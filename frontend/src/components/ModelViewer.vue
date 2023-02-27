@@ -12,17 +12,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 export default {
   name: 'ModelViewer',
   data: () => ({
-    mtlURL: 'example2.mtl',
     objURL: 'example.obj',
+    obj: null,
   }),
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
     width: () => window.innerWidth,
     height: () => window.innerHeight,
   },
-  mounted() {
-    // this.customInit();
-    this.init();
+  async mounted() {
+    await this.init();
   },
   methods: {
     createLights() {
@@ -31,18 +30,20 @@ export default {
       const pointLight = new THREE.PointLight(0xffffff, 0.8);
       this.camera.add(pointLight);
     },
-    init() {
+    async init() {
       this.scene = new THREE.Scene();
 
       const VIEW_ANGLE = 35;
       const ASPECT = this.width / this.height;
       const NEAR = 0.1;
       const FAR = 20000;
+      // const NEAR = 10;
+      // const FAR = 100000;
 
       this.renderer = new THREE.WebGLRenderer({
-        // antialias: true,
-        // alpha: true,
-        // preserveDrawingBuffer: true
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true
       });
       this.renderer.setClearColor(0x000000, 0); // the default
       this.renderer.setPixelRatio(window.devicePixelRatio * 1.5);
@@ -71,46 +72,54 @@ export default {
       const cube = new THREE.Mesh(geometry, material);
       this.scene.add(cube);
 
-      this.loadOBJ();
+      await this.loadOBJ();
+      console.log(this.obj);
 
       this.animate();
     },
-    loadOBJ() {
-      this.mtlLoader = new MTLLoader();
+    async loadOBJ() {
       this.objLoader = new OBJLoader();
 
-      const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-      this.mtlLoader.load(
-        this.mtlURL,
-        (materials) => {
-          materials.preload();
-          // const mat = new THREE.ShaderMaterial();
-          // this.objLoader.setMaterials(materials);
+      await this.objLoader.load(
+        this.objURL,
+        // called when resource is loaded
+        (object) => {
+          // const bb = new THREE.Box3();
+          // bb.setFromObject(object);
+          // console.log(bb);
+          this.obj = object
+          object.traverse((child) => {
+            if ( child instanceof THREE.Mesh ) {
+              child.material.color = new THREE.Color('rgb(222, 49, 99)')
+              // child.material.side = THREE.DoubleSide;
 
-          this.objLoader.load(
-            this.objURL,
-            // called when resource is loaded
-            (object) => {
-              // object.traverse((child) => {
-              //   if ( child instanceof THREE.Mesh ) {
-              //     console.log(child);
-              //     child.setMaterial(material)
-              //     child.material.ambient.setHex(0xFF0000);
-              // child.material.color.setHex(0x00FF00);
-              // }
-              // })
-              this.scene.add(object);
-            },
-            // called when loading is in progresses
-            function (xhr) {
-              console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            // called when loading has errors
-            function (error) {
-              console.log('An error happened');
+              const box = new THREE.Box3().setFromObject(this.obj);
+              const center = box.getCenter(new THREE.Vector3());
+
+              if (child.geometry !== undefined) {
+                const edges = new THREE.EdgesGeometry(child.geometry);
+                const line = new THREE.LineSegments(
+                  edges,
+                  new THREE.LineBasicMaterial({ color: 0xFFC0CB }),
+                );
+
+                this.scene.add(line);
+              }
             }
-          );
-        });
+          })
+          console.log("inside ", this.obj)
+          this.scene.add(object);
+        },
+        // called when loading is in progresses
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+          console.log('An error happened');
+        }
+      );
+      console.log('outside', this.obj);
     },
     animate() {
       requestAnimationFrame(this.animate);
