@@ -1,0 +1,22 @@
+FROM node:lts-alpine3.12
+
+RUN npm install -g @feathersjs/cli
+
+RUN apk update && \
+    apk add zsh git vim zsh-autosuggestions zsh-syntax-highlighting bind-tools curl && \
+    rm -rf /var/cache/apk/*
+
+RUN sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+RUN echo "source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc && \
+echo "source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.zshrc
+
+WORKDIR /app
+
+ENV NODE_ENV development
+
+EXPOSE 3030
+# Attach to node process debug port
+EXPOSE 9229
+
+CMD [ "npm", "run", "debug" ]
