@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.12
+FROM node:lts-alpine3.17
 
 RUN npm install -g @feathersjs/cli
 
