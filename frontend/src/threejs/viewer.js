@@ -44,7 +44,7 @@ export class Viewer {
       FAR, // Far plane
     );
     this.camera.position.set(
-      0, 0, 50
+      0, 0, 1
     );
     this.scene.add(this.camera);
 
@@ -95,8 +95,9 @@ export class Viewer {
         })
         this.scene.add(object);
 
-        fitCameraToSelection(this.camera, this.controls, null, this.obj);
+        this.addAxesHelper();
 
+        fitCameraToSelection(this.camera, this.controls, null, this.obj);
       },
       // called when loading is in progresses
       function (xhr) {
@@ -111,6 +112,17 @@ export class Viewer {
 
   initControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+  }
+
+  addAxesHelper() {
+    const box = new THREE.Box3();
+    box.setFromObject(this.obj);
+    const size = new THREE.Vector3();
+    box.getSize(size)
+    const maxSize = Math.max(size.x, size.y, size.z);
+
+    const axesHelper = new THREE.AxesHelper( maxSize );
+    this.scene.add( axesHelper );
   }
 
   fitCameraToObjects() {
