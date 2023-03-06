@@ -19,7 +19,7 @@ export default {
   }),
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
-    width: () => window.innerWidth,
+    width: () => window.innerWidth - 64,
     height: () => window.innerHeight - 64,
   },
   mounted() {
