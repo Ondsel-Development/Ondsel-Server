@@ -4,6 +4,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { fitCameraToSelection } from '@/threejs/cameraUtils'
 
+const OBJ_COLOR = 0xcccccc;
+const OBJ_HIGHLIGHTED_COLOR = 0x76ff90;
+const EDGE_COLOR = 0x000000;
+
 export class Viewer {
 
   constructor(url, width, height) {
@@ -80,13 +84,12 @@ export class Viewer {
         this.obj = object
         object.traverse((child) => {
           if ( child instanceof THREE.Mesh ) {
-            child.material.color = new THREE.Color('rgb(222, 49, 99)')
-            // child.material.side = THREE.DoubleSide;
+            child.material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
             if (child.geometry !== undefined) {
               const edges = new THREE.EdgesGeometry(child.geometry);
               const line = new THREE.LineSegments(
                 edges,
-                new THREE.LineBasicMaterial({ color: 0xFFC0CB }),
+                new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
               );
 
               this.scene.add(line);
