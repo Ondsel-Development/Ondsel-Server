@@ -31,6 +31,8 @@ export default {
         this.objURL,
         this.width,
         this.height,
+        this.viewport3d,
+        window,
       )
       this.viewport3d.appendChild(this.viewer.renderer.domElement);
     },

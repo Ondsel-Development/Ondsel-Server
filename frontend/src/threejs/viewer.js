@@ -10,16 +10,20 @@ const EDGE_COLOR = 0x000000;
 
 export class Viewer {
 
-  constructor(url, width, height) {
+  constructor(url, width, height, viewport, window) {
     this.url = url;
     this.width = width;
     this.height = height;
+    this.viewport = viewport;
+    this.window = window;
     this.obj = null;
     this.scene = null;
     this.renderer = null;
     this.controls = null;
     this.camera = null;
     this.objLoader = new OBJLoader();
+    this.pointer = new THREE.Vector2();
+    this.raycaster = new THREE.Raycaster();
 
     this.initViewer();
   }
@@ -58,13 +62,20 @@ export class Viewer {
 
     this.loadOBJ();
 
+    // this.viewport.addEventListener('touchend', this.onPointerMove);
+    this.viewport.addEventListener('mousedown', this.onPointerClicked.bind(this));
+    // this.window.addEventListener('touchend', this.onPointerMove);
+    // this.window.addEventListener('mouseup', this.onPointerMove.bind(this));
+
     this.animate()
   }
 
   animate() {
-    this.controls.update();
-    this.renderer.render(this.scene, this.camera);
     requestAnimationFrame( this.animate.bind(this));
+
+    this.controls.update();
+
+    this.renderer.render(this.scene, this.camera);
   }
 
   createLights() {
@@ -130,6 +141,30 @@ export class Viewer {
 
   fitCameraToObjects() {
     fitCameraToSelection(this.camera, this.controls, null, this.obj);
+  }
+
+  onPointerClicked(event) {
+
+    this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    if (this.obj) {
+      this.raycaster.setFromCamera( this.pointer, this.camera );
+      const intersects = this.raycaster.intersectObject(this.obj, true );
+      if (intersects.length > 0) {
+        for ( let i = 0; i < intersects.length; i ++ ) {
+          const intersectedObj = intersects[i];
+          if (intersectedObj.object.isMesh) {
+            const objColorStr = intersectedObj.object.material.color.getHexString();
+            if (parseInt(objColorStr, 16) === parseInt(OBJ_COLOR)) {
+              intersectedObj.object.material.color.set(OBJ_HIGHLIGHTED_COLOR);
+            } else {
+              intersectedObj.object.material.color.set(OBJ_COLOR);
+            }
+          }
+        }
+      }
+    }
   }
 
 }
