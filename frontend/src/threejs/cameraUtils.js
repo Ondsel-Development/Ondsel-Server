@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 
-export function fitCameraToSelection(camera, controls, selection, obj, fitOffset = 1.2) {
+export function fitCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
   const size = new THREE.Vector3();
   const center = new THREE.Vector3();
   const box = new THREE.Box3();
 
-  if (selection) {
+  if (Array.isArray(selection)) {
     box.makeEmpty();
     for(const object of selection) {
       box.expandByObject(object);
     }
   } else {
-    box.setFromObject(obj);
+    box.setFromObject(selection);
   }
 
   box.getSize(size);
@@ -37,4 +37,18 @@ export function fitCameraToSelection(camera, controls, selection, obj, fitOffset
   camera.position.copy(controls.target).sub(direction);
 
   controls.update();
+}
+
+
+export function getSelectedObject(raycaster, camera, pointer, main_object) {
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObject(main_object, true );
+  if (intersects.length > 0) {
+    for ( let i = 0; i < intersects.length; i ++ ) {
+      const intersectedObj = intersects[i];
+      if (intersectedObj.object.isMesh) {
+        return intersectedObj.object;
+      }
+    }
+  }
 }

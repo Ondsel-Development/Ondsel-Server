@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { fitCameraToSelection } from '@/threejs/cameraUtils'
+import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
 
 const OBJ_COLOR = 0xcccccc;
 const OBJ_HIGHLIGHTED_COLOR = 0x76ff90;
@@ -24,6 +24,7 @@ export class Viewer {
     this.objLoader = new OBJLoader();
     this.pointer = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
+    this.selectedObjs = []
 
     this.initViewer();
   }
@@ -111,7 +112,7 @@ export class Viewer {
 
         this.addAxesHelper();
 
-        fitCameraToSelection(this.camera, this.controls, null, this.obj);
+        fitCameraToSelection(this.camera, this.controls, this.obj);
       },
       // called when loading is in progresses
       function (xhr) {
@@ -140,28 +141,30 @@ export class Viewer {
   }
 
   fitCameraToObjects() {
-    fitCameraToSelection(this.camera, this.controls, null, this.obj);
+    if (this.selectedObjs.length > 0) {
+      fitCameraToSelection(this.camera, this.controls, this.selectedObjs);
+    } else {
+      fitCameraToSelection(this.camera, this.controls, this.obj);
+    }
   }
 
   onPointerClicked(event) {
-
     this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-    if (this.obj) {
-      this.raycaster.setFromCamera( this.pointer, this.camera );
-      const intersects = this.raycaster.intersectObject(this.obj, true );
-      if (intersects.length > 0) {
-        for ( let i = 0; i < intersects.length; i ++ ) {
-          const intersectedObj = intersects[i];
-          if (intersectedObj.object.isMesh) {
-            const objColorStr = intersectedObj.object.material.color.getHexString();
-            if (parseInt(objColorStr, 16) === parseInt(OBJ_COLOR)) {
-              intersectedObj.object.material.color.set(OBJ_HIGHLIGHTED_COLOR);
-            } else {
-              intersectedObj.object.material.color.set(OBJ_COLOR);
-            }
-          }
+    const selectedObj = getSelectedObject(this.raycaster, this.camera, this.pointer, this.obj);
+    if (selectedObj) {
+      const objColorStr = selectedObj.material.color.getHexString();
+      if (parseInt(objColorStr, 16) === parseInt(OBJ_COLOR)) {
+        selectedObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
+        if (!this.selectedObjs.includes(selectedObj)) {
+          this.selectedObjs.push(selectedObj);
+        }
+      } else {
+        selectedObj.material.color.set(OBJ_COLOR);
+        const index = this.selectedObjs.indexOf(selectedObj);
+        if (index > -1) {
+          this.selectedObjs.splice(index, 1);
         }
       }
     }
