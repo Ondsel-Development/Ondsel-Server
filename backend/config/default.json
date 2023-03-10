@@ -9,5 +9,26 @@
     "default": 10,
     "max": 50
   },
-  "mongodb": "mongodb://127.0.0.1:27017/od-backend-db"
+  "mongodb": "mongodb://127.0.0.1:27017/od-backend-db",
+  "authentication": {
+    "entity": "user",
+    "service": "users",
+    "secret": "+vSwEKToEP8tqPaxY77hQpRLytxTN3XT",
+    "authStrategies": [
+      "jwt",
+      "local"
+    ],
+    "jwtOptions": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://yourdomain.com",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "usernameField": "email",
+      "passwordField": "password"
+    }
+  }
 }
