@@ -9,13 +9,20 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@feathersjs/authentication-client": "^5.0.0",
+    "@feathersjs/feathers": "^5.0.0",
+    "@feathersjs/socketio-client": "^5.0.0",
+    "@feathersjs/vuex": "^4.0.1-pre.7",
     "@mdi/font": "7.0.96",
     "core-js": "^3.8.3",
+    "feathers-hooks-common": "^7.0.1",
     "roboto-fontface": "*",
+    "socket.io-client": "^4.6.1",
     "three": "^0.150.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.0",
     "vuetify": "^3.0.0",
+    "vuex": "^4.0.2",
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {
