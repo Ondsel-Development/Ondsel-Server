@@ -29,12 +29,14 @@
 
         <v-text-field
           v-model="user.password"
+          type="password"
           label="Password"
           :rules="[rules.isRequired, rules.minCharacter]"
         ></v-text-field>
 
         <v-text-field
           v-model="confirmPassword"
+          type="password"
           label="Confirm Password"
           :rules="[rules.isRequired, rules.confirmPassword]"
         ></v-text-field>
