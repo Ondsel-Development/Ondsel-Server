@@ -49,7 +49,7 @@
       :timeout="2000"
       v-model="showSnacker"
     >
-      {{ errorMsg }}
+      {{ snackerMsg }}
     </v-snackbar>
   </v-container>
 </template>
@@ -66,7 +66,7 @@ export default {
       user: new models.api.User(),
       confirmPassword: '',
       isValid: false,
-      errorMsg: '',
+      snackerMsg: '',
       rules: {
         isEmail: v => /.+@.+/.test(v) || 'Invalid Email address',
         isRequired: v => !!v || 'This field is required',
@@ -84,10 +84,12 @@ export default {
     async signUp() {
       if (this.isValid) {
         await this.user.create()
+          .then(() => {
+            this.$router.push({name: 'Login'})
+          })
           .catch((e) => {
-            this.errorMsg = e.message;
+            this.snackerMsg = e.message;
             this.showSnacker = true;
-            console.log(e.message);
           });
       }
     }
