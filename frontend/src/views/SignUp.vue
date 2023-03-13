@@ -1,0 +1,98 @@
+<template>
+  <v-container fluid class="fill-height">
+    <v-card title="Sign Up to Ondsel" class="mx-auto" min-width="400" flat>
+      <template v-slot:loader="{ isActive }">
+        <v-progress-linear
+          :active="isCreatePending"
+          height="4"
+          indeterminate
+        ></v-progress-linear>
+      </template>
+      <v-form v-model="isValid" @submit.prevent="signUp" @keydown.prevent.enter>
+        <v-text-field
+          v-model="user.email"
+          label="Email"
+          :rules="[rules.isRequired, rules.isEmail]"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="user.firstName"
+          label="First name"
+          :rules="[rules.isRequired]"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="user.lastName"
+          label="Last name"
+          :rules="[rules.isRequired]"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="user.password"
+          label="Password"
+          :rules="[rules.isRequired, rules.minCharacter]"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="confirmPassword"
+          label="Confirm Password"
+          :rules="[rules.isRequired, rules.confirmPassword]"
+        ></v-text-field>
+        <v-card-actions>
+        <v-btn type="submit" v-bind:disabled="isCreatePending" block class="mt-2">Submit</v-btn>
+        </v-card-actions>
+      </v-form>
+    </v-card>
+    <v-snackbar
+      :timeout="2000"
+      v-model="showSnacker"
+    >
+      {{ errorMsg }}
+    </v-snackbar>
+  </v-container>
+</template>
+
+<script>
+import { mapState } from 'vuex';
+import { models } from '@feathersjs/vuex';
+
+export default {
+  name: 'SignUp',
+  data() {
+    return {
+      result: {},
+      user: new models.api.User(),
+      confirmPassword: '',
+      isValid: false,
+      errorMsg: '',
+      rules: {
+        isEmail: v => /.+@.+/.test(v) || 'Invalid Email address',
+        isRequired: v => !!v || 'This field is required',
+        minCharacter: v => (v && v.length >= 8) || 'Minimum 8 characters',
+        confirmPassword: v => v === this.user.password || 'Password must match',
+      },
+      showSnacker: false
+    }
+  },
+  computed: {
+    User: () => models.api.User,
+    ...mapState('users', ['isCreatePending']),
+  },
+  methods: {
+    async signUp() {
+      if (this.isValid) {
+        await this.user.create()
+          .catch((e) => {
+            this.errorMsg = e.message;
+            this.showSnacker = true;
+            console.log(e.message);
+          });
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>
