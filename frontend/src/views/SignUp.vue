@@ -13,18 +13,21 @@
           v-model="user.email"
           label="Email"
           :rules="[rules.isRequired, rules.isEmail]"
+          :disabled="isCreatePending"
         ></v-text-field>
 
         <v-text-field
           v-model="user.firstName"
           label="First name"
           :rules="[rules.isRequired]"
+          :disabled="isCreatePending"
         ></v-text-field>
 
         <v-text-field
           v-model="user.lastName"
           label="Last name"
           :rules="[rules.isRequired]"
+          :disabled="isCreatePending"
         ></v-text-field>
 
         <v-text-field
@@ -32,6 +35,7 @@
           type="password"
           label="Password"
           :rules="[rules.isRequired, rules.minCharacter]"
+          :disabled="isCreatePending"
         ></v-text-field>
 
         <v-text-field
@@ -39,9 +43,10 @@
           type="password"
           label="Confirm Password"
           :rules="[rules.isRequired, rules.confirmPassword]"
+          :disabled="isCreatePending"
         ></v-text-field>
         <v-card-actions>
-        <v-btn type="submit" v-bind:disabled="isCreatePending" block class="mt-2">Submit</v-btn>
+        <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Submit</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>

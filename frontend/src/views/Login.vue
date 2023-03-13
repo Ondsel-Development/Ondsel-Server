@@ -13,6 +13,7 @@
           v-model="user.email"
           label="Email"
           :rules="[rules.isRequired, rules.isEmail]"
+          :disabled="isAuthenticatePending"
         ></v-text-field>
 
         <v-text-field
@@ -20,6 +21,7 @@
           label="Password"
           type="password"
           :rules="[rules.isRequired]"
+          :disabled="isAuthenticatePending"
         ></v-text-field>
 
         <v-card-actions>
