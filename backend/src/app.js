@@ -11,6 +11,9 @@ import express, {
 } from '@feathersjs/express'
 import configuration from '@feathersjs/configuration'
 import socketio from '@feathersjs/socketio'
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import { configurationValidator } from './configuration.js'
 import { logger } from './logger.js'
 import { logError } from './hooks/log-error.js'

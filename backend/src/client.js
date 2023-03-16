@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { uploadClient } from './services/upload/upload.shared.js'
+
 import { userClient } from './services/users/users.shared.js'
 
 /**
@@ -19,6 +21,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.set('connection', connection)
 
   client.configure(userClient)
+
+  client.configure(uploadClient)
 
   return client
 }
