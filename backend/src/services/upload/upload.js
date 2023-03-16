@@ -44,7 +44,7 @@ export const upload = (app) => {
                 id: context.data.id
               }
             } else {
-              context.data = {uri: uri};
+              context.data = {uri: uri, id: context.params.file.originalname};
             }
           }
         },
