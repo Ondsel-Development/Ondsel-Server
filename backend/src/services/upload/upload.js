@@ -1,4 +1,5 @@
 import dauria from 'dauria';
+import { authenticate } from '@feathersjs/authentication';
 
 import { getUploadService, multipartMiddleware } from './upload.class.js'
 import { uploadPath, uploadMethods } from './upload.shared.js'
@@ -26,7 +27,7 @@ export const upload = (app) => {
   // Initialize hooks
   app.service(uploadPath).hooks({
     around: {
-      all: []
+      all: [authenticate('jwt')],
     },
     before: {
       all: [
