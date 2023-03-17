@@ -5,7 +5,7 @@ import io from 'socket.io-client'
 import { iff, discard } from 'feathers-hooks-common'
 import feathersVuex from '@feathersjs/vuex'
 
-const socket = io('http://localhost:3030', {transports: ['websocket']})
+const socket = io(import.meta.env.VITE_APP_API_URL, {transports: ['websocket']})
 
 const feathersClient = feathers()
   .configure(socketio(socket))
