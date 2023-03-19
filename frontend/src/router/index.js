@@ -9,7 +9,7 @@ import Login from '@/views/Login';
 
 const routes = [
   {
-    path: '/',
+    path: '/:id?',
     component: Home,
     name: 'Home',
     meta: { requiresAuth: true },

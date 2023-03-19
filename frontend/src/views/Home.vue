@@ -1,11 +1,43 @@
 <template>
-<!--  <ModelViewer />-->
+  <ModelViewer v-if="model && model.objUrl" :obj-url="model.objUrl" @openDialog="dialog = $emit"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
       width="auto"
     >
         <v-card class="mx-auto" min-width="600">
+          <div v-if="model">
+            File upload progress: {{ uploadInProgress }}<br>
+            Cust file name: {{ model.custFileName }}<br>
+            shouldStartObjGeneration: {{ model.shouldStartObjGeneration }}<br>
+            isObjGenerationInProgress: {{ model.isObjGenerationInProgress }}<br>
+            isObjGenerated: {{ model.isObjGenerated }}
+          </div>
+          <v-card-item v-if="model">
+            <v-card
+              class="mx-auto"
+              variant="outlined"
+            >
+              <v-card-item>
+                <v-container>
+                  <v-row>
+                    <v-icon icon="mdi-file" size="x-large"></v-icon>
+                      <div class="text-subtitle-2">
+                        {{ model.custFileName }}
+                      </div>
+                  </v-row>
+                  <v-row>
+                    <v-progress-linear indeterminate></v-progress-linear>
+                  </v-row>
+                  <v-row>
+                    <div class="text-caption" v-if="uploadInProgress">File uploading...</div>
+                    <div class="text-caption" v-else-if="model.isObjGenerated">Mesh generation done...</div>
+                    <div class="text-caption" v-else-if="model.isObjGenerationInProgress">Creating Mesh...</div>
+                  </v-row>
+                </v-container>
+              </v-card-item>
+            </v-card>
+          </v-card-item>
           <div ref="dropzone">
             <v-card-item>
               <div class="text-center">
@@ -24,18 +56,29 @@
 <script>
 import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
+import { mapState } from 'vuex';
+import { models } from '@feathersjs/vuex';
 
 import ModelViewer from "@/components/ModelViewer";
-import { mapState } from 'vuex'
+
+const { Model, Upload } = models.api;
 
 export default {
   name: 'HomeView',
   components: { ModelViewer },
   data: () => ({
     dialog: true,
+    model: null,
+    uploadInProgress: false,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
+  },
+  async created() {
+    const modelId = this.$route.params.id;
+    if (modelId) {
+      this.model = await Model.get(modelId);
+    }
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
@@ -53,21 +96,30 @@ export default {
         previewTemplate: vm.template(),
         acceptedFiles: '.OBJ,.FCSTD',
         clickable: '#dropzone-click-target',
-        dictDefaultMessage: 'amrit',
         renameFile: file => `${uuidv4()}.${file.name.split('.').pop()}`,
         init() {
           this.on("addedfile", file => {
+            vm.uploadInProgress = true;
             console.log(file);
-            console.log(`File added: ${file.name}`);
+            vm.model = new Model({
+              uniqueFileName: file.upload.filename,
+              custFileName: file.name,
+            })
+            file.model = vm.model;
           });
-          this.on('uploadprogress', (file, progress) => {
-            console.log('progress', file, progress);
-          });
-          this.on('success', file => {
-            console.log('success');
+          this.on('success', async file => {
+            await file.model.save();
+            vm.$router.replace(`/${vm.model._id}`);
+            await vm.model.patch({
+              id: vm.model._id,
+              data: {
+                shouldStartObjGeneration: true,
+                uniqueFileName: vm.uniqueFileName,
+              }
+            })
+            vm.uploadInProgress = false;
           });
           this.on('error', (file, message) => {
-            console.log('error', 'message');
           })
         }
       }
@@ -88,6 +140,13 @@ export default {
               </div>
         `;
     },
+  },
+  watch: {
+    'model.isObjGenerated'(v) {
+      if (v) {
+        this.dialog = false;
+      }
+    }
   }
 }
 </script>

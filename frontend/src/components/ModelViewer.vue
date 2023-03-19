@@ -1,6 +1,9 @@
 <template>
   <v-navigation-drawer rail location="right" permanent>
-    <v-btn icon @click="fitModelToScreen">
+    <v-btn icon flat @click="$emit('openDialog', true)">
+      <v-icon icon="mdi-file"></v-icon>
+    </v-btn>
+    <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
     </v-btn>
   </v-navigation-drawer>
@@ -13,8 +16,10 @@ import { Viewer } from '@/threejs/viewer';
 
 export default {
   name: 'ModelViewer',
+  props: {
+    objUrl: String,
+  },
   data: () => ({
-    objURL: 'example.obj',
     obj: null,
   }),
   computed: {
@@ -25,10 +30,12 @@ export default {
   mounted() {
     this.init();
   },
+  created() {
+  },
   methods: {
     init() {
       this.viewer = new Viewer(
-        this.objURL,
+        this.objUrl,
         this.width,
         this.height,
         this.viewport3d,
@@ -40,6 +47,7 @@ export default {
     fitModelToScreen() {
       this.viewer.fitCameraToObjects();
     },
+
   }
 }
 </script>
