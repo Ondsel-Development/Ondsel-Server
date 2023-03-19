@@ -16,13 +16,9 @@ export const modelSchema = Type.Object(
     uniqueFileName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    StatusLine: Type.Optional(
-      Type.Object({
-        isObjGenerationInProgress: Type.Optional(Type.Boolean({default: false})),
-        isObjGenerated: Type.Optional(Type.Boolean({default: false})),
-      })
-    ),
-    shouldStartObjGeneration: Type.Optional(Type.String()),
+    isObjGenerationInProgress: Type.Optional(Type.Boolean({default: false})),
+    isObjGenerated: Type.Optional(Type.Boolean({default: false})),
+    shouldStartObjGeneration: Type.Optional(Type.Boolean()),
     errorMsg: Type.String(),
   },
   { $id: 'Model', additionalProperties: false }
@@ -35,12 +31,28 @@ export const modelResolver = resolve({
   //   // Associate the user that sent the message
   //   return context.app.service('users').get(message.userId)
   // })
+  objUrl: virtual(async(message, context) => {
+    const { app } = context;
+    if (message.isObjGenerated) {
+      const f = message.uniqueFileName;
+      const r = await app.service('upload').get(`${f.substr(0, f.lastIndexOf('.'))}_generated.obj`);
+      return r.url
+    }
+    return '';
+  }),
 })
 
 export const modelExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const modelDataSchema = Type.Pick(modelSchema, ['uniqueFileName', 'custFileName', 'StatusLine'], {
+export const modelDataSchema = Type.Pick(modelSchema, [
+  'uniqueFileName',
+  'custFileName',
+  'shouldStartObjGeneration',
+  'isObjGenerationInProgress',
+  'isObjGenerated',
+  'errorMsg'
+], {
   $id: 'ModelData'
 })
 export const modelDataValidator = getValidator(modelDataSchema, dataValidator)
@@ -51,12 +63,12 @@ export const modelDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
-  StatusLine: async (_value, _message, context) => {
-    // https://github.com/feathersjs/feathers/issues/2837
-    return {
-      isObjGenerationInProgress: modelSchema.properties.StatusLine.properties.isObjGenerationInProgress.default,
-      isObjGenerated: modelSchema.properties.StatusLine.properties.isObjGenerated.default,
-    }
+  // https://github.com/feathersjs/feathers/issues/2837
+  isObjGenerationInProgress: async (_value, _message, context) => {
+    return modelSchema.properties.isObjGenerationInProgress.default
+  },
+  isObjGenerated: async (_value, _message, context) => {
+    return modelSchema.properties.isObjGenerated.default;
   }
 })
 
@@ -88,7 +100,6 @@ export const modelQueryResolver = resolve({
     if (context.params.user) {
       return context.params.user._id
     }
-
     return value
   },
 })

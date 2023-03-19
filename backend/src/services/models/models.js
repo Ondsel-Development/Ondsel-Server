@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import { iff } from 'feathers-hooks-common'
+import axios from 'axios';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -51,9 +52,8 @@ export const model = (app) => {
       ],
       patch: [
         iff(
-          context => context.data.generateOBJ,
-          runA,
-          runB
+          context => context.data.shouldStartObjGeneration,
+          startObjGeneration,
         ),
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
@@ -69,15 +69,27 @@ export const model = (app) => {
   })
 }
 
-const runA = function(context) {
-  console.log('RunA trigger')
-  console.log(context.data);
-  delete context.data.generateOBJ;
-}
-const runB = function() {
-  console.log('RunB trigger')
-}
-
-const startObjGeneration = function(context) {
-
+const startObjGeneration = async (context) => {
+  const { data, params } = context;
+  let fileName = null
+  if (!context.data.uniqueFileName) {
+    const result = await context.service.get(context.id);
+    fileName = result.uniqueFileName;
+  }
+  axios({
+    method: 'post',
+    url: context.app.get('fcWorkerUrl'),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: {
+      id: context.id,
+      fileName: fileName || data.uniqueFileName,
+      command: 'GENERATE_OBJ',
+      accessToken: params.authentication.accessToken,
+    }
+  });
+  context.data.shouldStartObjGeneration = false;
+  context.data.isObjGenerationInProgress = true;
+  return context
 };

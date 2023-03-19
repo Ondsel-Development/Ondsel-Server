@@ -44,6 +44,8 @@
     "bundle:client": "npm pack --pack-destination ./public"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.293.0",
+    "@aws-sdk/s3-request-presigner": "^3.293.0",
     "@feathersjs/adapter-commons": "^5.0.0",
     "@feathersjs/authentication": "^5.0.0",
     "@feathersjs/authentication-client": "^5.0.0",
@@ -63,6 +65,7 @@
     "dauria": "^2.0.0",
     "dotenv": "^16.0.3",
     "feathers-blob": "^2.6.0",
+    "feathers-hooks-common": "^7.0.1",
     "mongodb": "^5.1.0",
     "multer": "^1.4.5-lts.1",
     "s3-blob-store": "^4.1.1",
