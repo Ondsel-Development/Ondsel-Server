@@ -35,7 +35,7 @@ export const modelResolver = resolve({
     const { app } = context;
     if (message.isObjGenerated) {
       const f = message.uniqueFileName;
-      const r = await app.service('upload').get(`${f.substr(0, f.lastIndexOf('.'))}_generated.obj`);
+      const r = await app.service('upload').get(`${f.substr(0, f.lastIndexOf('.'))}_generated.OBJ`);
       return r.url
     }
     return '';
