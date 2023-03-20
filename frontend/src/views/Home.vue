@@ -1,18 +1,13 @@
 <template>
-  <ModelViewer v-if="model && model.objUrl" :obj-url="model.objUrl" @openDialog="dialog = $emit"/>
+  <ModelViewer v-if="model && model.objUrl" :obj-url="model.objUrl" @open-dialog="openDialog"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
       width="auto"
+      persistent
     >
+      <div ref="dropzone">
         <v-card class="mx-auto" min-width="600">
-          <div v-if="model">
-            File upload progress: {{ uploadInProgress }}<br>
-            Cust file name: {{ model.custFileName }}<br>
-            shouldStartObjGeneration: {{ model.shouldStartObjGeneration }}<br>
-            isObjGenerationInProgress: {{ model.isObjGenerationInProgress }}<br>
-            isObjGenerated: {{ model.isObjGenerated }}
-          </div>
           <v-card-item v-if="model">
             <v-card
               class="mx-auto"
@@ -27,28 +22,36 @@
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear indeterminate></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded"></v-progress-linear>
+                    <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
                     <div class="text-caption" v-if="uploadInProgress">File uploading...</div>
-                    <div class="text-caption" v-else-if="model.isObjGenerated">Mesh generation done...</div>
                     <div class="text-caption" v-else-if="model.isObjGenerationInProgress">Creating Mesh...</div>
+                    <div class="text-caption" v-else-if="model.isObjGenerated && !isModelLoaded">Mesh generated, loading...</div>
+                    <div class="text-caption" v-else-if="isModelLoaded">Loaded</div>
                   </v-row>
                 </v-container>
               </v-card-item>
             </v-card>
           </v-card-item>
-          <div ref="dropzone">
+          <div>
             <v-card-item>
               <div class="text-center">
                 <div class="text-h6 mt-6">
                   <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn id="dropzone-click-target">BROWSE</v-btn>
                 </div>
-                <div class="text-caption mt-2 mb-6">Allowed extensions: FCSTD</div>
+                <div class="text-caption mt-2 mb-6">Allowed extensions: FCSTD, OBJ</div>
               </div>
             </v-card-item>
           </div>
+          <v-card-actions class="justify-center">
+            <v-btn icon flat @click="dialog = false" :disabled="!isModelLoaded">
+              <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
+            </v-btn>
+          </v-card-actions>
         </v-card>
+      </div>
     </v-dialog>
   </div>
 </template>
@@ -70,6 +73,7 @@ export default {
     dialog: true,
     model: null,
     uploadInProgress: false,
+    isModelLoaded: false,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -90,6 +94,7 @@ export default {
         includeStyling: false,
         url: `${h}upload`,
         paramName: 'file',
+        parallelUploads: 1,
         headers: {
           Authorization: vm.accessToken,
         },
@@ -126,6 +131,9 @@ export default {
     }
   },
   methods: {
+    openDialog(v){
+      this.dialog = true;
+    },
     template() {
       return `<div class="dz-preview dz-file-preview" style="display: none;">
                 <div class="dz-details">
@@ -144,7 +152,10 @@ export default {
   watch: {
     'model.isObjGenerated'(v) {
       if (v) {
-        this.dialog = false;
+        setTimeout(async () => {
+          this.dialog = false;
+          this.isModelLoaded = true;
+        }, 3000)
       }
     }
   }

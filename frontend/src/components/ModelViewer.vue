@@ -22,6 +22,7 @@ export default {
   data: () => ({
     obj: null,
   }),
+  emits: ['openDialog'],
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
     width: () => window.innerWidth - 64,
