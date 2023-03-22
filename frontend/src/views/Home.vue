@@ -64,7 +64,7 @@ import { models } from '@feathersjs/vuex';
 
 import ModelViewer from "@/components/ModelViewer";
 
-const { Model, Upload } = models.api;
+const { Model } = models.api;
 
 export default {
   name: 'HomeView',
