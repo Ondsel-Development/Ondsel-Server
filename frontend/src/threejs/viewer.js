@@ -134,7 +134,7 @@ export class Viewer {
     box.setFromObject(this.obj);
     const size = new THREE.Vector3();
     box.getSize(size)
-    const maxSize = Math.max(size.x, size.y, size.z);
+    const maxSize = Math.max(size.x * 2, size.y * 2, size.z * 2);
 
     const axesHelper = new THREE.AxesHelper( maxSize );
     this.scene.add( axesHelper );
