@@ -19,6 +19,7 @@ export const modelSchema = Type.Object(
     isObjGenerationInProgress: Type.Optional(Type.Boolean({default: false})),
     isObjGenerated: Type.Optional(Type.Boolean({default: false})),
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
+    attributes: Type.Optional(Type.Object({})),
     errorMsg: Type.String(),
   },
   { $id: 'Model', additionalProperties: false }
@@ -51,6 +52,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'shouldStartObjGeneration',
   'isObjGenerationInProgress',
   'isObjGenerated',
+  'attributes',
   'errorMsg'
 ], {
   $id: 'ModelData'

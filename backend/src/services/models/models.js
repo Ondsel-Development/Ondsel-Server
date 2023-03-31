@@ -85,7 +85,8 @@ const startObjGeneration = async (context) => {
     data: {
       id: context.id,
       fileName: fileName || data.uniqueFileName,
-      command: 'GENERATE_OBJ',
+      // command: 'GENERATE_OBJ',
+      command: 'CONFIGURE_MODEL',
       accessToken: params.authentication.accessToken,
     }
   });
