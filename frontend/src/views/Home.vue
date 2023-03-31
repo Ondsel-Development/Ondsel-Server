@@ -1,5 +1,16 @@
 <template>
-  <ModelViewer v-if="model && model.objUrl" :obj-url="model.objUrl" @open-dialog="openDialog"/>
+  <v-navigation-drawer rail location="right" permanent>
+    <v-btn icon flat @click="dialog = true">
+      <v-icon icon="mdi-file"></v-icon>
+    </v-btn>
+    <v-btn icon flat @click="fitModelToScreen">
+      <v-icon>mdi-magnify</v-icon>
+    </v-btn>
+    <v-btn icon flat @click="$emit('openAttributeViewerDialog', true)">
+      <v-icon>mdi-view-list</v-icon>
+    </v-btn>
+  </v-navigation-drawer>
+  <ModelViewer v-if="model && model.objUrl" ref="modelViewer" :obj-url="model.objUrl" @open-dialog="openDialog"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -131,8 +142,8 @@ export default {
     }
   },
   methods: {
-    openDialog(v){
-      this.dialog = true;
+    fitModelToScreen() {
+      this.$refs.modelViewer.fitModelToScreen();
     },
     template() {
       return `<div class="dz-preview dz-file-preview" style="display: none;">
