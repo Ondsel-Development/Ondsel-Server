@@ -15,8 +15,8 @@ export default {
   }),
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
-    width: () => window.innerWidth - 64,
-    height: () => window.innerHeight - 64,
+    viewerWidth: () => window.innerWidth - 64,
+    viewerHeight: () => window.innerHeight - 64,
   },
   mounted() {
     this.init();
@@ -27,8 +27,8 @@ export default {
     init() {
       this.viewer = new Viewer(
         this.objUrl,
-        this.width,
-        this.height,
+        this.viewerWidth,
+        this.viewerHeight,
         this.viewport3d,
         window,
       )

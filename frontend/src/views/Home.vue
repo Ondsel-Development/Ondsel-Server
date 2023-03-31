@@ -10,7 +10,7 @@
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer v-if="model && model.objUrl" ref="modelViewer" :obj-url="model.objUrl" @open-dialog="openDialog"/>
+  <ModelViewer v-if="model && model.objUrl" ref="modelViewer" :obj-url="model.objUrl"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
