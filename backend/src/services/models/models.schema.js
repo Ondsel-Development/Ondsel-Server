@@ -21,6 +21,7 @@ export const modelSchema = Type.Object(
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
     attributes: Type.Optional(Type.Object({})),
     errorMsg: Type.String(),
+    objUrl: Type.String(),
   },
   { $id: 'Model', additionalProperties: false }
 )
