@@ -6,11 +6,11 @@
     <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
     </v-btn>
-    <v-btn icon flat @click="$emit('openAttributeViewerDialog', true)">
+    <v-btn icon flat @click="openAttributeViewer">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer v-if="model && model.objUrl" ref="modelViewer" :obj-url="model.objUrl"/>
+  <ModelViewer ref="modelViewer"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -64,6 +64,15 @@
         </v-card>
       </div>
     </v-dialog>
+    <AttributeViewer
+      v-if="model"
+      :is-active="isAttributeViewerActive"
+      :attributes="model.attributes"
+      :is-obj-generated="model.isObjGenerated"
+      :is-model-loaded="isModelLoaded"
+      ref="attributeViewer"
+      @update-model="updateModel"
+    />
   </div>
 </template>
 
@@ -74,17 +83,20 @@ import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import ModelViewer from "@/components/ModelViewer";
+import AttributeViewer from '@/components/AttributeViewer';
 
 const { Model } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { ModelViewer },
+  components: { AttributeViewer, ModelViewer },
   data: () => ({
     dialog: true,
     model: null,
     uploadInProgress: false,
     isModelLoaded: false,
+    isAttributeViewerActive: false,
+    isReloadingOBJ: false,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -116,7 +128,6 @@ export default {
         init() {
           this.on("addedfile", file => {
             vm.uploadInProgress = true;
-            console.log(file);
             vm.model = new Model({
               uniqueFileName: file.upload.filename,
               custFileName: file.name,
@@ -145,6 +156,9 @@ export default {
     fitModelToScreen() {
       this.$refs.modelViewer.fitModelToScreen();
     },
+    openAttributeViewer() {
+      this.$refs.attributeViewer.$data.dialog = true;
+    },
     template() {
       return `<div class="dz-preview dz-file-preview" style="display: none;">
                 <div class="dz-details">
@@ -159,12 +173,33 @@ export default {
               </div>
         `;
     },
+    async updateModel() {
+      console.log('update model');
+      this.isReloadingOBJ = true;
+      this.model.isObjGenerated = false;
+      this.isModelLoaded = false;
+      this.model.shouldStartObjGeneration = true;
+      console.log('before await');
+      this.model = await this.model.save();
+      console.log('after await');
+    }
   },
   watch: {
     'model.isObjGenerated'(v) {
       if (v) {
+        if (this.isReloadingOBJ) {
+          this.$refs.modelViewer.reloadOBJ(this.model.objUrl);
+        } else {
+          this.$refs.modelViewer.init(this.model.objUrl);
+        }
+
         setTimeout(async () => {
-          this.dialog = false;
+          if (this.isReloadingOBJ) {
+            this.$refs.attributeViewer.$data.dialog = false;
+            this.isReloadingOBJ = false;
+          } else {
+            this.dialog = false;
+          }
           this.isModelLoaded = true;
         }, 3000)
       }

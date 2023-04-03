@@ -8,10 +8,11 @@ import { Viewer } from '@/threejs/viewer';
 export default {
   name: 'ModelViewer',
   props: {
-    objUrl: String,
+    // objUrl: String,
   },
   data: () => ({
     obj: null,
+    objUrl: '',
   }),
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
@@ -19,12 +20,13 @@ export default {
     viewerHeight: () => window.innerHeight - 64,
   },
   mounted() {
-    this.init();
+    // this.init();
   },
   created() {
   },
   methods: {
-    init() {
+    init(objUrl) {
+      this.objUrl = objUrl;
       this.viewer = new Viewer(
         this.objUrl,
         this.viewerWidth,
@@ -38,6 +40,11 @@ export default {
     fitModelToScreen() {
       this.viewer.fitCameraToObjects();
     },
+
+    reloadOBJ(objUrl) {
+      this.objUrl = objUrl;
+      this.viewer.loadOBJ();
+    }
 
   }
 }

@@ -17,6 +17,8 @@ export class Viewer {
     this.viewport = viewport;
     this.window = window;
     this.obj = null;
+    this.lineSegments = null;
+    this.axisHelper = null
     this.scene = null;
     this.renderer = null;
     this.controls = null;
@@ -89,6 +91,14 @@ export class Viewer {
   loadOBJ() {
     this.objLoader = new OBJLoader();
 
+    if (this.obj) {
+      this.scene.remove(this.obj);
+    }
+    if (this.lineSegments) {
+      this.scene.remove(this.lineSegments);
+    }
+    this.lineSegments = new THREE.Group()
+
     this.objLoader.load(
       this.url,
       // called when resource is loaded
@@ -103,16 +113,17 @@ export class Viewer {
                 edges,
                 new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
               );
-
-              this.scene.add(line);
+              this.lineSegments.add(line);
             }
           }
         })
         this.scene.add(object);
+        this.scene.add(this.lineSegments);
 
-        this.addAxesHelper();
-
-        fitCameraToSelection(this.camera, this.controls, this.obj);
+        if (!this.axisHelper) {
+          this.addAxesHelper();
+          fitCameraToSelection(this.camera, this.controls, this.obj);
+        }
       },
       // called when loading is in progresses
       function (xhr) {
@@ -136,8 +147,8 @@ export class Viewer {
     box.getSize(size)
     const maxSize = Math.max(size.x * 2, size.y * 2, size.z * 2);
 
-    const axesHelper = new THREE.AxesHelper( maxSize );
-    this.scene.add( axesHelper );
+    this.axisHelper = new THREE.AxesHelper( maxSize );
+    this.scene.add(this.axisHelper);
   }
 
   fitCameraToObjects() {
