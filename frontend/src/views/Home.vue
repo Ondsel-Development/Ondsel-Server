@@ -174,14 +174,11 @@ export default {
         `;
     },
     async updateModel() {
-      console.log('update model');
       this.isReloadingOBJ = true;
       this.model.isObjGenerated = false;
       this.isModelLoaded = false;
       this.model.shouldStartObjGeneration = true;
-      console.log('before await');
       this.model = await this.model.save();
-      console.log('after await');
     }
   },
   watch: {
