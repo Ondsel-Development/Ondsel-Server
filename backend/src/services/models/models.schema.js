@@ -22,6 +22,7 @@ export const modelSchema = Type.Object(
     attributes: Type.Optional(Type.Object({})),
     errorMsg: Type.String(),
     objUrl: Type.String(),
+    isSharedModel: Type.Optional(Type.Boolean({default: false})),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -53,7 +54,8 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'isObjGenerationInProgress',
   'isObjGenerated',
   'attributes',
-  'errorMsg'
+  'errorMsg',
+  'isSharedModel'
 ], {
   $id: 'ModelData'
 })
@@ -71,7 +73,13 @@ export const modelDataResolver = resolve({
   },
   isObjGenerated: async (_value, _message, context) => {
     return modelSchema.properties.isObjGenerated.default;
-  }
+  },
+  isSharedModel: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return modelSchema.properties.isSharedModel.default;
+  },
 })
 
 // Schema for updating existing entries
