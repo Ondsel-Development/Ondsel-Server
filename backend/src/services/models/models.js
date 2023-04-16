@@ -43,10 +43,6 @@ export const model = (app) => {
       find: [],
       get: [],
       create: [
-        iff(
-          context => context.data.shouldStartObjGeneration,
-          startObjGeneration,
-        ),
         schemaHooks.validateData(modelDataValidator),
         schemaHooks.resolveData(modelDataResolver)
       ],
@@ -61,7 +57,13 @@ export const model = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        iff(
+          context => context.data.shouldStartObjGeneration,
+          startObjGeneration,
+        ),
+      ]
     },
     error: {
       all: []
@@ -83,7 +85,7 @@ const startObjGeneration = async (context) => {
       'Content-Type': 'application/json'
     },
     data: {
-      id: context.id,
+      id: context.id || context.result._id.toString(),
       fileName: fileName || data.uniqueFileName,
       command: 'CONFIGURE_MODEL',
       accessToken: params.authentication.accessToken,
