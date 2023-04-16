@@ -20,7 +20,17 @@
       <div>
         <v-card class="mx-auto" min-width="600">
           <v-card-item v-if="model">
+            <v-alert
+              v-if="!sharedModel.canViewModel"
+              variant="outlined"
+              type="warning"
+              border="top"
+              class="text-left"
+            >
+              Don't have permissions to view model.
+            </v-alert>
             <v-card
+              v-else
               class="mx-auto"
               variant="outlined"
             >
