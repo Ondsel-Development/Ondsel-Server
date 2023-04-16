@@ -5,6 +5,7 @@ import store from '@/store'
 import Home from "@/views/Home";
 import SignUp from "@/views/SignUp";
 import Login from '@/views/Login';
+import Share from '@/views/Share'
 
 
 const routes = [
@@ -24,6 +25,12 @@ const routes = [
     component: Login,
     name: 'Login',
   },
+  {
+    path: '/share/:id',
+    component: Share,
+    name: 'Share',
+    meta: { tryAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -37,6 +44,12 @@ router.beforeEach(async (to, from, next) => {
       await store.dispatch('auth/authenticate');
     } catch (err) {
       next({ name: 'Login' });
+    }
+  }
+  else if (to.meta && to.meta.tryAuth) {
+    try {
+      await store.dispatch('auth/authenticate');
+    } catch (err) {
     }
   }
   next();

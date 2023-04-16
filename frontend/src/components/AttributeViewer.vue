@@ -22,13 +22,25 @@
           class="overflow-y-auto"
         >
         <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
-        <template v-for="(item, key) in attributes">
+        <v-alert
+          v-if="canUpdateModel && !isAuthenticated"
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+        >
+          Need to Login to update model.
+        </v-alert>
+        <br>
+
+          <template v-for="(item, key) in attributes">
           <v-text-field
             v-model.trim="item.value"
             :label="key"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
             v-if="item.type === 'string'"
+            :readonly="!canUpdateModel"
           ></v-text-field>
           <v-text-field
             v-model="item.value"
@@ -36,6 +48,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'angle'"
           ></v-text-field>
           <v-text-field
@@ -44,6 +57,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'number'"
           ></v-text-field>
           <v-text-field
@@ -52,6 +66,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'float'"
           ></v-text-field>
           <v-text-field
@@ -61,6 +76,7 @@
             min="0"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'length'"
           ></v-text-field>
           <v-text-field
@@ -70,6 +86,7 @@
             min="0"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'percent'"
           ></v-text-field>
           <v-select
@@ -78,6 +95,7 @@
             :items="['true', 'false']"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'bool'"
           ></v-select>
           <v-select
@@ -86,6 +104,7 @@
             :items="item.items"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
+            :readonly="!canUpdateModel"
             v-if="item.type === 'select'"
           ></v-select>
         </template>
@@ -95,8 +114,8 @@
         <v-btn @click="dialog = false" :disabled="!isObjGenerated">Cancel</v-btn>
         <v-btn
           color="primary"
-          v-if="Object.keys(attributes).length"
-          :disabled="!isObjGenerated"
+          v-if="canUpdateModel && Object.keys(attributes).length"
+          :disabled="!isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"
         >Update</v-btn>
       </v-card-actions>
@@ -105,6 +124,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'AttributeViewer',
   emits: ['updateModel'],
@@ -113,12 +134,23 @@ export default {
     attributes: Object,
     isObjGenerated: Boolean,
     isModelLoaded: Boolean,
+    canViewModelAttributes: {
+      type: Boolean,
+      default: true,
+    },
+    canUpdateModel: {
+      type: Boolean,
+      default: true,
+    }
   },
   data: (vm) => ({
     dialog: false,
     valid: false,
     items: Array.from({ length: 1000 }, (k, v) => v + 1),
-  })
+  }),
+  computed: {
+    ...mapGetters('auth', ['isAuthenticated'])
+  },
 }
 </script>
 

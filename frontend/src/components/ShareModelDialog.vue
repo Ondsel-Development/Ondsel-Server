@@ -9,29 +9,29 @@
         <div class="text-center">Share Model</div>
       </template>
       <v-progress-linear
-        :active="isCreatePending"
+        :active="isGeneratingLink"
         indeterminate
         absolute
         bottom
       ></v-progress-linear>
       <v-card-text>
         <div class="text-subtitle-2">Select permissions user can perform</div>
-        <v-checkbox v-model="permissions.canViewModel" readonly hide-details>
+        <v-checkbox v-model="permissions.canViewModel" :disabled="isGeneratingLink" readonly hide-details>
           <template v-slot:label>
             Can view model
           </template>
         </v-checkbox>
-        <v-checkbox v-model="permissions.canViewModelAttributes" hide-details>
+        <v-checkbox v-model="permissions.canViewModelAttributes" :disabled="isGeneratingLink" hide-details>
           <template v-slot:label>
             Can view model attributes
           </template>
         </v-checkbox>
-        <v-checkbox v-model="permissions.canUpdateModel" hide-details>
+        <v-checkbox v-model="permissions.canUpdateModel" :disabled="isGeneratingLink" hide-details>
           <template v-slot:label>
             <div>Can update model attributes</div>
           </template>
         </v-checkbox>
-        <v-checkbox v-model="permissions.canExportModel" hide-details>
+        <v-checkbox v-model="permissions.canExportModel" :disabled="isGeneratingLink" hide-details>
           <template v-slot:label>
             <div>Can export model</div>
           </template>
@@ -53,17 +53,16 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn color="primary" @click="generateSharedModelUrl" :disabled="isCreatePending">Generate Link</v-btn>
+        <v-btn color="primary" @click="generateSharedModelUrl" :disabled="isGeneratingLink">Generate Link</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-const { SharedModel } = models.api;
+const { Model, SharedModel } = models.api;
 
 export default {
   name: 'ShareModelDialog',
@@ -81,11 +80,13 @@ export default {
       canUpdateModel: false,
       canExportModel: false
     },
+    tmpSharedModel: null,
+    tmpModel: null,
     sharedModel: null,
+    isGeneratingLink: false,
     toolTipMsg: 'Copy to clipboard'
   }),
   computed: {
-    ...mapState('shared-models', ['isCreatePending']),
     sharedModelUrl: (vm) => {
       if (vm.sharedModel) {
         return window.location.origin + '/share/' + vm.sharedModel._id
@@ -95,19 +96,32 @@ export default {
   },
   methods: {
     async generateSharedModelUrl() {
+      this.isGeneratingLink = true;
+      this.sharedModel = null;
       const sharedModel = new SharedModel();
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;
       sharedModel.canExportModel = this.permissions.canExportModel;
       sharedModel.cloneModelId = this.modelId;
-      this.sharedModel = await sharedModel.create();
+      this.tmpSharedModel = await sharedModel.create();
+      this.tmpModel = await Model.get(this.tmpSharedModel.modelId);
     },
     async copyUrlToClipboard() {
       await navigator.clipboard.writeText(this.sharedModelUrl);
       this.toolTipMsg = 'Link copied!';
       setTimeout(() => {this.toolTipMsg = 'Copy to clipboard'}, 5000);
     },
+  },
+  watch: {
+    'tmpModel.isObjGenerated'(v) {
+      if (v) {
+        this.sharedModel = this.tmpSharedModel;
+        this.tmpSharedModel = null;
+        this.tmpModel = null;
+        this.isGeneratingLink = false;
+      }
+    }
   }
 }
 </script>
