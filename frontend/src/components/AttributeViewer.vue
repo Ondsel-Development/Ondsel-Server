@@ -21,6 +21,7 @@
           style="max-height: 600px"
           class="overflow-y-auto"
         >
+        <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
         <template v-for="(item, key) in attributes">
           <v-text-field
             v-model.trim="item.value"
@@ -92,7 +93,12 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false" :disabled="!isObjGenerated">Cancel</v-btn>
-        <v-btn color="primary" @click="$emit('updateModel')" :disabled="!isObjGenerated">Update</v-btn>
+        <v-btn
+          color="primary"
+          v-if="Object.keys(attributes).length"
+          :disabled="!isObjGenerated"
+          @click="$emit('updateModel')"
+        >Update</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
