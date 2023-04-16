@@ -9,6 +9,9 @@
     <v-btn icon flat @click="openAttributeViewer">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
+    <v-btn icon flat @click="openShareModelDialog">
+      <v-icon>mdi-share-variant</v-icon>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer"/>
   <div class="text-center">
@@ -73,6 +76,13 @@
       ref="attributeViewer"
       @update-model="updateModel"
     />
+    <ShareModelDialog
+      v-if="model"
+      :is-active="isShareModelDialogActive"
+      :model-id="model._id"
+      ref="shareModelDialog"
+      @update-model="updateModel"
+    />
   </div>
 </template>
 
@@ -84,18 +94,20 @@ import { models } from '@feathersjs/vuex';
 
 import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
+import ShareModelDialog from '@/components/ShareModelDialog';
 
 const { Model } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, ModelViewer },
+  components: { AttributeViewer, ModelViewer, ShareModelDialog },
   data: () => ({
     dialog: true,
     model: null,
     uploadInProgress: false,
     isModelLoaded: false,
     isAttributeViewerActive: false,
+    isShareModelDialogActive: false,
     isReloadingOBJ: false,
   }),
   mounted() {
@@ -158,6 +170,9 @@ export default {
     },
     openAttributeViewer() {
       this.$refs.attributeViewer.$data.dialog = true;
+    },
+    openShareModelDialog() {
+      this.$refs.shareModelDialog.$data.dialog = true;
     },
     template() {
       return `<div class="dz-preview dz-file-preview" style="display: none;">
