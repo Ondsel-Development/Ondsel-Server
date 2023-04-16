@@ -35,7 +35,14 @@ export const sharedModelsResolver = resolve({
 export const sharedModelsExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, ['cloneModelId', 'modelId'], {
+export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
+  'cloneModelId',
+  'modelId',
+  'canViewModel',
+  'canViewModelAttributes',
+  'canUpdateModel',
+  'canExportModel',
+], {
   $id: 'SharedModelsData'
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
@@ -47,15 +54,27 @@ export const sharedModelsDataResolver = resolve({
   // Initialize default values
   // https://github.com/feathersjs/feathers/issues/2837
   canViewModel: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return sharedModelsSchema.properties.canViewModel.default
   },
   canViewModelAttributes: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return sharedModelsSchema.properties.canViewModelAttributes.default
   },
   canUpdateModel: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return sharedModelsSchema.properties.canUpdateModel.default
   },
   canExportModel: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return sharedModelsSchema.properties.canExportModel.default
   },
 })
