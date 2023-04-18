@@ -37,7 +37,7 @@
           </template>
         </v-checkbox>
 
-        <v-text-field variant="outlined" hide-details readonly :value="sharedModelUrl" :disabled="!sharedModelUrl">
+        <v-text-field ref="sharedUrl" variant="outlined" hide-details readonly :value="sharedModelUrl" :disabled="!sharedModelUrl">
           <template v-slot:append>
             <v-btn icon flat @click="copyUrlToClipboard">
               <v-icon>
@@ -107,8 +107,23 @@ export default {
       this.tmpSharedModel = await sharedModel.create();
       this.tmpModel = await Model.get(this.tmpSharedModel.modelId);
     },
+
+    async copyToClipboard(textToCopy) {
+      this.$refs.sharedUrl.select();
+      // Navigator clipboard api needs a secure context (https)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        try {
+          document.execCommand('copy');
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    },
+
     async copyUrlToClipboard() {
-      await navigator.clipboard.writeText(this.sharedModelUrl);
+      await this.copyToClipboard(this.sharedModelUrl);
       this.toolTipMsg = 'Link copied!';
       setTimeout(() => {this.toolTipMsg = 'Copy to clipboard'}, 5000);
     },
