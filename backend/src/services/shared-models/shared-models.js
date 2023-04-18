@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff } from 'feathers-hooks-common'
+import { iff, preventChanges, discard } from 'feathers-hooks-common'
+import { BadRequest } from '@feathersjs/errors';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import _ from 'lodash';
@@ -60,6 +61,13 @@ export const sharedModels = (app) => {
       ],
       patch: [
         iff(
+          async context => {
+            const sharedModel = await context.service.get(context.id);
+            return !context.params.user._id.equals(sharedModel.userId);
+          },
+          preventChanges(false, 'canViewModel', 'canViewModelAttributes', 'canUpdateModel', 'canExportModel')
+        ),
+        iff(
           context => context.data.model,
           patchModel,
         ),
@@ -102,12 +110,22 @@ const createClone = async (context) => {
 
 
 const patchModel = async (context) => {
-  const {data, app, params} = context;
+  const { data, app } = context;
   const sharedModel = await context.service.get(context.id);
+
+  if (!sharedModel.canUpdateModel) {
+    throw new BadRequest('Field `canUpdateModel` must be true');
+  }
 
   if (data.model) {
     const modelService = app.service('models');
-    await modelService.patch(sharedModel.modelId.toString(), data.model, params);
+    await modelService.patch(
+      sharedModel.modelId.toString(),
+      data.model,
+      {
+        accessToken: context.params.authentication.accessToken,
+        query: { isSharedModel: true }
+      });
     context.data = _.omit(data, 'model')
   }
   return context;

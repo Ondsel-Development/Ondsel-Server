@@ -105,7 +105,7 @@ export default {
       this.sharedModel = await SharedModel.get(shareModelId);
       if (this.isAuthenticated) {
         // Need to fetch model separately for reactivity for watcher
-        this.model = await Model.get(this.sharedModel.modelId);
+        this.model = await Model.get(this.sharedModel.modelId, {query: {isSharedModel: true}});
       } else {
         this.model = this.sharedModel.model;
       }
@@ -137,7 +137,6 @@ export default {
   },
   watch: {
     async 'model.isObjGenerated'(v) {
-      console.log('model generated: ', v);
       if (this.sharedModel.canViewModel && v) {
         if (this.isReloadingOBJ) {
           this.$refs.modelViewer.reloadOBJ(this.model.objUrl);

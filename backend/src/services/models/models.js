@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff } from 'feathers-hooks-common'
+import { iff, preventChanges } from 'feathers-hooks-common'
 import axios from 'axios';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
@@ -47,6 +47,7 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
+        preventChanges(false, 'isSharedModel'),
         iff(
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
@@ -88,8 +89,9 @@ const startObjGeneration = async (context) => {
       id: context.id || context.result._id.toString(),
       fileName: fileName || data.uniqueFileName,
       command: 'CONFIGURE_MODEL',
-      accessToken: params.authentication.accessToken,
-      attributes: data.attributes || {}
+      accessToken: params.authentication?.accessToken || params.accessToken,
+      attributes: data.attributes || {},
+      isSharedModel: context.params.query.isSharedModel,
     }
   });
   context.data.shouldStartObjGeneration = false;

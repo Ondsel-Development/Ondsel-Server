@@ -94,7 +94,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt']
+  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel']
 )
 export const modelQuerySchema = Type.Intersect(
   [
@@ -107,7 +107,7 @@ export const modelQuerySchema = Type.Intersect(
 export const modelQueryValidator = getValidator(modelQuerySchema, queryValidator)
 export const modelQueryResolver = resolve({
   userId: async (value, user, context) => {
-    if (context.params.user) {
+    if (!context.params.query.isSharedModel && context.params.user) {
       return context.params.user._id
     }
     return value

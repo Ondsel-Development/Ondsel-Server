@@ -1,4 +1,5 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
+import _ from 'lodash';
 import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
@@ -28,7 +29,14 @@ export const sharedModelsResolver = resolve({
   updatedAt: async () => Date.now(),
   model: virtual(async (message, context) => {
     // Associate the user that sent the message
-    return context.app.service('models').get(message.modelId)
+    if (message.canViewModel) {
+      const m = await context.app.service('models').get(message.modelId);
+      if (!(message.canUpdateModel || message.canViewModelAttributes)) {
+        return _.omit(m, 'attributes')
+      }
+      return m;
+    }
+   // return context.app.service('models').get(message.modelId);
   }),
 })
 
