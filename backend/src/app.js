@@ -11,6 +11,8 @@ import express, {
 } from '@feathersjs/express'
 import configuration from '@feathersjs/configuration'
 import socketio from '@feathersjs/socketio'
+import swagger from 'feathers-swagger';
+
 import { configurationValidator } from './configuration.js'
 import { logger } from './logger.js'
 import { logError } from './hooks/log-error.js'
@@ -41,6 +43,29 @@ app.configure(
   })
 )
 app.configure(mongodb)
+
+
+app.configure(swagger({
+  ui: swagger.swaggerUI({}),
+  specs: {
+    info: {
+      title: 'Ondsel Server API',
+      description: 'API documentation for Ondsel backend API',
+      version: '1.0.0',
+    },
+    schemes: ['http', 'https'], // Optionally set the protocol schema used (sometimes required when host on https)
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+        },
+      },
+    },
+    security: [{ BearerAuth: [] }],
+  },
+
+}));
 
 app.configure(authentication)
 
