@@ -21,7 +21,60 @@ export const upload = (app) => {
       // A list of all methods this service exposes externally
       methods: uploadMethods,
       // You can add additional custom events to be sent to clients here
-      events: []
+      events: [],
+      docs: {
+        description: 'A service to upload a file',
+        schemas: {
+          Upload: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'file name'
+              },
+              size: {
+                type: 'integer',
+                description: 'Size of upload file'
+              },
+              contentType: {
+                type: 'string',
+                description: 'File content type'
+              }
+
+            },
+          },
+        },
+        model: 'Upload',
+        tag: 'Upload',
+        idType: 'string',
+        securities: ['all'],
+        operations: {
+          find: false,
+          update: false,
+          remove: false,
+          patch: false,
+          create: {
+            description: 'Upload file',
+            requestBody: {
+              content: {
+                'multipart/form-data': {
+                  schema:
+                  {
+                    type: 'object',
+                    properties: {
+                      file: {
+                          type: 'string',
+                          format: 'binary',
+                          description: 'File name should be unique (uuid4)'
+                      }
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
     }
   )
   // Initialize hooks
