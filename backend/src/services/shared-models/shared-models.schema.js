@@ -29,7 +29,7 @@ export const sharedModelsResolver = resolve({
   updatedAt: async () => Date.now(),
   model: virtual(async (message, context) => {
     // Associate the user that sent the message
-    if (message.canViewModel) {
+    if (message.canViewModel && message.modelId) {
       const m = await context.app.service('models').get(message.modelId);
       if (!(message.canUpdateModel || message.canViewModelAttributes)) {
         return _.omit(m, 'attributes')
