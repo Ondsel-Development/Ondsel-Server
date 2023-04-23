@@ -2,6 +2,7 @@
 import { authenticate } from '@feathersjs/authentication'
 import { iff, preventChanges, discard } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import _ from 'lodash';
@@ -13,7 +14,11 @@ import {
   sharedModelsExternalResolver,
   sharedModelsDataResolver,
   sharedModelsPatchResolver,
-  sharedModelsQueryResolver
+  sharedModelsQueryResolver,
+  sharedModelsSchema,
+  sharedModelsDataSchema,
+  sharedModelsPatchSchema,
+  sharedModelsQuerySchema,
 } from './shared-models.schema.js'
 import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
@@ -28,7 +33,15 @@ export const sharedModels = (app) => {
     // A list of all methods this service exposes externally
     methods: sharedModelsMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { sharedModelsSchema, sharedModelsDataSchema, sharedModelsPatchSchema ,sharedModelsQuerySchema },
+      docs: {
+        description: 'A model service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(sharedModelsPath).hooks({

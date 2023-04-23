@@ -2,6 +2,7 @@
 import { authenticate } from '@feathersjs/authentication'
 import { iff, preventChanges } from 'feathers-hooks-common'
 import axios from 'axios';
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -12,7 +13,11 @@ import {
   modelExternalResolver,
   modelDataResolver,
   modelPatchResolver,
-  modelQueryResolver
+  modelQueryResolver,
+  modelSchema,
+  modelDataSchema,
+  modelPatchSchema,
+  modelQuerySchema,
 } from './models.schema.js'
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
@@ -27,7 +32,16 @@ export const model = (app) => {
     // A list of all methods this service exposes externally
     methods: modelMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { modelSchema, modelDataSchema, modelPatchSchema , modelQuerySchema, },
+      docs: {
+        description: 'A Model service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
+
   })
   // Initialize hooks
   app.service(modelPath).hooks({
