@@ -5,7 +5,8 @@ import store from '@/store'
 import Home from "@/views/Home";
 import SignUp from "@/views/SignUp";
 import Login from '@/views/Login';
-import Share from '@/views/Share'
+import Share from '@/views/Share';
+import Models from '@/views/Models';
 
 
 const routes = [
@@ -13,6 +14,12 @@ const routes = [
     path: '/:id?',
     component: Home,
     name: 'Home',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/models',
+    component: Models,
+    name: 'Models',
     meta: { requiresAuth: true },
   },
   {

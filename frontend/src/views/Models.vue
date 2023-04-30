@@ -1,0 +1,168 @@
+<template>
+  <v-container>
+<!--    <v-row class="pl-4 pr-4">-->
+<!--      <v-col cols="6">-->
+<!--        <v-text-field-->
+<!--          v-model="search"-->
+<!--          outlined-->
+<!--          hide-details-->
+<!--          placeholder="Search (by name)"-->
+<!--          append-icon="mdi-magnify"-->
+<!--        />-->
+<!--      </v-col>-->
+<!--      <v-spacer />-->
+<!--      <v-col cols="2">-->
+<!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
+<!--      </v-col>-->
+<!--    </v-row>-->
+
+    <v-row dense>
+      <v-col
+        v-for="(model, i) in myModels.data"
+        :key="model._id"
+        cols="4"
+      >
+        <v-card
+          class="mx-auto"
+          max-width="344"
+        >
+          <template v-if="model.thumbnailUrl">
+            <v-img
+              :src="model.thumbnailUrl"
+              height="200px"
+              cover
+            ></v-img>
+          </template>
+          <template v-else>
+            <v-sheet
+              color="#F4F4F4"
+              height="200px"
+              class="d-flex justify-center align-center"
+            >
+              <span style="color: #8D8D8D">?</span>
+            </v-sheet>
+          </template>
+
+          <v-card-title>
+            {{ i }} {{ model.custFileName }}
+          </v-card-title>
+
+          <v-card-subtitle>
+            {{ dateFormat(model.createdAt) }}
+          </v-card-subtitle>
+
+          <v-card-actions>
+            <v-btn
+              color="orange-lighten-2"
+              variant="text"
+              :to="{ name: 'Home', params: { id: model._id } }"
+            >
+              Explore
+            </v-btn>
+
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <template v-if="myModels.data.length === 0 && isFindPending">
+        <v-col
+          v-for="i in 9"
+          :key="i"
+          cols="4"
+        >
+          <v-card
+            class="mx-auto"
+            max-width="344"
+          >
+            <v-skeleton-loader
+              type="image, list-item-two-line, button"
+            >
+            </v-skeleton-loader>
+          </v-card>
+
+        </v-col>
+      </template>
+    </v-row>
+    <br>
+    <v-row dense class="justify-center">
+      <template v-if="myModels.data.length && isFindPending">
+        <v-progress-circular indeterminate></v-progress-circular>
+      </template>
+      <template v-if="myModels.data.length === this.pagination.total">
+        <div>You reached at the end!</div>
+      </template>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+import { mapState, mapActions, mapMutations } from 'vuex';
+import { models } from '@feathersjs/vuex';
+
+const { Model } = models.api;
+
+export default {
+  name: 'Models',
+  data: () => ({
+    search: '',
+    showRecentModels: true,
+    pagination: {
+      limit: 10,
+      skip: 0,
+      total: null,
+    }
+  }),
+  async created() {
+  },
+  async mounted() {
+    await this.fetchModels();
+    window.addEventListener('scroll', e => {
+      if(document.documentElement.scrollHeight <= window.scrollY + window.innerHeight + 1) {
+        this.fetchModels();
+      }
+    });
+  },
+  computed: {
+    ...mapState('models', ['isFindPending']),
+    myModels: () => Model.findInStore()
+  },
+  methods: {
+    ...mapMutations('models', ['clearAll']),
+    async fetchModels() {
+      // const models = await Model.find({query: {}, pipelines: [{custFileName: { $regex: 'c3dfe466', $options: 'igm' }}]})
+      if (this.myModels.data.length !== this.pagination.total) {
+        const models = await Model.find({
+          query: {
+            $limit: this.pagination.limit,
+            $skip: this.pagination.skip,
+            isSharedModel: false,
+            $sort: {
+              // createdAt: this.showRecentModels? 1 : -1,
+              createdAt: -1,
+            }
+          }
+        });
+        this.pagination.skip = models.skip + this.pagination.limit;
+        this.pagination.total = models.total;
+        console.log(models);
+      }
+    },
+    async showRecent() {
+      this.pagination.skip = 0;
+      this.pagination.total = null;
+      await this.clearAll();
+      await this.fetchModels();
+    },
+    dateFormat(number) {
+      const date = new Date(number);
+      return date.toDateString();
+    }
+  }
+}
+</script>
+
+<style scoped>
+::v-deep(.v-skeleton-loader__image) {
+  height: 190px;
+}
+</style>
