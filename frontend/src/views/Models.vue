@@ -1,6 +1,6 @@
 <template>
   <v-container>
-<!--    <v-row class="pl-4 pr-4">-->
+    <v-row class="pl-4 pr-4">
 <!--      <v-col cols="6">-->
 <!--        <v-text-field-->
 <!--          v-model="search"-->
@@ -10,12 +10,19 @@
 <!--          append-icon="mdi-magnify"-->
 <!--        />-->
 <!--      </v-col>-->
-<!--      <v-spacer />-->
-<!--      <v-col cols="2">-->
+      <v-spacer />
+      <v-col cols="3" class="text-right">
 <!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
-<!--      </v-col>-->
-<!--    </v-row>-->
+        <v-btn
+          prepend-icon="mdi-plus"
+          :to="{ name: 'Home'}"
+        >
+          Upload New Model
+        </v-btn>
+      </v-col>
+    </v-row>
 
+    <br>
     <v-row dense>
       <v-col
         v-for="(model, i) in myModels.data"
@@ -44,7 +51,7 @@
           </template>
 
           <v-card-title>
-            {{ i }} {{ model.custFileName }}
+            {{ model.custFileName }}
           </v-card-title>
 
           <v-card-subtitle>
@@ -89,7 +96,7 @@
         <v-progress-circular indeterminate></v-progress-circular>
       </template>
       <template v-if="myModels.data.length === this.pagination.total">
-        <div>You reached at the end!</div>
+        <div class="text-grey-darken-1">You reached at the end!</div>
       </template>
     </v-row>
   </v-container>
@@ -107,7 +114,7 @@ export default {
     search: '',
     showRecentModels: true,
     pagination: {
-      limit: 10,
+      limit: 12,
       skip: 0,
       total: null,
     }
