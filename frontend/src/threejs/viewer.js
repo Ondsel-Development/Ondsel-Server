@@ -10,7 +10,7 @@ const EDGE_COLOR = 0x000000;
 
 export class Viewer {
 
-  constructor(url, width, height, viewport, window) {
+  constructor(url, width, height, viewport, window, onLoadCallback) {
     this.url = url;
     this.width = width;
     this.height = height;
@@ -27,6 +27,7 @@ export class Viewer {
     this.pointer = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.selectedObjs = []
+    this.onLoadCallback = onLoadCallback;
 
     this.initViewer();
   }
@@ -124,6 +125,7 @@ export class Viewer {
           this.addAxesHelper();
           fitCameraToSelection(this.camera, this.controls, this.obj);
         }
+        setTimeout(() => {this.onLoadCallback(); console.log('callback trigger')}, 2000);
       },
       // called when loading is in progresses
       function (xhr) {

@@ -13,7 +13,7 @@
       <v-icon>mdi-share-variant</v-icon>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer"/>
+  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -194,7 +194,35 @@ export default {
       this.isModelLoaded = false;
       this.model.shouldStartObjGeneration = true;
       this.model = await this.model.save();
-    }
+    },
+    uploadThumbnail() {
+
+      if (this.model.isThumbnailGenerated) {
+        return
+      }
+
+      try {
+        this.$nextTick(async () => {
+          const canvas = document.getElementsByTagName('canvas')[0];
+          const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+          const fd = new FormData();
+          fd.append('file', image, `${this.model._id}_thumbnail.PNG`);
+          const uploadUrl = `${import.meta.env.VITE_APP_API_URL}upload`;
+
+          await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+              Authorization: this.accessToken,
+            },
+            body: fd,
+          });
+          await this.model.patch({data: {isThumbnailGenerated: true}});
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
   watch: {
     'model.isObjGenerated'(v) {
