@@ -23,6 +23,8 @@ export const modelSchema = Type.Object(
     errorMsg: Type.String(),
     objUrl: Type.String(),
     isSharedModel: Type.Optional(Type.Boolean({default: false})),
+    isThumbnailGenerated: Type.Boolean({default: false}),
+    thumbnailUrl: Type.String(),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -38,6 +40,14 @@ export const modelResolver = resolve({
     const { app } = context;
     if (message.isObjGenerated) {
       const r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
+      return r.url
+    }
+    return '';
+  }),
+  thumbnailUrl: virtual(async(message, context) => {
+    const { app } = context;
+    if (message.isThumbnailGenerated) {
+      const r = await app.service('upload').get(`${message._id.toString()}_thumbnail.PNG`);
       return r.url
     }
     return '';
