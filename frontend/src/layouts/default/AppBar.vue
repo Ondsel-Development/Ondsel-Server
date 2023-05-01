@@ -1,6 +1,6 @@
 <template>
   <v-app-bar flat>
-    <v-app-bar-nav-icon></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
     <v-app-bar-title>
       ONDSEL
@@ -61,6 +61,16 @@
     </v-menu>
 
     </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      location="left"
+      temporary
+    >
+      <v-list density="compact" nav>
+        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" value="models" :to="{ name: 'Models'}"></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 </template>
 
 <script>
@@ -71,6 +81,7 @@ export default {
 
   data: () => ({
     menu: false,
+    drawer: false,
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
