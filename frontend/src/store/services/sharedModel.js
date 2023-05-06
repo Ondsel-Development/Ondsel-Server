@@ -13,7 +13,11 @@ class SharedModel extends BaseModel {
       canViewModel: true,
       canViewModelAttributes: false,
       canUpdateModel: false,
-      canExportModel: false,
+      canExportFCStd: false,
+      canExportSTEP: false,
+      canExportSTL: false,
+      canExportIFC: false,
+      canExportOBJ: false,
     }
   }
 }

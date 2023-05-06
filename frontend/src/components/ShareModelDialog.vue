@@ -31,11 +31,47 @@
             <div>Can update model attributes</div>
           </template>
         </v-checkbox>
-        <v-checkbox v-model="permissions.canExportModel" :disabled="isGeneratingLink" hide-details>
-          <template v-slot:label>
-            <div>Can export model</div>
-          </template>
-        </v-checkbox>
+        <div class="ml-2 mt-2 text-body-2">Export model permissions</div>
+        <v-container>
+          <v-row no-gutters>
+            <v-col cols="6">
+              <v-checkbox v-model="permissions.canExportFCStd" :disabled="isGeneratingLink" hide-details>
+                <template v-slot:label>
+                  <div>Can export FCStd</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox v-model="permissions.canExportSTEP" :disabled="isGeneratingLink" hide-details>
+                <template v-slot:label>
+                  <div>Can export STEP</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox v-model="permissions.canExportSTL" :disabled="isGeneratingLink" hide-details>
+                <template v-slot:label>
+                  <div>Can export STL</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox v-model="permissions.canExportIFC" :disabled="isGeneratingLink" hide-details>
+                <template v-slot:label>
+                  <div>Can export IFC</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox v-model="permissions.canExportOBJ" :disabled="isGeneratingLink" hide-details>
+                <template v-slot:label>
+                  <div>Can export OBJ
+                  </div>
+                </template>
+              </v-checkbox>
+            </v-col>
+          </v-row>
+        </v-container>
 
         <v-text-field ref="sharedUrl" variant="outlined" hide-details readonly :value="sharedModelUrl" :disabled="!sharedModelUrl">
           <template v-slot:append>
@@ -78,7 +114,11 @@ export default {
       canViewModel: true,
       canViewModelAttributes: false,
       canUpdateModel: false,
-      canExportModel: false
+      canExportFCStd: false,
+      canExportSTEP: false,
+      canExportSTL: false,
+      canExportIFC: false,
+      canExportOBJ: false,
     },
     tmpSharedModel: null,
     tmpModel: null,
@@ -102,7 +142,11 @@ export default {
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;
-      sharedModel.canExportModel = this.permissions.canExportModel;
+      sharedModel.canExportFCStd = this.permissions.canExportFCStd;
+      sharedModel.canExportSTEP = this.permissions.canExportSTEP;
+      sharedModel.canExportSTL = this.permissions.canExportSTL;
+      sharedModel.canExportIFC = this.permissions.canExportIFC;
+      sharedModel.canExportOBJ = this.permissions.canExportOBJ;
       sharedModel.cloneModelId = this.modelId;
       this.tmpSharedModel = await sharedModel.create();
       this.tmpModel = await Model.get(this.tmpSharedModel.modelId);
