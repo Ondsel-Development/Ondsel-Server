@@ -3,6 +3,7 @@ import { authenticate } from '@feathersjs/authentication'
 import { iff, preventChanges } from 'feathers-hooks-common'
 import axios from 'axios';
 import swagger from 'feathers-swagger';
+import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -66,6 +67,15 @@ export const model = (app) => {
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
         ),
+        iff(
+          context => (
+            context.data.shouldStartFCStdExport ||
+            context.data.shouldStartSTEPExport ||
+            context.data.shouldStartSTLExport ||
+            context.data.shouldStartOBJExport
+          ),
+          startExport
+        ),
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
       ],
@@ -112,3 +122,47 @@ const startObjGeneration = async (context) => {
   context.data.isObjGenerationInProgress = true;
   return context
 };
+
+const startExport = async (context) => {
+  const { data, params } = context
+  let fileName = null
+  let attributes = {}
+  if (!context.data.uniqueFileName || !context.data.attributes) {
+    const result = await context.service.get(context.id);
+    fileName = result.uniqueFileName;
+    attributes = result.attributes;
+  }
+
+  let command;
+  if (data.shouldStartFCStdExport) {
+    command = 'EXPORT_FCSTD';
+    data['isExportFCStdGenerated'] = false;
+  } else if (data.shouldStartSTEPExport) {
+    command = 'EXPORT_STEP';
+    data['isExportSTEPGenerated'] = false;
+  } else if (data.shouldStartSTLExport) {
+    command = 'EXPORT_STL';
+    data['isExportSTLGenerated'] = false;
+  } else {
+    command = 'EXPORT_OBJ';
+    data['isExportOBJGenerated'] = false;
+  }
+
+  axios({
+    method: 'post',
+    url: context.app.get('fcWorkerUrl'),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data : {
+      id: context.id || context.result._id.toString(),
+      fileName: fileName || data.uniqueFileName,
+      command: command,
+      accessToken: params.authentication?.accessToken || params.accessToken,
+      attributes: data.attributes || attributes,
+      isSharedModel: context.params.query.isSharedModel,
+    }
+  });
+  context.data = _.omit(data, ['shouldStartFCStdExport', 'shouldStartSTEPExport', 'shouldStartSTLExport', 'shouldStartOBJExport']);
+  return context;
+}

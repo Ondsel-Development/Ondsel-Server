@@ -20,11 +20,15 @@ export const modelSchema = Type.Object(
     isObjGenerated: Type.Optional(Type.Boolean({default: false})),
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
     attributes: Type.Optional(Type.Object({})),
-    errorMsg: Type.String(),
+    errorMsg: Type.Optional(Type.String()),
     objUrl: Type.String(),
     isSharedModel: Type.Optional(Type.Boolean({default: false})),
-    isThumbnailGenerated: Type.Boolean({default: false}),
+    isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    isExportFCStdGenerated: Type.Optional(Type.Boolean({default: false})),
+    isExportSTEPGenerated: Type.Optional(Type.Boolean({default: false})),
+    isExportSTLGenerated: Type.Optional(Type.Boolean({default: false})),
+    isExportOBJGenerated: Type.Optional(Type.Boolean({default: false})),
   },
   { $id: 'Model', additionalProperties: false }
 )
