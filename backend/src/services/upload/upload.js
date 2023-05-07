@@ -1,5 +1,6 @@
 import dauria from 'dauria';
 import { authenticate } from '@feathersjs/authentication';
+import { iff } from 'feathers-hooks-common';
 
 import { getUploadService, multipartMiddleware } from './upload.class.js'
 import { uploadPath, uploadMethods } from './upload.shared.js'
@@ -80,10 +81,23 @@ export const upload = (app) => {
   // Initialize hooks
   app.service(uploadPath).hooks({
     around: {
-      all: [authenticate('jwt')],
+      all: [],
     },
     before: {
       all: [
+        iff (
+          context => context.params.query?.modelId,
+          iff (
+            async (context) => {
+              const modelId = context.params.query?.modelId
+              const model = await context.app.service('models').get(modelId);
+              return !model.isSharedModel
+            },
+            authenticate('jwt'),
+          ),
+        ).else (
+          authenticate('jwt'),
+        ),
       ],
       find: [],
       get: [],
