@@ -12,6 +12,9 @@
     <v-btn icon flat @click="openShareModelDialog">
       <v-icon>mdi-share-variant</v-icon>
     </v-btn>
+    <v-btn icon flat @click="openExportModelDialog">
+      <v-icon>mdi-file-export</v-icon>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
@@ -83,6 +86,13 @@
       ref="shareModelDialog"
       @update-model="updateModel"
     />
+    <ExportModelDialog
+      v-if="model"
+      :is-active="isShareModelDialogActive"
+      :model="model"
+      ref="exportModelDialog"
+      @update-model="updateModel"
+    />
   </div>
 </template>
 
@@ -95,12 +105,13 @@ import { models } from '@feathersjs/vuex';
 import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
 import ShareModelDialog from '@/components/ShareModelDialog';
+import ExportModelDialog from '@/components/ExportModelDialog';
 
 const { Model } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, ModelViewer, ShareModelDialog },
+  components: { AttributeViewer, ModelViewer, ShareModelDialog, ExportModelDialog },
   data: () => ({
     dialog: true,
     model: null,
@@ -173,6 +184,9 @@ export default {
     },
     openShareModelDialog() {
       this.$refs.shareModelDialog.$data.dialog = true;
+    },
+    openExportModelDialog() {
+      this.$refs.exportModelDialog.$data.dialog = true;
     },
     template() {
       return `<div class="dz-preview dz-file-preview" style="display: none;">
