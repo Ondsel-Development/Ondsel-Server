@@ -56,13 +56,6 @@
               </v-checkbox>
             </v-col>
             <v-col cols="6">
-              <v-checkbox v-model="permissions.canExportIFC" :disabled="isGeneratingLink" hide-details>
-                <template v-slot:label>
-                  <div>Can export IFC</div>
-                </template>
-              </v-checkbox>
-            </v-col>
-            <v-col cols="6">
               <v-checkbox v-model="permissions.canExportOBJ" :disabled="isGeneratingLink" hide-details>
                 <template v-slot:label>
                   <div>Can export OBJ
@@ -117,7 +110,6 @@ export default {
       canExportFCStd: false,
       canExportSTEP: false,
       canExportSTL: false,
-      canExportIFC: false,
       canExportOBJ: false,
     },
     tmpSharedModel: null,
@@ -145,7 +137,6 @@ export default {
       sharedModel.canExportFCStd = this.permissions.canExportFCStd;
       sharedModel.canExportSTEP = this.permissions.canExportSTEP;
       sharedModel.canExportSTL = this.permissions.canExportSTL;
-      sharedModel.canExportIFC = this.permissions.canExportIFC;
       sharedModel.canExportOBJ = this.permissions.canExportOBJ;
       sharedModel.cloneModelId = this.modelId;
       this.tmpSharedModel = await sharedModel.create();
