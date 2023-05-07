@@ -19,7 +19,11 @@ export const sharedModelsSchema = Type.Object(
     canViewModel: Type.Boolean({default: true}),
     canViewModelAttributes: Type.Boolean({default: false}),
     canUpdateModel: Type.Boolean({default: false}),
-    canExportModel: Type.Boolean({default: false}),
+    // export model permissions
+    canExportFCStd: Type.Boolean({default: false}),
+    canExportSTEP: Type.Boolean({default: false}),
+    canExportSTL: Type.Boolean({default: false}),
+    canExportOBJ: Type.Boolean({default: false}),
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
@@ -79,11 +83,29 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsSchema.properties.canUpdateModel.default
   },
-  canExportModel: async (_value, _message, context) => {
+  canExportFCStd: async (_value, _message, context) => {
     if (_value) {
       return _value;
     }
-    return sharedModelsSchema.properties.canExportModel.default
+    return sharedModelsSchema.properties.canExportFCStd.default
+  },
+  canExportSTEP: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.canExportSTEP.default
+  },
+  canExportSTL: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.canExportSTL.default
+  },
+  canExportOBJ: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.canExportOBJ.default
   },
 })
 
