@@ -78,7 +78,16 @@ export const sharedModels = (app) => {
             const sharedModel = await context.service.get(context.id);
             return !context.params.user._id.equals(sharedModel.userId);
           },
-          preventChanges(false, 'canViewModel', 'canViewModelAttributes', 'canUpdateModel', 'canExportModel')
+          preventChanges(
+            false,
+            'userId',
+            'modelId',
+            'cloneModelId',
+            'canViewModel',
+            'canViewModelAttributes',
+            'canUpdateModel',
+            'canExportModel'
+          )
         ),
         iff(
           context => context.data.model,
