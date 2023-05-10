@@ -53,7 +53,10 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canViewModel',
   'canViewModelAttributes',
   'canUpdateModel',
-  'canExportModel',
+  'canExportFCStd',
+  'canExportSTEP',
+  'canExportSTL',
+  'canExportOBJ',
 ], {
   $id: 'SharedModelsData'
 })
