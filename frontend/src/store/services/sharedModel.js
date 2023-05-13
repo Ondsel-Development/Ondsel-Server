@@ -16,7 +16,6 @@ class SharedModel extends BaseModel {
       canExportFCStd: false,
       canExportSTEP: false,
       canExportSTL: false,
-      canExportIFC: false,
       canExportOBJ: false,
     }
   }
