@@ -111,7 +111,6 @@ export default {
           let callCounts = 0;
           const intervalId = setInterval(
             async () => {
-              console.log("calling: ", callCounts)
               const sharedModel = await SharedModel.get(this.sharedModel._id);
               if (this.format === 'FCStd' && sharedModel.model.isExportFCStdGenerated) {
                 clearInterval(intervalId);
@@ -124,7 +123,6 @@ export default {
               }
               callCounts += 1;
               if (callCounts >= 2) {
-                console.log('breaker')
                 clearInterval(intervalId);
               }
             }, 3000
