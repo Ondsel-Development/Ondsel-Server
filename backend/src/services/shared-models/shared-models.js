@@ -54,7 +54,7 @@ export const sharedModels = (app) => {
         authenticate('jwt'),
       ],
       patch: [
-        authenticate('jwt'),
+        // authenticate('jwt'),
       ]
     },
     before: {
@@ -73,10 +73,14 @@ export const sharedModels = (app) => {
         schemaHooks.resolveData(sharedModelsDataResolver)
       ],
       patch: [
+        iff (
+          context => context.data?.model?.attributes,
+          authenticate('jwt'),
+        ),
         iff(
           async context => {
             const sharedModel = await context.service.get(context.id);
-            return !context.params.user._id.equals(sharedModel.userId);
+            return context.params.user && !context.params.user._id.equals(sharedModel.userId);
           },
           preventChanges(
             false,
@@ -135,20 +139,74 @@ const patchModel = async (context) => {
   const { data, app } = context;
   const sharedModel = await context.service.get(context.id);
 
-  if (!sharedModel.canUpdateModel) {
+  if (data.model.attributes && !sharedModel.canUpdateModel) {
     throw new BadRequest('Field `canUpdateModel` must be true');
   }
 
-  if (data.model) {
-    const modelService = app.service('models');
+  const modelService = app.service('models');
+  if (data.model.shouldStartObjGeneration && data.model.attributes) {
     await modelService.patch(
       sharedModel.modelId.toString(),
       data.model,
       {
-        accessToken: context.params.authentication.accessToken,
+        accessToken: context.params.authentication?.accessToken || null,
         query: { isSharedModel: true }
       });
-    context.data = _.omit(data, 'model')
   }
+
+  const callExport = async () => {
+    await modelService.patch(
+      sharedModel.modelId.toString(),
+      data.model,
+      {
+        accessToken: context.params.authentication?.accessToken || null,
+        query: { isSharedModel: true },
+        sharedModelId: context.id
+      });
+  }
+
+  if (data.model.shouldStartFCStdExport) {
+    if (sharedModel.canExportFCStd ) {
+      await callExport();
+    } else {
+      throw new BadRequest('Field `canExportFCStd` must be true');
+    }
+  }
+  if (data.model.shouldStartSTEPExport) {
+    if (sharedModel.canExportSTEP ) {
+      await callExport();
+    } else {
+      throw new BadRequest('Field `canExportSTEP` must be true');
+    }
+  }
+  if (data.model.shouldStartSTLExport) {
+    if (sharedModel.canExportSTL) {
+      await callExport();
+    } else {
+      throw new BadRequest('Field `canExportSTL` must be true');
+    }
+  }
+  if (data.model.shouldStartOBJExport) {
+    if (sharedModel.canExportOBJ) {
+      await callExport();
+    } else {
+      throw new BadRequest('Field `canExportOBJ` must be true');
+    }
+  }
+
+  if (
+    data.model.isExportFCStdGenerated ||
+    data.model.isExportSTEPGenerated ||
+    data.model.isExportSTLGenerated ||
+    data.model.isExportOBJGenerated
+  ) {
+    await modelService.patch(
+      sharedModel.modelId.toString(),
+      data.model,
+      {},
+    );
+  }
+
+  context.data = _.omit(data, 'model')
   return context;
 }

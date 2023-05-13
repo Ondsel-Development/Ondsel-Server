@@ -161,6 +161,7 @@ const startExport = async (context) => {
       accessToken: params.authentication?.accessToken || params.accessToken,
       attributes: data.attributes || attributes,
       isSharedModel: context.params.query.isSharedModel,
+      sharedModelId: params.sharedModelId || null,
     }
   });
   context.data = _.omit(data, ['shouldStartFCStdExport', 'shouldStartSTEPExport', 'shouldStartSTLExport', 'shouldStartOBJExport']);
