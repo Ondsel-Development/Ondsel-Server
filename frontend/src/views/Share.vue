@@ -9,6 +9,9 @@
     <v-btn icon flat @click="openAttributeViewer" v-if="sharedModel && (sharedModel.canViewModelAttributes || sharedModel.canUpdateModel)">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
+    <v-btn icon flat @click="openExportModelDialog">
+      <v-icon>mdi-file-export</v-icon>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer"/>
   <div class="text-center">
@@ -76,6 +79,13 @@
     ref="attributeViewer"
     @update-model="updateModel"
   />
+  <ExportModelDialog
+    v-if="model"
+    :is-active="isExportModelDialogActive"
+    :shared-model="sharedModel"
+    ref="exportModelDialog"
+    @update-model="updateModel"
+  />
 </template>
 
 <script>
@@ -84,12 +94,13 @@ import { models } from '@feathersjs/vuex';
 
 import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
+import ExportModelDialog from '@/components/ExportModelDialog';
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: { AttributeViewer, ModelViewer },
+  components: { AttributeViewer, ModelViewer, ExportModelDialog },
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -97,6 +108,7 @@ export default {
     uploadInProgress: false,
     isModelLoaded: false,
     isAttributeViewerActive: false,
+    isExportModelDialogActive: false,
     isReloadingOBJ: false,
   }),
   async created() {
@@ -121,6 +133,9 @@ export default {
     },
     openAttributeViewer() {
       this.$refs.attributeViewer.$data.dialog = true;
+    },
+    openExportModelDialog() {
+      this.$refs.exportModelDialog.$data.dialog = true;
     },
     async updateModel() {
       this.isReloadingOBJ = true;
