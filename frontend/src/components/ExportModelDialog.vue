@@ -50,18 +50,44 @@ export default {
   props: {
     isActive: Boolean,
     model: Object,
+    sharedModel: Object
   },
   data: () => ({
     dialog: false,
     valid: false,
     format: null,
-    formats: [
-      'FCStd', 'STEP', 'STL', 'OBJ'
-    ],
-    isExportInProgress: false
+    isExportInProgress: false,
   }),
   computed: {
     ...mapState('auth', ['accessToken']),
+    mainModel: (vm) => {
+      if (vm.sharedModel) {
+        return vm.sharedModel.model;
+      }
+      return vm.model;
+    },
+    formats: (vm) => {
+      if (vm.model) {
+        return ['FCStd', 'STEP', 'STL', 'OBJ']
+      }
+      const outputFormats = []
+      if (vm.sharedModel) {
+        if (vm.sharedModel.canExportFCStd) {
+          outputFormats.push('FCStd');
+        }
+        if (vm.sharedModel.canExportSTEP) {
+          outputFormats.push('STEP');
+        }
+        if (vm.sharedModel.canExportSTL) {
+          outputFormats.push('STL');
+        }
+        if (vm.sharedModel.canExportOBJ) {
+          outputFormats.push('OBJ');
+        }
+      }
+      return outputFormats;
+    },
+
   },
   methods: {
     async runExportCmd() {
@@ -75,14 +101,45 @@ export default {
         shouldStartSTLExport: this.format === 'STL',
         shouldStartOBJExport: this.format === 'OBJ',
       };
-      await this.model.patch({data: data});
+      if (this.model) {
+        await this.model.patch({data: data});
+      }
+      if (this.sharedModel) {
+        await this.sharedModel.patch({'data': {'model': data}})
+
+        if (!this.accessToken) {
+          let callCounts = 0;
+          const intervalId = setInterval(
+            async () => {
+              console.log("calling: ", callCounts)
+              const sharedModel = await SharedModel.get(this.sharedModel._id);
+              if (this.format === 'FCStd' && sharedModel.model.isExportFCStdGenerated) {
+                clearInterval(intervalId);
+              } else if (this.format === 'STEP' && sharedModel.model.isExportSTEPGenerated) {
+                clearInterval(intervalId);
+              } else if (this.format === 'STL' && sharedModel.model.isExportSTLGenerated) {
+                clearInterval(intervalId);
+              } else if (this.format === 'OBJ' && sharedModel.model.isExportOBJGenerated) {
+                clearInterval(intervalId);
+              }
+              callCounts += 1;
+              if (callCounts >= 2) {
+                console.log('breaker')
+                clearInterval(intervalId);
+              }
+            }, 3000
+          )
+        }
+      }
     },
-    async downloadFile() {
-      const fileEndpoint = `${uploadEndpoint}/${this.model._id}_export.${this.format}`;
+    async downloadFile(model) {
+      const fileEndpoint = `${uploadEndpoint}/${model._id}_export.${this.format}`;
+
       await axios(
         {
           method: 'GET',
           url: fileEndpoint,
+          params: this.sharedModel ? { modelId: model._id.toString()} : {},
           headers: {
             Authorization: `Bearer ${this.accessToken}`
           }
@@ -96,7 +153,7 @@ export default {
           }).then((res) => {
           const file = window.URL.createObjectURL(new Blob([res.data]));
           const docUrl = document.createElement('a');
-          const fileName = `${this.model.custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`
+          const fileName = `${model.custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`
           docUrl.href = file;
           docUrl.setAttribute('download', fileName);
           document.body.appendChild(docUrl);
@@ -108,27 +165,27 @@ export default {
   },
   watch: {
 
-    async 'model.isExportSTLGenerated'(v) {
+    async 'mainModel.isExportSTLGenerated'(v) {
       if (v) {
-        await this.downloadFile();
+        await this.downloadFile(this.mainModel);
       }
     },
 
-    async 'model.isExportFCStdGenerated'(v) {
+    async 'mainModel.isExportFCStdGenerated'(v) {
       if (v) {
-        await this.downloadFile();
+        await this.downloadFile(this.mainModel);
       }
     },
 
-    async 'model.isExportSTEPGenerated'(v) {
+    async 'mainModel.isExportSTEPGenerated'(v) {
       if (v) {
-        await this.downloadFile();
+        await this.downloadFile(this.mainModel);
       }
     },
 
-    async 'model.isExportOBJGenerated'(v) {
+    async 'mainModel.isExportOBJGenerated'(v) {
       if (v) {
-        await this.downloadFile();
+        await this.downloadFile(this.mainModel);
       }
     },
   }
