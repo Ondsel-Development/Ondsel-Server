@@ -88,7 +88,7 @@
     />
     <ExportModelDialog
       v-if="model"
-      :is-active="isShareModelDialogActive"
+      :is-active="isExportModelDialogActive"
       :model="model"
       ref="exportModelDialog"
       @update-model="updateModel"
@@ -119,6 +119,7 @@ export default {
     isModelLoaded: false,
     isAttributeViewerActive: false,
     isShareModelDialogActive: false,
+    isExportModelDialogActive: false,
     isReloadingOBJ: false,
   }),
   mounted() {
