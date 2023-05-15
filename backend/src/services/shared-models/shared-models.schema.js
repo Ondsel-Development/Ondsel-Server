@@ -29,8 +29,6 @@ export const sharedModelsSchema = Type.Object(
 )
 export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValidator)
 export const sharedModelsResolver = resolve({
-  createdAt: async () => Date.now(),
-  updatedAt: async () => Date.now(),
   model: virtual(async (message, context) => {
     // Associate the user that sent the message
     if (message.canViewModel && message.modelId) {
@@ -66,6 +64,8 @@ export const sharedModelsDataResolver = resolve({
     // Associate the record with the id of the authenticated user
     return context.params.user._id
   },
+  createdAt: async () => Date.now(),
+  updatedAt: async () => Date.now(),
   // Initialize default values
   // https://github.com/feathersjs/feathers/issues/2837
   canViewModel: async (_value, _message, context) => {
