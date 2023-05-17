@@ -24,6 +24,7 @@ export const sharedModelsSchema = Type.Object(
     canExportSTEP: Type.Boolean({default: false}),
     canExportSTL: Type.Boolean({default: false}),
     canExportOBJ: Type.Boolean({default: false}),
+    isActive: Type.Boolean({default: true}),
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
@@ -110,6 +111,12 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsSchema.properties.canExportOBJ.default
   },
+  isActive: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.isActive.default
+  },
 })
 
 // Schema for updating existing entries
@@ -122,7 +129,7 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'modelId'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'modelId', 'cloneModelId', 'isActive'])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),
