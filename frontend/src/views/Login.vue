@@ -72,7 +72,7 @@ export default {
           strategy: 'local',
           ...this.user,
         }).then(() => {
-          this.$router.push({ name: 'Home' })
+          this.$router.push({ name: 'Models' })
         }).catch((e) => {
           this.showSnacker = true;
           this.snackerMsg = "Invalid login"

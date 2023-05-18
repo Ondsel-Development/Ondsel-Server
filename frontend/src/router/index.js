@@ -11,13 +11,13 @@ import Models from '@/views/Models';
 
 const routes = [
   {
-    path: '/:id?',
+    path: '/model/:id?',
     component: Home,
     name: 'Home',
     meta: { requiresAuth: true },
   },
   {
-    path: '/models',
+    path: '/',
     component: Models,
     name: 'Models',
     meta: { requiresAuth: true },
