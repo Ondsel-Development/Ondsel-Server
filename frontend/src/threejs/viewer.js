@@ -125,7 +125,7 @@ export class Viewer {
           this.addAxesHelper();
           fitCameraToSelection(this.camera, this.controls, this.obj);
         }
-        setTimeout(() => {this.onLoadCallback(); console.log('callback trigger')}, 2000);
+        setTimeout(() => {this.onLoadCallback()}, 2000);
       },
       // called when loading is in progresses
       function (xhr) {
