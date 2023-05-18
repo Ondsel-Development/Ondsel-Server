@@ -207,6 +207,7 @@ export default {
       await SharedModel.find({
         query: {
           cloneModelId: model._id,
+          $paginate: false
         },
       })
     }
