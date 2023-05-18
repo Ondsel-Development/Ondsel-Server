@@ -68,6 +68,12 @@
             </v-btn>
 
             <v-spacer></v-spacer>
+            <v-btn
+              icon="mdi-format-list-checks"
+              density="comfortable"
+              @click.stop="sharedModelDrawerClicked(model)"
+            ></v-btn>
+
           </v-card-actions>
         </v-card>
       </v-col>
@@ -117,16 +123,29 @@
       </template>
     </v-row>
   </v-container>
+
+  <v-navigation-drawer
+    v-model="manageSharedModelsDrawer"
+    location="right"
+    width="1200"
+    temporary
+  >
+    <MangeSharedModels :model="activeModel"/>
+  </v-navigation-drawer>
+
 </template>
 
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-const { Model } = models.api;
+import MangeSharedModels from '@/components/MangeSharedModels';
+
+const { Model, SharedModel } = models.api;
 
 export default {
   name: 'Models',
+  components: { MangeSharedModels },
   data: () => ({
     search: '',
     showRecentModels: true,
@@ -134,7 +153,9 @@ export default {
       limit: 12,
       skip: 0,
       total: null,
-    }
+    },
+    manageSharedModelsDrawer: false,
+    activeModel: null,
   }),
   async created() {
   },
@@ -168,7 +189,6 @@ export default {
         });
         this.pagination.skip = models.skip + this.pagination.limit;
         this.pagination.total = models.total;
-        console.log(models);
       }
     },
     async showRecent() {
@@ -180,6 +200,15 @@ export default {
     dateFormat(number) {
       const date = new Date(number);
       return date.toDateString();
+    },
+    async sharedModelDrawerClicked(model) {
+      this.activeModel = model;
+      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
+      await SharedModel.find({
+        query: {
+          cloneModelId: model._id,
+        },
+      })
     }
   }
 }
