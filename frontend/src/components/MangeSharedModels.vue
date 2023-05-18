@@ -142,12 +142,6 @@ export default {
       ],
     }
   },
-  created() {
-    console.log('created')
-  },
-  mounted() {
-    console.log('moundted')
-  },
   computed: {
     ...mapState('shared-models', ['isFindPending', 'isPatchPending']),
     sharedModels: (vm) => {
