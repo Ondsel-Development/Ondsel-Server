@@ -59,6 +59,13 @@ export const sharedModels = (app) => {
     },
     before: {
       all: [
+        iff(
+          context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
+          (context) => {
+            context.params.paginate = context.params.query.$paginate === 'false' || context.params.query.$paginate === false;
+            delete context.params.query.$paginate;
+          }
+        ),
         schemaHooks.validateQuery(sharedModelsQueryValidator),
         schemaHooks.resolveQuery(sharedModelsQueryResolver)
       ],
