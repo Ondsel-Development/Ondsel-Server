@@ -128,7 +128,7 @@ export default {
   async created() {
     const modelId = this.$route.params.id;
     if (modelId) {
-      this.model = await Model.get(modelId);
+      this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
     }
   },
   computed: {
