@@ -81,10 +81,27 @@
             class="mx-auto"
             max-width="344"
           >
-            <v-skeleton-loader
-              type="image, list-item-two-line, button"
-            >
-            </v-skeleton-loader>
+              <v-skeleton-loader
+                type="image, list-item-two-line"
+              >
+              </v-skeleton-loader>
+
+            <v-row dense>
+              <v-col cols='10'>
+                <v-skeleton-loader
+                  type="button" width="300px"
+                >
+                </v-skeleton-loader>
+              </v-col>
+
+              <v-col cols='2'>
+              <v-skeleton-loader
+                type="button" width="100px" class="ml-n5" style="max-width: 70px;"
+              >
+              </v-skeleton-loader>
+              </v-col>
+
+            </v-row>
           </v-card>
 
         </v-col>
