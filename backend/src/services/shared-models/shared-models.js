@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, discard } from 'feathers-hooks-common'
+import { iff, preventChanges, discard, softDelete } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -59,6 +59,7 @@ export const sharedModels = (app) => {
     },
     before: {
       all: [
+        softDelete(),
         iff(
           context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
           (context) => {

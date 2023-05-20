@@ -25,6 +25,7 @@ export const sharedModelsSchema = Type.Object(
     canExportSTL: Type.Boolean({default: false}),
     canExportOBJ: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
+    deleted: Type.Optional(Type.Boolean()),
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
@@ -129,7 +130,7 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'modelId', 'cloneModelId', 'isActive'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'modelId', 'cloneModelId', 'isActive', 'deleted'])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),
