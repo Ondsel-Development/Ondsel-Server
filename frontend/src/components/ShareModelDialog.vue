@@ -70,7 +70,7 @@
           <template v-slot:append>
             <v-btn icon flat @click="copyUrlToClipboard">
               <v-icon>
-                mdi-clipboard
+                mdi-content-copy
               </v-icon>
               <v-tooltip
                 activator="parent"
