@@ -127,7 +127,7 @@
   <v-navigation-drawer
     v-model="manageSharedModelsDrawer"
     location="right"
-    width="1200"
+    width="1100"
     temporary
   >
     <MangeSharedModels :model="activeModel"/>
