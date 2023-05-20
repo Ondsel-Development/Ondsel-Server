@@ -13,13 +13,14 @@
       <v-toolbar flat>
         <v-toolbar-title class="text-center">Mange share model links</v-toolbar-title>
       </v-toolbar>
-      <v-progress-linear indeterminate v-if="isFindPending || isPatchPending"></v-progress-linear>
+      <v-progress-linear indeterminate v-if="isFindPending || isPatchPending || isRemovePending"></v-progress-linear>
     </template>
 
     <template v-slot:item.link="{ item }">
       <v-chip color="dark-grey">
         {{ sharedModelUrl(item.raw._id) }}
         <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
+        <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)"></v-btn>
       </v-chip>
     </template>
 
@@ -143,7 +144,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('shared-models', ['isFindPending', 'isPatchPending']),
+    ...mapState('shared-models', ['isFindPending', 'isPatchPending', 'isRemovePending']),
     sharedModels: (vm) => {
       if (!vm.model) {
         return [];
@@ -161,6 +162,9 @@ export default {
     },
     updateSharedModel: async (id, data) => {
       await SharedModel.patch(id, data);
+    },
+    deleteSharedModel: async (id) => {
+      await SharedModel.remove(id);
     },
   },
 }
