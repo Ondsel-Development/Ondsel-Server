@@ -17,11 +17,18 @@
     </template>
 
     <template v-slot:item.link="{ item }">
-      <v-chip color="dark-grey">
-        {{ sharedModelUrl(item.raw._id) }}
-        <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
-        <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)"></v-btn>
-      </v-chip>
+      <v-row>
+        <!-- Added text-field for copy URL to clipboard when hosted domain is not https or localhost -->
+        <v-responsive max-width="1px">
+          <v-text-field :id="item.raw._id" variant="plain" readonly :value="sharedModelUrl(item.raw._id)" type="hidden"></v-text-field>
+        </v-responsive>
+        <v-chip color="dark-grey" class="ml-2">
+          {{ sharedModelUrl(item.raw._id) }}
+          <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
+          <v-btn end variant="plain" icon="mdi-content-copy" @click.stop="copyToClipboard(item.raw._id, sharedModelUrl(item.raw._id))"></v-btn>
+          <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)"></v-btn>
+        </v-chip>
+      </v-row>
     </template>
 
     <template v-slot:item.createdAt="{ item }">
@@ -165,6 +172,19 @@ export default {
     },
     deleteSharedModel: async (id) => {
       await SharedModel.remove(id);
+    },
+    async copyToClipboard(id, textToCopy) {
+      // Navigator clipboard api needs a secure context (https)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        try {
+          document.getElementById(id).select();
+          document.execCommand('copy');
+        } catch (error) {
+          console.error(error);
+        }
+      }
     },
   },
 }
