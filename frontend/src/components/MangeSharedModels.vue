@@ -20,7 +20,7 @@
       <v-row>
         <!-- Added text-field for copy URL to clipboard when hosted domain is not https or localhost -->
         <v-responsive max-width="1px">
-          <v-text-field :id="item.raw._id" variant="plain" readonly :value="sharedModelUrl(item.raw._id)" type="hidden"></v-text-field>
+          <v-text-field :ref="'textField_' + item.raw._id" variant="plain" readonly :value="sharedModelUrl(item.raw._id)" type="hidden"></v-text-field>
         </v-responsive>
         <v-chip color="dark-grey" class="ml-2">
           {{ (item.raw._id) }}
@@ -208,7 +208,8 @@ export default {
         await navigator.clipboard.writeText(textToCopy);
       } else {
         try {
-          document.getElementById(id).select();
+          const { ['textField_' + id]:el } = this.$refs;
+          el.select();
           document.execCommand('copy');
         } catch (error) {
           console.error(error);
