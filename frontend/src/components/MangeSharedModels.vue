@@ -145,8 +145,8 @@ export default {
           sortable: false,
           key: 'link',
         },
-        { title: 'Created At', key: 'createdAt', sortable: false},
-        { title: 'Active', key: 'isActive', sortable: false},
+        { title: 'Created At', key: 'createdAt', sortable: true},
+        { title: 'Active', key: 'isActive', sortable: true},
       ],
     }
   },
