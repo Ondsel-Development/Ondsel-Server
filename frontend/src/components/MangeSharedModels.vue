@@ -23,12 +23,28 @@
           <v-text-field :id="item.raw._id" variant="plain" readonly :value="sharedModelUrl(item.raw._id)" type="hidden"></v-text-field>
         </v-responsive>
         <v-chip color="dark-grey" class="ml-2">
-          {{ sharedModelUrl(item.raw._id) }}
+          {{ (item.raw._id) }}
           <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
           <v-btn end variant="plain" icon="mdi-content-copy" @click.stop="copyToClipboard(item.raw._id, sharedModelUrl(item.raw._id))"></v-btn>
           <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)"></v-btn>
         </v-chip>
       </v-row>
+    </template>
+
+    <template v-slot:item.description="{ item }">
+      <v-form :ref="'description_' + item.raw._id">
+      <v-text-field
+        density="compact"
+        counter="20"
+        v-model="item.raw.description"
+        variant="plain"
+        append-inner-icon="mdi-check"
+        :rules="[
+          v => !!v || 'Description is required',
+          v => (v && v.length <= 20) || 'Description must be less than 20 characters'
+        ]"
+        @click:append-inner="updateDescription(item.raw._id, item.raw.description)"></v-text-field>
+      </v-form>
     </template>
 
     <template v-slot:item.createdAt="{ item }">
@@ -145,6 +161,7 @@ export default {
           sortable: false,
           key: 'link',
         },
+        { title: 'Description', key: 'description', sortable: false, width: '400px'},
         { title: 'Created At', key: 'createdAt', sortable: true},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
@@ -172,6 +189,18 @@ export default {
     },
     deleteSharedModel: async (id) => {
       await SharedModel.remove(id);
+    },
+    async updateDescription(id, val) {
+      const { ['description_' + id]:form } = this.$refs;
+      const { valid } = await form.validate();
+      if (valid) {
+        await this.updateSharedModel(
+          id,
+          {
+            description: val
+          }
+        );
+      }
     },
     async copyToClipboard(id, textToCopy) {
       // Navigator clipboard api needs a secure context (https)

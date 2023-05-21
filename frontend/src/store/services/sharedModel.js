@@ -10,6 +10,7 @@ class SharedModel extends BaseModel {
   static instanceDefaults() {
     return {
       cloneModelId: '',
+      description: '',
       canViewModel: true,
       canViewModelAttributes: false,
       canUpdateModel: false,
