@@ -16,6 +16,7 @@ export const sharedModelsSchema = Type.Object(
     cloneModelId: Type.String({ objectid: true }),
     modelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
+    description: Type.String({ maxLength: 20 }),
     canViewModel: Type.Boolean({default: true}),
     canViewModelAttributes: Type.Boolean({default: false}),
     canUpdateModel: Type.Boolean({default: false}),
@@ -25,6 +26,7 @@ export const sharedModelsSchema = Type.Object(
     canExportSTL: Type.Boolean({default: false}),
     canExportOBJ: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
+    // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
   { $id: 'SharedModels', additionalProperties: false }
@@ -50,6 +52,7 @@ export const sharedModelsExternalResolver = resolve({})
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'cloneModelId',
   'modelId',
+  'description',
   'canViewModel',
   'canViewModelAttributes',
   'canUpdateModel',
