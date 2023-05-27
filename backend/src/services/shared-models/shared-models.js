@@ -54,7 +54,7 @@ export const sharedModels = (app) => {
         authenticate('jwt'),
       ],
       patch: [
-        // authenticate('jwt'),
+        authenticate('jwt'),
       ]
     },
     before: {
@@ -71,7 +71,12 @@ export const sharedModels = (app) => {
         schemaHooks.resolveQuery(sharedModelsQueryResolver)
       ],
       find: [],
-      get: [],
+      get: [
+        iff(
+          context => context.params.authentication,
+          authenticate('jwt'),
+          ),
+      ],
       create: [
         iff(
           context => context.data.cloneModelId,
@@ -81,10 +86,6 @@ export const sharedModels = (app) => {
         schemaHooks.resolveData(sharedModelsDataResolver)
       ],
       patch: [
-        iff (
-          context => context.data?.model?.attributes,
-          authenticate('jwt'),
-        ),
         iff(
           async context => {
             const sharedModel = await context.service.get(context.id);
@@ -93,14 +94,20 @@ export const sharedModels = (app) => {
           preventChanges(
             false,
             'userId',
-            'modelId',
             'cloneModelId',
             'canViewModel',
             'canViewModelAttributes',
             'canUpdateModel',
-            'canExportModel'
+            'canExportModel',
+            'dummyModelId',
           )
         ),
+
+        iff(
+          context => context.data.shouldCreateInstance,
+          createUserInstance,
+        ),
+
         iff(
           context => context.data.model,
           patchModel,
@@ -121,7 +128,7 @@ export const sharedModels = (app) => {
 
 const createClone = async (context) => {
   const { data } = context;
-  if ( data.cloneModelId && !data.modelId ) {
+  if ( data.cloneModelId ) {
     const modelService = context.app.service('models');
     const model = await modelService.get(data.cloneModelId);
 
@@ -137,7 +144,7 @@ const createClone = async (context) => {
     }, {
       authentication: context.params.authentication,
     });
-    context.data['modelId'] = newModel._id.toString();
+    context.data['dummyModelId'] = newModel._id.toString();
     return context;
   }
 };
@@ -145,7 +152,11 @@ const createClone = async (context) => {
 
 const patchModel = async (context) => {
   const { data, app } = context;
-  const sharedModel = await context.service.get(context.id);
+  const sharedModel = await context.service.get(context.id, { authentication: context.params.authentication });
+
+  if (sharedModel.dummyModelId.equals(sharedModel.model._id)) {
+    throw new BadRequest('Before patching to model, first create a instance');
+  }
 
   if (data.model.attributes && !sharedModel.canUpdateModel) {
     throw new BadRequest('Field `canUpdateModel` must be true');
@@ -154,7 +165,7 @@ const patchModel = async (context) => {
   const modelService = app.service('models');
   if (data.model.shouldStartObjGeneration && data.model.attributes) {
     await modelService.patch(
-      sharedModel.modelId.toString(),
+      sharedModel.model._id.toString(),
       data.model,
       {
         accessToken: context.params.authentication?.accessToken || null,
@@ -164,7 +175,7 @@ const patchModel = async (context) => {
 
   const callExport = async () => {
     await modelService.patch(
-      sharedModel.modelId.toString(),
+      sharedModel.model._id.toString(),
       data.model,
       {
         accessToken: context.params.authentication?.accessToken || null,
@@ -209,7 +220,7 @@ const patchModel = async (context) => {
     data.model.isExportOBJGenerated
   ) {
     await modelService.patch(
-      sharedModel.modelId.toString(),
+      sharedModel.model._id.toString(),
       data.model,
       {},
     );
@@ -217,4 +228,30 @@ const patchModel = async (context) => {
 
   context.data = _.omit(data, 'model')
   return context;
+}
+
+const createUserInstance = async (context) => {
+  const { data, app } = context;
+  const modelService = app.service('models');
+  const result = await modelService.find({ query: { sharedModelId: context.id, userId: context.params.user._id }});
+  if (!result.data.length) {
+    const sharedModel = await context.service.get(context.id);
+    const dummyModel = await modelService.get(sharedModel.dummyModelId);
+
+    await modelService.create({
+      'uniqueFileName': dummyModel.uniqueFileName,
+      'custFileName': dummyModel.custFileName,
+      'shouldStartObjGeneration': true,
+      'isObjGenerationInProgress': false,
+      'isObjGenerated': false,
+      'errorMsg': dummyModel.errorMsg,
+      'attributes': dummyModel.attributes,
+      'isSharedModel': true,
+      'sharedModelId': context.id.toString(),
+    }, {
+      authentication: context.params.authentication,
+    });
+  }
+
+  context.data = _.omit(data, 'shouldCreateInstance');
 }

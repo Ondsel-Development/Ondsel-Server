@@ -29,6 +29,8 @@ export const modelSchema = Type.Object(
     isExportSTEPGenerated: Type.Optional(Type.Boolean({default: false})),
     isExportSTLGenerated: Type.Optional(Type.Boolean({default: false})),
     isExportOBJGenerated: Type.Optional(Type.Boolean({default: false})),
+
+    sharedModelId: Type.Optional(Type.String({ objectid: true }))
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -69,7 +71,8 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'isObjGenerated',
   'attributes',
   'errorMsg',
-  'isSharedModel'
+  'isSharedModel',
+  'sharedModelId',
 ], {
   $id: 'ModelData'
 })
@@ -108,7 +111,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel']
+  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId']
 )
 export const modelQuerySchema = Type.Intersect(
   [

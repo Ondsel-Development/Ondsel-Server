@@ -14,7 +14,6 @@ export const sharedModelsSchema = Type.Object(
     updatedAt: Type.Number(),
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
-    modelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
     description: Type.String({ maxLength: 20 }),
     canViewModel: Type.Boolean({default: true}),
@@ -28,21 +27,37 @@ export const sharedModelsSchema = Type.Object(
     isActive: Type.Boolean({default: true}),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
+
+    // Store the state of cloneModelId when share link is created
+    dummyModelId: Type.Optional(Type.String({ objectid: true })),
+
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
 export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValidator)
 export const sharedModelsResolver = resolve({
   model: virtual(async (message, context) => {
-    // Associate the user that sent the message
-    if (message.canViewModel && message.modelId) {
-      const m = await context.app.service('models').get(message.modelId);
+    if (message.canViewModel && message.dummyModelId) {
+      const modelService = context.app.service('models');
+      if (context.params.user) {
+        const result = await modelService.find({ query: { sharedModelId: message._id, userId: context.params.user._id }});
+        console.log(result);
+        if (result.data.length) {
+          if (!(message.canUpdateModel || message.canViewModelAttributes)) {
+            return _.omit(result.data[0], 'attributes')
+          }
+          return result.data[0];
+        }
+      }
+
+      // When anonymous user access share model to view the model
+      const m = await modelService.get(message.dummyModelId);
       if (!(message.canUpdateModel || message.canViewModelAttributes)) {
         return _.omit(m, 'attributes')
       }
       return m;
+
     }
-   // return context.app.service('models').get(message.modelId);
   }),
 })
 
@@ -51,7 +66,6 @@ export const sharedModelsExternalResolver = resolve({})
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'cloneModelId',
-  'modelId',
   'description',
   'canViewModel',
   'canViewModelAttributes',
@@ -60,6 +74,7 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canExportSTEP',
   'canExportSTL',
   'canExportOBJ',
+  'dummyModelId',
 ], {
   $id: 'SharedModelsData'
 })
@@ -133,7 +148,7 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'modelId', 'cloneModelId', 'isActive', 'deleted'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted'])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),
