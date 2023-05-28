@@ -147,7 +147,7 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId'])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),

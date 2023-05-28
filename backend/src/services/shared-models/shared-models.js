@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, discard, softDelete } from 'feathers-hooks-common'
+import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -55,11 +55,22 @@ export const sharedModels = (app) => {
       ],
       patch: [
         authenticate('jwt'),
+      ],
+      remove: [
+        authenticate('jwt'),
       ]
     },
     before: {
       all: [
-        softDelete(),
+        softDelete({
+          deletedQuery: async context => {
+            // Allow only owner to delete shared-model
+            if (context.params.user ) {
+              return { userId: context.params.user._id }
+            }
+            return {};
+          }
+        }),
         iff(
           context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
           (context) => {
