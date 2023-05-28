@@ -109,7 +109,10 @@ export const sharedModels = (app) => {
             'canViewModel',
             'canViewModelAttributes',
             'canUpdateModel',
-            'canExportModel',
+            'canExportFCStd',
+            'canExportSTEP',
+            'canExportSTL',
+            'canExportOBJ',
             'dummyModelId',
             'isActive',
           )
