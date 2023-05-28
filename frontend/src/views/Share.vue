@@ -115,9 +115,19 @@ export default {
     const shareModelId = this.$route.params.id;
     if (shareModelId) {
       this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+
       if (this.isAuthenticated) {
+        if (
+          this.sharedModel.canUpdateModel ||
+          this.sharedModel.canExportFCStd ||
+          this.sharedModel.canExportSTEP ||
+          this.sharedModel.canExportSTL ||
+          this.sharedModel.canExportOBJ
+        ) {
+          this.sharedModel = await this.sharedModel.patch({ data: { shouldCreateInstance: true }});
+        }
         // Need to fetch model separately for reactivity for watcher
-        this.model = await Model.get(this.sharedModel.modelId, {query: {isSharedModel: true}});
+        this.model = await Model.get(this.sharedModel.model._id, {query: {isSharedModel: true}});
       } else {
         this.model = this.sharedModel.model;
       }

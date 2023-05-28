@@ -160,7 +160,7 @@ export default {
       sharedModel.canExportOBJ = this.permissions.canExportOBJ;
       sharedModel.cloneModelId = this.modelId;
       this.tmpSharedModel = await sharedModel.create();
-      this.tmpModel = await Model.get(this.tmpSharedModel.modelId);
+      this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
     },
 
     async copyToClipboard(textToCopy) {
