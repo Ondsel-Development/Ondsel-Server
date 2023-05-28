@@ -160,7 +160,7 @@ export default {
           });
           this.on('success', async file => {
             await file.model.save();
-            vm.$router.replace(`/${vm.model._id}`);
+            vm.$router.replace(`/model/${vm.model._id}`);
             await vm.model.patch({
               id: vm.model._id,
               data: {
