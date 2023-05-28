@@ -66,9 +66,9 @@ export const sharedModels = (app) => {
           deletedQuery: async context => {
             // Allow only owner to delete shared-model
             if ( context.method === 'remove' && context.params.user ) {
-              return { userId: context.params.user._id }
+              return { userId: context.params.user._id, deleted: { $ne: true } }
             }
-            return {};
+            return { deleted: { $ne: true } };
           }
         }),
         iff(
