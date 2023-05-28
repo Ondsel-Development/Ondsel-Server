@@ -65,7 +65,7 @@ export const sharedModels = (app) => {
         softDelete({
           deletedQuery: async context => {
             // Allow only owner to delete shared-model
-            if (context.params.user ) {
+            if ( context.method === 'remove' && context.params.user ) {
               return { userId: context.params.user._id }
             }
             return {};
@@ -86,7 +86,7 @@ export const sharedModels = (app) => {
         iff(
           context => context.params.authentication,
           authenticate('jwt'),
-          ),
+        ),
       ],
       create: [
         iff(

@@ -118,6 +118,12 @@ const startObjGeneration = async (context) => {
       isSharedModel: context.params.query.isSharedModel,
     }
   });
+
+  if (context.result) {
+    // Update status in DB too, when shouldStartObjGeneration is true in POST endpoint
+    await context.service.patch(context.result._id.toString(), { shouldStartObjGeneration: false, isObjGenerationInProgress: true });
+  }
+
   context.data.shouldStartObjGeneration = false;
   context.data.isObjGenerationInProgress = true;
   return context
