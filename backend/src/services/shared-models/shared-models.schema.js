@@ -40,8 +40,7 @@ export const sharedModelsResolver = resolve({
     if (message.canViewModel && message.dummyModelId) {
       const modelService = context.app.service('models');
       if (context.params.user) {
-        const result = await modelService.find({ query: { sharedModelId: message._id, userId: context.params.user._id }});
-        console.log(result);
+        const result = await modelService.find({ query: { sharedModelId: message._id, userId: context.params.user._id, isSharedModelAnonymousType: false }});
         if (result.data.length) {
           if (!(message.canUpdateModel || message.canViewModelAttributes)) {
             return _.omit(result.data[0], 'attributes')

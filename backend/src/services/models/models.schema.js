@@ -30,7 +30,8 @@ export const modelSchema = Type.Object(
     isExportSTLGenerated: Type.Optional(Type.Boolean({default: false})),
     isExportOBJGenerated: Type.Optional(Type.Boolean({default: false})),
 
-    sharedModelId: Type.Optional(Type.String({ objectid: true }))
+    sharedModelId: Type.Optional(Type.String({ objectid: true })),
+    isSharedModelAnonymousType: Type.Optional(Type.Boolean({default: false})),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -73,6 +74,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'errorMsg',
   'isSharedModel',
   'sharedModelId',
+  'isSharedModelAnonymousType',
 ], {
   $id: 'ModelData'
 })
@@ -97,6 +99,12 @@ export const modelDataResolver = resolve({
     }
     return modelSchema.properties.isSharedModel.default;
   },
+  isSharedModelAnonymousType: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return modelSchema.properties.isSharedModelAnonymousType.default;
+  },
 })
 
 // Schema for updating existing entries
@@ -111,7 +119,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId']
+  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType']
 )
 export const modelQuerySchema = Type.Intersect(
   [

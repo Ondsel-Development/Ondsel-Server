@@ -118,7 +118,13 @@ export const sharedModels = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        iff(
+          context => context.data.cloneModelId,
+          createClone,
+        ),
+      ],
     },
     error: {
       all: []
@@ -128,8 +134,14 @@ export const sharedModels = (app) => {
 
 const createClone = async (context) => {
   const { data } = context;
+  const modelService = context.app.service('models');
+
+  if (context.result) {
+    await modelService.patch(context.result.dummyModelId, { sharedModelId: context.result._id.toString() });
+    return context
+  }
+
   if ( data.cloneModelId ) {
-    const modelService = context.app.service('models');
     const model = await modelService.get(data.cloneModelId);
 
     const newModel = await modelService.create({
@@ -141,6 +153,7 @@ const createClone = async (context) => {
       'errorMsg': model.errorMsg,
       'attributes': model.attributes,
       'isSharedModel': true,
+      'isSharedModelAnonymousType': true,
     }, {
       authentication: context.params.authentication,
     });
@@ -233,7 +246,9 @@ const patchModel = async (context) => {
 const createUserInstance = async (context) => {
   const { data, app } = context;
   const modelService = app.service('models');
-  const result = await modelService.find({ query: { sharedModelId: context.id, userId: context.params.user._id }});
+  const result = await modelService.find(
+    { query: { sharedModelId: context.id, userId: context.params.user._id, isSharedModelAnonymousType: false }}
+  );
   if (!result.data.length) {
     const sharedModel = await context.service.get(context.id);
     const dummyModel = await modelService.get(sharedModel.dummyModelId);
@@ -248,6 +263,7 @@ const createUserInstance = async (context) => {
       'attributes': dummyModel.attributes,
       'isSharedModel': true,
       'sharedModelId': context.id.toString(),
+      'isSharedModelAnonymousType': false,
     }, {
       authentication: context.params.authentication,
     });
