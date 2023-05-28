@@ -111,6 +111,7 @@ export const sharedModels = (app) => {
             'canUpdateModel',
             'canExportModel',
             'dummyModelId',
+            'isActive',
           )
         ),
 
