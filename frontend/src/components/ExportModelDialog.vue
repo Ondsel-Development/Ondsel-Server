@@ -15,7 +15,16 @@
         bottom
       ></v-progress-linear>
       <v-card-text>
-        <v-row>
+        <v-alert
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+          v-if="!isAuthenticated"
+        >
+          Need to Login to export model.
+        </v-alert>
+        <br>
           <v-select
             ref="inputFormatField"
             v-model="format"
@@ -25,11 +34,10 @@
             density="comfortable"
             label="Select file format"
           ></v-select>
-        </v-row>
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
-        <v-btn color="primary" @click="runExportCmd" :disabled="!format || isExportInProgress">Download</v-btn>
+        <v-btn color="primary" @click="runExportCmd" :disabled="!format || isExportInProgress || !isAuthenticated">Download</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -38,7 +46,7 @@
 <script>
 import axios from 'axios';
 import { models } from '@feathersjs/vuex';
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 const { Model, SharedModel } = models.api;
 
@@ -60,6 +68,7 @@ export default {
   }),
   computed: {
     ...mapState('auth', ['accessToken']),
+    ...mapGetters('auth', ['isAuthenticated']),
     mainModel: (vm) => {
       if (vm.sharedModel) {
         return vm.sharedModel.model;
