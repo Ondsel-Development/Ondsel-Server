@@ -44,6 +44,13 @@
           <v-container>
             <v-row no-gutters>
               <v-col cols="6">
+                <v-checkbox v-model="permissions.canDownloadDefaultModel" :disabled="isGeneratingLink" hide-details>
+                  <template v-slot:label>
+                    <div>Can download default model</div>
+                  </template>
+                </v-checkbox>
+              </v-col>
+              <v-col cols="6">
                 <v-checkbox v-model="permissions.canExportFCStd" :disabled="isGeneratingLink" hide-details>
                   <template v-slot:label>
                     <div>Can export FCStd</div>
@@ -122,6 +129,7 @@ export default {
       canExportSTEP: false,
       canExportSTL: false,
       canExportOBJ: false,
+      canDownloadDefaultModel: false,
     },
     tmpSharedModel: null,
     tmpModel: null,
@@ -158,6 +166,7 @@ export default {
       sharedModel.canExportSTEP = this.permissions.canExportSTEP;
       sharedModel.canExportSTL = this.permissions.canExportSTL;
       sharedModel.canExportOBJ = this.permissions.canExportOBJ;
+      sharedModel.canDownloadDefaultModel = this.permissions.canDownloadDefaultModel;
       sharedModel.cloneModelId = this.modelId;
       this.tmpSharedModel = await sharedModel.create();
       this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});

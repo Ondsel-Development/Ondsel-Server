@@ -84,6 +84,13 @@
             </v-checkbox>
           </v-col>
           <v-col cols="3">
+            <v-checkbox v-model="item.raw.canDownloadDefaultModel" :disabled="!item.raw.isActive" hide-details>
+              <template v-slot:label>
+                <div>Can download default model</div>
+              </template>
+            </v-checkbox>
+          </v-col>
+          <v-col cols="3">
             <v-checkbox v-model="item.raw.canExportFCStd" :disabled="!item.raw.isActive" hide-details>
               <template v-slot:label>
                 <div>Can export FCStd</div>
@@ -112,6 +119,7 @@
               </template>
             </v-checkbox>
           </v-col>
+          <v-col cols="9" />
           <v-col cols="3">
             <v-btn
               flat
@@ -126,6 +134,7 @@
                   canExportSTEP: item.raw.canExportSTEP,
                   canExportSTL: item.raw.canExportSTL,
                   canExportOBJ: item.raw.canExportOBJ,
+                  canDownloadDefaultModel: item.raw.canDownloadDefaultModel,
                 }
               )"
             >Update Permissions</v-btn>

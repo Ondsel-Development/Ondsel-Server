@@ -22,7 +22,8 @@
           class="text-left"
           v-if="!isAuthenticated"
         >
-          Need to Login to export model.
+          <span v-if="sharedModel && sharedModel.canDownloadDefaultModel">You can only export default model without Login.</span>
+          <span v-else>Need to Login to export model.</span>
         </v-alert>
         <br>
           <v-select
@@ -37,7 +38,7 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
-        <v-btn color="primary" @click="runExportCmd" :disabled="!format || isExportInProgress || !isAuthenticated">Download</v-btn>
+        <v-btn color="primary" @click="runExportCmd" :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model'))">Download</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -77,10 +78,13 @@ export default {
     },
     formats: (vm) => {
       if (vm.model) {
-        return ['FCStd', 'STEP', 'STL', 'OBJ']
+        return ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ']
       }
       const outputFormats = []
       if (vm.sharedModel) {
+        if (vm.sharedModel.canDownloadDefaultModel) {
+          outputFormats.push('Default model');
+        }
         if (vm.sharedModel.canExportFCStd) {
           outputFormats.push('FCStd');
         }
@@ -104,6 +108,10 @@ export default {
         return
       }
       this.isExportInProgress = true;
+      if (this.format === 'Default model') {
+        await this.downloadFile(this.model || this.sharedModel.model);
+        return;
+      }
       const data = {
         shouldStartFCStdExport: this.format === 'FCStd',
         shouldStartSTEPExport: this.format === 'STEP',
@@ -140,7 +148,16 @@ export default {
       }
     },
     async downloadFile(model) {
-      const fileEndpoint = `${uploadEndpoint}/${model._id}_export.${this.format}`;
+
+      let fileEndpoint;
+      let fileName;
+      if (this.format === 'Default model') {
+        fileEndpoint = `${uploadEndpoint}/${model.uniqueFileName}`;
+        fileName = model.custFileName;
+      } else {
+        fileEndpoint = `${uploadEndpoint}/${model._id}_export.${this.format}`;
+        fileName = `${model.custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`;
+      }
 
       await axios(
         {
@@ -160,7 +177,6 @@ export default {
           }).then((res) => {
           const file = window.URL.createObjectURL(new Blob([res.data]));
           const docUrl = document.createElement('a');
-          const fileName = `${model.custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`
           docUrl.href = file;
           docUrl.setAttribute('download', fileName);
           document.body.appendChild(docUrl);
