@@ -24,6 +24,7 @@ export const sharedModelsSchema = Type.Object(
     canExportSTEP: Type.Boolean({default: false}),
     canExportSTL: Type.Boolean({default: false}),
     canExportOBJ: Type.Boolean({default: false}),
+    canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -73,6 +74,7 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canExportSTEP',
   'canExportSTL',
   'canExportOBJ',
+  'canDownloadDefaultModel',
   'dummyModelId',
 ], {
   $id: 'SharedModelsData'
@@ -128,6 +130,12 @@ export const sharedModelsDataResolver = resolve({
       return _value;
     }
     return sharedModelsSchema.properties.canExportOBJ.default
+  },
+  canDownloadDefaultModel: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.canDownloadDefaultModel.default
   },
   isActive: async (_value, _message, context) => {
     if (_value) {
