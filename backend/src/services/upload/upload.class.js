@@ -3,7 +3,7 @@ import Store from 's3-blob-store'
 import BlobService from 'feathers-blob'
 import multer from 'multer'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, S3Client, HeadObjectCommand } from '@aws-sdk/client-s3'
 
 class UploadService {
   constructor(options, blobService, s3Client) {
@@ -21,11 +21,40 @@ class UploadService {
     return await getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
-  async get(id, _params) {
-    const url = await this.getSignedFileUrl(id, this.options.app.get('awsClientModelBucket'), 3600)
-    return {url: url};
+  async checkFileExists(bucketName, fileName) {
+    try {
+      const params = {
+        Bucket: bucketName,
+        Key: fileName
+      };
 
+      const command = new HeadObjectCommand(params);
+      await this.s3Client.send(command);
+
+      // The file exists
+      return true;
+    } catch (error) {
+      if (error.$metadata.httpStatusCode === 404) {
+        // The file does not exist
+        return false;
+      } else {
+        // Handle other errors
+        throw error;
+      }
+    }
   }
+
+  async get(id, _params) {
+
+    const bucketName = this.options.app.get('awsClientModelBucket');
+    const isFileExist = await this.checkFileExists(bucketName, id);
+    let url = '';
+    if (isFileExist) {
+      url = await this.getSignedFileUrl(id, bucketName, 3600);
+    }
+    return {url: url};
+  }
+
   async create(data, params) {
     return await this.blobService.create(data, params);
   }
