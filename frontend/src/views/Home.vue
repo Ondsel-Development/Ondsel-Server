@@ -129,6 +129,14 @@ export default {
     const modelId = this.$route.params.id;
     if (modelId) {
       this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
+      if (!this.model.objUrl) {
+        await this.model.patch({
+          data: {
+            shouldStartObjGeneration: true,
+            uniqueFileName: this.model.uniqueFileName,
+          }
+        })
+      }
     }
   },
   computed: {
