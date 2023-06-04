@@ -7,6 +7,7 @@ import SignUp from "@/views/SignUp";
 import Login from '@/views/Login';
 import Share from '@/views/Share';
 import Models from '@/views/Models';
+import PageNotFound from '@/views/PageNotFound';
 
 
 const routes = [
@@ -38,6 +39,12 @@ const routes = [
     name: 'Share',
     meta: { tryAuth: true },
   },
+  {
+    path: '/404',
+    component: PageNotFound,
+    name: 'PageNotFound',
+    meta: { tryAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -46,6 +53,11 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const link = router.resolve(to.path);
+  if (link.matched.length === 0) {
+    next('/404');
+    return;
+  }
   if (to.meta && to.meta.requiresAuth) {
     try {
       await store.dispatch('auth/authenticate');
