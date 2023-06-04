@@ -78,6 +78,14 @@ class UploadService {
       throw new BadRequest('File already exists!');
     }
 
+    if (customerFileNameRegex.test(data['id'])) {
+      const bucketName = this.options.app.get('awsClientModelBucket');
+      const isFileExist = await this.checkFileExists(bucketName, data['id']);
+      if (isFileExist) {
+        throw new BadRequest('File already exists!');
+      }
+    }
+
     return await this.blobService.create(data, params);
   }
 
