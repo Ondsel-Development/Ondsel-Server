@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
+import { NotFound } from '@feathersjs/errors';
 import { dataValidator, queryValidator } from '../../validators.js'
 import { modelSchema} from '../models/models.schema.js';
 
@@ -51,12 +52,18 @@ export const sharedModelsResolver = resolve({
       }
 
       // When anonymous user access share model to view the model
-      const m = await modelService.get(message.dummyModelId);
-      if (!(message.canUpdateModel || message.canViewModelAttributes)) {
-        return _.omit(m, 'attributes')
+      try {
+        const m = await modelService.get(message.dummyModelId);
+        if (!(message.canUpdateModel || message.canViewModelAttributes)) {
+          return _.omit(m, 'attributes')
+        }
+        return m;
+      } catch (error) {
+        if (error instanceof NotFound) {
+          return null; // Return null if no record is found
+        }
+        throw error; // Rethrow the error for other types of errors
       }
-      return m;
-
     }
   }),
 })
