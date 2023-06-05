@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="fill-height">
-    <v-card title="Sign Up to Ondsel" class="mx-auto" min-width="400" flat>
+    <v-card title="Sign Up to Ondsel" class="mx-auto" width="400" flat>
       <template v-slot:loader="{ isActive }">
         <v-progress-linear
           :active="isCreatePending"
