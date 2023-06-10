@@ -5,11 +5,15 @@
   },
   "host": "HOSTNAME",
   "authentication": {
-    "secret": "FEATHERS_SECRET"
+    "secret": "FEATHERS_SECRET",
+    "jwtOptions": {
+      "audience": "CLIENT_URL"
+    }
   },
   "awsAccessKeyId": "AWS_ACCESS_KEY_ID",
   "awsSecretAccessKey": "AWS_SECRET_ACCESS_KEY",
   "awsClientModelBucket": "AWS_CLIENT_MODELS_BUCKET",
   "awsRegion": "AWS_REGION",
-  "fcWorkerUrl": "FC_WORKER_URL"
+  "fcWorkerUrl": "FC_WORKER_URL",
+  "mongodb": "DB_URL"
 }
