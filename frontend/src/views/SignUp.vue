@@ -8,12 +8,13 @@
           indeterminate
         ></v-progress-linear>
       </template>
-      <v-form v-model="isValid" @submit.prevent="signUp" @keydown.prevent.enter>
+      <v-form v-model="isValid" @submit.prevent="signUp">
         <v-text-field
           v-model="user.email"
           label="Email"
           :rules="[rules.isRequired, rules.isEmail]"
           :disabled="isCreatePending"
+          autofocus
         ></v-text-field>
 
         <v-text-field
