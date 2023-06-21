@@ -11,7 +11,7 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title class="text-center">Mange share model links</v-toolbar-title>
+        <v-toolbar-title class="text-center">Manage share model links</v-toolbar-title>
       </v-toolbar>
       <v-progress-linear indeterminate v-if="isFindPending || isPatchPending || isRemovePending"></v-progress-linear>
     </template>
