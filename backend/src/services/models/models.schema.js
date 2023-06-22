@@ -118,10 +118,6 @@ export const modelPatchSchema = Type.Partial(modelSchema, {
 export const modelPatchValidator = getValidator(modelPatchSchema, dataValidator)
 export const modelPatchResolver = resolve({
   updatedAt: async () => Date.now(),
-
-  nestedObject: async (_value, _message, context) => {
-    console.log(_value);
-  }
 })
 
 // Schema for allowed query properties
