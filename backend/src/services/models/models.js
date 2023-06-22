@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges } from 'feathers-hooks-common'
+import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
 import axios from 'axios';
 import swagger from 'feathers-swagger';
 import _ from 'lodash';
@@ -54,7 +54,22 @@ export const model = (app) => {
       ]
     },
     before: {
-      all: [schemaHooks.validateQuery(modelQueryValidator), schemaHooks.resolveQuery(modelQueryResolver)],
+      all: [
+        softDelete({
+          deletedQuery: async context => {
+            if ( context.method === 'remove') {
+              const sharedModelService = context.app.service('shared-models');
+              const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id }})
+              for (const sharedModel of sharedModels.data) {
+                await sharedModelService.remove(sharedModel._id);
+              }
+            }
+            return { deleted: { $ne: true } };
+          }
+        }),
+        schemaHooks.validateQuery(modelQueryValidator),
+        schemaHooks.resolveQuery(modelQueryResolver)
+      ],
       find: [],
       get: [],
       create: [

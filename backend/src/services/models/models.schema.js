@@ -33,6 +33,8 @@ export const modelSchema = Type.Object(
 
     sharedModelId: Type.Optional(Type.String({ objectid: true })),
     isSharedModelAnonymousType: Type.Optional(Type.Boolean({default: false})),
+    // Soft delete
+    deleted: Type.Optional(Type.Boolean()),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -116,12 +118,16 @@ export const modelPatchSchema = Type.Partial(modelSchema, {
 export const modelPatchValidator = getValidator(modelPatchSchema, dataValidator)
 export const modelPatchResolver = resolve({
   updatedAt: async () => Date.now(),
+
+  nestedObject: async (_value, _message, context) => {
+    console.log(_value);
+  }
 })
 
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType']
+  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
 )
 export const modelQuerySchema = Type.Intersect(
   [
