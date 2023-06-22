@@ -68,6 +68,7 @@
             </v-btn>
 
             <v-spacer></v-spacer>
+            <DeleteDialog :model="model" @delete-model="deleteModel" />
             <v-btn
               icon="mdi-format-list-checks"
               density="comfortable"
@@ -93,7 +94,7 @@
               </v-skeleton-loader>
 
             <v-row dense>
-              <v-col cols='10'>
+              <v-col cols='8'>
                 <v-skeleton-loader
                   type="button" width="300px"
                 >
@@ -101,8 +102,15 @@
               </v-col>
 
               <v-col cols='2'>
+                <v-skeleton-loader
+                  type="button" width="65px" class=""
+                >
+                </v-skeleton-loader>
+              </v-col>
+
+              <v-col cols='2'>
               <v-skeleton-loader
-                type="button" width="100px" class="ml-n5" style="max-width: 70px;"
+                type="button" width="65px" class="ml-n2"
               >
               </v-skeleton-loader>
               </v-col>
@@ -140,12 +148,13 @@ import { mapState, mapActions, mapMutations } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import MangeSharedModels from '@/components/MangeSharedModels';
+import DeleteDialog from '@/components/DeleteDialog.vue';
 
 const { Model, SharedModel } = models.api;
 
 export default {
   name: 'Models',
-  components: { MangeSharedModels },
+  components: { MangeSharedModels, DeleteDialog },
   data: () => ({
     search: '',
     showRecentModels: true,
@@ -210,7 +219,10 @@ export default {
           $paginate: false
         },
       })
-    }
+    },
+    async deleteModel(model) {
+      await Model.remove(model._id)
+    },
   }
 }
 </script>
