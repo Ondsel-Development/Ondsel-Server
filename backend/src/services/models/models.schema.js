@@ -16,7 +16,7 @@ export const modelSchema = Type.Object(
     uniqueFileName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    fileUpdatedAt: Type.Number(),
+    fileUpdatedAt: Type.Optional(Type.Number()),
     isObjGenerationInProgress: Type.Optional(Type.Boolean({default: false})),
     isObjGenerated: Type.Optional(Type.Boolean({default: false})),
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
@@ -78,6 +78,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'isSharedModel',
   'sharedModelId',
   'isSharedModelAnonymousType',
+  'fileUpdatedAt',
 ], {
   $id: 'ModelData'
 })
@@ -89,7 +90,6 @@ export const modelDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
-  fileUpdatedAt: async () => Date.now(),
   // https://github.com/feathersjs/feathers/issues/2837
   isObjGenerationInProgress: async (_value, _message, context) => {
     return modelSchema.properties.isObjGenerationInProgress.default
