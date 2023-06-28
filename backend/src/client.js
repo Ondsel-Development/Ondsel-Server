@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { fileClient } from './services/file/file.shared.js'
+
 import { sharedModelsClient } from './services/shared-models/shared-models.shared.js'
 
 import { modelClient } from './services/models/models.shared.js'
@@ -31,6 +33,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(modelClient)
 
   client.configure(sharedModelsClient)
+
+  client.configure(fileClient)
 
   return client
 }
