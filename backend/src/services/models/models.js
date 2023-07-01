@@ -81,6 +81,14 @@ export const model = (app) => {
       patch: [
         preventChanges(false, 'isSharedModel'),
         iff(
+          context => context.data.shouldCommitNewVersion,
+          commitNewVersion
+        ),
+        iff(
+          context => context.data.shouldCheckoutToVersion,
+          checkoutToVersion,
+        ),
+        iff(
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
         ),
@@ -92,14 +100,6 @@ export const model = (app) => {
             context.data.shouldStartOBJExport
           ),
           startExport
-        ),
-        iff(
-          context => context.data.shouldCommitNewVersion,
-          commitNewVersion
-        ),
-        iff(
-          context => context.data.shouldCheckoutToVersion,
-          checkoutToVersion,
         ),
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
@@ -260,16 +260,18 @@ const checkoutToVersion = async (context) => {
   const lookUpAttributes = ['shouldCheckoutToVersion', 'versionId']
   const model = await context.service.get(context.id);
   if (model.fileId) {
-    await context.app.service('file').patch(
+    const file = await context.app.service('file').patch(
       model.fileId,
       _.pick(context.data, lookUpAttributes),
       { authentication: context.params.authentication },
     )
     // Save latest model.attributes to file data
     await saveModelAttributesToCurrentFile(context, model)
+
+    // assign current file version attributes to model attributes
+    context.data['attributes'] = file.currentVersion.additionalData.attributes || {}
   }
 
-  context.data['attributes'] = {}
   context.data = _.omit(context.data, lookUpAttributes);
   return context;
 }
