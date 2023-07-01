@@ -62,6 +62,10 @@ export const file = (app) => {
           context => context.data.shouldCheckoutToVersion,
           checkoutToVersion,
         ),
+        iff(
+          context => context.data.shouldUpdateVersionData,
+          updateVersionData,
+        ),
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
@@ -124,5 +128,42 @@ const checkoutToVersion = async (context) => {
 
   context.data['currentVersionId'] = context.data.versionId
   context.data = _.omit(context.data, ['shouldCheckoutToVersion', 'versionId'])
+  return context;
+};
+
+
+const updateVersionData = async (context) => {
+  const { data } = context;
+  if (!data.version) {
+    throw new BadRequest('Pass version object')
+  }
+
+  const file = await context.service.get(context.id);
+  const { versions } = file;
+
+  _.forEach(versions, v => {
+    v._id = v._id.toString()
+    v.userId = v.userId.toString()
+  });
+
+
+  if (!versions.some((item) => item._id === data.version._id)) {
+    throw new BadRequest(`Object with _id '${data.version._id}' not found in versions`);
+  }
+
+  const patchedVersions = versions.map((item) => {
+    if (item._id === data.version._id) {
+      return _.merge({}, item, data.version, (objValue, srcValue) => {
+        // Exclude properties with keys '_id' and 'userId'
+        if (objValue === item._id || objValue === item.userId) {
+          return objValue;
+        }
+      });
+    }
+    return item;
+  });
+
+  data['versions'] = patchedVersions;
+  context.data = _.omit(context.data, ['shouldUpdateVersionData', 'version'])
   return context;
 };
