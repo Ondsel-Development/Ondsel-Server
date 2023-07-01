@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import { BadRequest } from '@feathersjs/errors';
 import axios from 'axios';
 import swagger from 'feathers-swagger';
 import _ from 'lodash';
@@ -73,6 +74,7 @@ export const model = (app) => {
       find: [],
       get: [],
       create: [
+        createFileVersionControlObject,
         schemaHooks.validateData(modelDataValidator),
         schemaHooks.resolveData(modelDataResolver)
       ],
@@ -90,6 +92,14 @@ export const model = (app) => {
             context.data.shouldStartOBJExport
           ),
           startExport
+        ),
+        iff(
+          context => context.data.shouldCommitNewVersion,
+          commitNewVersion
+        ),
+        iff(
+          context => context.data.shouldCheckoutToVersion,
+          checkoutToVersion,
         ),
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
@@ -186,5 +196,80 @@ const startExport = async (context) => {
     }
   });
   context.data = _.omit(data, ['shouldStartFCStdExport', 'shouldStartSTEPExport', 'shouldStartSTLExport', 'shouldStartOBJExport']);
+  return context;
+}
+
+const createFileVersionControlObject = async context => {
+  const { data } = context
+  const fileService = context.app.service('file');
+  if (data.uniqueFileName) {
+    const file = await fileService.create({
+      shouldCommitNewVersion: true,
+      version: {
+        uniqueFileName: data.uniqueFileName,
+        message: 'Initial commit',
+        ...(data.fileUpdatedAt && {fileUpdatedAt: data.fileUpdatedAt})
+      }
+    }, {authentication: context.params.authentication,});
+    data['fileId'] = file._id.toString();
+    context.data = _.omit(data, 'uniqueFileName');
+  }
+  return context;
+}
+
+const saveModelAttributesToCurrentFile =  async (context, model) => {
+  await context.app.service('file').patch(
+    model.fileId,
+    {
+      shouldUpdateVersionData: true,
+      version: {
+        _id: model.file.currentVersion._id.toString(),
+        additionalData: _.merge({}, model.file.currentVersion.additionalData, {attributes: model.attributes}),
+      }
+    },
+  )
+}
+
+const commitNewVersion = async (context) => {
+  const { data } = context;
+  if (!data.version) {
+    throw new BadRequest('Should include version object');
+  }
+
+  const lookUpAttributes = ['shouldCommitNewVersion', 'version'];
+  const model = await context.service.get(context.id);
+  if (model.fileId) {
+
+    await context.app.service('file').patch(
+      model.fileId,
+      _.pick(data, lookUpAttributes),
+      { authentication: context.params.authentication },
+    );
+
+    // Save latest model.attributes to file data
+    await saveModelAttributesToCurrentFile(context, model)
+  }
+
+  context.data['attributes'] = {}
+  context.data = _.omit(data, lookUpAttributes);
+  return context;
+}
+
+
+const checkoutToVersion = async (context) => {
+  const lookUpAttributes = ['shouldCheckoutToVersion', 'versionId']
+  const model = await context.service.get(context.id);
+  if (model.fileId) {
+    await context.app.service('file').patch(
+      model.fileId,
+      _.pick(context.data, lookUpAttributes),
+      { authentication: context.params.authentication },
+    )
+    // Save latest model.attributes to file data
+    await saveModelAttributesToCurrentFile(context, model)
+  }
+
+  context.data['attributes'] = {}
+  context.data = _.omit(context.data, lookUpAttributes);
   return context;
 }

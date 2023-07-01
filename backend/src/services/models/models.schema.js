@@ -4,6 +4,7 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSchema } from '../users/users.schema.js'
+import { fileSchema } from '../file/file.schema.js';
 
 
 // Main data model schema
@@ -13,7 +14,9 @@ export const modelSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
     custFileName: Type.String(),
-    uniqueFileName: Type.String(),
+    uniqueFileName: Type.Optional(Type.String()),
+    fileId: ObjectIdSchema(),
+    file: Type.Ref(fileSchema),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     fileUpdatedAt: Type.Optional(Type.Number()),
@@ -62,6 +65,21 @@ export const modelResolver = resolve({
     }
     return '';
   }),
+  file: virtual(async (message, context) => {
+    const { app } = context;
+    const fileService = app.service('file');
+    if (message.fileId) {
+      return await fileService.get(message.fileId);
+    }
+  }),
+  uniqueFileName: virtual(async(message, context ) => {
+    if (message.uniqueFileName) {
+      return message.uniqueFileName
+    } else if (message.fileId) {
+      const file = await context.app.service('file').get(message.fileId);
+      return file.currentVersion.uniqueFileName;
+    }
+  }),
 })
 
 export const modelExternalResolver = resolve({})
@@ -79,6 +97,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'sharedModelId',
   'isSharedModelAnonymousType',
   'fileUpdatedAt',
+  'fileId',
 ], {
   $id: 'ModelData'
 })
