@@ -4,6 +4,7 @@ import { iff, preventChanges } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -15,6 +16,10 @@ import {
   fileDataResolver,
   filePatchResolver,
   fileQueryResolver,
+  fileSchema,
+  fileDataSchema,
+  filePatchSchema,
+  fileQuerySchema,
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
@@ -29,7 +34,15 @@ export const file = (app) => {
     // A list of all methods this service exposes externally
     methods: fileMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { fileSchema, fileDataSchema, filePatchSchema , fileQuerySchema, },
+      docs: {
+        description: 'A file service for file version control',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(filePath).hooks({
