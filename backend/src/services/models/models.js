@@ -101,7 +101,10 @@ export const model = (app) => {
           ),
           startExport
         ),
-        preventChanges(false, 'uniqueFileName', 'file'),  // deprecated not allowed patching
+        preventChanges(
+          false,
+          'uniqueFileName', 'file', 'objUrl', 'thumbnailUrl'  // Not allowed computed items
+        ),
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
       ],
