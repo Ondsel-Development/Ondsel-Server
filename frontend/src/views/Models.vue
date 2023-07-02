@@ -178,7 +178,7 @@ export default {
   },
   computed: {
     ...mapState('models', ['isFindPending']),
-    myModels: () => Model.findInStore()
+    myModels: () => Model.findInStore({ query: { isSharedModel: false }})
   },
   methods: {
     ...mapMutations('models', ['clearAll']),
