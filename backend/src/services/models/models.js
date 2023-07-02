@@ -101,6 +101,7 @@ export const model = (app) => {
           ),
           startExport
         ),
+        preventChanges(false, 'uniqueFileName', 'file'),  // deprecated not allowed patching
         schemaHooks.validateData(modelPatchValidator),
         schemaHooks.resolveData(modelPatchResolver),
       ],
@@ -124,9 +125,17 @@ export const model = (app) => {
 const startObjGeneration = async (context) => {
   const { data, params } = context;
   let fileName = null
-  if (!context.data.uniqueFileName) {
+
+  if (data.uniqueFileName) {
+    fileName = data.uniqueFileName;
+  } else if (context.id && !context.data.uniqueFileName) {
     const result = await context.service.get(context.id);
     fileName = result.uniqueFileName;
+  } else if (context.data.fileId) {
+    const file = await context.app.service('file').get(context.data.fileId);
+    fileName = file.currentVersion.uniqueFileName;
+  } else {
+    throw new BadRequest('Not able to find filename')
   }
   axios({
     method: 'post',
@@ -136,7 +145,7 @@ const startObjGeneration = async (context) => {
     },
     data: {
       id: context.id || context.result._id.toString(),
-      fileName: fileName || data.uniqueFileName,
+      fileName: fileName,
       command: 'CONFIGURE_MODEL',
       accessToken: params.authentication?.accessToken || params.accessToken,
       attributes: data.attributes || {},

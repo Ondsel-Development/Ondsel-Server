@@ -14,7 +14,7 @@ export const modelSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
     custFileName: Type.String(),
-    uniqueFileName: Type.Optional(Type.String()),
+    uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
     fileId: ObjectIdSchema(),
     file: Type.Ref(fileSchema),
     createdAt: Type.Number(),
