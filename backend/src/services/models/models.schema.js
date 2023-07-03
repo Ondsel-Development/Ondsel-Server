@@ -142,7 +142,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
+  ['_id', 'uniqueFileName', 'fileId', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
 )
 export const modelQuerySchema = Type.Intersect(
   [
