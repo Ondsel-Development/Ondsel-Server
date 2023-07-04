@@ -2,6 +2,7 @@
   <v-app-bar flat>
     <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
+    <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="ml-2 mr-n3"></v-img>
     <v-app-bar-title>
       ONDSEL
     </v-app-bar-title>
