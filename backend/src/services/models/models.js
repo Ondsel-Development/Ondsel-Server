@@ -45,6 +45,11 @@ export const model = (app) => {
     })
 
   })
+
+  app.service(modelPath).publish((data, context) => {
+    return app.channel(context.result.userId.toString())
+  })
+
   // Initialize hooks
   app.service(modelPath).hooks({
     around: {
