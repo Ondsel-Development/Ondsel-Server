@@ -91,6 +91,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'shouldStartObjGeneration',
   'isObjGenerationInProgress',
   'isObjGenerated',
+  'isThumbnailGenerated',
   'attributes',
   'errorMsg',
   'isSharedModel',
@@ -114,6 +115,9 @@ export const modelDataResolver = resolve({
     return modelSchema.properties.isObjGenerationInProgress.default
   },
   isObjGenerated: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return modelSchema.properties.isObjGenerated.default;
   },
   isSharedModel: async (_value, _message, context) => {
