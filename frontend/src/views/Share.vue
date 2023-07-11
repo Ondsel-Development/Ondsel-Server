@@ -83,6 +83,7 @@
     v-if="model"
     :is-active="isExportModelDialogActive"
     :shared-model="sharedModel"
+    :shared-model-sub-model="model"
     ref="exportModelDialog"
     @update-model="updateModel"
   />
