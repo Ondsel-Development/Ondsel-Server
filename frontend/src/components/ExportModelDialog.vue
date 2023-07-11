@@ -59,7 +59,8 @@ export default {
   props: {
     isActive: Boolean,
     model: Object,
-    sharedModel: Object
+    sharedModel: Object,
+    sharedModelSubModel: Object  // refs: sharedModel.model
   },
   data: () => ({
     dialog: false,
@@ -72,7 +73,7 @@ export default {
     ...mapGetters('auth', ['isAuthenticated']),
     mainModel: (vm) => {
       if (vm.sharedModel) {
-        return vm.sharedModel.model;
+        return vm.sharedModelSubModel;
       }
       return vm.model;
     },
