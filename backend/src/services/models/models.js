@@ -122,6 +122,13 @@ export const model = (app) => {
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
         ),
+        createSharedModelObject,
+      ],
+      patch: [
+        iff(
+          context => context.data.isObjGenerated || context.data.isThumbnailGenerated,
+          feedSystemGeneratedSharedModel,
+        ),
       ]
     },
     error: {
@@ -291,4 +298,101 @@ const checkoutToVersion = async (context) => {
 
   context.data = _.omit(context.data, lookUpAttributes);
   return context;
+}
+
+
+const createSharedModelObject = async (context) => {
+
+  if (context.result.isSharedModel) {
+    return context;
+  }
+
+  const sharedModelService = context.app.service('shared-models');
+  const fileService = context.app.service('file');
+  const uploadService = context.app.service('upload');
+
+  const originalFile = await fileService.get(context.result.fileId);
+
+  const file = await fileService.create({
+    shouldCommitNewVersion: true,
+    version: {
+      uniqueFileName: originalFile.currentVersion.uniqueFileName,
+    }
+  }, {
+    authentication: context.params.authentication,
+  })
+
+  const newModel = await context.service.create({
+    'custFileName': context.result.custFileName,
+    'fileId': file._id.toString(),
+    'shouldStartObjGeneration': false,
+    'isObjGenerationInProgress': false,
+    'isObjGenerated': context.result.isObjGenerated,
+    'errorMsg': context.result.errorMsg,
+    'attributes': context.result.attributes || {},
+    'isSharedModel': true,
+    'isSharedModelAnonymousType': true,
+  }, {
+    authentication: context.params.authentication,
+  });
+
+  const sharedModel = await sharedModelService.create({
+    cloneModelId: context.result._id.toString(),
+    dummyModelId: newModel._id.toString(),
+    description: 'System Generated',
+    isSystemGenerated: true,
+    canViewModel: true,
+    canViewModelAttributes: true,
+    canUpdateModel: false,
+    canExportFCStd: true,
+    canExportSTEP: true,
+    canExportSTL: true,
+    canExportOBJ: true,
+    canDownloadDefaultModel: true,
+  }, {
+    authentication: context.params.authentication,
+  })
+
+  console.log('SharedModel: ', sharedModel)
+
+  return context;
+}
+
+
+const feedSystemGeneratedSharedModel = async (context) => {
+
+  if (context.result.isSharedModel) {
+    console.log('\nreturn feedSystemGeneratedSharedModel issharedmode\n')
+    return context;
+  }
+  const uploadService = context.app.service('upload');
+  const result = await context.app.service('shared-models').find({
+    query: { isSystemGenerated: true, cloneModelId: context.id }
+  })
+  if (result.data.length) {
+    const systemGeneratedSharedModel = result.data[0];
+    const patchData = {};
+    if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
+      console.log('pushed obj file to sytem generated model: ', systemGeneratedSharedModel.model._id);
+      uploadService.copy(`${context.id.toString()}_generated.OBJ`, `${systemGeneratedSharedModel.model._id.toString()}_generated.OBJ`);
+      patchData['isObjGenerated'] = true;
+      patchData['attributes'] = context.result.attributes;
+
+    }
+    if (context.data.isThumbnailGenerated && !systemGeneratedSharedModel.model.isThumbnailGenerated) {
+      console.log('pushed png file to sytem generated model: ', systemGeneratedSharedModel.model._id);
+      uploadService.copy(`${context.id.toString()}_thumbnail.PNG`, `${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
+      patchData['isThumbnailGenerated'] = true;
+    }
+    if (Object.keys(patchData).length) {
+      console.log('before patch')
+      context.service.patch(
+        systemGeneratedSharedModel.model._id,
+        patchData,
+     )
+      console.log('after patch')
+    }
+  }
+  return context;
+
 }

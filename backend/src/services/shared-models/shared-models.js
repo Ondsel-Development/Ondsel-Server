@@ -90,7 +90,7 @@ export const sharedModels = (app) => {
       ],
       create: [
         iff(
-          context => context.data.cloneModelId,
+          context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,
         ),
         schemaHooks.validateData(sharedModelsDataValidator),
