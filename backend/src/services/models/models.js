@@ -385,14 +385,12 @@ const feedSystemGeneratedSharedModel = async (context) => {
       patchData['isThumbnailGenerated'] = true;
     }
     if (Object.keys(patchData).length) {
-      console.log('before patch')
-      context.service.patch(
-        systemGeneratedSharedModel.model._id,
-        patchData,
-     )
-      console.log('after patch')
+      context.app.service('shared-models').patch(
+        systemGeneratedSharedModel._id,
+        { model: patchData },
+        { authentication: context.params.authentication }
+      )
     }
   }
   return context;
-
 }

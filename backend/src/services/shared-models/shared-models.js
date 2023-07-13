@@ -43,6 +43,19 @@ export const sharedModels = (app) => {
       }
     })
   })
+
+  app.service(sharedModelsPath).publish('created', (data, context) => {
+    if (data.isSystemGenerated) {
+      return app.channel('authenticated').send(data);
+    }
+  })
+
+  app.service(sharedModelsPath).publish('patched', (data, context) => {
+    if (data.isSystemGenerated) {
+      return app.channel('authenticated').send(_.omit(data, 'model'));
+    }
+  })
+
   // Initialize hooks
   app.service(sharedModelsPath).hooks({
     around: {
@@ -181,6 +194,22 @@ const createClone = async (context) => {
 const patchModel = async (context) => {
   const { data, app } = context;
   const sharedModel = await context.service.get(context.id, { authentication: context.params.authentication });
+  const modelService = app.service('models');
+
+  const lookUpKeys = ['isObjGenerated', 'isThumbnailGenerated', 'attributes'];
+  if (
+    sharedModel.dummyModelId.equals(sharedModel.model._id) &&
+    sharedModel.userId.equals(context.params.user._id) &&
+    _.isEmpty(_.omit(data.model, lookUpKeys))
+  ) {
+    console.log('\n\npatching dummy model\n');
+    await modelService.patch(
+      sharedModel.model._id.toString(),
+      data.model,
+    );
+    context.data = _.omit(data, 'model');
+    return context;
+  }
 
   if (sharedModel.dummyModelId.equals(sharedModel.model._id)) {
     throw new BadRequest('Before patching to model, first create a instance');
@@ -190,7 +219,6 @@ const patchModel = async (context) => {
     throw new BadRequest('Field `canUpdateModel` must be true');
   }
 
-  const modelService = app.service('models');
   if (data.model.shouldStartObjGeneration && data.model.attributes) {
     await modelService.patch(
       sharedModel.model._id.toString(),

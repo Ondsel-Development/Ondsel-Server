@@ -67,6 +67,13 @@ export const sharedModelsResolver = resolve({
       }
     }
   }),
+  thumbnailUrl: virtual(async (message, context) => {
+    if (message.dummyModelId) {
+      const model = await context.app.service('models').get(message.dummyModelId, { query: { isSharedModel: true }, authentication: context.params.authentication });
+      return model.thumbnailUrl
+    }
+    return '';
+  }),
 })
 
 export const sharedModelsExternalResolver = resolve({})
@@ -170,7 +177,7 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt'])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),
