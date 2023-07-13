@@ -122,7 +122,10 @@ export const model = (app) => {
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
         ),
-        createSharedModelObject,
+        iff(
+          context => !context.params.skipSystemGeneratedSharedModel,
+          createSharedModelObject,
+        ),
       ],
       patch: [
         iff(
