@@ -13,7 +13,7 @@
       <v-icon>mdi-file-export</v-icon>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer"/>
+  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -159,7 +159,37 @@ export default {
       this.sharedModel.model.attributes = this.model.attributes;
 
       this.sharedModel = await this.sharedModel.save();
-    }
+    },
+    async uploadThumbnail() {
+
+      if (this.sharedModel.thumbnailUrl) {
+        return
+      }
+      const modelId = this.sharedModel.dummyModelId;
+      const model = await Model.get(modelId, { query: { isSharedModel: true }});
+
+      try {
+        this.$nextTick(async () => {
+          const canvas = document.getElementsByTagName('canvas')[0];
+          const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+          const fd = new FormData();
+          fd.append('file', image, `${modelId}_thumbnail.PNG`);
+          const uploadUrl = `${import.meta.env.VITE_APP_API_URL}upload`;
+
+          await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+              Authorization: this.accessToken,
+            },
+            body: fd,
+          });
+          await model.patch({ data: {isThumbnailGenerated: true}, query: { isSharedModel: true }});
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
   watch: {
     async 'model.isObjGenerated'(v) {
