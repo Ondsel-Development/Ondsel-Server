@@ -10,6 +10,7 @@
 <!--          append-icon="mdi-magnify"-->
 <!--        />-->
 <!--      </v-col>-->
+      <div class="text-h5">My Models</div>
       <v-spacer />
       <v-col cols="3" class="text-right">
 <!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
