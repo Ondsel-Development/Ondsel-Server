@@ -128,6 +128,7 @@ export const sharedModels = (app) => {
             'canExportOBJ',
             'dummyModelId',
             'isActive',
+            'thumbnailUrl'
           )
         ),
 

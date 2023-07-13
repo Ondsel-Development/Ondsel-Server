@@ -24,8 +24,6 @@
           class="mx-auto"
           max-width="344"
         >
-          {{ sharedModel.dummyModelId }}
-          {{ sharedModel.model._id }}
           <template v-if="sharedModel.thumbnailUrl">
             <v-img
               :src="sharedModel.thumbnailUrl"
@@ -84,21 +82,6 @@
                 >
                 </v-skeleton-loader>
               </v-col>
-
-              <v-col cols='2'>
-                <v-skeleton-loader
-                  type="button" width="65px" class=""
-                >
-                </v-skeleton-loader>
-              </v-col>
-
-              <v-col cols='2'>
-              <v-skeleton-loader
-                type="button" width="65px" class="ml-n2"
-              >
-              </v-skeleton-loader>
-              </v-col>
-
             </v-row>
           </v-card>
 

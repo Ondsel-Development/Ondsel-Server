@@ -27,7 +27,7 @@ export const sharedModelsSchema = Type.Object(
     canExportOBJ: Type.Boolean({default: false}),
     canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
-    isSystemGenerated: Type.Boolean({default: false}),
+    isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
 
