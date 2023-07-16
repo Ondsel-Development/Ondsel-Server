@@ -166,7 +166,6 @@ export default {
         return
       }
       const modelId = this.sharedModel.dummyModelId;
-      const model = await Model.get(modelId, { query: { isSharedModel: true }});
 
       try {
         this.$nextTick(async () => {
@@ -184,7 +183,14 @@ export default {
             },
             body: fd,
           });
-          await model.patch({ data: {isThumbnailGenerated: true}, query: { isSharedModel: true }});
+          await this.sharedModel.patch({
+            data: {
+              model: {
+                _id: this.sharedModel.dummyModelId,
+                isThumbnailGenerated: true,
+              }
+            }
+          })
         });
       } catch (e) {
         console.error(e);

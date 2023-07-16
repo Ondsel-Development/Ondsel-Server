@@ -197,16 +197,17 @@ const patchModel = async (context) => {
   const sharedModel = await context.service.get(context.id, { authentication: context.params.authentication });
   const modelService = app.service('models');
 
-  const lookUpKeys = ['isObjGenerated', 'isThumbnailGenerated', 'attributes'];
+  const lookUpKeys = ['isObjGenerated', 'isThumbnailGenerated', 'attributes', '_id'];
   if (
-    sharedModel.dummyModelId.equals(sharedModel.model._id) &&
-    sharedModel.userId.equals(context.params.user._id) &&
+    (
+      sharedModel.dummyModelId.equals(data.model._id) ||
+      sharedModel.dummyModelId.equals(sharedModel.model._id)
+    ) &&
     _.isEmpty(_.omit(data.model, lookUpKeys))
   ) {
-    console.log('\n\npatching dummy model\n');
     await modelService.patch(
-      sharedModel.model._id.toString(),
-      data.model,
+      data.model._id || sharedModel.model._id.toString(),
+      _.omit(data.model, '_id'),
     );
     context.data = _.omit(data, 'model');
     return context;

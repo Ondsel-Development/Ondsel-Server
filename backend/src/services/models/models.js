@@ -312,7 +312,6 @@ const createSharedModelObject = async (context) => {
 
   const sharedModelService = context.app.service('shared-models');
   const fileService = context.app.service('file');
-  const uploadService = context.app.service('upload');
 
   const originalFile = await fileService.get(context.result.fileId);
 
@@ -356,8 +355,6 @@ const createSharedModelObject = async (context) => {
     authentication: context.params.authentication,
   })
 
-  console.log('SharedModel: ', sharedModel)
-
   return context;
 }
 
@@ -365,7 +362,6 @@ const createSharedModelObject = async (context) => {
 const feedSystemGeneratedSharedModel = async (context) => {
 
   if (context.result.isSharedModel) {
-    console.log('\nreturn feedSystemGeneratedSharedModel issharedmode\n')
     return context;
   }
   const uploadService = context.app.service('upload');
@@ -376,14 +372,12 @@ const feedSystemGeneratedSharedModel = async (context) => {
     const systemGeneratedSharedModel = result.data[0];
     const patchData = {};
     if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
-      console.log('pushed obj file to sytem generated model: ', systemGeneratedSharedModel.model._id);
       uploadService.copy(`${context.id.toString()}_generated.OBJ`, `${systemGeneratedSharedModel.model._id.toString()}_generated.OBJ`);
       patchData['isObjGenerated'] = true;
       patchData['attributes'] = context.result.attributes;
 
     }
     if (context.data.isThumbnailGenerated && !systemGeneratedSharedModel.model.isThumbnailGenerated) {
-      console.log('pushed png file to sytem generated model: ', systemGeneratedSharedModel.model._id);
       uploadService.copy(`${context.id.toString()}_thumbnail.PNG`, `${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
       patchData['isThumbnailGenerated'] = true;
     }
