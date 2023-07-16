@@ -50,6 +50,12 @@ export const sharedModels = (app) => {
     }
   })
 
+  app.service(sharedModelsPath).publish('removed', (data, context) => {
+    if (data.isSystemGenerated) {
+      return app.channel('authenticated').send(data);
+    }
+  })
+
   app.service(sharedModelsPath).publish('patched', (data, context) => {
     if (data.isSystemGenerated) {
       return app.channel('authenticated').send(_.omit(data, 'model'));
