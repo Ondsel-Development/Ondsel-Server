@@ -325,15 +325,15 @@ const createSharedModelObject = async (context) => {
   })
 
   const newModel = await context.service.create({
-    'custFileName': context.result.custFileName,
-    'fileId': file._id.toString(),
-    'shouldStartObjGeneration': false,
-    'isObjGenerationInProgress': false,
-    'isObjGenerated': context.result.isObjGenerated,
-    'errorMsg': context.result.errorMsg,
-    'attributes': context.result.attributes || {},
-    'isSharedModel': true,
-    'isSharedModelAnonymousType': true,
+    custFileName: context.result.custFileName,
+    fileId: file._id.toString(),
+    shouldStartObjGeneration: false,
+    isObjGenerationInProgress: false,
+    isObjGenerated: context.result.isObjGenerated,
+    errorMsg: context.result.errorMsg,
+    attributes: context.result.attributes || {},
+    isSharedModel: true,
+    isSharedModelAnonymousType: true,
   }, {
     authentication: context.params.authentication,
   });
