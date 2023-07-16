@@ -65,8 +65,8 @@ export const model = (app) => {
           deletedQuery: async context => {
             if ( context.method === 'remove') {
               const sharedModelService = context.app.service('shared-models');
-              const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id }})
-              for (const sharedModel of sharedModels.data) {
+              const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id, '$paginate': false }})
+              for (const sharedModel of sharedModels) {
                 await sharedModelService.remove(sharedModel._id);
               }
             }
