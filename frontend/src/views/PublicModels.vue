@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import MangeSharedModels from '@/components/MangeSharedModels';
@@ -136,7 +136,6 @@ export default {
     sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
   },
   methods: {
-    ...mapMutations('shared-models', ['clearAll']),
     async fetchModels() {
       if (this.sharedModels.data.length !== this.pagination.total) {
         const models = await SharedModel.find({
@@ -153,12 +152,6 @@ export default {
         this.pagination.skip = models.skip + this.pagination.limit;
         this.pagination.total = models.total;
       }
-    },
-    async showRecent() {
-      this.pagination.skip = 0;
-      this.pagination.total = null;
-      await this.clearAll();
-      await this.fetchModels();
     },
     dateFormat(number) {
       const date = new Date(number);
