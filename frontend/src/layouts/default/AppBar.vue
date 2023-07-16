@@ -69,10 +69,10 @@
       temporary
     >
       <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" value="models" :to="{ name: 'Models'}"></v-list-item>
+        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models'}"></v-list-item>
       </v-list>
       <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" value="public-models" :to="{ name: 'PublicModels'}"></v-list-item>
+        <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 </template>
