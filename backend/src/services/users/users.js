@@ -126,7 +126,7 @@ const createSampleModels = async (context) => {
       attributes: attributes,
       isObjGenerated: true,
       isThumbnailGenerated: true,
-    }, { user: { _id: context.result._id }})
+    }, { user: { _id: context.result._id }, skipSystemGeneratedSharedModel: true })
 
     await uploadService.copy(sampleModelThumbnail, sampleModelThumbnail.replace('ondsel', model._id.toString()));
     await uploadService.copy(sampleModelObj, sampleModelObj.replace('ondsel', model._id.toString()));

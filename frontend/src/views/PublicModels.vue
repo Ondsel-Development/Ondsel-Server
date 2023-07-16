@@ -1,19 +1,9 @@
 <template>
   <v-container>
     <v-row class="pl-4 pr-4">
-<!--      <v-col cols="6">-->
-<!--        <v-text-field-->
-<!--          v-model="search"-->
-<!--          outlined-->
-<!--          hide-details-->
-<!--          placeholder="Search (by name)"-->
-<!--          append-icon="mdi-magnify"-->
-<!--        />-->
-<!--      </v-col>-->
-      <div class="text-h5">My Models</div>
+      <div class="text-h5">Public Models</div>
       <v-spacer />
       <v-col cols="3" class="text-right">
-<!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
         <v-btn
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
@@ -26,17 +16,17 @@
     <br>
     <v-row dense>
       <v-col
-        v-for="(model, i) in myModels.data"
-        :key="model._id"
+        v-for="(sharedModel, i) in sharedModels.data"
+        :key="sharedModel._id"
         cols="4"
       >
         <v-card
           class="mx-auto"
           max-width="344"
         >
-          <template v-if="model.thumbnailUrl">
+          <template v-if="sharedModel.thumbnailUrl">
             <v-img
-              :src="model.thumbnailUrl"
+              :src="sharedModel.thumbnailUrl"
               height="200px"
               cover
             ></v-img>
@@ -47,39 +37,30 @@
               height="200px"
               class="d-flex justify-center align-center"
             >
-              <span style="color: #8D8D8D">?</span>
+              <span style="color: #8D8D8D">?</span><br>
             </v-sheet>
           </template>
 
           <v-card-title>
-            {{ model.custFileName }}
+            {{ sharedModel.model.custFileName }}
           </v-card-title>
 
           <v-card-subtitle>
-            {{ dateFormat(model.createdAt) }}
+            {{ dateFormat(sharedModel.createdAt) }}
           </v-card-subtitle>
 
           <v-card-actions>
             <v-btn
               color="orange-lighten-2"
               variant="text"
-              :to="{ name: 'Home', params: { id: model._id } }"
+              :to="{ name: 'Share', params: { id: sharedModel._id } }"
             >
               Explore
             </v-btn>
-
-            <v-spacer></v-spacer>
-            <DeleteDialog :model="model" @delete-model="deleteModel" />
-            <v-btn
-              icon="mdi-format-list-checks"
-              density="comfortable"
-              @click.stop="sharedModelDrawerClicked(model)"
-            ></v-btn>
-
           </v-card-actions>
         </v-card>
       </v-col>
-      <template v-if="myModels.data.length === 0 && isFindPending">
+      <template v-if="sharedModels.data.length === 0 && isFindPending">
         <v-col
           v-for="i in 9"
           :key="i"
@@ -101,21 +82,6 @@
                 >
                 </v-skeleton-loader>
               </v-col>
-
-              <v-col cols='2'>
-                <v-skeleton-loader
-                  type="button" width="65px" class=""
-                >
-                </v-skeleton-loader>
-              </v-col>
-
-              <v-col cols='2'>
-              <v-skeleton-loader
-                type="button" width="65px" class="ml-n2"
-              >
-              </v-skeleton-loader>
-              </v-col>
-
             </v-row>
           </v-card>
 
@@ -124,28 +90,19 @@
     </v-row>
     <br>
     <v-row dense class="justify-center">
-      <template v-if="myModels.data.length && isFindPending">
+      <template v-if="sharedModels.data.length && isFindPending">
         <v-progress-circular indeterminate></v-progress-circular>
       </template>
-      <template v-if="myModels.data.length === this.pagination.total">
+      <template v-if="sharedModels.data.length === this.pagination.total">
         <div class="text-grey-darken-1">You reached at the end!</div>
       </template>
     </v-row>
   </v-container>
 
-  <v-navigation-drawer
-    v-model="manageSharedModelsDrawer"
-    location="right"
-    width="1100"
-    temporary
-  >
-    <MangeSharedModels :model="activeModel"/>
-  </v-navigation-drawer>
-
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import MangeSharedModels from '@/components/MangeSharedModels';
@@ -154,18 +111,15 @@ import DeleteDialog from '@/components/DeleteDialog.vue';
 const { Model, SharedModel } = models.api;
 
 export default {
-  name: 'Models',
+  name: 'PublicModels',
   components: { MangeSharedModels, DeleteDialog },
   data: () => ({
-    search: '',
     showRecentModels: true,
     pagination: {
       limit: 12,
       skip: 0,
       total: null,
     },
-    manageSharedModelsDrawer: false,
-    activeModel: null,
   }),
   async created() {
   },
@@ -178,51 +132,30 @@ export default {
     });
   },
   computed: {
-    ...mapState('models', ['isFindPending']),
-    myModels: () => Model.findInStore({ query: { isSharedModel: false }})
+    ...mapState('shared-models', ['isFindPending']),
+    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
   },
   methods: {
-    ...mapMutations('models', ['clearAll']),
     async fetchModels() {
-      // const models = await Model.find({query: {}, pipelines: [{custFileName: { $regex: 'c3dfe466', $options: 'igm' }}]})
-      if (this.myModels.data.length !== this.pagination.total) {
-        const models = await Model.find({
+      if (this.sharedModels.data.length !== this.pagination.total) {
+        const models = await SharedModel.find({
           query: {
             $limit: this.pagination.limit,
             $skip: this.pagination.skip,
-            isSharedModel: false,
             $sort: {
-              // createdAt: this.showRecentModels? 1 : -1,
               createdAt: -1,
-            }
+            },
+            isSystemGenerated: true,
+            isActive: true,
           }
         });
         this.pagination.skip = models.skip + this.pagination.limit;
         this.pagination.total = models.total;
       }
     },
-    async showRecent() {
-      this.pagination.skip = 0;
-      this.pagination.total = null;
-      await this.clearAll();
-      await this.fetchModels();
-    },
     dateFormat(number) {
       const date = new Date(number);
       return date.toDateString();
-    },
-    async sharedModelDrawerClicked(model) {
-      this.activeModel = model;
-      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
-      await SharedModel.find({
-        query: {
-          cloneModelId: model._id,
-          $paginate: false
-        },
-      })
-    },
-    async deleteModel(model) {
-      await Model.remove(model._id)
     },
   }
 }

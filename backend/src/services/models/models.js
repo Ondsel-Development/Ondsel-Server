@@ -65,8 +65,8 @@ export const model = (app) => {
           deletedQuery: async context => {
             if ( context.method === 'remove') {
               const sharedModelService = context.app.service('shared-models');
-              const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id }})
-              for (const sharedModel of sharedModels.data) {
+              const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id, '$paginate': false }})
+              for (const sharedModel of sharedModels) {
                 await sharedModelService.remove(sharedModel._id);
               }
             }
@@ -121,6 +121,16 @@ export const model = (app) => {
         iff(
           context => context.data.shouldStartObjGeneration,
           startObjGeneration,
+        ),
+        iff(
+          context => !context.params.skipSystemGeneratedSharedModel,
+          createSharedModelObject,
+        ),
+      ],
+      patch: [
+        iff(
+          context => context.data.isObjGenerated || context.data.isThumbnailGenerated,
+          feedSystemGeneratedSharedModel,
         ),
       ]
     },
@@ -290,5 +300,94 @@ const checkoutToVersion = async (context) => {
   }
 
   context.data = _.omit(context.data, lookUpAttributes);
+  return context;
+}
+
+
+const createSharedModelObject = async (context) => {
+
+  if (context.result.isSharedModel) {
+    return context;
+  }
+
+  const sharedModelService = context.app.service('shared-models');
+  const fileService = context.app.service('file');
+
+  const originalFile = await fileService.get(context.result.fileId);
+
+  const file = await fileService.create({
+    shouldCommitNewVersion: true,
+    version: {
+      uniqueFileName: originalFile.currentVersion.uniqueFileName,
+    }
+  }, {
+    authentication: context.params.authentication,
+  })
+
+  const newModel = await context.service.create({
+    custFileName: context.result.custFileName,
+    fileId: file._id.toString(),
+    shouldStartObjGeneration: false,
+    isObjGenerationInProgress: false,
+    isObjGenerated: context.result.isObjGenerated,
+    errorMsg: context.result.errorMsg,
+    attributes: context.result.attributes || {},
+    isSharedModel: true,
+    isSharedModelAnonymousType: true,
+  }, {
+    authentication: context.params.authentication,
+  });
+
+  const sharedModel = await sharedModelService.create({
+    cloneModelId: context.result._id.toString(),
+    dummyModelId: newModel._id.toString(),
+    description: 'System Generated',
+    isSystemGenerated: true,
+    canViewModel: true,
+    canViewModelAttributes: true,
+    canUpdateModel: false,
+    canExportFCStd: false,
+    canExportSTEP: false,
+    canExportSTL: false,
+    canExportOBJ: false,
+    canDownloadDefaultModel: true,
+  }, {
+    authentication: context.params.authentication,
+  })
+
+  return context;
+}
+
+
+const feedSystemGeneratedSharedModel = async (context) => {
+
+  if (context.result.isSharedModel) {
+    return context;
+  }
+  const uploadService = context.app.service('upload');
+  const result = await context.app.service('shared-models').find({
+    query: { isSystemGenerated: true, cloneModelId: context.id }
+  })
+  if (result.data.length) {
+    const systemGeneratedSharedModel = result.data[0];
+    const patchData = {};
+    if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
+      uploadService.copy(`${context.id.toString()}_generated.OBJ`, `${systemGeneratedSharedModel.model._id.toString()}_generated.OBJ`);
+      patchData['isObjGenerated'] = true;
+      patchData['attributes'] = context.result.attributes;
+
+    }
+    if (context.data.isThumbnailGenerated && !systemGeneratedSharedModel.model.isThumbnailGenerated) {
+      uploadService.copy(`${context.id.toString()}_thumbnail.PNG`, `${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
+      patchData['isThumbnailGenerated'] = true;
+    }
+    if (Object.keys(patchData).length) {
+      context.app.service('shared-models').patch(
+        systemGeneratedSharedModel._id,
+        { model: patchData },
+        { authentication: context.params.authentication }
+      )
+    }
+  }
   return context;
 }

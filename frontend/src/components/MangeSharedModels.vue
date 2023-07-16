@@ -26,7 +26,7 @@
           {{ (item.raw._id) }}
           <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
           <v-btn end variant="plain" icon="mdi-content-copy" @click.stop="copyToClipboard(item.raw._id, sharedModelUrl(item.raw._id))"></v-btn>
-          <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)"></v-btn>
+          <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)" :disabled="item.raw.isSystemGenerated"></v-btn>
         </v-chip>
       </v-row>
     </template>
@@ -39,6 +39,7 @@
         v-model="item.raw.description"
         variant="plain"
         append-inner-icon="mdi-check"
+        :disabled="item.raw.isSystemGenerated"
         :rules="[
           v => !!v || 'Description is required',
           v => (v && v.length <= 20) || 'Description must be less than 20 characters'
