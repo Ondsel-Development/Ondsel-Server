@@ -22,6 +22,17 @@
     >
       <div>
         <v-card class="mx-auto" min-width="600">
+          <v-card-item>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-if="error === 'NotFound'"
+            >
+              <span>Oops! The share link you're looking for could not be found.</span>
+            </v-alert>
+          </v-card-item>
           <v-card-item v-if="model">
             <v-alert
               v-if="!sharedModel.canViewModel"
@@ -111,11 +122,16 @@ export default {
     isAttributeViewerActive: false,
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
+    error: '',
   }),
   async created() {
     const shareModelId = this.$route.params.id;
     if (shareModelId) {
-      this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+      try {
+        this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+      } catch (error) {
+        this.error = 'NotFound';
+      }
 
       if (this.isAuthenticated) {
         if (
