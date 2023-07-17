@@ -8,6 +8,7 @@ import Login from '@/views/Login';
 import Share from '@/views/Share';
 import Models from '@/views/Models';
 import PageNotFound from '@/views/PageNotFound';
+import PublicModels from '@/views/PublicModels';
 
 
 const routes = [
@@ -21,6 +22,12 @@ const routes = [
     path: '/',
     component: Models,
     name: 'Models',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/public-models',
+    component: PublicModels,
+    name: 'PublicModels',
     meta: { requiresAuth: true },
   },
   {

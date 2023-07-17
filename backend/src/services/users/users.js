@@ -60,10 +60,79 @@ export const user = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [createSampleModels],
     },
     error: {
       all: []
     }
   })
+}
+
+
+const createSampleModels = async (context) => {
+  const sampleModelFileName = 'ondsel.FCStd';
+  const sampleModelObj = 'ondsel_generated.OBJ';
+  const sampleModelThumbnail = 'ondsel_thumbnail.PNG';
+  const attributes = {
+    "Fillet1": {
+      "type": "length",
+      "value": 20,
+      "unit": "mm"
+    },
+    "Fillet2": {
+      "type": "length",
+      "value": 5,
+      "unit": "mm"
+    },
+    "NumberOfCircles": {
+      "type": "number",
+      "value": 2,
+      "unit": ""
+    },
+    "RadialDistance": {
+      "type": "length",
+      "value": 1000,
+      "unit": "mm"
+    },
+    "TangentialDistance": {
+      "type": "length",
+      "value": 1000,
+      "unit": "mm"
+    },
+    "Thickness": {
+      "type": "length",
+      "value": 80,
+      "unit": "mm"
+    }
+  }
+
+  const { app } = context;
+  const modelService = app.service('models');
+  const fileService = app.service('file');
+  const uploadService = app.service('upload');
+
+  try {
+    const file = await fileService.create({
+      shouldCommitNewVersion: true,
+      version: {
+        uniqueFileName: sampleModelFileName,
+      }
+    }, { user: { _id: context.result._id }})
+
+    const model  = await modelService.create({
+      custFileName: 'Ondsel.FCStd',
+      fileId: file._id.toString(),
+      attributes: attributes,
+      isObjGenerated: true,
+      isThumbnailGenerated: true,
+    }, { user: { _id: context.result._id }, skipSystemGeneratedSharedModel: true })
+
+    await uploadService.copy(sampleModelThumbnail, sampleModelThumbnail.replace('ondsel', model._id.toString()));
+    await uploadService.copy(sampleModelObj, sampleModelObj.replace('ondsel', model._id.toString()));
+  } catch (e) {
+    console.error(e);
+  }
+
+  return context
 }

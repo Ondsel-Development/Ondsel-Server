@@ -29,7 +29,7 @@
           border="top"
           class="text-left"
         >
-          Need to Login to update model.
+          Please log in to customize the model.
         </v-alert>
         <br>
 

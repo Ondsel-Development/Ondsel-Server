@@ -4,6 +4,7 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSchema } from '../users/users.schema.js'
+import { fileSchema } from '../file/file.schema.js';
 
 
 // Main data model schema
@@ -13,9 +14,12 @@ export const modelSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
     custFileName: Type.String(),
-    uniqueFileName: Type.String(),
+    uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
+    fileId: ObjectIdSchema(),
+    file: Type.Ref(fileSchema),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    fileUpdatedAt: Type.Optional(Type.Number()),
     isObjGenerationInProgress: Type.Optional(Type.Boolean({default: false})),
     isObjGenerated: Type.Optional(Type.Boolean({default: false})),
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
@@ -32,6 +36,8 @@ export const modelSchema = Type.Object(
 
     sharedModelId: Type.Optional(Type.String({ objectid: true })),
     isSharedModelAnonymousType: Type.Optional(Type.Boolean({default: false})),
+    // Soft delete
+    deleted: Type.Optional(Type.Boolean()),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -59,6 +65,21 @@ export const modelResolver = resolve({
     }
     return '';
   }),
+  file: virtual(async (message, context) => {
+    const { app } = context;
+    const fileService = app.service('file');
+    if (message.fileId) {
+      return await fileService.get(message.fileId);
+    }
+  }),
+  uniqueFileName: virtual(async(message, context ) => {
+    if (message.uniqueFileName) {
+      return message.uniqueFileName
+    } else if (message.fileId) {
+      const file = await context.app.service('file').get(message.fileId);
+      return file.currentVersion.uniqueFileName;
+    }
+  }),
 })
 
 export const modelExternalResolver = resolve({})
@@ -70,11 +91,14 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'shouldStartObjGeneration',
   'isObjGenerationInProgress',
   'isObjGenerated',
+  'isThumbnailGenerated',
   'attributes',
   'errorMsg',
   'isSharedModel',
   'sharedModelId',
   'isSharedModelAnonymousType',
+  'fileUpdatedAt',
+  'fileId',
 ], {
   $id: 'ModelData'
 })
@@ -91,6 +115,9 @@ export const modelDataResolver = resolve({
     return modelSchema.properties.isObjGenerationInProgress.default
   },
   isObjGenerated: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
     return modelSchema.properties.isObjGenerated.default;
   },
   isSharedModel: async (_value, _message, context) => {
@@ -119,7 +146,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType']
+  ['_id', 'uniqueFileName', 'fileId', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
 )
 export const modelQuerySchema = Type.Intersect(
   [

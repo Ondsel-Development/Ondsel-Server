@@ -13,7 +13,7 @@
       <v-icon>mdi-file-export</v-icon>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer"/>
+  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -22,6 +22,17 @@
     >
       <div>
         <v-card class="mx-auto" min-width="600">
+          <v-card-item>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-if="error === 'NotFound'"
+            >
+              <span>Oops! The share link you're looking for could not be found.</span>
+            </v-alert>
+          </v-card-item>
           <v-card-item v-if="model">
             <v-alert
               v-if="!sharedModel.canViewModel"
@@ -83,6 +94,7 @@
     v-if="model"
     :is-active="isExportModelDialogActive"
     :shared-model="sharedModel"
+    :shared-model-sub-model="model"
     ref="exportModelDialog"
     @update-model="updateModel"
   />
@@ -110,11 +122,16 @@ export default {
     isAttributeViewerActive: false,
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
+    error: '',
   }),
   async created() {
     const shareModelId = this.$route.params.id;
     if (shareModelId) {
-      this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+      try {
+        this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+      } catch (error) {
+        this.error = 'NotFound';
+      }
 
       if (this.isAuthenticated) {
         if (
@@ -158,7 +175,43 @@ export default {
       this.sharedModel.model.attributes = this.model.attributes;
 
       this.sharedModel = await this.sharedModel.save();
-    }
+    },
+    async uploadThumbnail() {
+
+      if (this.sharedModel.thumbnailUrl) {
+        return
+      }
+      const modelId = this.sharedModel.dummyModelId;
+
+      try {
+        this.$nextTick(async () => {
+          const canvas = document.getElementsByTagName('canvas')[0];
+          const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+          const fd = new FormData();
+          fd.append('file', image, `${modelId}_thumbnail.PNG`);
+          const uploadUrl = `${import.meta.env.VITE_APP_API_URL}upload`;
+
+          await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+              Authorization: this.accessToken,
+            },
+            body: fd,
+          });
+          await this.sharedModel.patch({
+            data: {
+              model: {
+                _id: this.sharedModel.dummyModelId,
+                isThumbnailGenerated: true,
+              }
+            }
+          })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
   watch: {
     async 'model.isObjGenerated'(v) {

@@ -25,6 +25,17 @@
     >
       <div ref="dropzone">
         <v-card class="mx-auto" min-width="600">
+          <v-card-item>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-if="error === 'NotFound'"
+            >
+              <span>Oops! The model you're looking for could not be found.</span>
+            </v-alert>
+          </v-card-item>
           <v-card-item v-if="model">
             <v-card
               class="mx-auto"
@@ -121,6 +132,7 @@ export default {
     isShareModelDialogActive: false,
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
+    error: '',
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -128,8 +140,12 @@ export default {
   async created() {
     const modelId = this.$route.params.id;
     if (modelId) {
-      this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
-      if (!this.model.objUrl) {
+      try {
+        this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
+      } catch (error) {
+        this.error = 'NotFound';
+      }
+      if (this.model && !this.model.objUrl) {
         await this.model.patch({
           data: {
             shouldStartObjGeneration: true,

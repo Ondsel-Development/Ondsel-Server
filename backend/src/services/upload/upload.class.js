@@ -3,7 +3,7 @@ import Store from 's3-blob-store'
 import BlobService from 'feathers-blob'
 import multer from 'multer'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { GetObjectCommand, S3Client, HeadObjectCommand } from '@aws-sdk/client-s3'
+import { GetObjectCommand, S3Client, HeadObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
 import { BadRequest } from '@feathersjs/errors'
 
 const customerFileNameRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:fcstd|obj)$/i;
@@ -64,7 +64,7 @@ class UploadService {
     if (isFileExist) {
       url = await this.getSignedFileUrl(id, bucketName, 3600);
     }
-    return {url: url};
+    return { url: url };
   }
 
   async create(data, params) {
@@ -91,6 +91,28 @@ class UploadService {
 
   async remove(id, _params) {
     return await this.blobService.remove(id, _params)
+  }
+
+  async copy(sourceKey, destinationKey, _params) {
+    const bucketName = this.options.app.get('awsClientModelBucket');
+    const isDestinationFileExist = await this.checkFileExists(bucketName, destinationKey);
+    if (isDestinationFileExist) {
+      throw new BadRequest(`File (${destinationKey})  already exists!`);
+    }
+
+    const isSourceFileExist = await this.checkFileExists(bucketName, sourceKey);
+    if (!isSourceFileExist) {
+      throw new BadRequest(`File (${sourceKey})  already exists!`);
+    }
+
+    // Create a copy operation using the CopyObjectCommand
+    const copyCommand = new CopyObjectCommand({
+      CopySource: `/${bucketName}/${sourceKey}`,
+      Bucket: bucketName,
+      Key: destinationKey,
+    });
+
+    return await this.s3Client.send(copyCommand);
   }
 }
 

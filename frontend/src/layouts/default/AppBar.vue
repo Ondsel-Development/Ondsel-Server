@@ -2,6 +2,7 @@
   <v-app-bar flat>
     <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
+    <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="ml-2 mr-n3"></v-img>
     <v-app-bar-title>
       ONDSEL
     </v-app-bar-title>
@@ -68,7 +69,10 @@
       temporary
     >
       <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" value="models" :to="{ name: 'Models'}"></v-list-item>
+        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models'}"></v-list-item>
+      </v-list>
+      <v-list density="compact" nav>
+        <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 </template>
