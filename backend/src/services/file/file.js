@@ -66,7 +66,7 @@ export const file = (app) => {
         schemaHooks.resolveQuery(fileQueryResolver),
       ],
       find: [
-        schemaHooks.validateQuery(fileQueryValidator),  // validateQuery important to run $exists command
+        schemaHooks.validateQuery(fileQueryValidator),  // if not validate then $exists operator raise exception
       ],
       get: [],
       create: [
