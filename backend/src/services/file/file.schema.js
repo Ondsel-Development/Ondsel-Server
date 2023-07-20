@@ -23,6 +23,7 @@ export const fileSchema = Type.Object(
     currentVersionId: ObjectIdSchema(),
     userId: ObjectIdSchema(),
     modelId: Type.Optional(ObjectIdSchema()),
+    isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema)
@@ -42,7 +43,7 @@ export const fileResolver = resolve({
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
@@ -52,6 +53,12 @@ export const fileDataResolver = resolve({
   userId: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
+  },
+  isSystemGenerated: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return fileSchema.properties.isSystemGenerated.default
   },
 })
 
@@ -65,7 +72,7 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'versions', 'currentVersionId', 'modelId'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'versions', 'currentVersionId', 'modelId', 'isSystemGenerated'])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {
@@ -81,7 +88,7 @@ export const fileQuerySchema = Type.Intersect(
 export const fileQueryValidator = getValidator(fileQuerySchema, queryValidator)
 export const fileQueryResolver = resolve({
   userId: async (value, user, context) => {
-    if (context.method === 'find') {
+    if (context.method === 'find' || context.method === 'remove') {
       return context.params.user._id;
     }
     return value
