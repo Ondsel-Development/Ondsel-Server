@@ -7,7 +7,6 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { limitToUser } from '../../utils/hooks.utils.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -63,9 +62,12 @@ export const file = (app) => {
             delete context.params.query.$paginate;
           }
         ),
-        schemaHooks.validateQuery(fileQueryValidator), schemaHooks.resolveQuery(fileQueryResolver),
+        schemaHooks.validateQuery(fileQueryValidator),
+        schemaHooks.resolveQuery(fileQueryResolver),
       ],
-      find: [limitToUser],
+      find: [
+        schemaHooks.validateQuery(fileQueryValidator),  // validateQuery important to run $exists command
+      ],
       get: [],
       create: [
         iff(
@@ -92,7 +94,7 @@ export const file = (app) => {
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
-      remove: [limitToUser]
+      remove: []
     },
     after: {
       all: []

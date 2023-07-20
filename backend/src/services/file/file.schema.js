@@ -69,7 +69,7 @@ export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'vers
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {
-      currentVersionId: {
+      modelId: {
         $exists: Type.Boolean(),
       },
     }),
@@ -79,4 +79,11 @@ export const fileQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const fileQueryValidator = getValidator(fileQuerySchema, queryValidator)
-export const fileQueryResolver = resolve({})
+export const fileQueryResolver = resolve({
+  userId: async (value, user, context) => {
+    if (context.method === 'find') {
+      return context.params.user._id;
+    }
+    return value
+  },
+})
