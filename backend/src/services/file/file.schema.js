@@ -21,6 +21,9 @@ export const fileSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     currentVersionId: ObjectIdSchema(),
+    userId: ObjectIdSchema(),
+    modelId: Type.Optional(ObjectIdSchema()),
+    isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema)
@@ -31,20 +34,32 @@ export const fileSchema = Type.Object(
 export const fileValidator = getValidator(fileSchema, dataValidator)
 export const fileResolver = resolve({
   currentVersion: virtual(async(message, context) => {
-    return message.versions.find(version => version._id.equals(message.currentVersionId) )
+    if (message.versions && message.currentVersionId ) {
+      return message.versions.find(version => version._id.equals(message.currentVersionId) )
+    }
   })
 })
 
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
 export const fileDataResolver = resolve({
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  userId: async (_value, _message, context) => {
+    // Associate the record with the id of the authenticated user
+    return context.params.user._id
+  },
+  isSystemGenerated: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return fileSchema.properties.isSystemGenerated.default
+  },
 })
 
 // Schema for updating existing entries
@@ -57,14 +72,25 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated'])
 export const fileQuerySchema = Type.Intersect(
   [
-    querySyntax(fileQueryProperties),
+    querySyntax(fileQueryProperties, {
+      modelId: {
+        $exists: Type.Boolean(),
+      },
+    }),
     // Add additional query properties here
     Type.Object({}, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )
 export const fileQueryValidator = getValidator(fileQuerySchema, queryValidator)
-export const fileQueryResolver = resolve({})
+export const fileQueryResolver = resolve({
+  userId: async (value, user, context) => {
+    if (context.method === 'find' || context.method === 'remove') {
+      return context.params.user._id;
+    }
+    return value
+  },
+})

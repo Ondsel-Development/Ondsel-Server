@@ -126,6 +126,17 @@ export const model = (app) => {
           context => !context.params.skipSystemGeneratedSharedModel,
           createSharedModelObject,
         ),
+        iff(
+          context => context.result.fileId,
+          async (context) => {
+            await context.app.service('file').patch(
+              context.result.fileId,
+              {
+                modelId: context.result._id.toString(),
+                isSystemGenerated: context.result.isSharedModel,
+              });
+          },
+        )
       ],
       patch: [
         iff(
