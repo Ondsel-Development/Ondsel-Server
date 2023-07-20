@@ -78,7 +78,7 @@ export const file = (app) => {
         schemaHooks.resolveData(fileDataResolver)
       ],
       patch: [
-        preventChanges(false, 'versions', 'currentVersionId'),
+        preventChanges(false, 'versions', 'currentVersionId', 'isSystemGenerated', 'modelId'),
         iff(
           context => context.data.shouldCommitNewVersion,
           commitNewVersion
