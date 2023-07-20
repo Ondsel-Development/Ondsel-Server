@@ -5,8 +5,9 @@ import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
+import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { hooks as schemaHooks } from '@feathersjs/schema'
+import { limitToUser } from '../../utils/hooks.utils.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -54,8 +55,17 @@ export const file = (app) => {
       ]
     },
     before: {
-      all: [schemaHooks.validateQuery(fileQueryValidator), schemaHooks.resolveQuery(fileQueryResolver)],
-      find: [],
+      all: [
+        iff(
+          context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
+          (context) => {
+            context.params.paginate = context.params.query.$paginate === 'false' || context.params.query.$paginate === false;
+            delete context.params.query.$paginate;
+          }
+        ),
+        schemaHooks.validateQuery(fileQueryValidator), schemaHooks.resolveQuery(fileQueryResolver),
+      ],
+      find: [limitToUser],
       get: [],
       create: [
         iff(
@@ -82,7 +92,7 @@ export const file = (app) => {
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
-      remove: []
+      remove: [limitToUser]
     },
     after: {
       all: []
