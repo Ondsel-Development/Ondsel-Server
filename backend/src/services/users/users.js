@@ -114,6 +114,7 @@ const createSampleModels = async (context) => {
 
   try {
     const file = await fileService.create({
+      custFileName: 'Ondsel.FCStd',
       shouldCommitNewVersion: true,
       version: {
         uniqueFileName: sampleModelFileName,
@@ -121,7 +122,6 @@ const createSampleModels = async (context) => {
     }, { user: { _id: context.result._id }})
 
     const model  = await modelService.create({
-      custFileName: 'Ondsel.FCStd',
       fileId: file._id.toString(),
       attributes: attributes,
       isObjGenerated: true,

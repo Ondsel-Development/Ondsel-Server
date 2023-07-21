@@ -152,12 +152,13 @@ export default {
 
       let fileEndpoint;
       let fileName;
+      const custFileName = model.custFileName || model.file.custFileName;
       if (this.format === 'Default model') {
         fileEndpoint = `${uploadEndpoint}/${model.uniqueFileName}`;
-        fileName = model.custFileName;
+        fileName = custFileName;
       } else {
         fileEndpoint = `${uploadEndpoint}/${model._id}_export.${this.format}`;
-        fileName = `${model.custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`;
+        fileName = `${custFileName.replace(/\.[^/.]+$/, '')}-export.${this.format}`;
       }
 
       await axios(

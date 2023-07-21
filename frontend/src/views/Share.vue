@@ -53,7 +53,7 @@
                   <v-row>
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
-                        {{ model.custFileName }}
+                        {{ model.customerFileName }}
                       </div>
                   </v-row>
                   <v-row>
@@ -178,7 +178,7 @@ export default {
     },
     async uploadThumbnail() {
 
-      if (this.sharedModel.thumbnailUrl) {
+      if (!this.isAuthenticated || this.sharedModel.thumbnailUrl) {
         return
       }
       const modelId = this.sharedModel.dummyModelId;

@@ -20,6 +20,7 @@ const fileVersionSchema = Type.Object({
 export const fileSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    custFileName: Type.String(),
     currentVersionId: ObjectIdSchema(),
     userId: ObjectIdSchema(),
     modelId: Type.Optional(ObjectIdSchema()),
@@ -43,7 +44,7 @@ export const fileResolver = resolve({
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
@@ -72,7 +73,7 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName'])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {

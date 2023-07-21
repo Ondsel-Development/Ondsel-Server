@@ -42,7 +42,7 @@
           </template>
 
           <v-card-title>
-            {{ sharedModel.model.custFileName }}
+            {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
           </v-card-title>
 
           <v-card-subtitle>

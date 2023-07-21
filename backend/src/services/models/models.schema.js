@@ -13,7 +13,6 @@ export const modelSchema = Type.Object(
     _id: ObjectIdSchema(),
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
-    custFileName: Type.String(),
     uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
     fileId: ObjectIdSchema(),
     file: Type.Ref(fileSchema),
@@ -87,7 +86,6 @@ export const modelExternalResolver = resolve({})
 // Schema for creating new entries
 export const modelDataSchema = Type.Pick(modelSchema, [
   'uniqueFileName',
-  'custFileName',
   'shouldStartObjGeneration',
   'isObjGenerationInProgress',
   'isObjGenerated',
@@ -146,7 +144,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'fileId', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
+  ['_id', 'uniqueFileName', 'fileId', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
 )
 export const modelQuerySchema = Type.Intersect(
   [

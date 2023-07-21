@@ -10,7 +10,7 @@ class Model extends BaseModel {
   static instanceDefaults() {
     return {
       uniqueFileName: '',
-      custFileName: '',
+      custFileName: undefined,
       shouldStartObjGeneration: false,
       isObjGenerationInProgress: false,
       isObjGenerated: false,
@@ -18,6 +18,9 @@ class Model extends BaseModel {
     }
   }
 
+  get customerFileName() {
+    return this.custFileName || this.file.custFileName;
+  }
   // generatedObjUrl() {
   //   if (this.isObjGenerated) {
   //     const res = this.get(this._id);

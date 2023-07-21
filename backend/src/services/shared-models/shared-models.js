@@ -134,10 +134,9 @@ export const sharedModels = (app) => {
             'canExportOBJ',
             'dummyModelId',
             'isActive',
-            'thumbnailUrl'
           )
         ),
-
+        preventChanges(false, 'thumbnailUrl'),
         iff(
           context => context.data.shouldCreateInstance,
           createUserInstance,
@@ -181,7 +180,7 @@ const createClone = async (context) => {
 
     const newModel = await modelService.create({
       'uniqueFileName': model.uniqueFileName,
-      'custFileName': model.custFileName,
+      'custFileName': model.custFileName || model.file.custFileName,
       'shouldStartObjGeneration': true,
       'isObjGenerationInProgress': false,
       'isObjGenerated': false,
@@ -306,7 +305,7 @@ const createUserInstance = async (context) => {
 
     await modelService.create({
       'uniqueFileName': dummyModel.uniqueFileName,
-      'custFileName': dummyModel.custFileName,
+      'custFileName': dummyModel.custFileName || dummyModel.file.custFileName,
       'shouldStartObjGeneration': true,
       'isObjGenerationInProgress': false,
       'isObjGenerated': false,

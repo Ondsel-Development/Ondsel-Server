@@ -46,7 +46,7 @@
                   <v-row>
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
-                        {{ model.custFileName }}
+                        {{ model.customerFileName }}
                       </div>
                   </v-row>
                   <v-row>
