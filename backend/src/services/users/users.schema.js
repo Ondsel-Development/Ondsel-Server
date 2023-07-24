@@ -1,7 +1,7 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
-import { resolve } from '@feathersjs/schema'
+import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
-import { ObjectIdSchema } from '@feathersjs/typebox'
+import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 
@@ -17,11 +17,18 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    tier: StringEnum(["Free", "Paid"])
   },
   { $id: 'User', additionalProperties: false }
 )
 export const userValidator = getValidator(userSchema, dataValidator)
-export const userResolver = resolve({})
+export const userResolver = resolve({
+
+  tier: virtual(async (message, context) => {
+    return message.tier || "Free"
+  })
+
+})
 
 export const userExternalResolver = resolve({
   // The password should never be visible externally
@@ -37,6 +44,7 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  tier: async () => "Free",
 })
 
 // Schema for updating existing entries
@@ -50,7 +58,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'firstName', 'lastName'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'firstName', 'lastName', 'tier'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),
