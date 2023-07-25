@@ -15,6 +15,10 @@ class User extends BaseModel {
       lastName: '',
     }
   }
+
+  get isPaidTier() {
+    return this.tier === 'Paid';
+  }
 }
 const servicePath = 'users'
 const servicePlugin = makeServicePlugin({
