@@ -17,7 +17,7 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    tier: StringEnum(["Free", "Paid"])
+    tier: StringEnum(['Free', 'Premium', 'Enterprise'])
   },
   { $id: 'User', additionalProperties: false }
 )

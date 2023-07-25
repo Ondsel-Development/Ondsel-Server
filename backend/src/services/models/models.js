@@ -158,8 +158,8 @@ export const model = (app) => {
 const startObjGeneration = async (context) => {
   if (!context.params.$triggerObjGeneration && context.id) {
     const model = await context.service.get(context.id)
-    if (model.objUrl && context.params.user.tier !== 'Paid') {
-      throw new BadRequest('Please upgrade your plan to Paid tier');
+    if (model.objUrl && (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise')) {
+      throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
     }
   }
 
@@ -204,8 +204,8 @@ const startObjGeneration = async (context) => {
 };
 
 const startExport = async (context) => {
-  if (context.params.user.tier !== 'Paid') {
-    throw new BadRequest('Please upgrade your plan to Paid tier');
+  if (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise') {
+    throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
   }
   const { data, params } = context
   let fileName = null
