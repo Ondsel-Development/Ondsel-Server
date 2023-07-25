@@ -152,6 +152,14 @@ export const model = (app) => {
 }
 
 const startObjGeneration = async (context) => {
+  if (!context.params.$triggerObjGeneration && context.id) {
+    const model = await context.service.get(context.id)
+    console.log(context.params.user)
+    if (model.objUrl && context.params.user.tier !== 'Paid') {
+      throw new BadRequest('Please upgrade your plan to Paid tier');
+    }
+  }
+
   const { data, params } = context;
   let fileName = null
 
