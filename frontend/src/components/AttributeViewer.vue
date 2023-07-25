@@ -23,13 +23,13 @@
         >
         <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
         <v-alert
-          v-if="user && !user.isPaidTier"
+          v-if="user && !user.isPremiumTier && !user.isEnterpriseTier"
           variant="outlined"
           type="warning"
           border="top"
           class="text-left"
         >
-          Please upgrade your plan to <b>Paid</b> tier in order to update model parameters.
+          Please upgrade your plan to <b>Premium</b> or <b>Enterprise</b> tier in order to update model parameters.
         </v-alert>
         <v-alert
           v-if="canUpdateModel && !isAuthenticated"
@@ -124,7 +124,7 @@
         <v-btn
           color="primary"
           v-if="canUpdateModel && Object.keys(attributes).length"
-          :disabled="(user && !user.isPaidTier) || !isObjGenerated || !isAuthenticated"
+          :disabled="(user && !user.isPremiumTier && !user.isEnterpriseTier) || !isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"
         >Update</v-btn>
       </v-card-actions>

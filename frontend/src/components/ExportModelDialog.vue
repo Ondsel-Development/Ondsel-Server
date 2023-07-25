@@ -20,9 +20,9 @@
           type="warning"
           border="top"
           class="text-left"
-          v-if="user && !user.isPaidTier"
+          v-if="user && !user.isPremiumTier && !user.isEnterpriseTier"
         >
-          Please upgrade your plan to <b>Paid</b> tier in order to export model into all formats. In <b>Free</b> tier, you only allow to download the default model.
+          Please upgrade your plan to <b>Premium</b> or <b>Enterprise</b> tier in order to export model into all formats. In <b>Free</b> tier, you only allow to download the default model.
         </v-alert>
         <v-alert
           variant="outlined"
@@ -47,7 +47,11 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
-        <v-btn color="primary" @click="runExportCmd" :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.isPaidTier && !(format === 'Default model'))">Download</v-btn>
+        <v-btn
+          color="primary"
+          @click="runExportCmd"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.isPremiumTier && !user.isEnterpriseTier && !(format === 'Default model'))"
+        >Download</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

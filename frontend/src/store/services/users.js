@@ -16,8 +16,12 @@ class User extends BaseModel {
     }
   }
 
-  get isPaidTier() {
-    return this.tier === 'Paid';
+  get isPremiumTier() {
+    return this.tier === 'Premium';
+  }
+
+  get isEnterpriseTier() {
+    return this.tier === 'Enterprise';
   }
 }
 const servicePath = 'users'
