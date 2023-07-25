@@ -6,7 +6,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { GetObjectCommand, S3Client, HeadObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
 import { BadRequest } from '@feathersjs/errors'
 
-const customerFileNameRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:fcstd|obj)$/i;
+const customerFileNameRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.([a-z]+)$/i;
 const generatedObjRegex = /^[0-9a-fA-F]{24}_generated\.OBJ$/;
 const generatedThumbnailRegex = /^[0-9a-fA-F]{24}_thumbnail\.PNG$/;
 const exportedFileRegex = /^[0-9a-fA-F]{24}_export\.(?:fcstd|obj|step|stl)$/i;
@@ -70,12 +70,6 @@ class UploadService {
   async create(data, params) {
     if (!isValidFileName(data['id'])) {
       throw new BadRequest('Filename not valid!')
-    }
-
-    const modelService = this.options.app.service('models');
-    const resp = await modelService.find({ query: { uniqueFileName: data['id'] }});
-    if (resp.data.length) {
-      throw new BadRequest('File already exists!');
     }
 
     if (customerFileNameRegex.test(data['id'])) {
