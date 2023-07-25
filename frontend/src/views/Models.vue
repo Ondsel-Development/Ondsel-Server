@@ -52,7 +52,7 @@
           </template>
 
           <v-card-title>
-            {{ model.custFileName }}
+            {{ model.customerFileName }}
           </v-card-title>
 
           <v-card-subtitle>

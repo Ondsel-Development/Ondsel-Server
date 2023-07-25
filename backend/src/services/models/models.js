@@ -84,7 +84,7 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
-        preventChanges(false, 'isSharedModel'),
+        preventChanges(false, 'isSharedModel', 'custFileName'),
         iff(
           context => context.data.shouldCommitNewVersion,
           commitNewVersion
@@ -242,6 +242,7 @@ const createFileVersionControlObject = async context => {
   const fileService = context.app.service('file');
   if (data.uniqueFileName) {
     const file = await fileService.create({
+      custFileName: data.custFileName,
       shouldCommitNewVersion: true,
       version: {
         uniqueFileName: data.uniqueFileName,
@@ -250,7 +251,7 @@ const createFileVersionControlObject = async context => {
       }
     }, {authentication: context.params.authentication,});
     data['fileId'] = file._id.toString();
-    context.data = _.omit(data, 'uniqueFileName');
+    context.data = _.omit(data, 'uniqueFileName', 'custFileName');
   }
   return context;
 }
@@ -327,6 +328,7 @@ const createSharedModelObject = async (context) => {
   const originalFile = await fileService.get(context.result.fileId);
 
   const file = await fileService.create({
+    custFileName: originalFile.custFileName,
     shouldCommitNewVersion: true,
     version: {
       uniqueFileName: originalFile.currentVersion.uniqueFileName,
@@ -336,7 +338,6 @@ const createSharedModelObject = async (context) => {
   })
 
   const newModel = await context.service.create({
-    custFileName: context.result.custFileName,
     fileId: file._id.toString(),
     shouldStartObjGeneration: false,
     isObjGenerationInProgress: false,

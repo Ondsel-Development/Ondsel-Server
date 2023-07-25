@@ -15,7 +15,7 @@
         <div class="text-center">Delete Model?</div>
       </template>
     <v-card-text class="pa-12">
-      <p>Are you sure you want to delete <b>{{ model.custFileName }}</b> model? Deleting model also delete
+      <p>Are you sure you want to delete <b>{{ model.customerFileName }}</b> model? Deleting model also delete
       it's share links if exist.</p>
     </v-card-text>
     <v-card-actions class="justify-center">
