@@ -6,6 +6,7 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 
 import { dataValidator, queryValidator } from '../../validators.js'
+import {userAccountingSchema} from "./users.subdocs.schema.js";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -17,6 +18,7 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+      userAccounting: Type.Object(userAccountingSchema),
   },
   { $id: 'User', additionalProperties: false }
 )
