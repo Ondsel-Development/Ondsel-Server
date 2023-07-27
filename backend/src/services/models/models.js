@@ -64,16 +64,14 @@ export const model = (app) => {
         softDelete({
           deletedQuery: async context => {
             if ( context.method === 'remove') {
-
-              const model = await context.service.get(context.id);
-              if (model.fileId) {
-                await context.app.service('file').remove(model.fileId, {$forceRemove: true, ...context.params});
-              }
-
               const sharedModelService = context.app.service('shared-models');
               const sharedModels = await sharedModelService.find({ query: { cloneModelId: context.id, '$paginate': false }})
               for (const sharedModel of sharedModels) {
                 await sharedModelService.remove(sharedModel._id);
+              }
+              const model = await context.service.get(context.id);
+              if (model.fileId) {
+                await context.app.service('file').remove(model.fileId, {$forceRemove: true, ...context.params});
               }
             }
             return { deleted: { $ne: true } };
