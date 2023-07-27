@@ -231,6 +231,7 @@ const patchModel = async (context) => {
       sharedModel.model._id.toString(),
       data.model,
       {
+        ...context.params,
         accessToken: context.params.authentication?.accessToken || null,
         query: { isSharedModel: true }
       });
@@ -241,6 +242,7 @@ const patchModel = async (context) => {
       sharedModel.model._id.toString(),
       data.model,
       {
+        ...context.params,
         accessToken: context.params.authentication?.accessToken || null,
         query: { isSharedModel: true },
         sharedModelId: context.id
