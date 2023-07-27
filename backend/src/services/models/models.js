@@ -69,6 +69,10 @@ export const model = (app) => {
               for (const sharedModel of sharedModels) {
                 await sharedModelService.remove(sharedModel._id);
               }
+              const model = await context.service.get(context.id);
+              if (model.fileId) {
+                await context.app.service('file').remove(model.fileId, {$forceRemove: true, ...context.params});
+              }
             }
             return { deleted: { $ne: true } };
           }

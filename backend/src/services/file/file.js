@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges } from 'feathers-hooks-common'
+import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
@@ -55,6 +55,20 @@ export const file = (app) => {
     },
     before: {
       all: [
+        softDelete({
+          deletedQuery: async context => {
+            if ( context.method === 'remove') {
+              if (!context.params.$forceRemove) {
+                const file = await context.service.get(context.id);
+                if (file.modelId) {
+                  throw new BadRequest('To remove this file object, call remove attached model.');
+                }
+
+              }
+            }
+            return { deleted: { $ne: true } };
+          }
+        }),
         iff(
           context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
           (context) => {
