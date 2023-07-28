@@ -156,6 +156,13 @@ export const model = (app) => {
 }
 
 const startObjGeneration = async (context) => {
+  if (!context.params.$triggerObjGeneration && context.id) {
+    const model = await context.service.get(context.id)
+    if (model.objUrl && (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise')) {
+      throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
+    }
+  }
+
   const { data, params } = context;
   let fileName = null
 
@@ -197,6 +204,9 @@ const startObjGeneration = async (context) => {
 };
 
 const startExport = async (context) => {
+  if (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise') {
+    throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
+  }
   const { data, params } = context
   let fileName = null
   let attributes = {}
@@ -278,7 +288,6 @@ const commitNewVersion = async (context) => {
   if (!data.version) {
     throw new BadRequest('Should include version object');
   }
-
   const lookUpAttributes = ['shouldCommitNewVersion', 'version'];
   const model = await context.service.get(context.id);
   if (model.fileId) {
@@ -291,6 +300,7 @@ const commitNewVersion = async (context) => {
 
     // Save latest model.attributes to file data
     await saveModelAttributesToCurrentFile(context, model)
+    context.params.$triggerObjGeneration = true;
   }
 
   context.data['attributes'] = {}
@@ -313,6 +323,7 @@ const checkoutToVersion = async (context) => {
 
     // assign current file version attributes to model attributes
     context.data['attributes'] = file.currentVersion.additionalData.attributes || {}
+    context.params.$triggerObjGeneration = true;
   }
 
   context.data = _.omit(context.data, lookUpAttributes);

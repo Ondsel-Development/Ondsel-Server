@@ -15,6 +15,14 @@ class User extends BaseModel {
       lastName: '',
     }
   }
+
+  get isPremiumTier() {
+    return this.tier === 'Premium';
+  }
+
+  get isEnterpriseTier() {
+    return this.tier === 'Enterprise';
+  }
 }
 const servicePath = 'users'
 const servicePlugin = makeServicePlugin({
