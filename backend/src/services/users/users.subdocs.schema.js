@@ -10,7 +10,19 @@ export const userSummarySchema = Type.Object(
     }
 )
 
-const Ledger = StringEnum(
+export const SubscriptionStateType = StringEnum(
+    // see https://docs.google.com/document/d/1KDrAk16LUz4o6D3rsn03DDM2BDGsizbMXGnNLn_wkx8/edit?usp=sharing
+    [
+        'good',
+        'due',
+        'past-due',
+        'temp-downgrade',
+        'perm-downgrade',
+        'closed',
+    ]
+)
+
+export const Ledger = StringEnum(
     [
         'Cash',
         'ProcessorExpense',
