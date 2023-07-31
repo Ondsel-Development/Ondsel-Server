@@ -4,60 +4,61 @@ import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 
 export const userSummarySchema = Type.Object(
-    {
-        userId: ObjectIdSchema(),
-        name: Type.String(),
-    }
+  {
+    userId: ObjectIdSchema(),
+    name: Type.String(),
+  }
 )
 
 export const SubscriptionStateType = StringEnum(
     // see https://docs.google.com/document/d/1KDrAk16LUz4o6D3rsn03DDM2BDGsizbMXGnNLn_wkx8/edit?usp=sharing
-    [
-        'good',
-        'due',
-        'past-due',
-        'temp-downgrade',
-        'perm-downgrade',
-        'closed',
-    ]
+  [
+    'good',
+    'due',
+    'past-due',
+    'temp-downgrade',
+    'perm-downgrade',
+    'closed',
+  ]
 )
 
 export const Ledger = StringEnum(
-    [
-        'Cash',
-        'ProcessorExpense',
-        'UnearnedRevenue',
-        'Revenue',
-        'Refunds'
-    ]
+  [
+    'Cash',
+    'ProcessorExpense',
+    'UnearnedRevenue',
+    'Revenue',
+    'Refunds'
+  ]
+)
+
+export const journalElementSchema = Type.Object(
+  {
+    ledger: Ledger,
+    amount: Type.Integer()
+  }
 )
 
 export const journalTransactionSchema = Type.Object(
-    {
-        id: ObjectIdSchema(),
-        time: Type.Number(),
-        description: Type.String(),
-        entries: Type.Array(Type.Object(journalElementSchema))
-    }
-)
-export const journalElementSchema = Type.Object(
-    {
-        ledger: Ledger,
-        amount: Type.Integer()
-    }
+  {
+    id: ObjectIdSchema(),
+    time: Type.Number(),
+    description: Type.String(),
+    entries: Type.Array(journalElementSchema)
+  }
 )
 
 export const userAccountingSchema = Type.Object(
-    {
-        ledgerBalances: Type.Object(
-            {
-                cash: Type.Integer(), // ASSET; base10 decimal not supported by feathersjs; so store money in integer pennies
-                processorExpense: Type.Integer(), // EXPENSE
-                unearnedRevenue: Type.Integer(), // INCOME
-                revenue: Type.Integer(), // INCOME
-                refunds: Type.Integer(), // inverted INCOME (EXPENSE)
-            }
-        ),
-        journal: Type.Array(journalTransactionSchema),
-    }
+  {
+    ledgerBalances: Type.Object(
+      {
+        cash: Type.Integer(), // ASSET; base10 decimal not supported by feathersjs; so store money in integer pennies
+        processorExpense: Type.Integer(), // EXPENSE
+        unearnedRevenue: Type.Integer(), // INCOME
+        revenue: Type.Integer(), // INCOME
+        refunds: Type.Integer(), // inverted INCOME (EXPENSE)
+      }
+    ),
+    journal: Type.Array(journalTransactionSchema),
+  }
 )

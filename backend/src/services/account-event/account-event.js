@@ -10,13 +10,15 @@ import {
   accountEventExternalResolver,
   accountEventDataResolver,
   accountEventPatchResolver,
-  accountEventQueryResolver
+  accountEventQueryResolver,
+  accountEventSchema,
+  accountEventOptionsSchema,
 } from './account-event.schema.js'
 import { AccountEventService, getOptions } from './account-event.class.js'
 import { accountEventPath, accountEventMethods } from './account-event.shared.js'
-import {clearResultsFieldsToDefault, performAccountEventLogic} from "../../hooks/accountEventBusinessLogic.js";
-
-const { disallow } = require('feathers-hooks-common');
+import { disallow } from 'feathers-hooks-common';
+import { performAccountEventLogic } from "../../hooks/accountEventBusinessLogic.js";
+import swagger from "feathers-swagger";
 
 export * from './account-event.class.js'
 export * from './account-event.schema.js'
@@ -28,7 +30,15 @@ export const accountEvent = (app) => {
     // A list of all methods this service exposes externally
     methods: accountEventMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { accountEventSchema, accountEventOptionsSchema },
+      docs: {
+        description: 'An entry point for new account-related events and event-logger',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(accountEventPath).hooks({
@@ -49,8 +59,7 @@ export const accountEvent = (app) => {
       create: [
         schemaHooks.validateData(accountEventDataValidator),
         schemaHooks.resolveData(accountEventDataResolver),
-        clearResultsFieldsToDefault(),
-        performAccountEventLogic(),
+        performAccountEventLogic,
       ],
       patch: [ disallow() ], // the accountEventLog may never be deleted from or altered
       remove: [ disallow() ] // the accountEventLog may never be deleted from or altered

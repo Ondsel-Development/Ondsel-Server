@@ -18,7 +18,7 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-      userAccounting: Type.Object(userAccountingSchema),
+    userAccounting: userAccountingSchema,
   },
   { $id: 'User', additionalProperties: false }
 )
