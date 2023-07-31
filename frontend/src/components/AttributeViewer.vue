@@ -23,6 +23,15 @@
         >
         <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
         <v-alert
+          v-if="user && !user.isPremiumTier && !user.isEnterpriseTier"
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+        >
+          Please upgrade your plan to <b>Premium</b> or <b>Enterprise</b> tier in order to update model parameters.
+        </v-alert>
+        <v-alert
           v-if="canUpdateModel && !isAuthenticated"
           variant="outlined"
           type="warning"
@@ -115,7 +124,7 @@
         <v-btn
           color="primary"
           v-if="canUpdateModel && Object.keys(attributes).length"
-          :disabled="!isObjGenerated || !isAuthenticated"
+          :disabled="(user && !user.isPremiumTier && !user.isEnterpriseTier) || !isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"
         >Update</v-btn>
       </v-card-actions>
@@ -124,7 +133,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 export default {
   name: 'AttributeViewer',
@@ -149,7 +158,8 @@ export default {
     items: Array.from({ length: 1000 }, (k, v) => v + 1),
   }),
   computed: {
-    ...mapGetters('auth', ['isAuthenticated'])
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...(mapState('auth', ['user'])),
   },
 }
 </script>

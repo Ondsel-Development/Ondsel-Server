@@ -27,7 +27,9 @@ export const fileSchema = Type.Object(
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    versions: Type.Array(fileVersionSchema)
+    versions: Type.Array(fileVersionSchema),
+    // Soft delete
+    deleted: Type.Optional(Type.Boolean()),
   },
   { $id: 'File', additionalProperties: false }
 )
@@ -73,7 +75,7 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'deleted'])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {

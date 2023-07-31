@@ -19,7 +19,7 @@ class Model extends BaseModel {
   }
 
   get customerFileName() {
-    return this.custFileName || this.file.custFileName;
+    return this.custFileName || this.file?.custFileName;
   }
   // generatedObjUrl() {
   //   if (this.isObjGenerated) {

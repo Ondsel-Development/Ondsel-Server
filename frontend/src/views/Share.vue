@@ -53,7 +53,7 @@
                   <v-row>
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
-                        {{ model.customerFileName }}
+                        {{ model.customerFileName || sharedModel.model.file.custFileName }}
                       </div>
                   </v-row>
                   <v-row>

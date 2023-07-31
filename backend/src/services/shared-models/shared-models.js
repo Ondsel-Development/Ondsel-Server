@@ -231,9 +231,12 @@ const patchModel = async (context) => {
       sharedModel.model._id.toString(),
       data.model,
       {
+        ...context.params,
         accessToken: context.params.authentication?.accessToken || null,
         query: { isSharedModel: true }
       });
+    context.data = _.omit(data, 'model')
+    return context;
   }
 
   const callExport = async () => {
@@ -241,6 +244,7 @@ const patchModel = async (context) => {
       sharedModel.model._id.toString(),
       data.model,
       {
+        ...context.params,
         accessToken: context.params.authentication?.accessToken || null,
         query: { isSharedModel: true },
         sharedModelId: context.id
@@ -317,6 +321,9 @@ const createUserInstance = async (context) => {
     }, {
       authentication: context.params.authentication,
     });
+  } else if (!result.data[0].objUrl && !result.data[0].error) {
+    // Incase if mesh was not generated earlier
+    await modelService.patch(result.data[0]._id, { shouldStartObjGeneration: true }, context.params)
   }
 
   context.data = _.omit(data, 'shouldCreateInstance');
