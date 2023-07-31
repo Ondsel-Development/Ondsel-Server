@@ -1,7 +1,6 @@
 import {
   AccountEventType,
   AccountEventTypeMap,
-  SubscriptionType, SubscriptionTypeMap
 } from "../services/account-event/account-event.schema.js";
 import {ObjectId} from "mongodb";
 

@@ -3,7 +3,7 @@ import { resolve } from '@feathersjs/schema'
 import {Type, getValidator, querySyntax, StringEnum} from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import {SubscriptionStateType, userSummarySchema} from "../users/users.subdocs.schema.js";
+import {SubscriptionStateType, SubscriptionType, userSummarySchema} from "../users/users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 
 // Main data model schema
@@ -22,19 +22,6 @@ export const AccountEventType = StringEnum(
     AccountEventTypeMap.subscriptionServiceCompleted,
     AccountEventTypeMap.subscriptionRefundPayable,
     AccountEventTypeMap.refundPaid,
-  ]
-)
-
-export const SubscriptionTypeMap = {
-  free: 'free',
-  premium: 'premium',
-  enterprise: 'enterprise',
-}
-export const SubscriptionType = StringEnum(
-  [
-    SubscriptionTypeMap.free,
-    SubscriptionTypeMap.premium,
-    SubscriptionTypeMap.enterprise,
   ]
 )
 

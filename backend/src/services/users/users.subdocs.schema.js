@@ -3,6 +3,19 @@
 import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 
+export const SubscriptionTypeMap = {
+  free: 'Free',
+  premium: 'Premium',
+  enterprise: 'Enterprise',
+}
+export const SubscriptionType = StringEnum(
+  [
+    SubscriptionTypeMap.free,
+    SubscriptionTypeMap.premium,
+    SubscriptionTypeMap.enterprise,
+  ]
+)
+
 export const userSummarySchema = Type.Object(
   {
     userId: ObjectIdSchema(),
