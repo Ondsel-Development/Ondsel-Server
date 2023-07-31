@@ -14,6 +14,9 @@ import {
 } from './account-event.schema.js'
 import { AccountEventService, getOptions } from './account-event.class.js'
 import { accountEventPath, accountEventMethods } from './account-event.shared.js'
+import {clearResultsFieldsToDefault, performAccountEventLogic} from "../../hooks/accountEventBusinessLogic.js";
+
+const { disallow } = require('feathers-hooks-common');
 
 export * from './account-event.class.js'
 export * from './account-event.schema.js'
@@ -45,13 +48,12 @@ export const accountEvent = (app) => {
       get: [],
       create: [
         schemaHooks.validateData(accountEventDataValidator),
-        schemaHooks.resolveData(accountEventDataResolver)
+        schemaHooks.resolveData(accountEventDataResolver),
+        clearResultsFieldsToDefault(),
+        performAccountEventLogic(),
       ],
-      patch: [
-        schemaHooks.validateData(accountEventPatchValidator),
-        schemaHooks.resolveData(accountEventPatchResolver)
-      ],
-      remove: []
+      patch: [ disallow() ], // the accountEventLog may never be deleted from or altered
+      remove: [ disallow() ] // the accountEventLog may never be deleted from or altered
     },
     after: {
       all: []

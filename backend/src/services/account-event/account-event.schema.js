@@ -6,20 +6,33 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import {SubscriptionStateType, userSummarySchema} from "../users/users.subdocs.schema.js";
 
 // Main data model schema
+export const AccountEventTypeMap = {
+    initialSubscriptionPurchase : 'initial-subscription-purchase',
+    recurringSubscriptionPurchase: 'recurring-subscription-purchase',
+    subscriptionServiceCompleted: 'subscription-service-completed',
+    subscriptionRefundPayable: 'subscription-refund-payable',
+    refundPaid: 'refund-paid',
+}
 export const AccountEventType = StringEnum(
     [
-        'initial-subscription-purchase',
-        'recurring-subscription-purchase',
-        'subscription-service-completed',
-        'subscription-refund-payable',
-        'refund-paid',
+        AccountEventTypeMap.initialSubscriptionPurchase,
+        AccountEventTypeMap.recurringSubscriptionPurchase,
+        AccountEventTypeMap.subscriptionServiceCompleted,
+        AccountEventTypeMap.subscriptionRefundPayable,
+        AccountEventTypeMap.refundPaid,
     ]
 )
+
+export const SubscriptionTypeMap = {
+    free: 'free',
+    premium: 'premium',
+    enterprise: 'enterprise',
+}
 export const SubscriptionType = StringEnum(
     [
-        'free',
-        'premium',
-        'enterprise',
+        SubscriptionTypeMap.free,
+        SubscriptionTypeMap.premium,
+        SubscriptionTypeMap.enterprise,
     ]
 )
 
@@ -46,6 +59,8 @@ export const accountEventSchema = Type.Object(
         description: Type.String(),
         amount: Type.Optional(Type.Integer()),
         detail: Type.Object(accountEventOptionsSchema),
+        success: Type.Boolean(),
+        resultMsg: Type.Optional(Type.String())
     },
     { $id: 'AccountEventLog', additionalProperties: false }
 )
