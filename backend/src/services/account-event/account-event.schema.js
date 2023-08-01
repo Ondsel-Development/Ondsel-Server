@@ -34,7 +34,6 @@ export const accountEventOptionsSchema = Type.Object(
     // the "current" fields are used for auditing. The represent what the calling algorithm thinks is true before
     // the event happens.
     currentSubscription: Type.Optional(SubscriptionType),
-    currentSubscriptionState: Type.Optional(SubscriptionStateType),
     currentKeyBalance: Type.Optional(Type.Integer()),  // the meaning of "key" depends on the event
   }
 )
