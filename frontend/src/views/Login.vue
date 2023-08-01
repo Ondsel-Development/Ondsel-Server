@@ -42,6 +42,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { models } from '@feathersjs/vuex';
+import { resetStores } from '@/store';
 
 export default {
   name: 'Login',
@@ -64,6 +65,9 @@ export default {
   computed: {
     User: () => models.api.User,
     ...mapState('auth', ['isAuthenticatePending']),
+  },
+  mounted() {
+    resetStores();
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
