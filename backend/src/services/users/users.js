@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
+import { preventChanges } from 'feathers-hooks-common'
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -56,7 +57,11 @@ export const user = (app) => {
       find: [],
       get: [],
       create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), uniqueUserValidator],
-      patch: [schemaHooks.validateData(userPatchValidator), schemaHooks.resolveData(userPatchResolver), uniqueUserValidator],
+      patch: [
+        preventChanges(false, 'tier'),
+        schemaHooks.validateData(userPatchValidator),
+        schemaHooks.resolveData(userPatchResolver), uniqueUserValidator
+      ],
       remove: []
     },
     after: {
@@ -114,6 +119,7 @@ const createSampleModels = async (context) => {
 
   try {
     const file = await fileService.create({
+      custFileName: 'Ondsel.FCStd',
       shouldCommitNewVersion: true,
       version: {
         uniqueFileName: sampleModelFileName,
@@ -121,7 +127,6 @@ const createSampleModels = async (context) => {
     }, { user: { _id: context.result._id }})
 
     const model  = await modelService.create({
-      custFileName: 'Ondsel.FCStd',
       fileId: file._id.toString(),
       attributes: attributes,
       isObjGenerated: true,

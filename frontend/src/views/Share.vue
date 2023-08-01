@@ -2,15 +2,31 @@
   <v-navigation-drawer rail location="right" permanent>
     <v-btn icon flat @click="dialog = true">
       <v-icon icon="mdi-file"></v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >File info</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Fit all or selection</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="openAttributeViewer" v-if="sharedModel && (sharedModel.canViewModelAttributes || sharedModel.canUpdateModel)">
       <v-icon>mdi-view-list</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >See model attributes</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="openExportModelDialog">
       <v-icon>mdi-file-export</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Export model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
@@ -53,7 +69,7 @@
                   <v-row>
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
-                        {{ model.custFileName }}
+                        {{ model.customerFileName || sharedModel.model.file.custFileName }}
                       </div>
                   </v-row>
                   <v-row>
@@ -178,7 +194,7 @@ export default {
     },
     async uploadThumbnail() {
 
-      if (this.sharedModel.thumbnailUrl) {
+      if (!this.isAuthenticated || this.sharedModel.thumbnailUrl) {
         return
       }
       const modelId = this.sharedModel.dummyModelId;

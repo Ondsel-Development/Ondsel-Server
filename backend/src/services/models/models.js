@@ -69,6 +69,10 @@ export const model = (app) => {
               for (const sharedModel of sharedModels) {
                 await sharedModelService.remove(sharedModel._id);
               }
+              const model = await context.service.get(context.id);
+              if (model.fileId) {
+                await context.app.service('file').remove(model.fileId, {$forceRemove: true, ...context.params});
+              }
             }
             return { deleted: { $ne: true } };
           }
@@ -84,7 +88,7 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
-        preventChanges(false, 'isSharedModel'),
+        preventChanges(false, 'isSharedModel', 'custFileName'),
         iff(
           context => context.data.shouldCommitNewVersion,
           commitNewVersion
@@ -126,6 +130,17 @@ export const model = (app) => {
           context => !context.params.skipSystemGeneratedSharedModel,
           createSharedModelObject,
         ),
+        iff(
+          context => context.result.fileId,
+          async (context) => {
+            await context.app.service('file').patch(
+              context.result.fileId,
+              {
+                modelId: context.result._id.toString(),
+                isSystemGenerated: context.result.isSharedModel,
+              });
+          },
+        )
       ],
       patch: [
         iff(
@@ -141,6 +156,13 @@ export const model = (app) => {
 }
 
 const startObjGeneration = async (context) => {
+  if (!context.params.$triggerObjGeneration && context.id) {
+    const model = await context.service.get(context.id)
+    if (model.objUrl && (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise')) {
+      throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
+    }
+  }
+
   const { data, params } = context;
   let fileName = null
 
@@ -182,6 +204,9 @@ const startObjGeneration = async (context) => {
 };
 
 const startExport = async (context) => {
+  if (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise') {
+    throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
+  }
   const { data, params } = context
   let fileName = null
   let attributes = {}
@@ -231,6 +256,7 @@ const createFileVersionControlObject = async context => {
   const fileService = context.app.service('file');
   if (data.uniqueFileName) {
     const file = await fileService.create({
+      custFileName: data.custFileName,
       shouldCommitNewVersion: true,
       version: {
         uniqueFileName: data.uniqueFileName,
@@ -239,7 +265,7 @@ const createFileVersionControlObject = async context => {
       }
     }, {authentication: context.params.authentication,});
     data['fileId'] = file._id.toString();
-    context.data = _.omit(data, 'uniqueFileName');
+    context.data = _.omit(data, 'uniqueFileName', 'custFileName');
   }
   return context;
 }
@@ -262,7 +288,6 @@ const commitNewVersion = async (context) => {
   if (!data.version) {
     throw new BadRequest('Should include version object');
   }
-
   const lookUpAttributes = ['shouldCommitNewVersion', 'version'];
   const model = await context.service.get(context.id);
   if (model.fileId) {
@@ -275,6 +300,7 @@ const commitNewVersion = async (context) => {
 
     // Save latest model.attributes to file data
     await saveModelAttributesToCurrentFile(context, model)
+    context.params.$triggerObjGeneration = true;
   }
 
   context.data['attributes'] = {}
@@ -297,6 +323,7 @@ const checkoutToVersion = async (context) => {
 
     // assign current file version attributes to model attributes
     context.data['attributes'] = file.currentVersion.additionalData.attributes || {}
+    context.params.$triggerObjGeneration = true;
   }
 
   context.data = _.omit(context.data, lookUpAttributes);
@@ -316,6 +343,7 @@ const createSharedModelObject = async (context) => {
   const originalFile = await fileService.get(context.result.fileId);
 
   const file = await fileService.create({
+    custFileName: originalFile.custFileName,
     shouldCommitNewVersion: true,
     version: {
       uniqueFileName: originalFile.currentVersion.uniqueFileName,
@@ -325,7 +353,6 @@ const createSharedModelObject = async (context) => {
   })
 
   const newModel = await context.service.create({
-    custFileName: context.result.custFileName,
     fileId: file._id.toString(),
     shouldStartObjGeneration: false,
     isObjGenerationInProgress: false,

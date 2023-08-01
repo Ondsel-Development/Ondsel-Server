@@ -1,12 +1,12 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges } from 'feathers-hooks-common'
+import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
+import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   fileDataValidator,
   filePatchValidator,
@@ -54,8 +54,34 @@ export const file = (app) => {
       ]
     },
     before: {
-      all: [schemaHooks.validateQuery(fileQueryValidator), schemaHooks.resolveQuery(fileQueryResolver)],
-      find: [],
+      all: [
+        softDelete({
+          deletedQuery: async context => {
+            if ( context.method === 'remove') {
+              if (!context.params.$forceRemove) {
+                const file = await context.service.get(context.id);
+                if (file.modelId) {
+                  throw new BadRequest('To remove this file object, call remove attached model.');
+                }
+
+              }
+            }
+            return { deleted: { $ne: true } };
+          }
+        }),
+        iff(
+          context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
+          (context) => {
+            context.params.paginate = context.params.query.$paginate === 'false' || context.params.query.$paginate === false;
+            delete context.params.query.$paginate;
+          }
+        ),
+        schemaHooks.validateQuery(fileQueryValidator),
+        schemaHooks.resolveQuery(fileQueryResolver),
+      ],
+      find: [
+        schemaHooks.validateQuery(fileQueryValidator),  // if not validate then $exists operator raise exception
+      ],
       get: [],
       create: [
         iff(

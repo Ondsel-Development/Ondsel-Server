@@ -65,11 +65,20 @@ router.beforeEach(async (to, from, next) => {
     next('/404');
     return;
   }
-  if (to.meta && to.meta.requiresAuth) {
+  if (link.name === 'Login' || link.name === 'SignUp') {
+    try {
+      await store.dispatch('auth/authenticate');
+      next({ name: 'Models' });
+      return;
+    } catch (err) {
+    }
+  }
+  else if (to.meta && to.meta.requiresAuth) {
     try {
       await store.dispatch('auth/authenticate');
     } catch (err) {
       next({ name: 'Login' });
+      return;
     }
   }
   else if (to.meta && to.meta.tryAuth) {

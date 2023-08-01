@@ -1,6 +1,6 @@
 export const filePath = 'file'
 
-export const fileMethods = ['get', 'create', 'patch']
+export const fileMethods = ['find', 'get', 'create', 'patch', 'remove']
 
 export const fileClient = (client) => {
   const connection = client.get('connection')

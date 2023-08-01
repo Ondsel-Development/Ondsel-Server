@@ -5,6 +5,7 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSchema } from '../users/users.schema.js'
 import { fileSchema } from '../file/file.schema.js';
+import { NotFound } from '@feathersjs/errors'
 
 
 // Main data model schema
@@ -13,7 +14,6 @@ export const modelSchema = Type.Object(
     _id: ObjectIdSchema(),
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
-    custFileName: Type.String(),
     uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
     fileId: ObjectIdSchema(),
     file: Type.Ref(fileSchema),
@@ -69,15 +69,27 @@ export const modelResolver = resolve({
     const { app } = context;
     const fileService = app.service('file');
     if (message.fileId) {
-      return await fileService.get(message.fileId);
+      try {
+        return await fileService.get(message.fileId);
+      } catch (error) {
+        if (error instanceof NotFound) {
+          return null; // Return null if no record is found
+        }
+      }
     }
   }),
   uniqueFileName: virtual(async(message, context ) => {
     if (message.uniqueFileName) {
       return message.uniqueFileName
     } else if (message.fileId) {
-      const file = await context.app.service('file').get(message.fileId);
-      return file.currentVersion.uniqueFileName;
+      try {
+        const file = await context.app.service('file').get(message.fileId);
+        return file.currentVersion.uniqueFileName;
+      } catch (error) {
+        if (error instanceof NotFound) {
+          return null; // Return null if no record is found
+        }
+      }
     }
   }),
 })
@@ -87,7 +99,6 @@ export const modelExternalResolver = resolve({})
 // Schema for creating new entries
 export const modelDataSchema = Type.Pick(modelSchema, [
   'uniqueFileName',
-  'custFileName',
   'shouldStartObjGeneration',
   'isObjGenerationInProgress',
   'isObjGenerated',
@@ -146,7 +157,7 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'fileId', 'custFileName', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
+  ['_id', 'uniqueFileName', 'fileId', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
 )
 export const modelQuerySchema = Type.Intersect(
   [
