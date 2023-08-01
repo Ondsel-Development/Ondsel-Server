@@ -35,13 +35,28 @@ export const SubscriptionStateType = StringEnum(
   ]
 )
 
+export const LedgerMap = {
+  cash: 'Cash',
+  processorExpense: 'ProcessorExpense',
+  unearnedRevenue: 'UnearnedRevenue',
+  revenue: 'Revenue',
+  refunds: 'Refunds',
+}
+
+export const LedgerNature = {
+  'Cash': 1,              // +1 DEBIT as ASSET
+  'ProcessorExpense': 1,  // +1 DEBIT as EXPENSE
+  'UnearnedRevenue': -1,  // -1 CREDIT as LIABILITY
+  'Revenue': -1,          // -1 CREDIT for INCOME
+  'Refunds': -1,          // -1 CREDIT for LIABILITY
+}
 export const Ledger = StringEnum(
   [
-    'Cash',
-    'ProcessorExpense',
-    'UnearnedRevenue',
-    'Revenue',
-    'Refunds'
+    LedgerMap.cash,
+    LedgerMap.processorExpense,
+    LedgerMap.unearnedRevenue,
+    LedgerMap.revenue,
+    LedgerMap.refunds,
   ]
 )
 
@@ -54,7 +69,7 @@ export const journalElementSchema = Type.Object(
 
 export const journalTransactionSchema = Type.Object(
   {
-    id: ObjectIdSchema(),
+    transactionId: ObjectIdSchema(),
     time: Type.Number(),
     description: Type.String(),
     entries: Type.Array(journalElementSchema)
@@ -65,11 +80,11 @@ export const userAccountingSchema = Type.Object(
   {
     ledgerBalances: Type.Object(
       {
-        cash: Type.Integer(), // ASSET; base10 decimal not supported by feathersjs; so store money in integer pennies
-        processorExpense: Type.Integer(), // EXPENSE
-        unearnedRevenue: Type.Integer(), // INCOME
-        revenue: Type.Integer(), // INCOME
-        refunds: Type.Integer(), // inverted INCOME (EXPENSE)
+        Cash: Type.Integer(), // ASSET; base10 decimal not supported by feathersjs; so store money in integer pennies
+        ProcessorExpense: Type.Integer(), // EXPENSE
+        UnearnedRevenue: Type.Integer(), // INCOME
+        Revenue: Type.Integer(), // INCOME
+        Refunds: Type.Integer(), // inverted INCOME (EXPENSE)
       }
     ),
     journal: Type.Array(journalTransactionSchema),

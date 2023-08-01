@@ -42,6 +42,7 @@ export const accountEventOptionsSchema = Type.Object(
 export const accountEventSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    transactionId: ObjectIdSchema(),  // must be kept separate from _id to prevent the framework from mangling it.
     event: AccountEventType,
     userId: Type.Optional(ObjectIdSchema()),
     createdAt: Type.Number(),

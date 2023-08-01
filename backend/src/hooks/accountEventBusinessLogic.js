@@ -3,7 +3,13 @@ import {
   AccountEventTypeMap,
 } from "../services/account-event/account-event.schema.js";
 import {ObjectId} from "mongodb";
-import {SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
+import {
+  journalElementSchema,
+  journalTransactionSchema, Ledger, LedgerMap,
+  SubscriptionTypeMap
+} from "../services/users/users.subdocs.schema.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {addTransactionToUserAndSummarize, debit, makeEmptyJournalTransaction, verifyBalanced} from "../accounting.js";
 
 export const performAccountEventLogic = async (context) => {
   switch (context.data.event) {
@@ -32,15 +38,29 @@ async function DoInitialSubscriptionPurchase(context) {
     context.data.resultMsg = detail.errMsg;
     return;
   }
-  console.log(detail.desc);
   //
   // 3. calculate the proper journal entries, summarize, optional tier
+  //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
+  let transaction = makeEmptyJournalTransaction(detail.desc);
+  debit(transaction, LedgerMap.cash, detail.amt);
+  debit(transaction, LedgerMap.unearnedRevenue, detail.amt);
+  let balanceMsg = verifyBalanced(transaction);
+  if (balanceMsg != "") {
+    context.data.resultMsg = balanceMsg;
+    return;
+  }
+  addTransactionToUserAndSummarize(user, transaction);
 
+  // TODO subscription state
   //
   // 4. update the user doc
   //
-
+  context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
+  await context.app.service('users').patch(user._id, {
+    tier: detail.newTier,
+    userAccounting: user.userAccounting,
+  });
   //
   // all is good; return message
   //
