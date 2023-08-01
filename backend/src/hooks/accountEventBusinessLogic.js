@@ -42,7 +42,7 @@ async function DoInitialSubscriptionPurchase(context) {
   // 3. calculate the proper journal entries, summarize, optional tier
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
-  let transaction = makeEmptyJournalTransaction(detail.desc);
+  let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
   debit(transaction, LedgerMap.cash, detail.amt);
   debit(transaction, LedgerMap.unearnedRevenue, detail.amt);
   let balanceMsg = verifyBalanced(transaction);
@@ -75,6 +75,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     newTier: "",
     addedMonths: 0.0,
     desc: "",
+    internal: "",
   }
   //
   // amount checks
@@ -146,10 +147,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   }
   result.addedMonths = addedMonths;
   //
-  // description for transaction
+  // descriptions for transaction
   //
-  let passedDescription = String(context.data.description);
-  result.desc = `INITIAL SUBSCRIPTION FOR ${result.newTier} WITH USER ${user._id} (${passedDescription})`;
+  result.note = String(context.data.note) + ";"; // the semicolon is for possibly adding things later
+  result.desc = `INITIAL SUBSCRIPTION FOR ${result.newTier}`;
   //
   // done
   //

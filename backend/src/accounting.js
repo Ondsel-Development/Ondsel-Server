@@ -35,11 +35,12 @@ export function addTransactionToUserAndSummarize(user, transaction) {
   user.userAccounting.ledgerBalances = balance;
 }
 
-export function makeEmptyJournalTransaction(description) {
+export function makeEmptyJournalTransaction(description, note) {
   let transaction = {
     transactionId: new ObjectId(),
     time: Date.now(),
     description: description,
+    internalNote: note,
     entries: [],
   };
   return transaction;

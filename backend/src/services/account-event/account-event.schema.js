@@ -46,13 +46,13 @@ export const accountEventSchema = Type.Object(
     event: AccountEventType,
     userId: Type.Optional(ObjectIdSchema()),
     createdAt: Type.Number(),
-    description: Type.String(),
+    note: Type.String(), // not seen by end user
     amount: Type.Optional(Type.Integer()),
     detail: accountEventOptionsSchema,
     success: Type.Boolean(),
     resultMsg: Type.Optional(Type.String())
   },
-  { $id: 'AccountEventLog', additionalProperties: true }
+  { $id: 'AccountEvent', additionalProperties: true }
 )
 
 export const accountEventValidator = getValidator(accountEventSchema, dataValidator)
