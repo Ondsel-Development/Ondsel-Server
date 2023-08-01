@@ -5,7 +5,7 @@ import {
 import {ObjectId} from "mongodb";
 import {
   journalElementSchema,
-  journalTransactionSchema, Ledger, LedgerMap,
+  journalTransactionSchema, Ledger, LedgerMap, SubscriptionStateMap,
   SubscriptionTypeMap
 } from "../services/users/users.subdocs.schema.js";
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
@@ -52,13 +52,13 @@ async function DoInitialSubscriptionPurchase(context) {
   }
   addTransactionToUserAndSummarize(user, transaction);
 
-  // TODO subscription state
   //
   // 4. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
   await context.app.service('users').patch(user._id, {
     tier: detail.newTier,
+    subscriptionState: detail.newSubscriptionState,
     userAccounting: user.userAccounting,
   });
   //
@@ -73,9 +73,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     errMsg: "",
     amt: 0,
     newTier: "",
+    newSubscriptionState: "",
     addedMonths: 0.0,
     desc: "",
-    internal: "",
+    note: "",
   }
   //
   // amount checks
@@ -99,7 +100,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   }
   result.amt = amt;
   //
-  // subscription checks
+  // subscription tier checks
   //
   if (context.data.detail === undefined ) {
     result.errMsg = "Detail required for this event type.";
@@ -132,6 +133,16 @@ function InitialSubscriptionPurchaseVerification(context, user) {
       return result;
     }
   }
+  let oldState = user.subscriptionState;
+  if (oldState === SubscriptionStateMap.closed) {
+    result.errMsg = "Cannot start a subscription on a closed account.";
+    return result;
+  }
+  if (oldState === SubscriptionStateMap.permDowngrade) {
+    result.errMsg = "This account has been permanently downgraded to Free. Please resolve this first.";
+    return result;
+  }
+  result.newSubscriptionState = SubscriptionStateMap.good;
   result.newTier = subscription;
   //
   // addedMonths checks
@@ -149,7 +160,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   //
   // descriptions for transaction
   //
-  result.note = String(context.data.note) + ";"; // the semicolon is for possibly adding things later
+  result.note = String(context.data.note);
+  if (result.newSubscriptionState != oldState) {
+    result.note += `; substate moved to ${result.newSubscriptionState} from ${oldState}`;
+  }
   result.desc = `INITIAL SUBSCRIPTION FOR ${result.newTier}`;
   //
   // done
