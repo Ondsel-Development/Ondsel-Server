@@ -29,7 +29,7 @@ export function addTransactionToUserAndSummarize(user, transaction) {
   for (te of user.userAccounting.journal) {
     let entry;
     for (entry of te.entries) {
-      balance[entry.ledger] += entry.amount * LedgerNature[entry.ledger]; // adds to debit ledgers; subtracts from credit ledgers
+      balance[entry.ledger] += entry.amount;
     }
   }
   user.userAccounting.ledgerBalances = balance;
@@ -73,12 +73,16 @@ export function credit(transaction, ledger, amt) {
 
 export function verifyBalanced(transaction) {
   let errMsg = "";
-  let balance = 0.0;
+  let balance = 0;
   let entry;
   for (entry of transaction.entries) {
-    balance += entry.amount;
+    if (LedgerNature[entry.ledger] === 1) {
+      balance += entry.amount;
+    } else {
+      balance -= entry.amount;
+    }
   }
-  if (balance != 0.0) {
+  if (balance !== 0) {
     errMsg = `Transaction unbalanced: ${transaction.entries}.`;
   }
   return errMsg;

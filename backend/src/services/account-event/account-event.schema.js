@@ -29,12 +29,10 @@ export const accountEventOptionsSchema = Type.Object(
   {
     // ALL fields in this schema should be optional
     subscription: Type.Optional(SubscriptionType),
-    termAddedMonths: Type.Optional(Type.Number()),
-    termFulfilledMonths: Type.Optional(Type.Number()),
+    term: Type.Optional(Type.Number()),
     // the "current" fields are used for auditing. The represent what the calling algorithm thinks is true before
     // the event happens.
     currentSubscription: Type.Optional(SubscriptionType),
-    currentKeyBalance: Type.Optional(Type.Integer()),  // the meaning of "key" depends on the event
   }
 )
 

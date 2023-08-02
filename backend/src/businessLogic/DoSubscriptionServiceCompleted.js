@@ -7,7 +7,7 @@ import {
 } from "../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
 
-export async function DoInitialSubscriptionPurchase(context) {
+export async function DoSubscriptionServiceCompleted(context) {
   // it is presumed that the processor has a confirmed charge at this point
   // hook.success is set to false already
   //
@@ -17,8 +17,8 @@ export async function DoInitialSubscriptionPurchase(context) {
   //
   // 2. verify supplied data
   //
-  let detail = InitialSubscriptionPurchaseVerification(context, user);
-  if (detail.errMsg != "") {
+  let detail = SubscriptionServiceCompletedVerification(context, user);
+  if (detail.errMsg !== "") {
     context.data.resultMsg = detail.errMsg;
     return;
   }
@@ -27,21 +27,28 @@ export async function DoInitialSubscriptionPurchase(context) {
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
-  debit(transaction, LedgerMap.cash, detail.amt);
-  credit(transaction, LedgerMap.unearnedRevenue, detail.amt);
+
+  debit(transaction, LedgerMap.unearnedRevenue, detail.amt);
+  credit(transaction, LedgerMap.revenue, detail.amt);
   let balanceMsg = verifyBalanced(transaction);
-  if (balanceMsg != "") {
+  if (balanceMsg !== "") {
     context.data.resultMsg = balanceMsg;
     return;
   }
   addTransactionToUserAndSummarize(user, transaction);
+  if (user.userAccounting.ledgerBalances.UnearnedRevenue >= detail.amt) {
+    detail.newSubscriptionState = SubscriptionStateMap.good;
+  } else {
+    detail.newSubscriptionState = SubscriptionStateMap.due; // TODO: perhaps do detail.renewNextDay flag instead?
+  }
+  // TODO: handle subscriptions changing price between the date of payment and date of completion
+  // TODO: safety check of 1-month interval since last "completion"; actually use that term field
 
   //
   // 4. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
   await context.app.service('users').patch(user._id, {
-    tier: detail.newTier,
     subscriptionState: detail.newSubscriptionState,
     userAccounting: user.userAccounting,
   });
@@ -52,15 +59,14 @@ export async function DoInitialSubscriptionPurchase(context) {
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
 }
 
-function InitialSubscriptionPurchaseVerification(context, user) {
+function SubscriptionServiceCompletedVerification(context, user) {
   let result = {
     errMsg: "",
     amt: 0,
-    newTier: "",
-    newSubscriptionState: "",
-    addedMonths: 0.0,
     desc: "",
     note: "",
+    newSubscriptionState: SubscriptionStateMap.due, // the default is to bill again the next day
+    resolvedMonths: 0.0
   }
   //
   // amount checks
@@ -82,6 +88,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     result.errMsg = "Amount must be a below 100000 (1000.00 USD) to be valid.";
     return result;
   }
+  if (user.userAccounting.ledgerBalances.UnearnedRevenue < amt) {
+    result.errMsg =  `Account has ${user.userAccounting.ledgerBalances.UnearnedRevenue} in unearned revenue. You can't complete ${amt} of service with that low a number. SOMETHING IS WRONG!`;
+    return result;
+  }
   result.amt = amt;
   //
   // subscription tier checks
@@ -95,56 +105,28 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     return result;
   }
   let subscription = context.data.detail.subscription;
-  if (!Object.values(SubscriptionTypeMap).includes(subscription)) {
-    result.errMsg = "Invalid detail.subscription.";
+  if (subscription !== user.tier) {
+    result.errMsg = `The completion of subscription for ${subscription} does not match the user's tier of ${user.tier}.`;
     return result;
   }
-  if (subscription === SubscriptionTypeMap.free) {
-    result.errMsg = "You cannot subscribe to `free` in exchange for money."; // this might change later w 0 amt
-    return result;
-  }
-  if (subscription == user.tier) {
-    result.errMsg = "Cannot start a new subscription at tier " + user.tier + " as the user already has that subscription.";
-    return result;
-  }
-  if (context.data.detail.currentSubscription) { // only do the check if the value is passed along
-    if (context.data.detail.currentSubscription != user.tier) {
-      result.errMsg = "The caller has impression the user is currently at tier " + context.data.detail.currentSubscription + " but this is wrong. It is at " + user.tier + ".";
-      return result;
-    }
-  }
-  let oldState = user.subscriptionState;
-  if (oldState === SubscriptionStateMap.closed) {
-    result.errMsg = "Cannot start a subscription on a closed account.";
-    return result;
-  }
-  if (oldState === SubscriptionStateMap.permDowngrade) {
-    result.errMsg = "This account has been permanently downgraded to Free. Please resolve this first.";
-    return result;
-  }
-  result.newSubscriptionState = SubscriptionStateMap.good;
-  result.newTier = subscription;
   //
   // addedMonths checks
   //
-  let addedMonths = context.data.detail.term ?? 0.0;
-  if (addedMonths <= 0) {
-    result.errMsg = "You cannot subscribe for 0 (or negative) months.";
+  let resolvedMonths = context.data.detail.term ?? 0.0;
+  if (resolvedMonths <= 0) {
+    result.errMsg = "You cannot complete for 0 (or negative) months.";
     return result;
   }
-  if (addedMonths > 1.0) {
-    result.errMsg = "Currently only 1 (or a fraction of 1) months of renewal is supported.";
+  if (resolvedMonths > 1.0) {
+    result.errMsg = "Currently only 1 (or a fraction of 1) months of resolution is supported.";
     return result;
   }
-  result.addedMonths = addedMonths;
+  result.resolvedMonths = resolvedMonths;
   //
   // descriptions for transaction
   //
   result.note = String(context.data.note);
-  if (result.newSubscriptionState != oldState) {
-    result.note += `; substate moved to ${result.newSubscriptionState} from ${oldState}`;
-  }
-  result.desc = `INITIAL SUBSCRIPTION FOR ${result.newTier}`;
+  result.desc = `COMPLETED ${result.resolvedMonths} MONTHS OF SERVICE FOR ${subscription}`;
   //
   // done
   //

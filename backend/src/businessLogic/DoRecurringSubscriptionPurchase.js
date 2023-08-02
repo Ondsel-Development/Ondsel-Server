@@ -1,4 +1,10 @@
-import {addTransactionToUserAndSummarize, debit, makeEmptyJournalTransaction, verifyBalanced} from "../accounting.js";
+import {
+  addTransactionToUserAndSummarize,
+  credit,
+  debit,
+  makeEmptyJournalTransaction,
+  verifyBalanced
+} from "../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
 
 export async function DoRecurringSubscriptionPurchase(context) {
@@ -22,7 +28,7 @@ export async function DoRecurringSubscriptionPurchase(context) {
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
   debit(transaction, LedgerMap.cash, detail.amt);
-  debit(transaction, LedgerMap.unearnedRevenue, detail.amt);
+  credit(transaction, LedgerMap.unearnedRevenue, detail.amt);
   let balanceMsg = verifyBalanced(transaction);
   if (balanceMsg !== "") {
     context.data.resultMsg = balanceMsg;
@@ -74,6 +80,10 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     result.errMsg = "Amount must be a below 100000 (1000.00 USD) to be valid.";
     return result;
   }
+  if (user.userAccounting.ledgerBalances.UnearnedRevenue >= amt) {
+    result.errMsg =  `Account has ${user.userAccounting.ledgerBalances.UnearnedRevenue} in unearned revenue already. Why the renewal? SOMETHING IS WRONG!`;
+    return result;
+  }
   result.amt = amt;
   //
   // subscription tier checks
@@ -108,7 +118,7 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
   //
   // addedMonths checks
   //
-  let addedMonths = context.data.detail.termAddedMonths ?? 0.0;
+  let addedMonths = context.data.detail.term ?? 0.0;
   if (addedMonths <= 0) {
     result.errMsg = "You cannot renew for 0 (or negative) months.";
     return result;
