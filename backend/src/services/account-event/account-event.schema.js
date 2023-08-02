@@ -11,8 +11,7 @@ export const AccountEventTypeMap = {
   initialSubscriptionPurchase : 'initial-subscription-purchase',
   recurringSubscriptionPurchase: 'recurring-subscription-purchase',
   subscriptionServiceCompleted: 'subscription-service-completed',
-  subscriptionRefundPayable: 'subscription-refund-payable',
-  refundPaid: 'refund-paid',
+  subscriptionRefund: 'subscription-refund',
 }
 
 export const AccountEventType = StringEnum(
@@ -20,8 +19,7 @@ export const AccountEventType = StringEnum(
     AccountEventTypeMap.initialSubscriptionPurchase,
     AccountEventTypeMap.recurringSubscriptionPurchase,
     AccountEventTypeMap.subscriptionServiceCompleted,
-    AccountEventTypeMap.subscriptionRefundPayable,
-    AccountEventTypeMap.refundPaid,
+    AccountEventTypeMap.subscriptionRefund,
   ]
 )
 
@@ -30,7 +28,7 @@ export const accountEventOptionsSchema = Type.Object(
     // ALL fields in this schema should be optional
     subscription: Type.Optional(SubscriptionType),
     term: Type.Optional(Type.Number()),
-    // the "current" fields are used for auditing. The represent what the calling algorithm thinks is true before
+    // the "current" fields are used for auditing. They represent what the calling algorithm thinks is true before
     // the event happens.
     currentSubscription: Type.Optional(SubscriptionType),
   }

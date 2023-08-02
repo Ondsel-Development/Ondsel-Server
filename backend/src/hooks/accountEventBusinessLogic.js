@@ -5,6 +5,7 @@ import {
 import {DoInitialSubscriptionPurchase} from "../businessLogic/DoInitialSubscriptionPurchase.js";
 import {DoRecurringSubscriptionPurchase} from "../businessLogic/DoRecurringSubscriptionPurchase.js";
 import {DoSubscriptionServiceCompleted} from "../businessLogic/DoSubscriptionServiceCompleted.js";
+import {DoSubscriptionRefund} from "../businessLogic/DoSubscriptionRefund.js";
 
 export const performAccountEventLogic = async (context) => {
   switch (context.data.event) {
@@ -16,6 +17,9 @@ export const performAccountEventLogic = async (context) => {
       break;
     case AccountEventTypeMap.subscriptionServiceCompleted:
       await DoSubscriptionServiceCompleted(context);
+      break;
+    case AccountEventTypeMap.subscriptionRefund:
+      await DoSubscriptionRefund(context);
       break;
     default:
       context.data.resultMsg = "Business logic for event type not supported yet.";

@@ -48,15 +48,15 @@ export const LedgerMap = {
   processorExpense: 'ProcessorExpense',
   unearnedRevenue: 'UnearnedRevenue',
   revenue: 'Revenue',
-  refunds: 'Refunds',
+  salesReturnsAndAllowances: 'SalesReturnsAndAllowances',
 }
 
 export const LedgerNature = {
-  'Cash': 1,              // +1 DEBIT as ASSET
-  'ProcessorExpense': 1,  // +1 DEBIT as EXPENSE
-  'UnearnedRevenue': -1,  // -1 CREDIT as LIABILITY
-  'Revenue': -1,          // -1 CREDIT for INCOME
-  'Refunds': -1,          // -1 CREDIT for LIABILITY
+  'Cash': 1,                           // +1 DEBIT  as ASSET
+  'ProcessorExpense': 1,               // +1 DEBIT  as EXPENSE
+  'UnearnedRevenue': -1,               // -1 CREDIT as LIABILITY
+  'Revenue': -1,                       // -1 CREDIT as INCOME
+  'SalesReturnsAndAllowances': 1,      // +1 DEBIT  as CONTRA-REVENUE
 }
 export const Ledger = StringEnum(
   [
@@ -64,7 +64,7 @@ export const Ledger = StringEnum(
     LedgerMap.processorExpense,
     LedgerMap.unearnedRevenue,
     LedgerMap.revenue,
-    LedgerMap.refunds,
+    LedgerMap.salesReturnsAndAllowances,
   ]
 )
 
@@ -88,11 +88,12 @@ export const userAccountingSchema = Type.Object(
   {
     ledgerBalances: Type.Object(
       {
-        Cash: Type.Integer(), // ASSET; base10 decimal not supported by feathersjs; so store money in integer pennies
-        ProcessorExpense: Type.Integer(), // EXPENSE
-        UnearnedRevenue: Type.Integer(), // INCOME
-        Revenue: Type.Integer(), // INCOME
-        Refunds: Type.Integer(), // inverted INCOME (EXPENSE)
+        // base10 decimal not supported by feathersjs; so store money in integer pennies
+        Cash: Type.Integer(),                      // ASSET
+        ProcessorExpense: Type.Integer(),          // EXPENSE
+        UnearnedRevenue: Type.Integer(),           // LIABILITY
+        Revenue: Type.Integer(),                   // INCOME
+        SalesReturnsAndAllowances: Type.Integer(), // CONTRA-REVENUE (negative income)
       }
     ),
     journal: Type.Array(journalTransactionSchema),
