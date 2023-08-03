@@ -19,6 +19,7 @@ export const userSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     tier: SubscriptionType,
+    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
     userAccounting: userAccountingSchema,
   },

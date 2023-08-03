@@ -12,6 +12,9 @@ export const AccountEventTypeMap = {
   recurringSubscriptionPurchase: 'recurring-subscription-purchase',
   subscriptionServiceCompleted: 'subscription-service-completed',
   subscriptionRefund: 'subscription-refund',
+  subscriptionTierDowngrade: 'subscription-tier-downgrade',
+  // TODO:
+  // 'subscription-tier-upgrade'    // the amount needs to be properly pre-computed. make an API for that? to enterprise right now
 }
 
 export const AccountEventType = StringEnum(

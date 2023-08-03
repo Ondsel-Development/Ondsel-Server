@@ -38,20 +38,28 @@ export async function DoSubscriptionServiceCompleted(context) {
   addTransactionToUserAndSummarize(user, transaction);
   if (user.userAccounting.ledgerBalances.UnearnedRevenue >= detail.amt) {
     detail.newSubscriptionState = SubscriptionStateMap.good;
+  } else if (detail.tierChanged && detail.tier === SubscriptionTypeMap.free) {
+    detail.newSubscriptionState = SubscriptionStateMap.good;
   } else {
-    detail.newSubscriptionState = SubscriptionStateMap.due; // TODO: perhaps do detail.renewNextDay flag instead?
+    detail.newSubscriptionState = SubscriptionStateMap.due;
   }
-  // TODO: handle subscriptions changing price between the date of payment and date of completion
-  // TODO: safety check of 1-month interval since last "completion"; actually use that term field
-
   //
   // 4. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
-  await context.app.service('users').patch(user._id, {
-    subscriptionState: detail.newSubscriptionState,
-    userAccounting: user.userAccounting,
-  });
+  if (detail.tierChanged) {
+    await context.app.service('users').patch(user._id, {
+      tier: detail.tier,
+      nextTier: null,
+      subscriptionState: detail.newSubscriptionState,
+      userAccounting: user.userAccounting,
+    });
+  } else {
+    await context.app.service('users').patch(user._id, {
+      subscriptionState: detail.newSubscriptionState,
+      userAccounting: user.userAccounting,
+    });
+  }
   //
   // all is good; return message
   //
@@ -66,7 +74,9 @@ function SubscriptionServiceCompletedVerification(context, user) {
     desc: "",
     note: "",
     newSubscriptionState: SubscriptionStateMap.due, // the default is to bill again the next day
-    resolvedMonths: 0.0
+    resolvedMonths: 0.0,
+    tierChanged: false,
+    tier: null,
   }
   //
   // amount checks
@@ -109,6 +119,13 @@ function SubscriptionServiceCompletedVerification(context, user) {
     result.errMsg = `The completion of subscription for ${subscription} does not match the user's tier of ${user.tier}.`;
     return result;
   }
+  if (user.nextTier !== undefined && user.nextTier != null) {
+    // nextTier is set, so upgrade/downgrade to the new level
+    result.tier = user.nextTier;
+    result.tierChanged = true;
+  } else {
+    result.tier = user.tier;
+  }
   //
   // addedMonths checks
   //
@@ -127,6 +144,9 @@ function SubscriptionServiceCompletedVerification(context, user) {
   //
   result.note = String(context.data.note);
   result.desc = `COMPLETED ${result.resolvedMonths} MONTHS OF SERVICE FOR ${subscription}`;
+  if (result.tierChanged) {
+    result.desc += " AND NEXT PERIOD WILL BE " + result.tier
+  }
   //
   // done
   //
