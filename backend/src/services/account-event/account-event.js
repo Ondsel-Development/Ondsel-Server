@@ -17,7 +17,7 @@ import {
 import { AccountEventService, getOptions } from './account-event.class.js'
 import { accountEventPath, accountEventMethods } from './account-event.shared.js'
 import { disallow } from 'feathers-hooks-common';
-import { performAccountEventLogic } from "../../hooks/accountEventBusinessLogic.js";
+import { performAccountEventLogic } from "./hooks/accountEventBusinessLogic.js";
 import swagger from "feathers-swagger";
 
 export * from './account-event.class.js'

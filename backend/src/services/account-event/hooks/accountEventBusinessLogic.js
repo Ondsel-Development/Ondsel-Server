@@ -1,7 +1,7 @@
 import {
   AccountEventType,
   AccountEventTypeMap,
-} from "../services/account-event/account-event.schema.js";
+} from "../account-event.schema.js";
 import {DoInitialSubscriptionPurchase} from "../businessLogic/DoInitialSubscriptionPurchase.js";
 import {DoRecurringSubscriptionPurchase} from "../businessLogic/DoRecurringSubscriptionPurchase.js";
 import {DoSubscriptionServiceCompleted} from "../businessLogic/DoSubscriptionServiceCompleted.js";
