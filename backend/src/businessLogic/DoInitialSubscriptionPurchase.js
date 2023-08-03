@@ -6,6 +6,7 @@ import {
   verifyBalanced
 } from "../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
+import {currencyTypeMap} from "../currencies.js";
 
 export async function DoInitialSubscriptionPurchase(context) {
   // it is presumed that the processor has a confirmed charge at this point
@@ -18,7 +19,7 @@ export async function DoInitialSubscriptionPurchase(context) {
   // 2. verify supplied data
   //
   let detail = InitialSubscriptionPurchaseVerification(context, user);
-  if (detail.errMsg != "") {
+  if (detail.errMsg !== "") {
     context.data.resultMsg = detail.errMsg;
     return;
   }
@@ -27,15 +28,14 @@ export async function DoInitialSubscriptionPurchase(context) {
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
-  debit(transaction, LedgerMap.cash, detail.amt);
+  debit(transaction, LedgerMap.cash, detail.amt, detail.originalCurrency, detail.originalAmt);
   credit(transaction, LedgerMap.unearnedRevenue, detail.amt);
   let balanceMsg = verifyBalanced(transaction);
-  if (balanceMsg != "") {
+  if (balanceMsg !== "") {
     context.data.resultMsg = balanceMsg;
     return;
   }
   addTransactionToUserAndSummarize(user, transaction);
-
   //
   // 4. update the user doc
   //
@@ -58,19 +58,21 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     amt: 0,
     newTier: "",
     newSubscriptionState: "",
-    addedMonths: 0.0,
+    addedMonths: "",
     desc: "",
     note: "",
+    originalCurrency: "",
+    originalAmt: "",
   }
   //
   // amount checks
   //
   let amt = context.data.amount;
-  if (amt === undefined || result.amt == null ) {
+  if (amt === undefined || amt == null ) {
     result.errMsg = "Amount must be set to an integer (in pennies) for this event type.";
     return result;
   }
-  if (amt != Math.round(amt)) {
+  if (amt !== Math.round(amt)) {
     result.errMsg = "Amount must be a simple integer measuring pennies (100ths of USD), not a float, for this event type.";
     return result;
   };
@@ -83,6 +85,19 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     return result;
   }
   result.amt = amt;
+  //
+  // transaction data for original currency
+  //
+  if (context.data.originalAmt === undefined || context.data.originalAmt == null ) {
+    result.errMsg = "Original amount in the original currency must be specified. For USD, express this as dollars here (1.23) not pennies.";
+    return result;
+  }
+  if (context.data.originalCurrency === undefined || context.data.originalCurrency == null ) {
+    result.errMsg = "Original currency must be specified. For USD, use 'USD'.";
+    return result;
+  }
+  result.originalAmt = context.data.originalAmt;
+  result.originalCurrency = context.data.originalCurrency;
   //
   // subscription tier checks
   //
@@ -127,20 +142,15 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   //
   // addedMonths checks
   //
-  let addedMonths = context.data.detail.term ?? 0.0;
-  if (addedMonths <= 0) {
-    result.errMsg = "You cannot subscribe for 0 (or negative) months.";
+  if (context.data.detail.term === undefined || context.data.detail.term == null ) {
+    result.errMsg = "Detail.term (in months) required.";
     return result;
   }
-  if (addedMonths > 1.0) {
-    result.errMsg = "Currently only 1 (or a fraction of 1) months of renewal is supported.";
-    return result;
-  }
-  result.addedMonths = addedMonths;
+  result.addedMonths = context.data.detail.term;
   //
   // descriptions for transaction
   //
-  result.note = String(context.data.note);
+  result.note = String(context.data.note) + `; ${result.addedMonths} months`;
   if (result.newSubscriptionState != oldState) {
     result.note += `; substate moved to ${result.newSubscriptionState} from ${oldState}`;
   }

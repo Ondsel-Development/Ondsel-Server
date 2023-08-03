@@ -27,7 +27,7 @@ export async function DoRecurringSubscriptionPurchase(context) {
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
-  debit(transaction, LedgerMap.cash, detail.amt);
+  debit(transaction, LedgerMap.cash, detail.amt, detail.originalCurrency, detail.originalAmt);
   credit(transaction, LedgerMap.unearnedRevenue, detail.amt);
   let balanceMsg = verifyBalanced(transaction);
   if (balanceMsg !== "") {
@@ -56,9 +56,11 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     errMsg: "",
     amt: 0,
     newSubscriptionState: "",
-    addedMonths: 0.0,
+    addedMonths: "",
     desc: "",
     note: "",
+    originalCurrency: "",
+    originalAmt: "",
   }
   //
   // amount checks
@@ -85,6 +87,19 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     return result;
   }
   result.amt = amt;
+  //
+  // transaction data for original currency
+  //
+  if (context.data.originalCurrency === undefined || context.data.originalCurrency == null ) {
+    result.errMsg = "Original currency must be specified. For USD, use 'USD'.";
+    return result;
+  }
+  if (context.data.originalAmt === undefined || context.data.originalAmt == null ) {
+    result.errMsg = "Original amount in the original currency must be specified. For USD, express this as dollars here (1.23) not pennies.";
+    return result;
+  }
+  result.originalCurrency = context.data.originalCurrency;
+  result.originalAmt = context.data.originalAmt;
   //
   // subscription tier checks
   //
@@ -118,20 +133,12 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
   //
   // addedMonths checks
   //
-  let addedMonths = context.data.detail.term ?? 0.0;
-  if (addedMonths <= 0) {
-    result.errMsg = "You cannot renew for 0 (or negative) months.";
-    return result;
-  }
-  if (addedMonths > 1.0) {
-    result.errMsg = "Currently only 1 (or a fraction of 1) months of renewal is supported.";
-    return result;
-  }
+  let addedMonths = context.data.detail.term
   result.addedMonths = addedMonths;
   //
   // descriptions for transaction
   //
-  result.note = String(context.data.note);
+  result.note = String(context.data.note) + `; for ${result.addedMonths} mo`;
   if (result.newSubscriptionState != oldState) {
     result.note += `; substate moved to ${result.newSubscriptionState} from ${oldState}`;
   }

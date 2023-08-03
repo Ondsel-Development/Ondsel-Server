@@ -2,6 +2,7 @@
 
 import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
+import {CurrencyType} from "../../currencies.js";
 
 export const SubscriptionTypeMap = {
   free: 'Free',
@@ -71,7 +72,9 @@ export const Ledger = StringEnum(
 export const journalElementSchema = Type.Object(
   {
     ledger: Ledger,
-    amount: Type.Integer()
+    amount: Type.Integer(),
+    currency: Type.Optional(Type.Union([CurrencyType, Type.Null()])),  // currency display only needed on inbound/outbound entries to processor
+    currencyAmt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   }
 )
 

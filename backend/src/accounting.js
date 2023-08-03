@@ -46,7 +46,7 @@ export function makeEmptyJournalTransaction(description, note) {
   return transaction;
 }
 
-export function debit(transaction, ledger, amt) {
+export function debit(transaction, ledger, amt, origCurrency, origAmt) {
   // a debit records incoming money
   if (amt < 0) {
     throw "negative value passed to debit function";
@@ -54,11 +54,13 @@ export function debit(transaction, ledger, amt) {
   let finalAmt = amt * LedgerNature[ledger];
   let entry = {
     ledger: ledger,
-    amount: finalAmt,
+    amount: finalAmt,  // pennies USD; always.
+    currency: origCurrency,
+    currencyAmt: origAmt,
   }
   transaction.entries.push(entry);
 }
-export function credit(transaction, ledger, amt) {
+export function credit(transaction, ledger, amt, origCurrency, origAmt) {
   // a credit records outgoing money
   if (amt < 0) {
     throw "negative value passed to credit function";
@@ -67,6 +69,8 @@ export function credit(transaction, ledger, amt) {
   let entry = {
     ledger: ledger,
     amount: finalAmt,
+    currency: origCurrency,
+    currencyAmt: origAmt,
   }
   transaction.entries.push(entry);
 }

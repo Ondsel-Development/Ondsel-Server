@@ -5,6 +5,7 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {SubscriptionStateType, SubscriptionType, userSummarySchema} from "../users/users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
+import {CurrencyType} from "../../currencies.js";
 
 // Main data model schema
 export const AccountEventTypeMap = {
@@ -30,7 +31,7 @@ export const accountEventOptionsSchema = Type.Object(
   {
     // ALL fields in this schema should be optional
     subscription: Type.Optional(SubscriptionType),
-    term: Type.Optional(Type.Number()),
+    term: Type.Optional(Type.String()),
     // the "current" fields are used for auditing. They represent what the calling algorithm thinks is true before
     // the event happens.
     currentSubscription: Type.Optional(SubscriptionType),
@@ -42,10 +43,12 @@ export const accountEventSchema = Type.Object(
     _id: ObjectIdSchema(),
     transactionId: ObjectIdSchema(),  // must be kept separate from _id to prevent the framework from mangling it.
     event: AccountEventType,
-    userId: Type.Optional(ObjectIdSchema()),
+    userId: ObjectIdSchema(),
     createdAt: Type.Number(),
     note: Type.String(), // not seen by end user
     amount: Type.Optional(Type.Integer()),
+    originalCurrency: Type.Optional(CurrencyType),
+    originalAmt: Type.Optional(Type.String()),
     detail: accountEventOptionsSchema,
     success: Type.Boolean(),
     resultMsg: Type.Optional(Type.String())

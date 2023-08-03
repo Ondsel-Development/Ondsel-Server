@@ -127,17 +127,9 @@ function SubscriptionServiceCompletedVerification(context, user) {
     result.tier = user.tier;
   }
   //
-  // addedMonths checks
+  // resolvedMonths
   //
-  let resolvedMonths = context.data.detail.term ?? 0.0;
-  if (resolvedMonths <= 0) {
-    result.errMsg = "You cannot complete for 0 (or negative) months.";
-    return result;
-  }
-  if (resolvedMonths > 1.0) {
-    result.errMsg = "Currently only 1 (or a fraction of 1) months of resolution is supported.";
-    return result;
-  }
+  let resolvedMonths = context.data.detail.term
   result.resolvedMonths = resolvedMonths;
   //
   // descriptions for transaction
