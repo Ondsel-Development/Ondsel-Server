@@ -7,15 +7,11 @@ import {
 } from "../../../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 
-export async function DoRecurringSubscriptionPurchase(context) {
+export async function DoRecurringSubscriptionPurchase(context, user) {
   // it is presumed that the processor has a confirmed charge at this point
   // hook.success is set to false already
   //
-  // 1. get the user document (will naturally throw 404 on missing user error if not found)
-  //
-  let user = await context.app.service('users').get(context.data.userId);
-  //
-  // 2. verify supplied data
+  // 1. verify supplied data
   //
   let detail = RecurringSubscriptionPurchaseVerification(context, user);
   if (detail.errMsg !== "") {
@@ -23,7 +19,7 @@ export async function DoRecurringSubscriptionPurchase(context) {
     return;
   }
   //
-  // 3. calculate the proper journal entries, summarize, optional tier
+  // 2. calculate the proper journal entries, summarize, optional tier
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
@@ -37,7 +33,7 @@ export async function DoRecurringSubscriptionPurchase(context) {
   addTransactionToUserAndSummarize(user, transaction);
 
   //
-  // 4. update the user doc
+  // 3. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
   await context.app.service('users').patch(user._id, {

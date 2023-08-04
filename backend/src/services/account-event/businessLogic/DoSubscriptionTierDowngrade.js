@@ -7,15 +7,11 @@ import {
 } from "../../../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 
-export async function DoSubscriptionTierDowngrade(context) {
+export async function DoSubscriptionTierDowngrade(context, user) {
   // it is presumed that the processor has a confirmed charge at this point
   // hook.success is set to false already
   //
-  // 1. get the user document (will naturally throw 404 on missing user error if not found)
-  //
-  let user = await context.app.service('users').get(context.data.userId);
-  //
-  // 2. verify supplied data
+  // 1. verify supplied data
   //
   let detail = SubscriptionTierDowngradeVerification(context, user);
   if (detail.errMsg !== "") {
@@ -23,11 +19,11 @@ export async function DoSubscriptionTierDowngrade(context) {
     return;
   }
   //
-  // 3. this account event does NOT create a transaction.
+  // 2. this account event does NOT create a transaction.
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   //
-  // 4. update the user doc
+  // 3. update the user doc
   //
   await context.app.service('users').patch(user._id, {
     nextTier: detail.newTier,

@@ -24,6 +24,7 @@ export const AccountEventType = StringEnum(
     AccountEventTypeMap.recurringSubscriptionPurchase,
     AccountEventTypeMap.subscriptionServiceCompleted,
     AccountEventTypeMap.subscriptionRefund,
+    AccountEventTypeMap.subscriptionTierDowngrade,
   ]
 )
 
@@ -51,7 +52,8 @@ export const accountEventSchema = Type.Object(
     originalAmt: Type.Optional(Type.String()),
     detail: accountEventOptionsSchema,
     success: Type.Boolean(),
-    resultMsg: Type.Optional(Type.String())
+    resultMsg: Type.Optional(Type.String()),
+    additionalData: Type.Optional(Type.Object({}))
   },
   { $id: 'AccountEvent', additionalProperties: true }
 )
@@ -62,12 +64,20 @@ export const accountEventResolver = resolve({})
 export const accountEventExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const accountEventDataSchema = Type.Pick(accountEventSchema, ['text'], {
+export const accountEventDataSchema = Type.Pick(accountEventSchema, [
+  'event',
+  'note',
+  'detail',
+], {
   $id: 'AccountEventData'
 })
 export const accountEventDataValidator = getValidator(accountEventDataSchema, dataValidator)
 export const accountEventDataResolver = resolve({
   _id: async () => new ObjectId(),
+  userId: async (_value, _message, context) => {
+    // Associate the record with the id of the authenticated user
+    return context.params.user._id
+  },
   createdAt: async () => Date.now(),
   success: async () => false,
   resultMsg: async () => "Internal error: performAccountEventLogic never completed; nor did it record a real error.",
@@ -81,7 +91,7 @@ export const accountEventPatchValidator = getValidator(accountEventPatchSchema, 
 export const accountEventPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const accountEventQueryProperties = Type.Pick(accountEventSchema, ['_id', 'text'])
+export const accountEventQueryProperties = Type.Pick(accountEventSchema, ['_id', 'userId'])
 export const accountEventQuerySchema = Type.Intersect(
   [
     querySyntax(accountEventQueryProperties),
@@ -91,4 +101,12 @@ export const accountEventQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const accountEventQueryValidator = getValidator(accountEventQuerySchema, queryValidator)
-export const accountEventQueryResolver = resolve({})
+export const accountEventQueryResolver = resolve({
+  // user are only allowed to see their own data
+  userId: async (value, user, context) => {
+    if (context.params.user) {
+      return context.params.user._id
+    }
+    return value
+  }
+})

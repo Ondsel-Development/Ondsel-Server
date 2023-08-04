@@ -23,11 +23,6 @@ import swagger from "feathers-swagger";
 export * from './account-event.class.js'
 export * from './account-event.schema.js'
 
-const setUserId = setField({
-  from: 'params.user._id',
-  as: 'data.userId'
-});
-
 // A configure function that registers the service and its hooks via `app.configure`
 export const accountEvent = (app) => {
   // Register our service on the Feathers application
@@ -62,13 +57,12 @@ export const accountEvent = (app) => {
       find: [],
       get: [],
       create: [
-        setUserId,
         schemaHooks.validateData(accountEventDataValidator),
         schemaHooks.resolveData(accountEventDataResolver),
         performAccountEventLogic,
       ],
-      patch: [ disallow() ], // the accountEventLog may never be deleted from or altered
-      remove: [ disallow() ] // the accountEventLog may never be deleted from or altered
+      patch: [],
+      remove: []
     },
     after: {
       all: []
