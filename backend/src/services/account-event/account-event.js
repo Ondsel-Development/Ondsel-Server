@@ -16,12 +16,17 @@ import {
 } from './account-event.schema.js'
 import { AccountEventService, getOptions } from './account-event.class.js'
 import { accountEventPath, accountEventMethods } from './account-event.shared.js'
-import { disallow } from 'feathers-hooks-common';
+import {disallow, setField} from 'feathers-hooks-common';
 import { performAccountEventLogic } from "./hooks/accountEventBusinessLogic.js";
 import swagger from "feathers-swagger";
 
 export * from './account-event.class.js'
 export * from './account-event.schema.js'
+
+const setUserId = setField({
+  from: 'params.user._id',
+  as: 'data.userId'
+});
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const accountEvent = (app) => {
@@ -57,6 +62,7 @@ export const accountEvent = (app) => {
       find: [],
       get: [],
       create: [
+        setUserId,
         schemaHooks.validateData(accountEventDataValidator),
         schemaHooks.resolveData(accountEventDataResolver),
         performAccountEventLogic,

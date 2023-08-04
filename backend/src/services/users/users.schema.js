@@ -6,7 +6,12 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 
 import { dataValidator, queryValidator } from '../../validators.js'
-import {SubscriptionStateType, SubscriptionType, userAccountingSchema} from "./users.subdocs.schema.js";
+import {
+  SubscriptionStateMap,
+  SubscriptionStateType,
+  SubscriptionType,
+  userAccountingSchema
+} from "./users.subdocs.schema.js";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -27,11 +32,15 @@ export const userSchema = Type.Object(
 )
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
-
   tier: virtual(async (message, context) => {
     return message.tier || "Free"
-  })
-
+  }),
+  nextTier: virtual(async (message, context) => {
+    return message.nextTier || null
+  }),
+  subscriptionState: virtual(async (message, context) => {
+    return message.subscriptionState || SubscriptionStateMap.good
+  }),
 })
 
 export const userExternalResolver = resolve({

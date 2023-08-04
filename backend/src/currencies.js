@@ -1,5 +1,7 @@
 import {StringEnum, Type} from "@feathersjs/typebox";
 
+// pulled and rewritten from https://github.com/ourworldincode/currency
+
 export const currencyNameMap = {
   AED: "Dirhams",
   AFN: "Afghani",
