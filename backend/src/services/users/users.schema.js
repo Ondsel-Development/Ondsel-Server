@@ -6,6 +6,15 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 
 import { dataValidator, queryValidator } from '../../validators.js'
+import {specificAgreementSummaryType} from "../agreements/agreements.schema.js";
+
+export const agreementsAcceptedSchema = Type.Object(
+  {
+    currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
+    currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
+    history: Type.Array(specificAgreementSummaryType),
+  }
+)
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -17,7 +26,8 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    tier: StringEnum(['Free', 'Premium', 'Enterprise'])
+    tier: StringEnum(['Free', 'Premium', 'Enterprise']),
+    agreementAccepted: agreementsAcceptedSchema,
   },
   { $id: 'User', additionalProperties: false }
 )

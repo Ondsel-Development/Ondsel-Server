@@ -1,3 +1,7 @@
+import { acceptAgreement } from './agreements/accept/accept.js'
+
+import { agreements } from './agreements/agreements.js'
+
 import { file } from './file/file.js'
 
 import { sharedModels } from './shared-models/shared-models.js'
@@ -9,6 +13,10 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(acceptAgreement)
+
+  app.configure(agreements)
+
   app.configure(file)
 
   app.configure(sharedModels)
