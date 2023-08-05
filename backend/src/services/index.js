@@ -1,5 +1,9 @@
 import { accountEvent } from './account-event/account-event.js'
 
+import { acceptAgreement } from './agreements/accept/accept.js'
+
+import { agreements } from './agreements/agreements.js'
+
 import { file } from './file/file.js'
 
 import { sharedModels } from './shared-models/shared-models.js'
@@ -12,6 +16,10 @@ import { user } from './users/users.js'
 
 export const services = (app) => {
   app.configure(accountEvent)
+
+  app.configure(acceptAgreement)
+
+  app.configure(agreements)
 
   app.configure(file)
 

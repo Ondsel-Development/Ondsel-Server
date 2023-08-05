@@ -12,7 +12,15 @@ import {
   SubscriptionType,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
+import {specificAgreementSummaryType} from "../agreements/agreements.schema.js";
 
+export const agreementsAcceptedSchema = Type.Object(
+  {
+    currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
+    currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
+    history: Type.Array(specificAgreementSummaryType),
+  }
+)
 // Main data model schema
 export const userSchema = Type.Object(
   {
@@ -27,11 +35,13 @@ export const userSchema = Type.Object(
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
     userAccounting: userAccountingSchema,
+    agreementAccepted: agreementsAcceptedSchema,
   },
   { $id: 'User', additionalProperties: false }
 )
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
+
   tier: virtual(async (message, context) => {
     return message.tier || "Free"
   }),
