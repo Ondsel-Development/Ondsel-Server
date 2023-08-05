@@ -3,6 +3,7 @@
 import {ObjectId} from "mongodb";
 import {LedgerMap, LedgerNature} from "./services/users/users.subdocs.schema.js";
 import {resolveObjectId} from "@feathersjs/mongodb";
+import {BadRequest} from "@feathersjs/errors";
 
 export function addTransactionToUserAndSummarize(user, transaction) {
   if (!user.userAccounting) {
@@ -49,7 +50,7 @@ export function makeEmptyJournalTransaction(description, note) {
 export function debit(transaction, ledger, amt, origCurrency, origAmt) {
   // a debit records incoming money
   if (amt < 0) {
-    throw "negative value passed to debit function";
+    throw new BadRequest('negative value passed to debit function');
   }
   let finalAmt = amt * LedgerNature[ledger];
   let entry = {
@@ -63,7 +64,7 @@ export function debit(transaction, ledger, amt, origCurrency, origAmt) {
 export function credit(transaction, ledger, amt, origCurrency, origAmt) {
   // a credit records outgoing money
   if (amt < 0) {
-    throw "negative value passed to credit function";
+    throw new BadRequest('negative value passed to credit function');
   }
   let finalAmt = amt * (-1) * LedgerNature[ledger];
   let entry = {
