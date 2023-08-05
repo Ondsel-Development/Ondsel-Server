@@ -23,15 +23,9 @@ export async function DoSubscriptionRefund(context, user) {
   //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
-  // This is a possible double entry
-  // First: debit cash AND credit salesReturnsAndAllowances
+  // This is a possible double entry; but only later when we start tracking Processor Expenses
   debit(transaction, LedgerMap.salesReturnsAndAllowances, detail.amt)
   credit(transaction, LedgerMap.cash, detail.amt);
-  // Second: clear up unearnedRevenue liability, if any.
-  if (detail.unearnedRevenueAmt > 0) {
-    debit(transaction, LedgerMap.unearnedRevenue, detail.unearnedRevenueAmt);
-    credit(transaction, LedgerMap.revenue, detail.unearnedRevenueAmt);
-  }
   let balanceMsg = verifyBalanced(transaction);
   if (balanceMsg !== "") {
     context.data.resultMsg = balanceMsg;
@@ -56,7 +50,6 @@ function SubscriptionRefundVerification(context, user) {
   let result = {
     errMsg: "",
     amt: 0,
-    unearnedRevenueAmt: 0,
     desc: "",
     note: "",
   }
@@ -64,7 +57,7 @@ function SubscriptionRefundVerification(context, user) {
   // amount checks
   //
   let amt = context.data.amount;
-  let cash = user.userAccounting.ledgerBalances.Cash;
+  let totalCollected = user.userAccounting.ledgerBalances.Cash + user.userAccounting.ledgerBalances.ProcessorExpense;
   if (amt === undefined || result.amt == null ) {
     result.errMsg = "Amount must be set to an integer (in pennies) for this event type.";
     return result;
@@ -73,8 +66,8 @@ function SubscriptionRefundVerification(context, user) {
     result.errMsg = "Amount must be a simple integer measuring pennies (100ths of USD), not a float, for this event type.";
     return result;
   };
-  if (amt > cash) {
-    result.errMsg = `This person has only ever paid us ${cash}. Not possible to refund this much.`;
+  if (amt > totalCollected) {
+    result.errMsg = `This person has only ever paid us ${totalCollected}. Not possible to refund this much.`;
     return result;
   }
   if (amt <= 1) {
@@ -86,16 +79,6 @@ function SubscriptionRefundVerification(context, user) {
     return result;
   }
   result.amt = amt;
-  //
-  // resolve outstanding liability
-  //
-  let unearnedRevenueBalance = user.userAccounting.ledgerBalances.UnearnedRevenue;
-  if (unearnedRevenueBalance > 0) {
-    result.unearnedRevenueAmt = unearnedRevenueBalance;
-    if (result.unearnedRevenueAmt > amt) {
-      result.unearnedRevenueAmt = amt;
-    }
-  }
   //
   // descriptions for transaction
   //
