@@ -6,6 +6,6 @@ export class AcceptAgreementService extends MongoDBService {}
 export const getOptions = (app) => {
   return {
     paginate: app.get('paginate'),
-    Model: app.get('mongodbClient').then((db) => db.collection('agreements-accept'))
+    Model: app.get('mongodbClient').then((db) => db.collection('agreement-acceptance-log'))
   }
 }

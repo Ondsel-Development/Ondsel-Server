@@ -9,9 +9,10 @@ import {agreementCategoryType} from "../agreements.schema.js";
 export const acceptAgreementSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    userid: ObjectIdSchema(),
+    userId: ObjectIdSchema(),
     category: agreementCategoryType,
     version: Type.String(),
+    dbResultMsg: Type.String(),
   },
   { $id: 'AcceptAgreement', additionalProperties: false }
 )
@@ -29,7 +30,12 @@ export const acceptAgreementDataSchema = Type.Pick(acceptAgreementSchema, [
   $id: 'AcceptAgreementData'
 })
 export const acceptAgreementDataValidator = getValidator(acceptAgreementDataSchema, dataValidator)
-export const acceptAgreementDataResolver = resolve({})
+export const acceptAgreementDataResolver = resolve({
+  userId: async (_value, _message, context) => {
+    // Associate the record with the id of the authenticated user
+    return context.params.user._id
+  },
+})
 
 // Schema for updating existing entries
 export const acceptAgreementPatchSchema = Type.Partial(acceptAgreementSchema, {

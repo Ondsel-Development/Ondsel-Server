@@ -21,6 +21,7 @@ export const agreementsAcceptedSchema = Type.Object(
     history: Type.Array(specificAgreementSummaryType),
   }
 )
+
 // Main data model schema
 export const userSchema = Type.Object(
   {
