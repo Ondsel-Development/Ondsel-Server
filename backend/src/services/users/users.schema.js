@@ -27,7 +27,7 @@ export const userSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     tier: StringEnum(['Free', 'Premium', 'Enterprise']),
-    agreementAccepted: agreementsAcceptedSchema,
+    agreementAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
 )

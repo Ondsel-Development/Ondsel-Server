@@ -19,7 +19,8 @@ export const specificAgreementSummaryType = Type.Object(
     category: agreementCategoryType,
     title: Type.String(),
     version: Type.String(),
-  }
+  },
+  { $id: 'SpecificAgreementSum', additionalProperties: true }
 )
 export const specificAgreementType = Type.Object(
   {
@@ -63,7 +64,7 @@ export const agreementsPatchValidator = getValidator(agreementsPatchSchema, data
 export const agreementsPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const agreementsQueryProperties = Type.Pick(agreementsSchema, ['_id', 'text'])
+export const agreementsQueryProperties = Type.Pick(agreementsSchema, ['_id', 'category'])
 export const agreementsQuerySchema = Type.Intersect(
   [
     querySyntax(agreementsQueryProperties),

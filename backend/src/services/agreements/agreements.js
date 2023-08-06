@@ -9,10 +9,12 @@ import {
   agreementsExternalResolver,
   agreementsDataResolver,
   agreementsPatchResolver,
-  agreementsQueryResolver
+  agreementsQueryResolver, agreementsSchema, agreementsQuerySchema
 } from './agreements.schema.js'
 import { AgreementsService, getOptions } from './agreements.class.js'
 import { agreementsPath, agreementsMethods } from './agreements.shared.js'
+import {authenticate} from "@feathersjs/authentication";
+import swagger from "feathers-swagger";
 
 export * from './agreements.class.js'
 export * from './agreements.schema.js'
@@ -24,12 +26,21 @@ export const agreements = (app) => {
     // A list of all methods this service exposes externally
     methods: agreementsMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { agreementsSchema, agreementsQuerySchema },
+      docs: {
+        description: 'An agreements service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    }),
   })
   // Initialize hooks
   app.service(agreementsPath).hooks({
     around: {
       all: [
+        authenticate('jwt'),
         schemaHooks.resolveExternal(agreementsExternalResolver),
         schemaHooks.resolveResult(agreementsResolver)
       ]
