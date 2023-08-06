@@ -37,6 +37,16 @@ export const doAcceptOneAgreement = async (context) => {
     title: agreement.current.title,
     version: ver,
   };
+  if (!user.agreementAccepted) {
+    user.agreementAccepted = {
+      currentPrivacyPolicyVersion: null,
+      currentTermsOfServiceVersion: null,
+      history: []
+    };
+  }
+  if (!user.agreementAccepted.history) {
+    user.agreementAccepted.history = [];
+  }
   user.agreementAccepted.history.push(sum);
   switch (cat) {
     case agreementCategoryTypeMap.privacyPolicy:
