@@ -7,8 +7,15 @@ export const doAcceptOneAgreement = async (context) => {
   context.data.dbResultMsg = "agreement logic failed to complete.";
   const cat = context.data.category || "not-specified";
   const ver = context.data.version || "no-version-given";
+  if (!user.agreementsAccepted) {
+    user.agreementsAccepted = {
+      currentPrivacyPolicyVersion: null,
+      currentTermsOfServiceVersion: null,
+      history: []
+    };
+  }
   //
-  // GET the current version for the category
+  // GET the current agreement for the category
   //
   let agreementResult = await context.app.service('agreements').find({
     query: {
@@ -31,29 +38,39 @@ export const doAcceptOneAgreement = async (context) => {
     context.data.dbResultMsg = `Cannot agree to version ${ver} of ${cat} as ${agreement.current.version} is the current version.`;
     return;
   }
+  switch (cat) {
+    case agreementCategoryTypeMap.privacyPolicy:
+      if (ver === user.agreementsAccepted.currentPrivacyPolicyVersion) {
+        context.data.dbResultMsg = `User has already agreed to version ${ver} of ${cat}.`;
+        return;
+      };
+      break;
+    case agreementCategoryTypeMap.termsOfService:
+      if (ver === user.agreementsAccepted.currentTermsOfServiceVersion) {
+        context.data.dbResultMsg = `User has already agreed to version ${ver} of ${cat}.`;
+        return;
+      };
+      break;
+    default:
+      context.data.dbResultMsg = `There no support for a category of ${cat}.`;
+      return;
+  }
+  let rightNow = Date.now();
   let sum = {
     agreementDocId: agreement.current.agreementDocId,
     category: cat,
     title: agreement.current.title,
     version: ver,
+    whenAgreedTo: new Date(rightNow).toUTCString(),
+    when: rightNow,
   };
-  if (!user.agreementAccepted) {
-    user.agreementAccepted = {
-      currentPrivacyPolicyVersion: null,
-      currentTermsOfServiceVersion: null,
-      history: []
-    };
-  }
-  if (!user.agreementAccepted.history) {
-    user.agreementAccepted.history = [];
-  }
-  user.agreementAccepted.history.push(sum);
+  user.agreementsAccepted.history.push(sum);
   switch (cat) {
     case agreementCategoryTypeMap.privacyPolicy:
-      user.agreementAccepted.currentPrivacyPolicyVersion = ver;
+      user.agreementsAccepted.currentPrivacyPolicyVersion = ver;
       break;
     case agreementCategoryTypeMap.termsOfService:
-      user.agreementAccepted.currentTermsOfServiceVersion = ver;
+      user.agreementsAccepted.currentTermsOfServiceVersion = ver;
       break;
     default:
       break;
@@ -62,8 +79,8 @@ export const doAcceptOneAgreement = async (context) => {
   // save the result
   //
   await context.app.service('users').patch(user._id, {
-    agreementAccepted: user.agreementAccepted,
+    agreementsAccepted: user.agreementsAccepted,
   });
-  context.data.dbResultMsg = `saved acceptance to ${cat} version ${ver} to user ${user._id}`;
+  context.data.dbResultMsg = `SUCCESS: saved acceptance to ${cat} version ${ver} to user ${user._id}`;
   return context;
 }

@@ -6,6 +6,7 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 
 import { dataValidator, queryValidator } from '../../validators.js'
+import {agreementCategoryType} from "../agreements/agreements.schema.js";
 import {
   SubscriptionStateMap,
   SubscriptionStateType,
@@ -14,11 +15,21 @@ import {
 } from "./users.subdocs.schema.js";
 import {specificAgreementSummaryType} from "../agreements/agreements.schema.js";
 
+export const specificAgreementCompletionType = Type.Object(
+  {
+    agreementDocId: ObjectIdSchema(),
+    category: agreementCategoryType,
+    title: Type.String(),
+    version: Type.String(),
+    whenAgreedTo: Type.String(), // the legal text version
+    when: Type.Number(),         // the database searchable version of whenAgreedTo
+  }
+)
 export const agreementsAcceptedSchema = Type.Object(
   {
     currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
     currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
-    history: Type.Array(specificAgreementSummaryType),
+    history: Type.Array(specificAgreementCompletionType),
   }
 )
 
@@ -36,7 +47,7 @@ export const userSchema = Type.Object(
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
     userAccounting: userAccountingSchema,
-    agreementAccepted: agreementsAcceptedSchema,
+    agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
 )
