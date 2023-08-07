@@ -17,9 +17,16 @@ import { acceptAgreementPath, acceptAgreementMethods } from './accept.shared.js'
 import swagger from "feathers-swagger";
 import {agreementsQuerySchema, agreementsSchema} from "../agreements.schema.js";
 import {doAcceptOneAgreement} from "./hooks/DoAcceptOneAgreement.js";
+import {BadRequest} from "@feathersjs/errors";
 
 export * from './accept.class.js'
 export * from './accept.schema.js'
+
+export const ThrowOnBadData = async (context) => {
+  if (!context.data.dbResultMsg.startsWith("SUCCESS")) {
+    throw new BadRequest(context.data.dbResultMsg);
+  }
+}
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const acceptAgreement = (app) => {
@@ -59,7 +66,10 @@ export const acceptAgreement = (app) => {
       ],
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        ThrowOnBadData // do this "after" so that the log is still stored.
+      ],
     },
     error: {
       all: []

@@ -13,15 +13,6 @@ export const agreementCategoryType = StringEnum([
   agreementCategoryTypeMap.termsOfService,
 ])
 
-// export const specificAgreementSummaryType = Type.Object(
-//   {
-//     agreementDocId: ObjectIdSchema(),
-//     category: agreementCategoryType,
-//     title: Type.String(),
-//     version: Type.String(),
-//   },
-//   { $id: 'SpecificAgreementSum', additionalProperties: true }
-// )
 export const specificAgreementType = Type.Object(
   {
     agreementDocId: ObjectIdSchema(),

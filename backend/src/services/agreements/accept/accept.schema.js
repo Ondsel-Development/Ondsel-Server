@@ -10,6 +10,7 @@ export const acceptAgreementSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     userId: ObjectIdSchema(),
+    createdAt: Type.Number(),
     category: agreementCategoryType,
     version: Type.String(),
     dbResultMsg: Type.String(),
@@ -35,6 +36,7 @@ export const acceptAgreementDataResolver = resolve({
     // Associate the record with the id of the authenticated user
     return context.params.user._id
   },
+  createdAt: async () => Date.now(),
 })
 
 // Schema for updating existing entries

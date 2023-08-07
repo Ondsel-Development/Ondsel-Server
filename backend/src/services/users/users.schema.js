@@ -4,34 +4,15 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
-
 import { dataValidator, queryValidator } from '../../validators.js'
-import {agreementCategoryType} from "../agreements/agreements.schema.js";
+
 import {
+  agreementsAcceptedSchema,
   SubscriptionStateMap,
   SubscriptionStateType,
   SubscriptionType,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
-import {specificAgreementSummaryType} from "../agreements/agreements.schema.js";
-
-export const specificAgreementCompletionType = Type.Object(
-  {
-    agreementDocId: ObjectIdSchema(),
-    category: agreementCategoryType,
-    title: Type.String(),
-    version: Type.String(),
-    whenAgreedTo: Type.String(), // the legal text version
-    when: Type.Number(),         // the database searchable version of whenAgreedTo
-  }
-)
-export const agreementsAcceptedSchema = Type.Object(
-  {
-    currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
-    currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
-    history: Type.Array(specificAgreementCompletionType),
-  }
-)
 
 // Main data model schema
 export const userSchema = Type.Object(
