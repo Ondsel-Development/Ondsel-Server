@@ -116,6 +116,12 @@ export class Viewer {
               );
               this.lineSegments.add(line);
             }
+          } else if ( child instanceof THREE.LineSegments ) {
+            const line = new THREE.LineSegments(
+              child.geometry.clone(),
+              new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+            );
+            this.lineSegments.add(line);
           }
         })
         this.scene.add(object);
