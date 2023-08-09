@@ -1,3 +1,5 @@
+import { stripeEvents } from './stripe-events/stripe-events.js'
+
 import { accountEvent } from './account-event/account-event.js'
 
 import { file } from './file/file.js'
@@ -11,6 +13,8 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(stripeEvents)
+
   app.configure(accountEvent)
 
   app.configure(file)
