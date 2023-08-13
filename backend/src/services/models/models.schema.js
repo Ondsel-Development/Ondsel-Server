@@ -8,6 +8,8 @@ import { fileSchema } from '../file/file.schema.js';
 import { NotFound } from '@feathersjs/errors'
 
 
+export const logErrorIdType = Type.Optional(Type.Union([ObjectIdSchema(), Type.Null()]))
+
 // Main data model schema
 export const modelSchema = Type.Object(
   {
@@ -38,6 +40,12 @@ export const modelSchema = Type.Object(
     isSharedModelAnonymousType: Type.Optional(Type.Boolean({default: false})),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
+    // latest runner log for each command if lambda crashes midway
+    latestLogErrorIdForObjGenerationCommand: logErrorIdType,
+    latestLogErrorIdForFcstdExportCommand: logErrorIdType,
+    latestLogErrorIdForStepExportCommand: logErrorIdType,
+    latestLogErrorIdForStlExportCommand: logErrorIdType,
+    latestLogErrorIdForObjExportCommand: logErrorIdType,
   },
   { $id: 'Model', additionalProperties: false }
 )
