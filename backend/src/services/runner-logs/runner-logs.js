@@ -32,7 +32,7 @@ export const runnerLogs = (app) => {
   app.service(runnerLogsPath).hooks({
     around: {
       all: [
-        // authenticate('jwt'),
+        authenticate('jwt'),
         schemaHooks.resolveExternal(runnerLogsExternalResolver),
         schemaHooks.resolveResult(runnerLogsResolver)
       ]
