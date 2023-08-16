@@ -51,6 +51,15 @@
               type="error"
               border="top"
               class="text-left"
+              v-if="model && model.latestLogErrorIdForObjGenerationCommand"
+            >
+              <span>Internal server error occurred!</span>
+            </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
               v-if="error === 'NotFound'"
             >
               <span>Oops! The model you're looking for could not be found.</span>
@@ -70,14 +79,14 @@
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear model-value="100" v-if="isModelLoaded"></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand"></v-progress-linear>
                     <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
                     <div class="text-caption" v-if="uploadInProgress">File uploading...</div>
-                    <div class="text-caption" v-else-if="model.isObjGenerationInProgress">Creating Mesh...</div>
+                    <div class="text-caption" v-else-if="model.isObjGenerationInProgress && !model.latestLogErrorIdForObjGenerationCommand">Creating Mesh...</div>
                     <div class="text-caption" v-else-if="model.isObjGenerated && !isModelLoaded">Mesh generated, loading...</div>
-                    <div class="text-caption" v-else-if="isModelLoaded">Loaded</div>
+                    <div class="text-caption" v-else-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand">Loaded</div>
                   </v-row>
                 </v-container>
               </v-card-item>
