@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { runnerLogsClient } from './services/runner-logs/runner-logs.shared.js'
+
 import { accountEventClient } from './services/account-event/account-event.shared.js'
 
 import { acceptAgreementClient } from './services/agreements/accept/accept.shared.js'
@@ -47,6 +49,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(agreementsClient)
 
   client.configure(acceptAgreementClient)
+
+  client.configure(runnerLogsClient)
 
   return client
 }

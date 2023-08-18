@@ -200,6 +200,7 @@ const startObjGeneration = async (context) => {
 
   context.data.shouldStartObjGeneration = false;
   context.data.isObjGenerationInProgress = true;
+  context.data.latestLogErrorIdForObjGenerationCommand = null;
   return context
 };
 
@@ -220,15 +221,19 @@ const startExport = async (context) => {
   if (data.shouldStartFCStdExport) {
     command = 'EXPORT_FCSTD';
     data['isExportFCStdGenerated'] = false;
+    data['latestLogErrorIdForFcstdExportCommand'] = null;
   } else if (data.shouldStartSTEPExport) {
     command = 'EXPORT_STEP';
     data['isExportSTEPGenerated'] = false;
+    data['latestLogErrorIdForStepExportCommand'] = null;
   } else if (data.shouldStartSTLExport) {
     command = 'EXPORT_STL';
     data['isExportSTLGenerated'] = false;
+    data['latestLogErrorIdForStlExportCommand'] = null;
   } else {
     command = 'EXPORT_OBJ';
     data['isExportOBJGenerated'] = false;
+    data['latestLogErrorIdForObjExportCommand'] = null;
   }
 
   axios({
