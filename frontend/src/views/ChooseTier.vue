@@ -27,7 +27,7 @@
                        variant="text"
                 >
                   <!-- @click="reserve" -->
-                  Switch to Solo on next renewal ($0/mo)
+                  Cancel the Switch to Solo
                 </v-btn>
                 <v-btn v-else
                        variant="text"
@@ -54,7 +54,7 @@
               <v-card-actions>
                 <v-btn v-if="loggedInUser.user.tier !== 'Premium'"
                        variant="text"
-                       href="https://google.com/"
+                       :href="`${stripePurchasePeerUrl}?prefilled_email=${encodeURIComponent(loggedInUser.user.email)}&utm_content=${loggedInUser.user._id}`"
                 >
                   Switch to Peer ($10/mo)
                 </v-btn>
@@ -106,7 +106,8 @@ export default {
       user: {
         email: '',
         tier: '',
-      }
+      },
+      stripePurchasePeerUrl: import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL,
     }
   },
   computed: {

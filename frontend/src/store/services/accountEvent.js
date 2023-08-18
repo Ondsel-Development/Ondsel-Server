@@ -1,32 +1,38 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
-class User extends BaseModel {
+class AccountEvent extends BaseModel {
   constructor(data, options) {
     super(data, options)
   }
   // Required for $FeathersVuex plugin to work after production transpile.
-  static modelName = 'User'
+  static modelName = 'AccountEvent';
   // Define default properties here
   static instanceDefaults() {
     return {
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
+      event: '',
+      note: '', // not seen by end user
+      amount: 0,
+      originalCurrency: 'USD',
+      originalAmt: undefined,
+      detail: {
+        subscription: '',
+        term: '',
+        currentSubscription: '',
+      },
+      success: false,
+      resultMsg: '',
+      additionalData: {},
     }
   }
 
-  get isPremiumTier() {
-    return this.tier === 'Premium';
-  }
-
-  get isEnterpriseTier() {
-    return this.tier === 'Enterprise';
+  get successFlag() {
+    return this.success;
   }
 }
-const servicePath = 'users'
+
+const servicePath = 'account-event'
 const servicePlugin = makeServicePlugin({
-  Model: User,
+  Model: AccountEvent,
   service: feathersClient.service(servicePath),
   servicePath
 })
@@ -62,10 +68,12 @@ feathersClient.service(servicePath).hooks({
   }
 })
 
-export const SubscriptionTypeMap = {
-  free: 'Free',
-  premium: 'Premium',
-  enterprise: 'Enterprise',
+export const AccountEventTypeMap = {
+  initialSubscriptionPurchase : 'initial-subscription-purchase',
+  recurringSubscriptionPurchase: 'recurring-subscription-purchase',
+  subscriptionServiceCompleted: 'subscription-service-completed',
+  subscriptionRefund: 'subscription-refund',
+  subscriptionTierDowngrade: 'subscription-tier-downgrade',
 }
 
 export default servicePlugin

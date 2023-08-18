@@ -10,6 +10,7 @@ import Share from '@/views/Share';
 import Models from '@/views/Models';
 import PageNotFound from '@/views/PageNotFound';
 import PublicModels from '@/views/PublicModels';
+import InitialPurchaseForPeer from "@/views/InitialPurchaseForPeer.vue";
 
 
 const routes = [
@@ -37,9 +38,15 @@ const routes = [
     name: 'SignUp',
   },
   {
-    path: '/choosetier',
+    path: '/choose-tier',
     component: ChooseTier,
     name: 'ChooseTier',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/initial-purchase-for-peer/:stripe_session_id',
+    component: InitialPurchaseForPeer,
+    name: 'InitialPurchaseForPeer',
     meta: { requiresAuth: true },
   },
   {
