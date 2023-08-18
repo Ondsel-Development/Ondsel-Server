@@ -47,7 +47,7 @@ export const acceptAgreementPatchValidator = getValidator(acceptAgreementPatchSc
 export const acceptAgreementPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const acceptAgreementQueryProperties = Type.Pick(acceptAgreementSchema, ['_id', 'text'])
+export const acceptAgreementQueryProperties = Type.Pick(acceptAgreementSchema, ['_id'])
 export const acceptAgreementQuerySchema = Type.Intersect(
   [
     querySyntax(acceptAgreementQueryProperties),
