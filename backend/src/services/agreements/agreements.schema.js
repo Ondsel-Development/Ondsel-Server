@@ -41,7 +41,7 @@ export const agreementsResolver = resolve({})
 export const agreementsExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const agreementsDataSchema = Type.Pick(agreementsSchema, ['text'], {
+export const agreementsDataSchema = Type.Pick(agreementsSchema, [], {
   $id: 'AgreementsData'
 })
 export const agreementsDataValidator = getValidator(agreementsDataSchema, dataValidator)
