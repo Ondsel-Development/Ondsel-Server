@@ -22,7 +22,7 @@
           class="text-left"
           v-if="user && !user.isPremiumTier && !user.isEnterpriseTier"
         >
-          Please upgrade your plan to <b>Premium</b> or <b>Enterprise</b> tier in order to export model into all formats. In <b>Free</b> tier, you only allow to download the default model.
+          Please upgrade your plan to <b>Peer</b> or <b>Enterprise</b> tier in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
         </v-alert>
         <v-alert
           variant="outlined"

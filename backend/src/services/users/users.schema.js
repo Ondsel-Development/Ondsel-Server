@@ -9,7 +9,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import {
   SubscriptionStateMap,
   SubscriptionStateType,
-  SubscriptionType,
+  SubscriptionType, SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 
@@ -33,7 +33,7 @@ export const userSchema = Type.Object(
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
   tier: virtual(async (message, context) => {
-    return message.tier || "Free"
+    return message.tier || SubscriptionTypeMap.solo
   }),
   nextTier: virtual(async (message, context) => {
     return message.nextTier || null
@@ -57,7 +57,7 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
-  tier: async () => "Free",
+  tier: async () => SubscriptionTypeMap.solo,
 })
 
 // Schema for updating existing entries

@@ -110,8 +110,8 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     result.errMsg = "Invalid detail.subscription.";
     return result;
   }
-  if (subscription === SubscriptionTypeMap.free) {
-    result.errMsg = "You cannot subscribe to `free` in exchange for money."; // this might change later w 0 amt
+  if (subscription === SubscriptionTypeMap.solo) {
+    result.errMsg = "You cannot subscribe to `solo` in exchange for money."; // this might change later w 0 amt
     return result;
   }
   if (subscription == user.tier) {
@@ -130,7 +130,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     return result;
   }
   if (oldState === SubscriptionStateMap.permDowngrade) {
-    result.errMsg = "This account has been permanently downgraded to Free. Please resolve this first.";
+    result.errMsg = "This account has been permanently downgraded to Solo. Please resolve this first.";
     return result;
   }
   result.newSubscriptionState = SubscriptionStateMap.good;
