@@ -19,25 +19,17 @@ export async function changeTierNames(context, PIN) {
   // at this point in time. Fortunately, there are not that many user documents.
   //
   const userService = context.app.service('users');
-  let resultMsg = ' | Free: ';
-  const freeTierUsers = await getAllUsersNeedingChange(userService, SubscriptionTypeMap.free);
   let userChange;
-  for (userChange of freeTierUsers) {
-    resultMsg += await fixUser(userService, userChange, SubscriptionTypeMap.solo);
+  let resultMsg = '';
+  const allUsers = await getAllUsers(userService);
+  for (userChange of allUsers) {
+    resultMsg += await fixUser(userService, userChange);
   }
-  resultMsg += `(${freeTierUsers.length} done);`;
-
-  resultMsg += ' | Premium: ';
-  const premiumTierUsers = await getAllUsersNeedingChange(userService, SubscriptionTypeMap.premium);
-  for (userChange of premiumTierUsers) {
-    resultMsg += await fixUser(userService, userChange, SubscriptionTypeMap.peer);
-  }
-  resultMsg += `(${premiumTierUsers.length} done);`;
 
   context.data.resultMsg = 'SUCCESS' + resultMsg;
 }
 
-async function getAllUsersNeedingChange(userService, tier){
+async function getAllUsers(userService){
   const result = await userService.find({
     query: {
       $limit: 1000, // at this stage, this is overkill
@@ -45,18 +37,38 @@ async function getAllUsersNeedingChange(userService, tier){
       $sort: {
         _id: -1,
       },
-      tier: tier
     }
   });
   return result.data;
 }
 
-async function fixUser(userService, userChange, newTier){
-  const result = await userService.patch(
-    userChange._id,
-    {
-      tier: newTier
-    }
-  );
-  return `(${result.email}),`;
+async function fixUser(userService, userChange){
+  let resultMsg = '';
+  let newTier = null;
+  switch (userChange.tier)
+  {
+    case SubscriptionTypeMap.free:
+      newTier = SubscriptionTypeMap.solo;
+      break;
+    case SubscriptionTypeMap.premium:
+      newTier = SubscriptionTypeMap.peer;
+      break;
+    case SubscriptionTypeMap.enterprise:
+    case SubscriptionTypeMap.peer:
+      // do nothing
+      break;
+    default: // "missing" appears as "solo"; so both solo and missing are set to solo
+      newTier = SubscriptionTypeMap.solo;
+      break;
+  }
+  if (newTier !== null) {
+    const result = await userService.patch(
+      userChange._id,
+      {
+        tier: newTier
+      }
+    );
+    resultMsg = ` ${userChange.email}(${userChange.tier}>${result.tier})`;
+  }
+  return resultMsg;
 }
