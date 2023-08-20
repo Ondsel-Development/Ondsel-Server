@@ -1,5 +1,5 @@
 import {BadRequest} from "@feathersjs/errors";
-import {exampleChange} from "../businessLogic/example-change.js";
+import {changeTierNames} from "../businessLogic/change-tier-names.js";
 
 export const doDbMigration = async (context) => {
   const action = context.data.action;
@@ -10,12 +10,12 @@ export const doDbMigration = async (context) => {
     throw new BadRequest(`The db-migration called '${action}' was already been completed on ${dateCompleted}.`)
   }
   switch (action) {
-    case 'example-change':
-      await exampleChange(context, PIN);
-      break;
-//    case 'change-tier-names':
-//      await changeTierNames(context, PIN);
-//      break;
+    // case 'example-change':  // commented out on 2023-08-20
+    //   await exampleChange(context, PIN);
+    //   break;
+   case 'change-tier-names':
+     await changeTierNames(context, PIN);
+     break;
     default:
       throw new BadRequest(`There is no active db-migration called '${action}' with that PIN.`)
   }

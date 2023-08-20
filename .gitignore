@@ -46,3 +46,4 @@ packages/**/lib
 docs/.vitepress/cache
 
 backend/.env
+frontend/.env
