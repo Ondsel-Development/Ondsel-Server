@@ -23,7 +23,7 @@
         >
         <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
         <v-alert
-          v-if="user && !user.isPremiumTier && !user.isEnterpriseTier"
+          v-if="user && !user.isPeerTier && !user.isEnterpriseTier"
           variant="outlined"
           type="warning"
           border="top"
@@ -124,7 +124,7 @@
         <v-btn
           color="primary"
           v-if="canUpdateModel && Object.keys(attributes).length"
-          :disabled="(user && !user.isPremiumTier && !user.isEnterpriseTier) || !isObjGenerated || !isAuthenticated"
+          :disabled="(user && !user.isPeerTier && !user.isEnterpriseTier) || !isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"
         >Update</v-btn>
       </v-card-actions>
