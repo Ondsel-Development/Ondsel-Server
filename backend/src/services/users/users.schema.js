@@ -4,9 +4,10 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
-
 import { dataValidator, queryValidator } from '../../validators.js'
+
 import {
+  agreementsAcceptedSchema,
   SubscriptionStateMap,
   SubscriptionStateType,
   SubscriptionType,
@@ -27,11 +28,13 @@ export const userSchema = Type.Object(
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
     userAccounting: userAccountingSchema,
+    agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
 )
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
+
   tier: virtual(async (message, context) => {
     return message.tier || "Free"
   }),
