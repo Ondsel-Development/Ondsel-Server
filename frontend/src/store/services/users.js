@@ -67,10 +67,4 @@ feathersClient.service(servicePath).hooks({
   }
 })
 
-export const SubscriptionTypeMap = {
-  free: 'Free',
-  premium: 'Premium',
-  enterprise: 'Enterprise',
-}
-
 export default servicePlugin

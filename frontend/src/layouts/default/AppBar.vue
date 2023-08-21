@@ -38,6 +38,14 @@
             :title="`${loggedInUser.user.firstName} ${loggedInUser.user.lastName}`"
           >
           </v-list-item>
+          <v-list-item>
+            <v-btn
+              variant="text"
+              @click="gotoChooseTier()"
+            >
+              {{ loggedInUser.user.tier }} (change)
+            </v-btn>
+          </v-list-item>
         </v-list>
 
         <v-divider></v-divider>
@@ -96,6 +104,9 @@ export default {
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
+    gotoChooseTier() {
+      this.$router.push({name: 'ChooseTier'});
+    }
   },
 }
 </script>

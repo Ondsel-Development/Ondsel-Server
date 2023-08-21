@@ -4,9 +4,11 @@
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container>
         <v-row align="stretch">
-          <v-col>
+          <v-col cols="4">
             <v-card class="fill-height d-flex flex-column"  variant="tonal">
               <v-card-title>Solo</v-card-title>
+              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
+              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Full FreeCAD Application</v-list-item>
@@ -17,16 +19,14 @@
               </v-card-text>
               <v-spacer></v-spacer>
               <v-card-actions>
-                <v-btn v-if="loggedInUser.user.tier !== 'Free' && loggedInUser.nextTier !=='Free'"
+                <v-btn v-if="loggedInUser.user.tier !== SubscriptionTypeMap.solo && loggedInUser.nextTier !== SubscriptionTypeMap.solo"
                        variant="text"
                 >
-                  <!-- @click="reserve" -->
-                  Switch to Solo on next renewal ($0/mo)
+                  Cancel to Solo ($0/mo)
                 </v-btn>
-                <v-btn v-else-if="loggedInUser.nextTier==='Free'"
+                <v-btn v-else-if="loggedInUser.nextTier=== SubscriptionTypeMap.solo"
                        variant="text"
                 >
-                  <!-- @click="reserve" -->
                   Cancel the Switch to Solo
                 </v-btn>
                 <v-btn v-else
@@ -38,9 +38,11 @@
               </v-card-actions>
             </v-card>
           </v-col>
-          <v-col>
+          <v-col cols="4">
             <v-card class="fill-height d-flex flex-column" variant="tonal">
               <v-card-title>Peer</v-card-title>
+              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
+              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Everything in Solo</v-list-item>
@@ -52,7 +54,12 @@
               </v-card-text>
               <v-spacer></v-spacer>
               <v-card-actions>
-                <v-btn v-if="loggedInUser.user.tier !== 'Premium'"
+                <v-btn v-if="loggedInUser.nextTier=== SubscriptionTypeMap.peer"
+                       variant="text"
+                >
+                  Cancel the Switch to Peer
+                </v-btn>
+                <v-btn v-else-if="loggedInUser.user.tier !== SubscriptionTypeMap.peer"
                        variant="text"
                        :href="`${stripePurchasePeerUrl}?prefilled_email=${encodeURIComponent(loggedInUser.user.email)}&utm_content=${loggedInUser.user._id}`"
                 >
@@ -67,9 +74,11 @@
               </v-card-actions>
             </v-card>
           </v-col>
-          <v-col>
+          <v-col cols="4">
             <v-card class="fill-height d-flex flex-column" variant="tonal">
               <v-card-title>Enterprise</v-card-title>
+              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
+              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Everything in Peer</v-list-item>
@@ -78,11 +87,23 @@
               </v-card-text>
               <v-spacer></v-spacer>
               <v-card-actions>
-                <v-btn
-                  variant="text"
-                  disabled
+                <v-btn v-if="loggedInUser.nextTier === SubscriptionTypeMap.enterprise"
+                       variant="text"
+                       disabled
                 >
-                  not available yet
+                  Cancel the Switch to Enterprise
+                </v-btn>
+                <v-btn v-else-if="loggedInUser.user.tier !== SubscriptionTypeMap.enterprise"
+                       variant="text"
+                       disabled
+                >
+                  NOT AVAILABLE YET
+                </v-btn>
+                <v-btn v-else
+                       variant="text"
+                       @click="goHome"
+                >
+                  Continue
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -97,6 +118,7 @@
 
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
+import {SubscriptionTypeMap} from "@/store/services/users";
 
 export default {
   name: 'ChooseTier',
@@ -111,6 +133,9 @@ export default {
     }
   },
   computed: {
+    SubscriptionTypeMap() {
+      return SubscriptionTypeMap
+    },
     User: () => models.api.User,
     ...mapState('auth', { loggedInUser: 'payload' }),
   },
