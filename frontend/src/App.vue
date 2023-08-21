@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <AppBar />
+    <AppBar v-if="!$route.meta.isWindowLoadedInIframe"/>
     <v-main>
       <router-view/>
     </v-main>

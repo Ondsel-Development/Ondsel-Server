@@ -9,6 +9,10 @@ export default {
   name: 'ModelViewer',
   props: {
     // objUrl: String,
+    fullScreen: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['load:mesh'],
   data: () => ({
@@ -17,8 +21,8 @@ export default {
   }),
   computed: {
     viewport3d: vm => vm.$refs.modelViewer,
-    viewerWidth: () => window.innerWidth - 64,
-    viewerHeight: () => window.innerHeight - 64,
+    viewerWidth: (vm) => vm.fullScreen ? window.innerWidth : window.innerWidth - 64,
+    viewerHeight: (vm) => vm.fullScreen ? window.innerHeight : window.innerHeight - 64,
   },
   mounted() {
     // this.init();
