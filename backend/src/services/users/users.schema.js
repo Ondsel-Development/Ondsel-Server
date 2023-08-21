@@ -4,12 +4,13 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
-
 import { dataValidator, queryValidator } from '../../validators.js'
+
 import {
+  agreementsAcceptedSchema,
   SubscriptionStateMap,
   SubscriptionStateType,
-  SubscriptionType,
+  SubscriptionType, SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 
@@ -27,13 +28,15 @@ export const userSchema = Type.Object(
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
     userAccounting: userAccountingSchema,
+    agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
 )
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
+
   tier: virtual(async (message, context) => {
-    return message.tier || "Free"
+    return message.tier || SubscriptionTypeMap.solo;
   }),
   nextTier: virtual(async (message, context) => {
     return message.nextTier || null
@@ -57,7 +60,7 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
-  tier: async () => "Free",
+  tier: async () => SubscriptionTypeMap.solo,
 })
 
 // Schema for updating existing entries

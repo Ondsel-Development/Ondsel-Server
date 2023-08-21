@@ -3,17 +3,24 @@
 import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
+import {agreementCategoryType} from "../agreements/agreements.schema.js";
 
 export const SubscriptionTypeMap = {
+  solo: 'Solo',
+  peer: 'Peer',
+  enterprise: 'Enterprise',
+  // legacy entries TODO: remove on release after next
   free: 'Free',
   premium: 'Premium',
-  enterprise: 'Enterprise',
 }
 export const SubscriptionType = StringEnum(
   [
+    SubscriptionTypeMap.solo,
+    SubscriptionTypeMap.peer,
+    SubscriptionTypeMap.enterprise,
+    // legacy entries TODO: remove on release after next
     SubscriptionTypeMap.free,
     SubscriptionTypeMap.premium,
-    SubscriptionTypeMap.enterprise,
   ]
 )
 
@@ -100,5 +107,23 @@ export const userAccountingSchema = Type.Object(
       }
     ),
     journal: Type.Array(journalTransactionSchema),
+  }
+)
+
+export const specificAgreementCompletionType = Type.Object(
+  {
+    agreementDocId: ObjectIdSchema(),
+    category: agreementCategoryType,
+    title: Type.String(),
+    version: Type.String(),
+    whenAgreedTo: Type.String(), // the legal text version
+    when: Type.Number(),         // the database searchable version of whenAgreedTo
+  }
+)
+export const agreementsAcceptedSchema = Type.Object(
+  {
+    currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
+    currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
+    history: Type.Array(specificAgreementCompletionType),
   }
 )

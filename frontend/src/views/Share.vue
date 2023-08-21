@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer rail location="right" permanent>
+  <v-navigation-drawer rail location="right" permanent v-if="!isWindowLoadedInIframe">
     <v-btn icon flat @click="dialog = true">
       <v-icon icon="mdi-file"></v-icon>
       <v-tooltip
@@ -29,15 +29,16 @@
       >Export model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
+  <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
-      width="auto"
+      class="w-75"
+      max-width="600"
       persistent
     >
       <div>
-        <v-card class="mx-auto" min-width="600">
+        <v-card>
           <v-card-item>
             <v-alert
               variant="outlined"
@@ -114,6 +115,12 @@
     ref="exportModelDialog"
     @update-model="updateModel"
   />
+  <a :href="$route.path" v-if="isWindowLoadedInIframe" target="_blank">
+    <v-sheet class="bottom-left-button d-flex flex-wrap" :height="50" :width="160" border>
+      <div class="text-h6 font-weight-bold pa-2 text-white">Explore on</div>
+      <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="mt-1"></v-img>
+    </v-sheet>
+  </a>
 </template>
 
 <script>
@@ -168,7 +175,8 @@ export default {
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
-    ...mapGetters('auth', ['isAuthenticated'])
+    ...mapGetters('auth', ['isAuthenticated']),
+    isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
   },
   methods: {
     fitModelToScreen() {
@@ -254,4 +262,10 @@ export default {
 </script>
 
 <style scoped>
+.bottom-left-button {
+  background: rgba(23, 23, 23, 0.8);
+  position: fixed;
+  bottom: 10px; /* Adjust this value to control the vertical position */
+  /*left: 20px;   !* Adjust this value to control the horizontal position *!*/
+}
 </style>

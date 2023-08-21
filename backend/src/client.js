@@ -5,6 +5,10 @@ import { runnerLogsClient } from './services/runner-logs/runner-logs.shared.js'
 
 import { accountEventClient } from './services/account-event/account-event.shared.js'
 
+import { acceptAgreementClient } from './services/agreements/accept/accept.shared.js'
+
+import { agreementsClient } from './services/agreements/agreements.shared.js'
+
 import { fileClient } from './services/file/file.shared.js'
 
 import { sharedModelsClient } from './services/shared-models/shared-models.shared.js'
@@ -41,6 +45,10 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(fileClient)
 
   client.configure(accountEventClient)
+
+  client.configure(agreementsClient)
+
+  client.configure(acceptAgreementClient)
 
   client.configure(runnerLogsClient)
 
