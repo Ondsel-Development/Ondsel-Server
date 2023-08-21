@@ -34,7 +34,7 @@ export async function DoSubscriptionServiceCompleted(context, user) {
   addTransactionToUserAndSummarize(user, transaction);
   if (user.userAccounting.ledgerBalances.UnearnedRevenue >= detail.amt) {
     detail.newSubscriptionState = SubscriptionStateMap.good;
-  } else if (detail.tierChanged && detail.tier === SubscriptionTypeMap.free) {
+  } else if (detail.tierChanged && detail.tier === SubscriptionTypeMap.solo) {
     detail.newSubscriptionState = SubscriptionStateMap.good;
   } else {
     detail.newSubscriptionState = SubscriptionStateMap.due;

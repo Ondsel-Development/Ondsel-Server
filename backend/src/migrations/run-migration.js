@@ -1,5 +1,6 @@
 import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
+import {updateTierNames} from "./update-tier-names.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -8,12 +9,15 @@ async function runMigration() {
     case 'migrateOldModels':
       await migrateOldModelsCommand(app);
       break;
+    case 'updateTierNames':
+      await updateTierNames(app);
+      break;
     default:
       console.error('Please specify the migration command.')
       process.exit(1);
   }
   console.log('Migration successfully applied!');
-  process.exit(1);
+  process.exit(0);
 }
 
 runMigration().catch(error => {

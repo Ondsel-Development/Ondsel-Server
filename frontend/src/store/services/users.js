@@ -1,5 +1,10 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
+export const SubscriptionTypeMap = {
+  solo: 'Solo',
+  peer: 'Peer',
+  enterprise: 'Enterprise',
+}
 class User extends BaseModel {
   constructor(data, options) {
     super(data, options)
@@ -16,12 +21,12 @@ class User extends BaseModel {
     }
   }
 
-  get isPremiumTier() {
-    return this.tier === 'Premium';
+  get isPeerTier() {
+    return this.tier === SubscriptionTypeMap.peer;
   }
 
   get isEnterpriseTier() {
-    return this.tier === 'Enterprise';
+    return this.tier === SubscriptionTypeMap.enterprise;
   }
 }
 const servicePath = 'users'

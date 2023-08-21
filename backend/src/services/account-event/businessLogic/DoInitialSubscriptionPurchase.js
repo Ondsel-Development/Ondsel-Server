@@ -6,7 +6,6 @@ import {
   verifyBalanced
 } from "../../../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
-import {currencyTypeMap} from "../../../currencies.js";
 
 export async function DoInitialSubscriptionPurchase(context, user) {
   // it is presumed that the processor has a confirmed charge at this point
@@ -35,7 +34,7 @@ export async function DoInitialSubscriptionPurchase(context, user) {
   //
   // 3. update the user doc
   //
-  context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
+  context.data.transactionId = transaction.transactionId; // this is VERY important; otherwise we can't match the logs to the user journal entries
   await context.app.service('users').patch(user._id, {
     tier: detail.newTier,
     subscriptionState: detail.newSubscriptionState,
@@ -71,7 +70,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   if (amt !== Math.round(amt)) {
     result.errMsg = "Amount must be a simple integer measuring pennies (100ths of USD), not a float, for this event type.";
     return result;
-  };
+  }
   if (amt <= 1) {
     result.errMsg = "Amount must be a positive non-zero integer (in pennies) for this event type.";
     return result;
@@ -110,16 +109,16 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     result.errMsg = "Invalid detail.subscription.";
     return result;
   }
-  if (subscription === SubscriptionTypeMap.free) {
-    result.errMsg = "You cannot subscribe to `free` in exchange for money."; // this might change later w 0 amt
+  if (subscription === SubscriptionTypeMap.solo) {
+    result.errMsg = "You cannot subscribe to `Solo` in exchange for money."; // this might change later w 0 amt
     return result;
   }
-  if (subscription == user.tier) {
+  if (subscription === user.tier) {
     result.errMsg = "Cannot start a new subscription at tier " + user.tier + " as the user already has that subscription.";
     return result;
   }
   if (context.data.detail.currentSubscription) { // only do the check if the value is passed along
-    if (context.data.detail.currentSubscription != user.tier) {
+    if (context.data.detail.currentSubscription !== user.tier) {
       result.errMsg = "The caller has impression the user is currently at tier " + context.data.detail.currentSubscription + " but this is wrong. It is at " + user.tier + ".";
       return result;
     }
@@ -130,7 +129,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     return result;
   }
   if (oldState === SubscriptionStateMap.permDowngrade) {
-    result.errMsg = "This account has been permanently downgraded to Free. Please resolve this first.";
+    result.errMsg = "This account has been permanently downgraded to Solo. Please resolve this first.";
     return result;
   }
   result.newSubscriptionState = SubscriptionStateMap.good;
@@ -147,8 +146,8 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   // descriptions for transaction
   //
   result.note = String(context.data.note) + `; ${result.addedMonths} months`;
-  if (result.newSubscriptionState != oldState) {
-    result.note += `; substate moved to ${result.newSubscriptionState} from ${oldState}`;
+  if (result.newSubscriptionState !== oldState) {
+    result.note += `; subscriptionState moved to ${result.newSubscriptionState} from ${oldState}`;
   }
   result.desc = `INITIAL SUBSCRIPTION FOR ${result.newTier}`;
   //
