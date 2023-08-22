@@ -11,6 +11,15 @@ import PageNotFound from '@/views/PageNotFound';
 import PublicModels from '@/views/PublicModels';
 
 
+const isWindowLoadedInIframe = () => {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
+
+
 const routes = [
   {
     path: '/model/:id?',
@@ -44,7 +53,7 @@ const routes = [
     path: '/share/:id',
     component: Share,
     name: 'Share',
-    meta: { tryAuth: true },
+    meta: { tryAuth: true, checkIframe: true },
   },
   {
     path: '/404',
@@ -65,6 +74,11 @@ router.beforeEach(async (to, from, next) => {
     next('/404');
     return;
   }
+
+  if (to.meta && to.meta.checkIframe) {
+    to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
+  }
+
   if (link.name === 'Login' || link.name === 'SignUp') {
     try {
       await store.dispatch('auth/authenticate');

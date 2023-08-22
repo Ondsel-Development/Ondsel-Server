@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import { preventChanges } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges} from 'feathers-hooks-common'
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -58,7 +58,7 @@ export const user = (app) => {
       get: [],
       create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), uniqueUserValidator],
       patch: [
-        preventChanges(false, 'tier'),
+        iff(isProvider('external'), preventChanges(false, 'tier', 'nextTier', 'subscriptionState')),
         schemaHooks.validateData(userPatchValidator),
         schemaHooks.resolveData(userPatchResolver), uniqueUserValidator
       ],

@@ -94,7 +94,7 @@
         <v-progress-circular indeterminate></v-progress-circular>
       </template>
       <template v-if="sharedModels.data.length === this.pagination.total">
-        <div class="text-grey-darken-1">You reached at the end!</div>
+        <div class="text-grey-darken-1">You reached the end!</div>
       </template>
     </v-row>
   </v-container>

@@ -41,7 +41,8 @@
     "prettier": "npx prettier \"**/*.js\" --write",
     "mocha": "cross-env NODE_ENV=test mocha test/ --recursive --exit",
     "test": "npm run mocha",
-    "bundle:client": "npm pack --pack-destination ./public"
+    "bundle:client": "npm pack --pack-destination ./public",
+    "migration": "node src/migrations/run-migration.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.293.0",

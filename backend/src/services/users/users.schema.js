@@ -4,8 +4,15 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
-
 import { dataValidator, queryValidator } from '../../validators.js'
+
+import {
+  agreementsAcceptedSchema,
+  SubscriptionStateMap,
+  SubscriptionStateType,
+  SubscriptionType,
+  userAccountingSchema
+} from "./users.subdocs.schema.js";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -17,7 +24,11 @@ export const userSchema = Type.Object(
     lastName: Type.String(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    tier: StringEnum(['Free', 'Premium', 'Enterprise'])
+    tier: SubscriptionType,
+    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
+    subscriptionState: SubscriptionStateType,
+    userAccounting: userAccountingSchema,
+    agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
 )
@@ -26,8 +37,13 @@ export const userResolver = resolve({
 
   tier: virtual(async (message, context) => {
     return message.tier || "Free"
-  })
-
+  }),
+  nextTier: virtual(async (message, context) => {
+    return message.nextTier || null
+  }),
+  subscriptionState: virtual(async (message, context) => {
+    return message.subscriptionState || SubscriptionStateMap.good
+  }),
 })
 
 export const userExternalResolver = resolve({
