@@ -8,7 +8,7 @@ export async function migrateOldModelsCommand(app) {
   const data = await modelService.find({
     paginate: false,
     pipeline: [
-      { $match: { fileId: { $exists: false }, isSharedModel: false, deleted: { $ne: true } } },
+      { $match: { fileId: { $exists: false }, deleted: { $ne: true } } },
     ]
   });
 
