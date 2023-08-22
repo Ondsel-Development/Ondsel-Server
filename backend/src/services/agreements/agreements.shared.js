@@ -1,6 +1,6 @@
 export const agreementsPath = 'agreements'
 
-export const agreementsMethods = ['find', 'get']
+export const agreementsMethods = ['create', 'find', 'get']
 
 export const agreementsClient = (client) => {
   const connection = client.get('connection')

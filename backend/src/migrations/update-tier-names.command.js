@@ -1,4 +1,4 @@
-// Migrate models which were created before file service endpoint.
+// update tier names
 
 import {SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
 

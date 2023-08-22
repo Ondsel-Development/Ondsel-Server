@@ -1,6 +1,7 @@
 import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
 import {updateTierNames} from "./update-tier-names.command.js";
+import {addInitialTosPp} from "./add-initial-tos-pp.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -11,6 +12,9 @@ async function runMigration() {
       break;
     case 'updateTierNames':
       await updateTierNames(app);
+      break;
+    case 'addInitialTosPp':
+      await addInitialTosPp(app);
       break;
     default:
       console.error('Please specify the migration command.')
