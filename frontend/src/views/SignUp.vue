@@ -133,6 +133,7 @@ export default {
     return {
       result: {},
       user: new models.api.User(),
+      acceptAgreement: new models.api.AcceptAgreement(),
       confirmPassword: '',
       isValid: false,
       snackerMsg: '',
@@ -165,11 +166,17 @@ export default {
         this.user.agreeToPrivacyPolicy = undefined;
         await this.user.create()
           .then(() => {
+            // post agreement to TOS
+            this.acceptAgreement.userId = this.user._id;
+            this.acceptAgreement.category = 'terms-of-service';
+            this.acceptAgreement.version = this.tosDoc.current.version;
+            this.acceptAgreement.newAccount = true;
+            this.acceptAgreement.create();
             this.authenticate({
               strategy: 'local',
               ...this.user,
             }).then(() => {
-              // await this.user.legaldocs.create();
+              // done. go to choose-tier page
               this.$router.push({name: 'ChooseTier'})
             }).catch(() => {
               this.showSnacker = true;
