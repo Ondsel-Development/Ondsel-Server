@@ -74,6 +74,7 @@ export const AccountEventTypeMap = {
   subscriptionServiceCompleted: 'subscription-service-completed',
   subscriptionRefund: 'subscription-refund',
   subscriptionTierDowngrade: 'subscription-tier-downgrade',
+  cancelTierDowngrade: 'cancel-tier-downgrade',
 }
 
 export default servicePlugin

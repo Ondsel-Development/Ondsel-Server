@@ -15,8 +15,10 @@ class User extends BaseModel {
   constructor(data, options) {
     super(data, options)
   }
+
   // Required for $FeathersVuex plugin to work after production transpile.
   static modelName = 'User'
+
   // Define default properties here
   static instanceDefaults() {
     return {
@@ -24,6 +26,8 @@ class User extends BaseModel {
       password: '',
       firstName: '',
       lastName: '',
+      tier: '',
+      nextTier: null,
     }
   }
 
@@ -33,6 +37,22 @@ class User extends BaseModel {
 
   get isEnterpriseTier() {
     return this.tier === SubscriptionTypeMap.enterprise;
+  }
+
+  get fullTierName() {
+    let tierName = this.tier;
+    if (this.nextTier !== undefined && this.nextTier !== null) {
+      tierName += ` (but destined for ${this.nextTier} on next renewal)`
+    }
+    return tierName;
+  }
+
+  get shortTierName() {
+    let tierName = this.tier;
+    if (this.nextTier !== undefined && this.nextTier !== null) {
+      tierName += ` -> ${this.nextTier}`
+    }
+    return tierName;
   }
 }
 const servicePath = 'users'

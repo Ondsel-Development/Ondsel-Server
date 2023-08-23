@@ -43,7 +43,7 @@
               variant="text"
               @click="gotoChooseTier()"
             >
-              {{ loggedInUser.user.tier }} (change)
+              {{ user.shortTierName }} (change)
             </v-btn>
           </v-list-item>
         </v-list>
@@ -97,6 +97,7 @@ export default {
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapState('auth', ['user']),
     currentRouteName: (vm) => vm.$route.name
   },
   methods: {

@@ -39,7 +39,7 @@ export async function DoInitialSubscriptionPurchase(context, user) {
     tier: detail.newTier,
     subscriptionState: detail.newSubscriptionState,
     subscriptionAnniversary: Date.now(),
-    subscriptionTerm: context.data.subscriptionTerm,
+    subscriptionTerm: context.data.detail.term,
     userAccounting: user.userAccounting,
   });
   //
@@ -55,7 +55,6 @@ function InitialSubscriptionPurchaseVerification(context, user) {
     amt: 0,
     newTier: "",
     newSubscriptionState: "",
-    addedMonths: "",
     desc: "",
     note: "",
     originalCurrency: "",
@@ -137,17 +136,16 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   result.newSubscriptionState = SubscriptionStateMap.good;
   result.newTier = subscription;
   //
-  // addedMonths checks
+  // term check
   //
   if (context.data.detail.term === undefined || context.data.detail.term == null ) {
     result.errMsg = "Detail.term (in months) required.";
     return result;
   }
-  result.addedMonths = context.data.detail.term;
   //
   // descriptions for transaction
   //
-  result.note = String(context.data.note) + `; ${result.addedMonths} months`;
+  result.note = String(context.data.note);
   if (result.newSubscriptionState !== oldState) {
     result.note += `; subscriptionState moved to ${result.newSubscriptionState} from ${oldState}`;
   }

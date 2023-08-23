@@ -20,7 +20,6 @@ export const resetStores = () => {
   store.commit('models/clearAll');
   store.commit('shared-models/clearAll');
   store.commit('agreements/clearAll');
-  store.commit('agreements/accept/clearAll');
 };
 
 export default store;

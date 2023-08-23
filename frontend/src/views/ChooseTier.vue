@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="fill-height">
-    <v-card class="mx-auto" :subtitle="`current tier: ${loggedInUser.user.tier}`" width="800" flat>
+    <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" width="896" flat>
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container>
         <v-row align="stretch">
@@ -19,15 +19,17 @@
               </v-card-text>
               <v-spacer></v-spacer>
               <v-card-actions>
-                <v-btn v-if="loggedInUser.user.tier !== SubscriptionTypeMap.solo && loggedInUser.nextTier !== SubscriptionTypeMap.solo"
+                <v-btn v-if="user.tier !== SubscriptionTypeMap.solo && user.nextTier !== SubscriptionTypeMap.solo"
                        variant="text"
+                       @click="downgradeToSolo"
                 >
-                  Cancel to Solo ($0/mo)
+                  Downgrade to Solo ($0/mo)
                 </v-btn>
-                <v-btn v-else-if="loggedInUser.nextTier=== SubscriptionTypeMap.solo"
+                <v-btn v-else-if="user.nextTier=== SubscriptionTypeMap.solo"
                        variant="text"
+                       @click="cancelDowngrade"
                 >
-                  Cancel the Switch to Solo
+                  Cancel Switch to Solo
                 </v-btn>
                 <v-btn v-else
                        variant="text"
@@ -126,10 +128,6 @@ export default {
   data() {
     return {
       result: {},
-      user: {
-        email: '',
-        tier: '',
-      },
       stripePurchasePeerUrl: import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL,
     }
   },
@@ -139,11 +137,18 @@ export default {
     },
     User: () => models.api.User,
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapState('auth', ['user']),
   },
   methods: {
     async goHome() {
       this.$router.push({name: 'Models'})
-    }
+    },
+    async downgradeToSolo() {
+      this.$router.push({name: 'DowngradeToSolo'})
+    },
+    async cancelDowngrade() {
+      this.$router.push({name: 'CancelTierChange'})
+    },
   }
 }
 </script>
