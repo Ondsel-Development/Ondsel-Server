@@ -36,8 +36,9 @@ export async function DoRecurringSubscriptionPurchase(context, user) {
   // 3. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
+  user.subscriptionDetail.state = detail.newSubscriptionState;
   await context.app.service('users').patch(user._id, {
-    subscriptionState: detail.newSubscriptionState,
+    subscriptionDetail: user.subscriptionDetail,
     userAccounting: user.userAccounting,
   });
   //
@@ -116,7 +117,7 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     result.errMsg = `A Solo tier does not need renewal.`;
     return result;
   }
-  let oldState = user.subscriptionState;
+  let oldState = user.subscriptionDetail.state;
   if (oldState === SubscriptionStateMap.closed) {
     result.errMsg = "Cannot renew a subscription on a closed account.";
     return result;

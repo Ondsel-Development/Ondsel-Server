@@ -18,9 +18,10 @@ export async function DoCancelTierDowngrade(context, user) {
   //
   // 3. update the user doc
   //
+  user.subscriptionDetail.term = detail.newTerm;
   await context.app.service('users').patch(user._id, {
     nextTier: null,
-    subscriptionTerm: detail.newTerm,
+    subscriptionDetail: user.subscriptionDetail,
   });
   //
   // all is good; return message
@@ -60,7 +61,7 @@ function SubscriptionTierDowngradeVerification(context, user) {
   // descriptions for transaction
   //
   result.note = String(context.data.note);
-  result.desc = `CANCELLING DOWNGRADE TO ${user.nextTier} FROM ${result.newTier}`;
+  result.desc = `CANCELLING DOWNGRADE TO ${user.nextTier}; NOW IS ${currentTier} AGAIN`;
   //
   // done
   //

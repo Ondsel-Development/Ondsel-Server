@@ -7,7 +7,7 @@ import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
 import {
-  agreementsAcceptedSchema,
+  agreementsAcceptedSchema, subscriptionDetailSchema,
   SubscriptionStateMap,
   SubscriptionStateType, SubscriptionTermType,
   SubscriptionType, SubscriptionTypeMap,
@@ -26,9 +26,7 @@ export const userSchema = Type.Object(
     updatedAt: Type.Number(),
     tier: SubscriptionType,
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
-    subscriptionState: SubscriptionStateType,
-    subscriptionTerm: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
-    subscriptionAnniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
+    subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
@@ -43,8 +41,12 @@ export const userResolver = resolve({
   nextTier: virtual(async (message, context) => {
     return message.nextTier || null
   }),
-  subscriptionState: virtual(async (message, context) => {
-    return message.subscriptionState || SubscriptionStateMap.good
+  subscriptionDetail: virtual(async (message, context) => {
+    return message.subscriptionDetail || {
+      state: SubscriptionStateMap.good,
+      term: null,
+      anniversary: null,
+    }
   }),
 })
 

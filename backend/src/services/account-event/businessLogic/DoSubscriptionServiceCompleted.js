@@ -43,16 +43,17 @@ export async function DoSubscriptionServiceCompleted(context, user) {
   // 3. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
+  user.subscriptionDetail.state = detail.newSubscriptionState;
   if (detail.tierChanged) {
     await context.app.service('users').patch(user._id, {
       tier: detail.tier,
       nextTier: null,
-      subscriptionState: detail.newSubscriptionState,
+      subscriptionDetail: user.subscriptionDetail,
       userAccounting: user.userAccounting,
     });
   } else {
     await context.app.service('users').patch(user._id, {
-      subscriptionState: detail.newSubscriptionState,
+      subscriptionDetail: user.subscriptionDetail,
       userAccounting: user.userAccounting,
     });
   }

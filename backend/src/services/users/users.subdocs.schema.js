@@ -62,6 +62,14 @@ export const SubscriptionTermType = StringEnum(
   ]
 );
 
+export const subscriptionDetailSchema= Type.Object(
+  {
+    state: SubscriptionStateType,
+    term: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
+    anniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
+  }
+);
+
 export const LedgerMap = {
   cash: 'Cash',
   processorExpense: 'ProcessorExpense',

@@ -35,12 +35,13 @@ export async function DoInitialSubscriptionPurchase(context, user) {
   // 3. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important; otherwise we can't match the logs to the user journal entries
+  user.subscriptionDetail.state = detail.newSubscriptionState;
+  user.subscriptionDetail.term = context.data.detail.term;
+  user.subscriptionDetail.anniversary = Date.now();
   await context.app.service('users').patch(user._id, {
     tier: detail.newTier,
-    subscriptionState: detail.newSubscriptionState,
-    subscriptionAnniversary: Date.now(),
-    subscriptionTerm: context.data.detail.term,
     userAccounting: user.userAccounting,
+    subscriptionDetail: user.subscriptionDetail,
   });
   //
   // all is good; return message
@@ -124,7 +125,7 @@ function InitialSubscriptionPurchaseVerification(context, user) {
       return result;
     }
   }
-  let oldState = user.subscriptionState;
+  let oldState = user.subscriptionDetail.state;
   if (oldState === SubscriptionStateMap.closed) {
     result.errMsg = "Cannot start a subscription on a closed account.";
     return result;
