@@ -9,7 +9,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import {
   agreementsAcceptedSchema,
   SubscriptionStateMap,
-  SubscriptionStateType,
+  SubscriptionStateType, SubscriptionTermType,
   SubscriptionType, SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
@@ -27,6 +27,8 @@ export const userSchema = Type.Object(
     tier: SubscriptionType,
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionState: SubscriptionStateType,
+    subscriptionTerm: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
+    subscriptionAnniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
     userAccounting: userAccountingSchema,
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },

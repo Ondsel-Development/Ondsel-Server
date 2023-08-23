@@ -38,6 +38,8 @@ export async function DoInitialSubscriptionPurchase(context, user) {
   await context.app.service('users').patch(user._id, {
     tier: detail.newTier,
     subscriptionState: detail.newSubscriptionState,
+    subscriptionAnniversary: Date.now(),
+    subscriptionTerm: context.data.subscriptionTerm,
     userAccounting: user.userAccounting,
   });
   //

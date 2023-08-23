@@ -51,6 +51,17 @@ export const SubscriptionStateType = StringEnum(
   ]
 )
 
+export const SubscriptionTermTypeMap = {
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+}
+export const SubscriptionTermType = StringEnum(
+  [
+    SubscriptionTermTypeMap.monthly,
+    SubscriptionTermTypeMap.yearly,
+  ]
+);
+
 export const LedgerMap = {
   cash: 'Cash',
   processorExpense: 'ProcessorExpense',

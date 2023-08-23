@@ -3,7 +3,12 @@ import { resolve } from '@feathersjs/schema'
 import {Type, getValidator, querySyntax, StringEnum} from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import {SubscriptionStateType, SubscriptionType, userSummarySchema} from "../users/users.subdocs.schema.js";
+import {
+  SubscriptionStateType,
+  SubscriptionTermType,
+  SubscriptionType,
+  userSummarySchema
+} from "../users/users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {CurrencyType} from "../../currencies.js";
 
@@ -32,7 +37,7 @@ export const accountEventOptionsSchema = Type.Object(
   {
     // ALL fields in this schema should be optional
     subscription: Type.Optional(SubscriptionType),
-    term: Type.Optional(Type.String()),
+    term: Type.Optional(SubscriptionTermType),
     // the "current" fields are used for auditing. They represent what the calling algorithm thinks is true before
     // the event happens.
     currentSubscription: Type.Optional(SubscriptionType),

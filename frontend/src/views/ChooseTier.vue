@@ -50,6 +50,7 @@
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Private models</v-list-item>
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Customizable models</v-list-item>
                   <v-list-item><template v-slot:prepend>*&nbsp;</template>Control what the viewer can download</v-list-item>
+                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Equivalent to $10/month</v-list-item>
                 </v-list>
               </v-card-text>
               <v-spacer></v-spacer>
@@ -63,7 +64,7 @@
                        variant="text"
                        :href="`${stripePurchasePeerUrl}?prefilled_email=${encodeURIComponent(loggedInUser.user.email)}&utm_content=${loggedInUser.user._id}`"
                 >
-                  Switch to Peer ($10/mo)
+                  Switch to Peer ($120/yr)
                 </v-btn>
                 <v-btn v-else
                        variant="text"
