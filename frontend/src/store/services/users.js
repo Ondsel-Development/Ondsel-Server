@@ -5,6 +5,12 @@ export const SubscriptionTypeMap = {
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
+
+export const SubscriptionTermTypeMap = {
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+}
+
 class User extends BaseModel {
   constructor(data, options) {
     super(data, options)

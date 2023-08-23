@@ -8,7 +8,7 @@
         {{ this.$route.query }}
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="transactionRecorded == true"
+        <v-btn v-if="transactionRecorded === true"
                @click="goHome"
         >
           Continue
@@ -28,7 +28,7 @@
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
-import {SubscriptionTypeMap} from "@/store/services/users";
+import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
 
 //
 // This page is ONLY reached via a return call from a Stripe Purchase Page.
@@ -58,16 +58,25 @@ export default {
     },
     async applySubscription() {
       this.accountEvent.event = AccountEventTypeMap.initialSubscriptionPurchase;
-      this.accountEvent.detail.subscription = SubscriptionTypeMap.premium;
+      this.accountEvent.detail.subscription = SubscriptionTypeMap.peer;
       this.accountEvent.detail.currentSubscription = this.loggedInUser.user.tier;
-      this.accountEvent.detail.term = '1 month';
-      this.accountEvent.amount = 1000; // $10.00
+      this.accountEvent.detail.term = SubscriptionTermTypeMap.yearly;
+      this.accountEvent.amount = 12000; // $120.00
       this.accountEvent.originalCurrency = 'USD';
-      this.accountEvent.originalAmt = '10.00';
+      this.accountEvent.originalAmt = '120.00';
       this.accountEvent.note = 'frontend InitialPurchaseForPeer page call';
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
+          this.authenticate({
+            strategy: 'local',
+            ...this.user,
+          }).then(() => {
+            this.$router.push({name: 'Models'})
+          }).catch((e) => {
+            console.log(e);
+            console.log(e.message);
+          })
         })
         .catch((e) => {
           console.log(e);
