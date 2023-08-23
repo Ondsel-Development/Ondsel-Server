@@ -89,6 +89,10 @@ export default {
       this.accountEvent.originalCurrency = 'USD';
       this.accountEvent.originalAmt = '120.00';
       this.accountEvent.note = 'frontend InitialPurchaseForPeer page call';
+      this.accountEvent.additionalData = {
+        ...this.$route.params,
+        ...this.$route.query,
+      };
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
