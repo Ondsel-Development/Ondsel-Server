@@ -54,6 +54,10 @@
           :disabled="isCreatePending"
         ></v-checkbox>
 
+        <v-btn block size="small" @click="tosDialog = true">
+          View Terms of Service
+        </v-btn>
+
         <v-checkbox
           v-model="agreeToPrivacyPolicy"
           label="I understand Privacy Policy"
@@ -61,15 +65,13 @@
           :disabled="isCreatePending"
         ></v-checkbox>
 
+        <v-btn block size="small" @click="ppDialog = true">
+          View Privacy Policy
+        </v-btn>
+
         <v-card-actions>
-          <v-btn type="submit" :disabled="isCreatePending">
+          <v-btn type="submit" color="primary" :disabled="isCreatePending">
             Submit
-          </v-btn>
-          <v-btn @click="tosDialog = true">
-            View TOS
-          </v-btn>
-          <v-btn @click="ppDialog = true">
-            View PP
           </v-btn>
         </v-card-actions>
       </v-form>
