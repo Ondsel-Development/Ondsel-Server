@@ -26,8 +26,6 @@ class User extends BaseModel {
       password: '',
       firstName: '',
       lastName: '',
-      tier: '',
-      nextTier: null,
     }
   }
 
