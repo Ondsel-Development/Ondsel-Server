@@ -57,6 +57,17 @@
             >
               Explore
             </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              prepend-icon="mdi-share"
+              variant="text"
+              @click.stop="openShareLinkDialog(sharedModel)"
+            >
+              <template v-slot:prepend>
+                <v-icon></v-icon>
+              </template>
+              Share
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -78,7 +89,13 @@
             <v-row dense>
               <v-col cols='8'>
                 <v-skeleton-loader
-                  type="button" width="300px"
+                  type="button"
+                >
+                </v-skeleton-loader>
+              </v-col>
+              <v-col cols='4'>
+                <v-skeleton-loader
+                  type="button" class=""
                 >
                 </v-skeleton-loader>
               </v-col>
@@ -97,22 +114,25 @@
         <div class="text-grey-darken-1">You reached the end!</div>
       </template>
     </v-row>
+    <ShareLinkDialog
+      :is-active="isShareLinkDialogActive"
+      :shared-model-id="activeShareModel._id"
+      ref="shareLinkDialog"
+    />
   </v-container>
-
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-import MangeSharedModels from '@/components/MangeSharedModels';
-import DeleteDialog from '@/components/DeleteDialog.vue';
+import ShareLinkDialog from '@/components/ShareLinkDialog.vue';
 
-const { Model, SharedModel } = models.api;
+const { SharedModel } = models.api;
 
 export default {
   name: 'PublicModels',
-  components: { MangeSharedModels, DeleteDialog },
+  components: { ShareLinkDialog },
   data: () => ({
     showRecentModels: true,
     pagination: {
@@ -120,6 +140,8 @@ export default {
       skip: 0,
       total: null,
     },
+    isShareLinkDialogActive: false,
+    activeShareModel: {},
   }),
   async created() {
   },
@@ -157,6 +179,11 @@ export default {
       const date = new Date(number);
       return date.toDateString();
     },
+    openShareLinkDialog(sharedModel) {
+      this.isShareLinkDialogActive = true;
+      this.activeShareModel = sharedModel;
+      this.$refs.shareLinkDialog.$data.dialog = true;
+    }
   }
 }
 </script>
