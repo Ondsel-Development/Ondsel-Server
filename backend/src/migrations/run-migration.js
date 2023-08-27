@@ -1,5 +1,6 @@
 import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
+import { migrateOldFilesCommand } from './migrate-old-files.command.js';
 
 async function runMigration() {
   console.log('Migration start');
@@ -7,6 +8,9 @@ async function runMigration() {
   switch (command) {
     case 'migrateOldModels':
       await migrateOldModelsCommand(app);
+      break;
+    case 'migrateOldFiles':
+      await migrateOldFilesCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
