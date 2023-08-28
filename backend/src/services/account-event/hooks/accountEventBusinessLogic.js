@@ -7,6 +7,7 @@ import {DoRecurringSubscriptionPurchase} from "../businessLogic/DoRecurringSubsc
 import {DoSubscriptionServiceCompleted} from "../businessLogic/DoSubscriptionServiceCompleted.js";
 import {DoSubscriptionRefund} from "../businessLogic/DoSubscriptionRefund.js";
 import {DoSubscriptionTierDowngrade} from "../businessLogic/DoSubscriptionTierDowngrade.js";
+import {DoCancelTierDowngrade} from "../businessLogic/DoCancelTierDowngrade.js";
 
 export const performAccountEventLogic = async (context) => {
   const { user } = context.params;
@@ -25,6 +26,9 @@ export const performAccountEventLogic = async (context) => {
       break;
     case AccountEventTypeMap.subscriptionTierDowngrade:
       await DoSubscriptionTierDowngrade(context, user);
+      break;
+    case AccountEventTypeMap.cancelTierDowngrade:
+      await DoCancelTierDowngrade(context, user);
       break;
     default:
       context.data.resultMsg = "Business logic for event type not supported yet.";

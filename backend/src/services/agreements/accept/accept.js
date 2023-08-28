@@ -49,7 +49,6 @@ export const acceptAgreement = (app) => {
   app.service(acceptAgreementPath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
         schemaHooks.resolveExternal(acceptAgreementExternalResolver),
         schemaHooks.resolveResult(acceptAgreementResolver)
       ]

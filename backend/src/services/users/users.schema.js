@@ -7,10 +7,10 @@ import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
 import {
-  agreementsAcceptedSchema,
+  agreementsAcceptedSchema, subscriptionDetailSchema,
   SubscriptionStateMap,
-  SubscriptionStateType,
-  SubscriptionType,
+  SubscriptionStateType, SubscriptionTermType,
+  SubscriptionType, SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 
@@ -26,7 +26,7 @@ export const userSchema = Type.Object(
     updatedAt: Type.Number(),
     tier: SubscriptionType,
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
-    subscriptionState: SubscriptionStateType,
+    subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
@@ -36,13 +36,17 @@ export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
 
   tier: virtual(async (message, context) => {
-    return message.tier || "Free"
+    return message.tier || SubscriptionTypeMap.solo;
   }),
   nextTier: virtual(async (message, context) => {
     return message.nextTier || null
   }),
-  subscriptionState: virtual(async (message, context) => {
-    return message.subscriptionState || SubscriptionStateMap.good
+  subscriptionDetail: virtual(async (message, context) => {
+    return message.subscriptionDetail || {
+      state: SubscriptionStateMap.good,
+      term: null,
+      anniversary: null,
+    }
   }),
 })
 
@@ -60,7 +64,7 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
-  tier: async () => "Free",
+  tier: async () => SubscriptionTypeMap.solo,
 })
 
 // Schema for updating existing entries

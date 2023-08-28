@@ -1,11 +1,24 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
+export const SubscriptionTypeMap = {
+  solo: 'Solo',
+  peer: 'Peer',
+  enterprise: 'Enterprise',
+}
+
+export const SubscriptionTermTypeMap = {
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+}
+
 class User extends BaseModel {
   constructor(data, options) {
     super(data, options)
   }
+
   // Required for $FeathersVuex plugin to work after production transpile.
   static modelName = 'User'
+
   // Define default properties here
   static instanceDefaults() {
     return {
@@ -16,12 +29,28 @@ class User extends BaseModel {
     }
   }
 
-  get isPremiumTier() {
-    return this.tier === 'Premium';
+  get isPeerTier() {
+    return this.tier === SubscriptionTypeMap.peer;
   }
 
   get isEnterpriseTier() {
-    return this.tier === 'Enterprise';
+    return this.tier === SubscriptionTypeMap.enterprise;
+  }
+
+  get fullTierName() {
+    let tierName = this.tier;
+    if (this.nextTier !== undefined && this.nextTier !== null) {
+      tierName += ` (but destined for ${this.nextTier} on next renewal)`
+    }
+    return tierName;
+  }
+
+  get shortTierName() {
+    let tierName = this.tier;
+    if (this.nextTier !== undefined && this.nextTier !== null) {
+      tierName += ` -> ${this.nextTier}`
+    }
+    return tierName;
   }
 }
 const servicePath = 'users'

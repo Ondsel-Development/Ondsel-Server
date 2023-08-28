@@ -12,6 +12,7 @@ export const acceptAgreementSchema = Type.Object(
     userId: ObjectIdSchema(),
     createdAt: Type.Number(),
     category: agreementCategoryType,
+    newAccount: Type.Boolean(), // when set, it actually does all the default categories, not jst the supplied one.
     version: Type.String(),
     dbResultMsg: Type.String(),
   },
@@ -25,17 +26,15 @@ export const acceptAgreementExternalResolver = resolve({})
 
 // Schema for creating new entries
 export const acceptAgreementDataSchema = Type.Pick(acceptAgreementSchema, [
+    'userId',
     'category',
-    'version'
+    'version',
+    'newAccount',
   ], {
   $id: 'AcceptAgreementData'
 })
 export const acceptAgreementDataValidator = getValidator(acceptAgreementDataSchema, dataValidator)
 export const acceptAgreementDataResolver = resolve({
-  userId: async (_value, _message, context) => {
-    // Associate the record with the id of the authenticated user
-    return context.params.user._id
-  },
   createdAt: async () => Date.now(),
 })
 

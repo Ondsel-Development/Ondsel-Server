@@ -38,6 +38,14 @@
             :title="`${loggedInUser.user.firstName} ${loggedInUser.user.lastName}`"
           >
           </v-list-item>
+          <v-list-item>
+            <v-btn
+              variant="text"
+              @click="gotoChooseTier()"
+            >
+              {{ user.shortTierName }} (change)
+            </v-btn>
+          </v-list-item>
         </v-list>
 
         <v-divider></v-divider>
@@ -89,6 +97,7 @@ export default {
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapState('auth', ['user']),
     currentRouteName: (vm) => vm.$route.name
   },
   methods: {
@@ -96,6 +105,9 @@ export default {
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
+    gotoChooseTier() {
+      this.$router.push({name: 'ChooseTier'});
+    }
   },
 }
 </script>
