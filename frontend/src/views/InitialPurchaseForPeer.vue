@@ -97,7 +97,6 @@ export default {
         .then(() => {
           this.transactionRecorded = true;
           this.authLogout().then(() => {
-            console.log("logged out");
           }).catch((e) => {
             console.log(e);
             console.log(e.message);
@@ -110,7 +109,6 @@ export default {
     }
   },
   created() {
-    console.log("creation here");
     this.applySubscription();
   }
 }
