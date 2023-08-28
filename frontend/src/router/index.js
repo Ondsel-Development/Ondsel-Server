@@ -4,11 +4,15 @@ import store from '@/store'
 
 import Home from "@/views/Home";
 import SignUp from "@/views/SignUp";
+import ChooseTier from "@/views/ChooseTier.vue";
 import Login from '@/views/Login';
 import Share from '@/views/Share';
 import Models from '@/views/Models';
 import PageNotFound from '@/views/PageNotFound';
 import PublicModels from '@/views/PublicModels';
+import InitialPurchaseForPeer from "@/views/InitialPurchaseForPeer.vue";
+import DowngradeToSolo from "@/views/DowngradeToSolo.vue";
+import CancelTierChange from "@/views/CancelTierChange.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -43,6 +47,30 @@ const routes = [
     path: '/signup',
     component: SignUp,
     name: 'SignUp',
+  },
+  {
+    path: '/choose-tier',
+    component: ChooseTier,
+    name: 'ChooseTier',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/initial-purchase-for-peer/:stripe_session_id',
+    component: InitialPurchaseForPeer,
+    name: 'InitialPurchaseForPeer',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/downgrade-to-solo',
+    component: DowngradeToSolo,
+    name: 'DowngradeToSolo',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cancel-tier-change',
+    component: CancelTierChange,
+    name: 'CancelTierChange',
+    meta: { requiresAuth: true },
   },
   {
     path: '/login',

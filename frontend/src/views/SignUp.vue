@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="fill-height">
     <v-card title="Sign Up to Ondsel" class="mx-auto" width="400" flat>
-      <template v-slot:loader="{ isActive }">
+      <template v-slot:loader="{  }">
         <v-progress-linear
           :active="isCreatePending"
           height="4"
@@ -46,8 +46,62 @@
           :rules="[rules.isRequired, rules.confirmPassword]"
           :disabled="isCreatePending"
         ></v-text-field>
+
+        <v-checkbox
+          v-model="agreeToTOS"
+          :rules="[rules.confirmTOS]"
+          :disabled="isCreatePending"
+          density="compact"
+        >
+          <template v-slot:label>
+            <div>
+              I understand
+              <v-tooltip location="bottom">
+                <template v-slot:activator="{ props }">
+                  <a
+                    v-bind="props"
+                    @click.stop="ppDialog = true"
+                  >
+                    <span class="font-weight-medium text-decoration-underline text-black">
+                      Terms of Service
+                    </span>
+                  </a>
+                </template>
+                Click to read Terms of Service
+              </v-tooltip>
+            </div>
+          </template>
+        </v-checkbox>
+
+        <v-checkbox
+          v-model="agreeToPrivacyPolicy"
+          :rules="[rules.confirmPP]"
+          :disabled="isCreatePending"
+          density="compact"
+        >
+          <template v-slot:label>
+            <div>
+              I understand
+              <v-tooltip location="bottom">
+                <template v-slot:activator="{ props }">
+                  <a
+                    v-bind="props"
+                    @click.stop="ppDialog = true"
+                  >
+                    <span class="font-weight-medium text-decoration-underline text-black">
+                      Privacy Policy
+                    </span>
+                  </a>
+                </template>
+                Click to read Privacy Policy
+              </v-tooltip>
+            </div>
+          </template>
+
+        </v-checkbox>
+
         <v-card-actions>
-        <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Submit</v-btn>
+          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Submit</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>
@@ -57,19 +111,60 @@
     >
       {{ snackerMsg }}
     </v-snackbar>
+    <v-dialog
+      v-model="tosDialog"
+      width="auto"
+    >
+      <v-card>
+        <v-card-title>{{ tosDoc.current.title }}</v-card-title>
+        <v-card-subtitle>ver {{ tosDoc.current.version }}</v-card-subtitle>
+        <v-card-text>
+          <VueShowdown
+            :markdown="tosDoc.current.markdownContent"
+            flavor="github"
+            :options="{ emoji: false }"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" block @click="tosDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="ppDialog"
+      width="auto"
+    >
+      <v-card>
+        <v-card-title>{{ ppDoc.current.title }}</v-card-title>
+        <v-card-subtitle>ver {{ ppDoc.current.version }}</v-card-subtitle>
+        <v-card-text>
+          <VueShowdown
+            :markdown="ppDoc.current.markdownContent"
+            flavor="github"
+            :options="{ emoji: false }"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" block @click="ppDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
+
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 export default {
   name: 'SignUp',
+  components: { },
   data() {
     return {
       result: {},
       user: new models.api.User(),
+      acceptAgreement: new models.api.AcceptAgreement(),
       confirmPassword: '',
       isValid: false,
       snackerMsg: '',
@@ -78,8 +173,16 @@ export default {
         isRequired: v => !!v || 'This field is required',
         minCharacter: v => (v && v.length >= 8) || 'Minimum 8 characters',
         confirmPassword: v => v === this.user.password || 'Password must match',
+        confirmTOS: v => v || 'Terms of Service must be understood',
+        confirmPP: v => v || 'Privacy Policy must be understood',
       },
-      showSnacker: false
+      agreeToTOS: false,
+      agreeToPrivacyPolicy: false,
+      showSnacker: false,
+      tosDoc: {},
+      tosDialog: false,
+      ppDoc: {},
+      ppDialog: false,
     }
   },
   computed: {
@@ -87,19 +190,49 @@ export default {
     ...mapState('users', ['isCreatePending']),
   },
   methods: {
+    ...mapActions('auth', ['authenticate']),
     async signUp() {
       if (this.isValid) {
+        this.user.agreeToTOS = undefined; // now that we have confirmed these, we should remove from 'user create`
+        this.user.agreeToPrivacyPolicy = undefined;
         await this.user.create()
           .then(() => {
-            this.$router.push({name: 'Login'})
+            // post agreement to TOS
+            this.acceptAgreement.userId = this.user._id;
+            this.acceptAgreement.category = 'terms-of-service';
+            this.acceptAgreement.version = this.tosDoc.current.version;
+            this.acceptAgreement.newAccount = true;
+            this.acceptAgreement.create();
+            this.authenticate({
+              strategy: 'local',
+              ...this.user,
+            }).then(() => {
+              // done. go to choose-tier page
+              this.$router.push({name: 'ChooseTier'})
+            }).catch(() => {
+              this.showSnacker = true;
+              this.snackerMsg = "Internal Error: invalid login after signup"
+            })
           })
           .catch((e) => {
             this.snackerMsg = e.message;
             this.showSnacker = true;
           });
       }
-    }
-  }
+    },
+  },
+  created() {
+    models.api.Agreements.find({
+      query: {category: 'terms-of-service'}
+    }).then(response => {
+        this.tosDoc = (response.data.length > 0) ? response.data[0] : {current:{markdownContent: 'doc missing'}};
+    });
+    models.api.Agreements.find({
+      query: {category: 'privacy-policy'}
+    }).then(response => {
+      this.ppDoc = (response.data.length > 0) ? response.data[0] : {current:{markdownContent: 'doc missing'}};
+    });
+  },
 }
 </script>
 

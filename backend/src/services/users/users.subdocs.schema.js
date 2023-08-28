@@ -6,15 +6,21 @@ import {CurrencyType} from "../../currencies.js";
 import {agreementCategoryType} from "../agreements/agreements.schema.js";
 
 export const SubscriptionTypeMap = {
+  solo: 'Solo',
+  peer: 'Peer',
+  enterprise: 'Enterprise',
+  // legacy entries TODO: remove on release after next
   free: 'Free',
   premium: 'Premium',
-  enterprise: 'Enterprise',
 }
 export const SubscriptionType = StringEnum(
   [
+    SubscriptionTypeMap.solo,
+    SubscriptionTypeMap.peer,
+    SubscriptionTypeMap.enterprise,
+    // legacy entries TODO: remove on release after next
     SubscriptionTypeMap.free,
     SubscriptionTypeMap.premium,
-    SubscriptionTypeMap.enterprise,
   ]
 )
 
@@ -44,6 +50,25 @@ export const SubscriptionStateType = StringEnum(
     SubscriptionStateMap.closed,
   ]
 )
+
+export const SubscriptionTermTypeMap = {
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+}
+export const SubscriptionTermType = StringEnum(
+  [
+    SubscriptionTermTypeMap.monthly,
+    SubscriptionTermTypeMap.yearly,
+  ]
+);
+
+export const subscriptionDetailSchema= Type.Object(
+  {
+    state: SubscriptionStateType,
+    term: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
+    anniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
+  }
+);
 
 export const LedgerMap = {
   cash: 'Cash',

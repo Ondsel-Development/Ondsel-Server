@@ -15,6 +15,7 @@ import { AgreementsService, getOptions } from './agreements.class.js'
 import { agreementsPath, agreementsMethods } from './agreements.shared.js'
 import {authenticate} from "@feathersjs/authentication";
 import swagger from "feathers-swagger";
+import {disallow, iff, isProvider, preventChanges} from "feathers-hooks-common";
 
 export * from './agreements.class.js'
 export * from './agreements.schema.js'
@@ -52,6 +53,7 @@ export const agreements = (app) => {
       find: [],
       get: [],
       create: [
+        disallow('external'),
         schemaHooks.validateData(agreementsDataValidator),
         schemaHooks.resolveData(agreementsDataResolver)
       ],

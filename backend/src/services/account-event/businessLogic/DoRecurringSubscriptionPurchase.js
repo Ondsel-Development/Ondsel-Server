@@ -36,8 +36,9 @@ export async function DoRecurringSubscriptionPurchase(context, user) {
   // 3. update the user doc
   //
   context.data.transactionId = transaction.transactionId; // this is VERY important or we can't match the logs to the user journal entries
+  user.subscriptionDetail.state = detail.newSubscriptionState;
   await context.app.service('users').patch(user._id, {
-    subscriptionState: detail.newSubscriptionState,
+    subscriptionDetail: user.subscriptionDetail,
     userAccounting: user.userAccounting,
   });
   //
@@ -112,17 +113,17 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     result.errMsg = `The renewal of subscription for ${subscription} does not match the user's tier of ${user.tier}.`;
     return result;
   }
-  if (subscription === SubscriptionTypeMap.free) {
-    result.errMsg = `A free tier does not need renewal.`;
+  if (subscription === SubscriptionTypeMap.solo) {
+    result.errMsg = `A Solo tier does not need renewal.`;
     return result;
   }
-  let oldState = user.subscriptionState;
+  let oldState = user.subscriptionDetail.state;
   if (oldState === SubscriptionStateMap.closed) {
     result.errMsg = "Cannot renew a subscription on a closed account.";
     return result;
   }
   if (oldState === SubscriptionStateMap.permDowngrade) {
-    result.errMsg = "This account has been permanently downgraded to Free. A renewal should NOT have been tried.";
+    result.errMsg = "This account has been permanently downgraded to Solo. A renewal should NOT have been tried.";
     return result;
   }
   result.newSubscriptionState = SubscriptionStateMap.good;
