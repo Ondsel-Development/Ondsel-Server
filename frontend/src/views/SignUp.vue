@@ -49,30 +49,59 @@
 
         <v-checkbox
           v-model="agreeToTOS"
-          label="I understand Terms of Service"
           :rules="[rules.confirmTOS]"
           :disabled="isCreatePending"
-        ></v-checkbox>
-
-        <v-btn block size="small" @click="tosDialog = true">
-          View Terms of Service
-        </v-btn>
+          density="compact"
+        >
+          <template v-slot:label>
+            <div>
+              I understand
+              <v-tooltip location="bottom">
+                <template v-slot:activator="{ props }">
+                  <a
+                    v-bind="props"
+                    @click.stop="ppDialog = true"
+                  >
+                    <span class="font-weight-medium text-decoration-underline text-black">
+                      Terms of Service
+                    </span>
+                  </a>
+                </template>
+                Click to read Terms of Service
+              </v-tooltip>
+            </div>
+          </template>
+        </v-checkbox>
 
         <v-checkbox
           v-model="agreeToPrivacyPolicy"
-          label="I understand Privacy Policy"
           :rules="[rules.confirmPP]"
           :disabled="isCreatePending"
-        ></v-checkbox>
+          density="compact"
+        >
+          <template v-slot:label>
+            <div>
+              I understand
+              <v-tooltip location="bottom">
+                <template v-slot:activator="{ props }">
+                  <a
+                    v-bind="props"
+                    @click.stop="ppDialog = true"
+                  >
+                    <span class="font-weight-medium text-decoration-underline text-black">
+                      Privacy Policy
+                    </span>
+                  </a>
+                </template>
+                Click to read Privacy Policy
+              </v-tooltip>
+            </div>
+          </template>
 
-        <v-btn block size="small" @click="ppDialog = true">
-          View Privacy Policy
-        </v-btn>
+        </v-checkbox>
 
         <v-card-actions>
-          <v-btn type="submit" color="primary" :disabled="isCreatePending">
-            Submit
-          </v-btn>
+          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Submit</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>
