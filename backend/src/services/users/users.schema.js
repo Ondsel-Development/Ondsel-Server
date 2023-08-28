@@ -65,6 +65,7 @@ export const userDataResolver = resolve({
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
   tier: async () => SubscriptionTypeMap.solo,
+  nextTier: async () => null,
 })
 
 // Schema for updating existing entries
@@ -78,7 +79,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'firstName', 'lastName', 'tier'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'firstName', 'lastName', 'tier', 'nextTier'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),

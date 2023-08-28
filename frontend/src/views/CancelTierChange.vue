@@ -7,10 +7,6 @@
           <p>
             Your account is no longer switching service level (tier) at the end of the current billing period.
           </p>
-          &nbsp;
-          <p>
-            Please Login again to see your new credentials.
-          </p>
         </div>
         <div v-else>
           <p>
@@ -24,9 +20,9 @@
       </v-card-text>
       <v-card-actions>
         <v-btn v-if="transactionRecorded"
-               @click="goLogin"
+               @click="goHome"
         >
-          Go To Login Page
+          continue
         </v-btn>
         <v-btn v-else
                @click="applySubscription"
@@ -64,9 +60,8 @@ export default {
     ...mapState('auth', { loggedInUser: 'payload' }),
   },
   methods: {
-    ...mapActions('auth', {authLogout: 'logout'}),
-    async goLogin() {
-      this.$router.push({name: 'Login'})
+    async goHome() {
+      this.$router.push({name: 'Models'})
     },
     async applySubscription() {
       this.accountEvent.event = AccountEventTypeMap.cancelTierDowngrade;
@@ -80,11 +75,6 @@ export default {
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
-          this.authLogout().then(() => {
-          }).catch((e) => {
-            console.log(e);
-            console.log(e.message);
-          })
         })
         .catch((e) => {
           console.log(e);

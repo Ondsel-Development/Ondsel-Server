@@ -7,16 +7,11 @@
           <p>
             Your account is now setup for automatically downgrading to Solo service at the end of the current billing period. Until then, enjoy the remainder of your current service.
           </p>
-          &nbsp;
-          <p>
-            Please Login again to see your new credentials.
-          </p>
         </div>
         <div v-else>
           <p>
             For some reason, Ondsel's system had difficulty recording the transaction. Please hit the "try recording again" button below to re-attempt.
-          </p>
-          &nbsp;
+          </p>&nbsp;
           <p>
             If this continues to fail, please contact <a href="mailto:contact@ondsel.com">contact@ondsel.com</a> for support.
           </p>
@@ -24,9 +19,9 @@
       </v-card-text>
       <v-card-actions>
         <v-btn v-if="transactionRecorded"
-               @click="goLogin"
+               @click="goHome"
         >
-          Go To Login Page
+          continue
         </v-btn>
         <v-btn v-else
                @click="applySubscription"
@@ -47,6 +42,7 @@ import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/use
 
 export default {
   name: 'DowngradeToSolo',
+  emits: ['updateUser'],
   data() {
     return {
       result: {},
@@ -64,9 +60,8 @@ export default {
     ...mapState('auth', { loggedInUser: 'payload' }),
   },
   methods: {
-    ...mapActions('auth', {authLogout: 'logout'}),
-    async goLogin() {
-      this.$router.push({name: 'Login'})
+    async goHome() {
+      this.$router.push({name: 'Models'})
     },
     async applySubscription() {
       this.accountEvent.event = AccountEventTypeMap.subscriptionTierDowngrade;
@@ -77,14 +72,11 @@ export default {
       this.accountEvent.originalCurrency = 'USD';
       this.accountEvent.originalAmt = '0.00';
       this.accountEvent.note = 'frontend DowngradeToSolo page call';
+      this.user.nextTier = SubscriptionTypeMap.solo; // used for emit
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
-          this.authLogout().then(() => {
-          }).catch((e) => {
-            console.log(e);
-            console.log(e.message);
-          })
+          this.$emit('updateUser', this.user);
         })
         .catch((e) => {
           console.log(e);

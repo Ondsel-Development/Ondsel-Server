@@ -43,7 +43,6 @@ export const model = (app) => {
         securities: ['all'],
       }
     })
-
   })
 
   app.service(modelPath).publish((data, context) => {
