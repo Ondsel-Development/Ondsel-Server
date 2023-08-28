@@ -2,6 +2,7 @@ import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
 import {updateTierNames} from "./update-tier-names.command.js";
 import {addInitialTosPp} from "./add-initial-tos-pp.js";
+import { migrateOldFilesCommand } from './migrate-old-files.command.js';
 
 async function runMigration() {
   console.log('Migration start');
@@ -9,6 +10,9 @@ async function runMigration() {
   switch (command) {
     case 'migrateOldModels':
       await migrateOldModelsCommand(app);
+      break;
+    case 'migrateOldFiles':
+      await migrateOldFilesCommand(app);
       break;
     case 'updateTierNames':
       await updateTierNames(app);
