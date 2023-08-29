@@ -68,6 +68,9 @@
         </v-text-field>
 
       </v-card-text>
+      <v-card-actions class="justify-center">
+        <v-btn @click="dialog = false">Cancel</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
