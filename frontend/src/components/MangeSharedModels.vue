@@ -11,7 +11,18 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title class="text-center">Manage share model links</v-toolbar-title>
+        <v-toolbar-title>
+          Manage share model links
+        </v-toolbar-title>
+        <v-divider
+          class="mx-4"
+          inset
+          vertical
+        ></v-divider>
+        <v-spacer />
+        <v-btn prepend-icon="mdi-plus" flat @click.stop="openShareModelDialog">
+          Create Share Link
+        </v-btn>
       </v-toolbar>
       <v-progress-linear indeterminate v-if="isFindPending || isPatchPending || isRemovePending"></v-progress-linear>
     </template>
@@ -25,7 +36,7 @@
         <v-chip color="dark-grey" class="ml-2">
           {{ (item.raw._id) }}
           <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item.raw._id }}" target="_blank"></v-btn>
-          <v-btn end variant="plain" icon="mdi-content-copy" @click.stop="copyToClipboard(item.raw._id, sharedModelUrl(item.raw._id))"></v-btn>
+          <v-btn end variant="plain" icon="mdi-share" @click.stop="openShareLinkDialog(item.raw._id)"></v-btn>
           <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item.raw._id)" :disabled="item.raw.isSystemGenerated"></v-btn>
         </v-chip>
       </v-row>
@@ -147,16 +158,31 @@
 
   </v-data-table-virtual>
 
+  <ShareModelDialog
+    v-if="model"
+    :is-active="isShareModelDialogActive"
+    :model-id="model._id"
+    ref="shareModelDialog"
+  />
+  <ShareLinkDialog
+    :is-active="isShareLinkDialogActive"
+    :shared-model-id="activeShareModelId"
+    ref="shareLinkDialog"
+  />
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
+
+import ShareModelDialog from '@/components/ShareModelDialog';
+import ShareLinkDialog from '@/components/ShareLinkDialog';
 
 const { Model, SharedModel } = models.api;
 
 export default {
   name: 'MangeSharedModels',
+  components: { ShareModelDialog, ShareLinkDialog },
   props: {
     model: Object,
   },
@@ -175,6 +201,9 @@ export default {
         { title: 'Created At', key: 'createdAt', sortable: true},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
+      isShareModelDialogActive: false,
+      isShareLinkDialogActive: false,
+      activeShareModelId: '',
     }
   },
   computed: {
@@ -212,20 +241,14 @@ export default {
         );
       }
     },
-    async copyToClipboard(id, textToCopy) {
-      // Navigator clipboard api needs a secure context (https)
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(textToCopy);
-      } else {
-        try {
-          const { ['textField_' + id]:el } = this.$refs;
-          el.select();
-          document.execCommand('copy');
-        } catch (error) {
-          console.error(error);
-        }
-      }
+    openShareModelDialog() {
+      this.$refs.shareModelDialog.$data.dialog = true;
     },
+    openShareLinkDialog(sharedModelId) {
+      this.isShareLinkDialogActive = true;
+      this.activeShareModelId = sharedModelId;
+      this.$refs.shareLinkDialog.$data.dialog = true;
+    }
   },
 }
 </script>
