@@ -13,6 +13,7 @@ import PublicModels from '@/views/PublicModels';
 import InitialPurchaseForPeer from "@/views/InitialPurchaseForPeer.vue";
 import DowngradeToSolo from "@/views/DowngradeToSolo.vue";
 import CancelTierChange from "@/views/CancelTierChange.vue";
+import LegalDoc from "@/views/LegalDoc.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -47,6 +48,11 @@ const routes = [
     path: '/signup',
     component: SignUp,
     name: 'SignUp',
+  },
+  {
+    path: '/legal-document/:doc_name',
+    component: LegalDoc,
+    name: 'LegalDoc',
   },
   {
     path: '/choose-tier',
