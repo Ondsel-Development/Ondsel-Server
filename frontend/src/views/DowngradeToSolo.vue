@@ -7,21 +7,24 @@
           <p>
             Your account is now setup for automatically downgrading to Solo service at the end of the current billing period. Until then, enjoy the remainder of your current service.
           </p>
+          &nbsp;
+          <p>
+            Click on "Continue" below to refresh your browser's cache.
+          </p>
         </div>
         <div v-else>
           <p>
             For some reason, Ondsel's system had difficulty recording the transaction. Please hit the "try recording again" button below to re-attempt.
-          </p>&nbsp;
+          </p>
+          &nbsp;
           <p>
             If this continues to fail, please contact <a href="mailto:contact@ondsel.com">contact@ondsel.com</a> for support.
           </p>
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="transactionRecorded"
-               @click="goHome"
-        >
-          continue
+        <v-btn v-if="transactionRecorded">
+          <a href="/">continue</a>
         </v-btn>
         <v-btn v-else
                @click="applySubscription"
@@ -42,16 +45,10 @@ import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/use
 
 export default {
   name: 'DowngradeToSolo',
-  emits: ['updateUser'],
   data() {
     return {
       result: {},
       accountEvent: new models.api.AccountEvent(),
-      user: {
-        email: '',
-        password: '',
-        tier: '',
-      },
       transactionRecorded: false,
     }
   },
@@ -72,11 +69,9 @@ export default {
       this.accountEvent.originalCurrency = 'USD';
       this.accountEvent.originalAmt = '0.00';
       this.accountEvent.note = 'frontend DowngradeToSolo page call';
-      this.user.nextTier = SubscriptionTypeMap.solo; // used for emit
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
-          this.$emit('updateUser', this.user);
         })
         .catch((e) => {
           console.log(e);
