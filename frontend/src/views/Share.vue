@@ -28,6 +28,13 @@
         location="start"
       >Export model</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="openShareLinkDialog">
+      <v-icon>mdi-share</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Share model</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @load:mesh="uploadThumbnail"/>
   <div class="text-center">
@@ -121,6 +128,11 @@
       <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="mt-1"></v-img>
     </v-sheet>
   </a>
+  <ShareLinkDialog
+    :is-active="isShareLinkDialogActive"
+    :shared-model-id="sharedModel._id"
+    ref="shareLinkDialog"
+  />
 </template>
 
 <script>
@@ -130,12 +142,13 @@ import { models } from '@feathersjs/vuex';
 import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
+import ShareLinkDialog from '@/components/ShareLinkDialog';
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: { AttributeViewer, ModelViewer, ExportModelDialog },
+  components: {ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog },
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -146,6 +159,7 @@ export default {
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
     error: '',
+    isShareLinkDialogActive: false,
   }),
   async created() {
     const shareModelId = this.$route.params.id;
@@ -236,6 +250,10 @@ export default {
         console.error(e);
       }
     },
+    openShareLinkDialog() {
+      this.isShareLinkDialogActive = true;
+      this.$refs.shareLinkDialog.$data.dialog = true;
+    }
   },
   watch: {
     async 'model.isObjGenerated'(v) {
