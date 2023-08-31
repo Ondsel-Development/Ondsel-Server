@@ -46,7 +46,7 @@
               <v-col cols="6">
                 <v-checkbox v-model="permissions.canDownloadDefaultModel" :disabled="isGeneratingLink" hide-details>
                   <template v-slot:label>
-                    <div>Can download default model</div>
+                    <div>Can download original model</div>
                   </template>
                 </v-checkbox>
               </v-col>
