@@ -209,7 +209,7 @@ export default {
   computed: {
     ...mapState('shared-models', ['isFindPending', 'isPatchPending', 'isRemovePending']),
     sharedModels: (vm) => {
-      if (!vm.model) {
+      if (!vm.model?._id) {
         return [];
       }
       return SharedModel.findInStore({ query: { cloneModelId: vm.model._id.toString() } }).data

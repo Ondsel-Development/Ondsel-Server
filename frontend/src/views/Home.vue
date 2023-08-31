@@ -22,7 +22,7 @@
       >See model attributes</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="sharedModelDrawerClicked">
-      <v-icon>mdi-share-variant</v-icon>
+      <v-icon>mdi-format-list-checks</v-icon>
       <v-tooltip
         activator="parent"
         location="start"

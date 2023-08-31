@@ -129,6 +129,7 @@
     </v-sheet>
   </a>
   <ShareLinkDialog
+    v-if="sharedModel"
     :is-active="isShareLinkDialogActive"
     :shared-model-id="sharedModel._id"
     ref="shareLinkDialog"
