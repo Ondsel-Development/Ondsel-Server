@@ -24,6 +24,25 @@ $ npm ci
 $ npm run dev
 ```
 
+### Running sharefrontend
+
+- Go to the `sharefrontend` directory
+- Rename `env.example` to `.env` (Or export variables)
+- create and start the VirtualEnv based on python 3.10
+- within the venv, pip install the libraries (`requirements.txt`)
+- within the venv, run server app.py
+
+
+```bash
+$ cd sharefrontend
+$ mv env.example .env
+$ set -a; . ./.env; set +a
+$ python3.10 -m venv venv     # only on first creation
+$ source venv/bin/activate
+(venv) $ pip install -r requirements.txt
+(venv) $ python app.py
+```
+
 ### Running backend
 
 - Go to the `backend` directory

@@ -45,5 +45,11 @@ packages/**/lib
 *.sqlite
 docs/.vitepress/cache
 
+sharefrontend/venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
 backend/.env
 frontend/.env
+sharefrontend/.env

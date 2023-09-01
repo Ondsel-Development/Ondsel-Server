@@ -1,0 +1,20 @@
+<!doctype html>
+<head>
+  <title>{{ detail.description }} - Shared via Ondsel</title>
+  <meta name=viewport content="width=device-width">
+  <meta property="og:url" content="{{ share_url }}/{{ link_id }}"/>
+  <meta property="og:title" content="{{ detail.description }} - Shared via Ondsel"/>
+  <meta property="og:description" content="A shared FreeCAD model: {{ detail.description }}."/>
+  <meta property="og:site_name" content="Ondsel"/>
+  <meta property=”og:image" content="{{ detail.thumbnailUrl }}"/>
+  <style>
+   html, body, iframe { height:100%; width:100%; margin:10px; border:0; display:block }
+  </style>
+</head>
+<body>
+{% if good_flag %}
+  <iframe src="{{ share_url }}/{{ link_id }}"></iframe>
+{% else %}
+  <h1>Error: FreeCAD model not found</h1>
+{% endif %}
+</body>
