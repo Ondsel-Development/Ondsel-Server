@@ -21,12 +21,12 @@
         location="start"
       >See model attributes</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openShareModelDialog">
-      <v-icon>mdi-share-variant</v-icon>
+    <v-btn icon flat @click="sharedModelDrawerClicked">
+      <v-icon>mdi-format-list-checks</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
-      >Create a share link</v-tooltip>
+      >Manage share link</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="openExportModelDialog">
       <v-icon>mdi-file-export</v-icon>
@@ -119,20 +119,20 @@
       ref="attributeViewer"
       @update-model="updateModel"
     />
-    <ShareModelDialog
-      v-if="model"
-      :is-active="isShareModelDialogActive"
-      :model-id="model._id"
-      ref="shareModelDialog"
-      @update-model="updateModel"
-    />
     <ExportModelDialog
       v-if="model"
       :is-active="isExportModelDialogActive"
       :model="model"
       ref="exportModelDialog"
-      @update-model="updateModel"
     />
+    <v-navigation-drawer
+      v-model="manageSharedModelsDrawer"
+      location="right"
+      width="1100"
+      temporary
+    >
+      <MangeSharedModels :model="model"/>
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -142,16 +142,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-import ModelViewer from "@/components/ModelViewer";
+import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
-import ShareModelDialog from '@/components/ShareModelDialog';
 import ExportModelDialog from '@/components/ExportModelDialog';
+import MangeSharedModels from '@/components/MangeSharedModels';
 
-const { Model } = models.api;
+const { Model, SharedModel } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, ModelViewer, ShareModelDialog, ExportModelDialog },
+  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog },
   data: () => ({
     dialog: true,
     model: null,
@@ -162,6 +162,7 @@ export default {
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
     error: '',
+    manageSharedModelsDrawer: false,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -236,9 +237,6 @@ export default {
     openAttributeViewer() {
       this.$refs.attributeViewer.$data.dialog = true;
     },
-    openShareModelDialog() {
-      this.$refs.shareModelDialog.$data.dialog = true;
-    },
     openExportModelDialog() {
       this.$refs.exportModelDialog.$data.dialog = true;
     },
@@ -290,6 +288,15 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    async sharedModelDrawerClicked() {
+      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
+      await SharedModel.find({
+        query: {
+          cloneModelId: this.model._id,
+          $paginate: false
+        },
+      })
     },
   },
   watch: {
