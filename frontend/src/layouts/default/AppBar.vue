@@ -98,7 +98,7 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
-    currentRouteName: (vm) => vm.$route.name
+    currentRouteName: (vm) => vm.$route.name,
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
