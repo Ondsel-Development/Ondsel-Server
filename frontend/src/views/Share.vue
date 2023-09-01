@@ -130,6 +130,7 @@ import { models } from '@feathersjs/vuex';
 import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
+import {useMeta} from "vue-meta";
 
 const { SharedModel, Model } = models.api;
 
@@ -257,7 +258,20 @@ export default {
         }, 3000)
       }
     }
-  }
+  },
+  setup () {
+    useMeta({
+      title: `X Shared Via Ondsel`,
+      meta: {
+        property: "og:url",
+        content: "https://swiftkey.com/en/keyboard/ios",
+      },
+      // "og:title": "SwiftKey Keyboard for iPhone, iPad &amp;amp; iPod Touch",
+      // "og:description": "Discover the best new app for iPhone and iPad, SwiftKey Keyboard learns from you for faster, easier mobile typing — free.",
+      // "og:site_name": "Ondsel",
+      // "og:image": "https://xyz.com/images/og/default.jpg"
+    });
+  },
 }
 </script>
 

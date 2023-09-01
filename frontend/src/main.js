@@ -27,5 +27,4 @@ app.use(VueShowdownPlugin, {
   },
 });
 
-
 app.mount('#app')
