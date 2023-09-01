@@ -98,7 +98,7 @@
           <v-col cols="3">
             <v-checkbox v-model="item.raw.canDownloadDefaultModel" :disabled="!item.raw.isActive" hide-details>
               <template v-slot:label>
-                <div>Can download default model</div>
+                <div>Can download original model</div>
               </template>
             </v-checkbox>
           </v-col>
