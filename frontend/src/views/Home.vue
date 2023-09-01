@@ -103,8 +103,11 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-            <v-btn icon flat @click="dialog = false" :disabled="!isModelLoaded">
+            <v-btn v-if="model" icon flat @click="dialog = false" :disabled="!isModelLoaded">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
+            </v-btn>
+            <v-btn v-else icon flat :to="{ name: 'Models' }">
+              <v-icon icon="mdi-arrow-left" size="x-large"></v-icon>
             </v-btn>
           </v-card-actions>
         </v-card>
