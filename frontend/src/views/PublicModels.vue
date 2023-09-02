@@ -5,6 +5,7 @@
       <v-spacer />
       <v-col cols="3" class="text-right">
         <v-btn
+          min-width="200"
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
         >

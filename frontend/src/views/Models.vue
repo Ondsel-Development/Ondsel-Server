@@ -15,6 +15,7 @@
       <v-col cols="3" class="text-right">
 <!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
         <v-btn
+          min-width="200"
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
         >
