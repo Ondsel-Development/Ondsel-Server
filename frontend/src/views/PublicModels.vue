@@ -18,11 +18,16 @@
       <v-col
         v-for="(sharedModel, i) in sharedModels.data"
         :key="sharedModel._id"
-        cols="4"
+        xs="12"
+        sm="12"
+        md="6"
+        lg="4"
+        xl="3"
+        xxl="2"
       >
         <v-card
           class="mx-auto"
-          max-width="344"
+          width="344"
         >
           <template v-if="sharedModel.thumbnailUrl">
             <v-img
@@ -73,9 +78,14 @@
       </v-col>
       <template v-if="sharedModels.data.length === 0 && isFindPending">
         <v-col
-          v-for="i in 9"
+          v-for="i in 25"
           :key="i"
-          cols="4"
+          xs="12"
+          sm="12"
+          md="6"
+          lg="4"
+          xl="3"
+          xxl="2"
         >
           <v-card
             class="mx-auto"
@@ -110,8 +120,11 @@
       <template v-if="sharedModels.data.length && isFindPending">
         <v-progress-circular indeterminate></v-progress-circular>
       </template>
-      <template v-if="sharedModels.data.length === this.pagination.total">
+      <template v-else-if="sharedModels.data.length === this.pagination.total">
         <div class="text-grey-darken-1">You reached the end!</div>
+      </template>
+      <template v-else>
+        <v-btn flat variant="text" @click.stop="fetchModels">Load more</v-btn>
       </template>
     </v-row>
     <ShareLinkDialog
@@ -136,7 +149,7 @@ export default {
   data: () => ({
     showRecentModels: true,
     pagination: {
-      limit: 12,
+      limit: 25,
       skip: 0,
       total: null,
     },
