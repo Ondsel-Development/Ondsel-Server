@@ -60,7 +60,7 @@
                 <template v-slot:activator="{ props }">
                   <a
                     v-bind="props"
-                    @click.stop="ppDialog = true"
+                    @click.stop="tosDialog = true"
                   >
                     <span class="font-weight-medium text-decoration-underline text-black">
                       Terms of Service
@@ -119,11 +119,7 @@
         <v-card-title>{{ tosDoc.current.title }}</v-card-title>
         <v-card-subtitle>ver {{ tosDoc.current.version }}</v-card-subtitle>
         <v-card-text>
-          <VueShowdown
-            :markdown="tosDoc.current.markdownContent"
-            flavor="github"
-            :options="{ emoji: false }"
-          />
+          <div v-html='tosMarkdown' class="pa-3"></div>
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" block @click="tosDialog = false">Close</v-btn>
@@ -138,11 +134,7 @@
         <v-card-title>{{ ppDoc.current.title }}</v-card-title>
         <v-card-subtitle>ver {{ ppDoc.current.version }}</v-card-subtitle>
         <v-card-text>
-          <VueShowdown
-            :markdown="ppDoc.current.markdownContent"
-            flavor="github"
-            :options="{ emoji: false }"
-          />
+          <div v-html='ppMarkdown' class="pa-3"></div>
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" block @click="ppDialog = false">Close</v-btn>
@@ -156,6 +148,7 @@
 <script>
 import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
+import {marked} from "marked";
 
 export default {
   name: 'SignUp',
@@ -180,8 +173,10 @@ export default {
       agreeToPrivacyPolicy: false,
       showSnacker: false,
       tosDoc: {},
+      tosMarkdown: '',
       tosDialog: false,
       ppDoc: {},
+      ppMarkdown: '',
       ppDialog: false,
     }
   },
@@ -226,11 +221,13 @@ export default {
       query: {category: 'terms-of-service'}
     }).then(response => {
         this.tosDoc = (response.data.length > 0) ? response.data[0] : {current:{markdownContent: 'doc missing'}};
+        this.tosMarkdown =  marked.parse(this.tosDoc.current.markdownContent);
     });
     models.api.Agreements.find({
       query: {category: 'privacy-policy'}
     }).then(response => {
       this.ppDoc = (response.data.length > 0) ? response.data[0] : {current:{markdownContent: 'doc missing'}};
+      this.ppMarkdown =  marked.parse(this.ppDoc.current.markdownContent);
     });
   },
 }
