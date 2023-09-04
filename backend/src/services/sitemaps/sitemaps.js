@@ -9,11 +9,13 @@ import {
   sitemapsExternalResolver,
   sitemapsDataResolver,
   sitemapsPatchResolver,
-  sitemapsQueryResolver
+  sitemapsQueryResolver, sitemapsSchema
 } from './sitemaps.schema.js'
 import { SitemapsService, getOptions } from './sitemaps.class.js'
 import { sitemapsPath, sitemapsMethods } from './sitemaps.shared.js'
 import {disallow} from "feathers-hooks-common";
+import swagger from "feathers-swagger";
+import {accountEventOptionsSchema, accountEventSchema} from "../account-event/account-event.schema.js";
 
 export * from './sitemaps.class.js'
 export * from './sitemaps.schema.js'
@@ -25,7 +27,15 @@ export const sitemaps = (app) => {
     // A list of all methods this service exposes externally
     methods: sitemapsMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { sitemapsSchema },
+      docs: {
+        description: 'sitemaps.xml content for Ondsel\'s various websites',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(sitemapsPath).hooks({
