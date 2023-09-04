@@ -3,7 +3,6 @@
  *
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
-import { VueShowdownPlugin } from 'vue-showdown';
 
 // Components
 import App from './App.vue'
@@ -17,15 +16,5 @@ import { registerPlugins } from '@/plugins'
 const app = createApp(App)
 
 registerPlugins(app)
-
-app.use(VueShowdownPlugin, {
-  // set default flavor of showdown
-  flavor: 'github',
-  // set default options of showdown (will override the flavor options)
-  options: {
-    emoji: false,
-  },
-});
-
 
 app.mount('#app')
