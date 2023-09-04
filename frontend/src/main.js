@@ -3,6 +3,7 @@
  *
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
+import { VueShowdownPlugin } from 'vue-showdown';
 
 // Components
 import App from './App.vue'
@@ -12,7 +13,6 @@ import { createApp } from 'vue'
 
 // Plugins
 import { registerPlugins } from '@/plugins'
-import { VueShowdownPlugin } from 'vue-showdown'
 
 const app = createApp(App)
 
