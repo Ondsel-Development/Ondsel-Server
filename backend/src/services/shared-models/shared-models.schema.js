@@ -33,7 +33,6 @@ export const sharedModelsSchema = Type.Object(
 
     // Store the state of cloneModelId when share link is created
     dummyModelId: Type.Optional(Type.String({ objectid: true })),
-
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
@@ -177,7 +176,17 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt'])
+export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, [
+  '_id',
+  'cloneModelId',
+  'isActive',
+  'deleted',
+  'userId',
+  'isSystemGenerated',
+  'createdAt',
+  'updatedAt',
+  'canViewModel',
+])
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),

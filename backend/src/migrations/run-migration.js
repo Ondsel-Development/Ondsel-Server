@@ -3,6 +3,7 @@ import { migrateOldModelsCommand } from './migrate-models.command.js';
 import {updateTierNames} from "./update-tier-names.command.js";
 import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';
+import {rebuildSiteMapCommand} from "./rebuild-sitemap.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -19,6 +20,9 @@ async function runMigration() {
       break;
     case 'addInitialTosPp':
       await addInitialTosPp(app);
+      break;
+    case 'rebuildSiteMap':
+      await rebuildSiteMapCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
