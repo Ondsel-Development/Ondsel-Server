@@ -48,9 +48,8 @@ async function getUrlsForShare(app) {
       $sort: {
         _id: 1,   // when we approach 50,000 urls, rethink the order and query
       },
-      canViewModel: true,
       isActive: true,
-      deleted: {$ne: true},
+      isSystemGenerated: true,
     },
   });
   for (const share of shares.data) {
