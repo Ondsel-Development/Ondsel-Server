@@ -41,9 +41,9 @@
           <v-list-item>
             <v-btn
               variant="text"
-              @click="gotoChooseTier()"
+              @click="gotoAccountProfile()"
             >
-              {{ user.shortTierName }} (change)
+              account profile
             </v-btn>
           </v-list-item>
         </v-list>
@@ -105,8 +105,8 @@ export default {
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
-    gotoChooseTier() {
-      this.$router.push({name: 'ChooseTier'});
+    gotoAccountProfile() {
+      this.$router.push({name: 'AccountProfile'});
     }
   },
 }
