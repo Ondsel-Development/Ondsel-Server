@@ -24,7 +24,6 @@
     "uuid": "^9.0.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.0",
-    "vue-showdown": "^4.1.1",
     "vuetify": "^3.2.1",
     "vuex": "^4.0.2",
     "webfontloader": "^1.0.0"
