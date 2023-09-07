@@ -6,12 +6,13 @@ import sharedModel from './services/sharedModel';
 import accountEvent from './services/accountEvent';
 import agreements from "./services/agreements";
 import acceptAgreement from "@/store/services/accept-agreement";
+import file from "@/store/services/file";
 
 const store =  new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
-  plugins: [user, auth, model, sharedModel, accountEvent, agreements, acceptAgreement]
+  plugins: [user, auth, model, sharedModel, accountEvent, agreements, acceptAgreement, file]
 })
 
 
