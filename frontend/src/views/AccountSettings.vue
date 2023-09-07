@@ -108,6 +108,26 @@
           </template>
         </v-list-item>
 
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Remaining Models</v-list-item-title>
+          <v-list-item-subtitle>
+            {{ remainingFiles }}
+          </v-list-item-subtitle>
+<!--          <template #append>-->
+<!--            <v-list-item-action>-->
+<!--              <v-btn variant="outlined" color="default" size="small" @click="gotoChooseTier()">-->
+<!--                Choose New Tier-->
+<!--              </v-btn>-->
+<!--            </v-list-item-action>-->
+<!--            <v-list-item-action>-->
+<!--              <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">-->
+<!--                View Account History-->
+<!--              </v-btn>-->
+<!--            </v-list-item-action>-->
+<!--          </template>-->
+        </v-list-item>
+
       </v-list>
     </v-card>
   </v-container>
@@ -123,6 +143,7 @@ export default {
   name: 'AccountSettings',
   data() {
     return {
+      remainingFiles: "processing..."
     }
   },
   computed: {
@@ -133,6 +154,9 @@ export default {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
   },
+  async mounted() {
+    await this.getRemainingFiles();
+  },
   methods: {
     gotoChooseTier() {
       this.$router.push({name: 'ChooseTier'});
@@ -140,6 +164,13 @@ export default {
     gotoAccountHistory() {
       this.$router.push({name: 'AccountHistory'});
     },
+    async getRemainingFiles() {
+      models.api.File.find({
+        query: {userId: this.user._id}
+      }).then(response => {
+        this.remainingFiles = this.user.calculateRemainingModels(response.data.length);
+      });
+    }
   }
 }
 </script>

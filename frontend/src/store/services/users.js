@@ -53,6 +53,21 @@ class User extends BaseModel {
     }
     return tierName;
   }
+
+  calculateRemainingModels(count) {
+    let total = 0;
+    switch (this.tier) {
+      case SubscriptionTypeMap.solo:
+        total = 50;
+        break;
+      case SubscriptionTypeMap.peer:
+        total = 250;
+        break;
+      case SubscriptionTypeMap.enterprise:
+        return `no limit (${count} active)`
+    }
+    return total - count;
+  }
 }
 const servicePath = 'users'
 const servicePlugin = makeServicePlugin({
