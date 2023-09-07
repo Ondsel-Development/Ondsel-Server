@@ -7,24 +7,33 @@
       :border="true"
       class="mx-auto my-6"
     >
-      <v-expansion-panels
-        multiple
+      <v-list
+        lines="two"
       >
-        <v-expansion-panel
+        <v-list-item
           v-for="item in user.userAccounting.journal"
           :key="item.transactionId"
         >
-          <v-expansion-panel-title>
-            {{ new Date(item.time) }} &nbsp; &nbsp; &nbsp; &nbsp; {{item.description}}
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          <v-list-item-title>
+            {{item.description}}
+          </v-list-item-title>
+<!--          <template v-slot:append>-->
+<!--            <v-btn-->
+<!--              size="small"-->
+<!--              variant="text"-->
+<!--              icon="mdi-menu-down"-->
+<!--            ></v-btn>-->
+<!--          </template>-->
+          <v-list-item-subtitle>
+            {{ new Date(item.time) }}
+          </v-list-item-subtitle>
+          <v-card>
             <v-table v-if="item.entries.length > 0">
               <thead>
                 <th class="text-right">
                   amt
                 </th>
                 <th class="text-right">
-
                 </th>
                 <th class="text-left">
                   debit
@@ -49,12 +58,9 @@
                 </tr>
               </tbody>
             </v-table>
-            <div v-else>
-              <i>not a financial transaction</i>
-            </div>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+          </v-card>
+        </v-list-item>
+      </v-list>
     </v-card>
 
   </v-container>

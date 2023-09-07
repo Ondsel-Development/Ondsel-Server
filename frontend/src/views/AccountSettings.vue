@@ -16,13 +16,6 @@
           <v-list-item-subtitle>
             {{ user.screenName }}
           </v-list-item-subtitle>
-<!--            <template #append>-->
-<!--              <v-list-item-action>-->
-<!--                <v-btn variant="outlined" color="default" size="small" @click="isChangeNameDialogShown = true">-->
-<!--                  Edit Name-->
-<!--                </v-btn>-->
-<!--              </v-list-item-action>-->
-<!--            </template>-->
         </v-list-item>
 
       </v-list>
@@ -41,13 +34,6 @@
           <v-list-item-subtitle>
             {{ user.firstName }} {{ user.lastName }}
           </v-list-item-subtitle>
-          <!--            <template #append>-->
-          <!--              <v-list-item-action>-->
-          <!--                <v-btn variant="outlined" color="default" size="small" @click="isChangeNameDialogShown = true">-->
-          <!--                  Edit Name-->
-          <!--                </v-btn>-->
-          <!--              </v-list-item-action>-->
-          <!--            </template>-->
         </v-list-item>
 
         <v-divider />
@@ -56,11 +42,6 @@
           <v-list-item-subtitle>
             {{ user.email }}
           </v-list-item-subtitle>
-          <!-- <template v-slot:append>
-               <v-list-item-action>
-                  <v-btn>Change Email</v-btn>
-              </v-list-item-action>
-          </template> -->
         </v-list-item>
 
         <v-divider />
@@ -69,16 +50,21 @@
           <v-list-item-subtitle>
             **********
           </v-list-item-subtitle>
-          <!--          <template #append>-->
-          <!--            <v-list-item-action>-->
-          <!--              <v-btn variant="outlined" color="default" size="small" @click="isChangePasswordDialogShown = true">-->
-          <!--                Change Password-->
-          <!--              </v-btn>-->
-          <!--            </v-list-item-action>-->
-          <!--          </template>-->
+          <template #append>
+            <v-list-item-action>
+              <v-btn variant="outlined" color="default" size="small" @click="openChangePasswordDialog">
+                Change Password
+              </v-btn>
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
       </v-list>
+      <ChangePassword
+        :is-active="isChangePasswordActive"
+        :model="user"
+        ref="ChangePassword"
+      />
     </v-card>
     <v-card
       variant="flat"
@@ -114,18 +100,6 @@
           <v-list-item-subtitle>
             {{ remainingFiles }}
           </v-list-item-subtitle>
-<!--          <template #append>-->
-<!--            <v-list-item-action>-->
-<!--              <v-btn variant="outlined" color="default" size="small" @click="gotoChooseTier()">-->
-<!--                Choose New Tier-->
-<!--              </v-btn>-->
-<!--            </v-list-item-action>-->
-<!--            <v-list-item-action>-->
-<!--              <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">-->
-<!--                View Account History-->
-<!--              </v-btn>-->
-<!--            </v-list-item-action>-->
-<!--          </template>-->
         </v-list-item>
 
       </v-list>
@@ -138,11 +112,14 @@
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
+import ChangePassword from "@/components/ChangePassword.vue";
 
 export default {
   name: 'AccountSettings',
+  components: {ChangePassword},
   data() {
     return {
+      isChangePasswordActive: false,
       remainingFiles: "processing..."
     }
   },
@@ -170,7 +147,10 @@ export default {
       }).then(response => {
         this.remainingFiles = this.user.calculateRemainingModels(response.data.length);
       });
-    }
+    },
+    openChangePasswordDialog() {
+      this.$refs.ChangePassword.$data.dialog = true;
+    },
   }
 }
 </script>
