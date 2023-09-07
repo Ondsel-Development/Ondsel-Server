@@ -47,6 +47,21 @@
           :disabled="isCreatePending"
         ></v-text-field>
 
+        <v-text-field
+          v-model="screenNameTemp"
+          label="Type Here to Enter Screen Name"
+          :rules="[rules.isRequired, rules.nameConforms]"
+          :disabled="isCreatePending"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="user.screenName"
+          readonly
+          label="Public Screen Name (Derived)"
+          :rules="[rules.isRequired, rules.nameConforms]"
+          :disabled="isCreatePending"
+        ></v-text-field>
+
         <v-checkbox
           v-model="agreeToTOS"
           :rules="[rules.confirmTOS]"
@@ -149,6 +164,7 @@
 import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
+import {conformName} from "@/screenNameFunctions";
 
 export default {
   name: 'SignUp',
@@ -157,6 +173,7 @@ export default {
     return {
       result: {},
       user: new models.api.User(),
+      screenNameTemp: '',
       acceptAgreement: new models.api.AcceptAgreement(),
       confirmPassword: '',
       isValid: false,
@@ -168,6 +185,7 @@ export default {
         confirmPassword: v => v === this.user.password || 'Password must match',
         confirmTOS: v => v || 'Terms of Service must be understood',
         confirmPP: v => v || 'Privacy Policy must be understood',
+        nameConforms: v => this.conformNameCheck(v),
       },
       agreeToTOS: false,
       agreeToPrivacyPolicy: false,
@@ -215,6 +233,14 @@ export default {
           });
       }
     },
+    conformNameCheck(rawName) {
+      const conformedName = conformName(rawName);
+      this.user.screenName = conformedName;
+      if (conformedName.length < 4) {
+        return "requires at least 4 characters in derived screen name";
+      }
+      return true;
+    }
   },
   created() {
     models.api.Agreements.find({

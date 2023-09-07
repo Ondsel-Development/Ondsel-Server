@@ -46,6 +46,7 @@ class User extends BaseModel {
     return {
       email: '',
       password: '',
+      screenName: '',
       firstName: '',
       lastName: '',
     }
