@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="text-h5 font-weight-bold mb-2">Account Profile</h1>
+    <h1 class="text-h5 font-weight-bold mb-2">Account Settings</h1>
 
     <v-card
       variant="flat"
@@ -14,7 +14,7 @@
         <v-list-item>
           <v-list-item-title>Screen Name</v-list-item-title>
           <v-list-item-subtitle>
-            tbd
+            {{ user.screenName }}
           </v-list-item-subtitle>
 <!--            <template #append>-->
 <!--              <v-list-item-action>-->
@@ -100,6 +100,11 @@
                 Choose New Tier
               </v-btn>
             </v-list-item-action>
+            <v-list-item-action>
+              <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
+                View Account History
+              </v-btn>
+            </v-list-item-action>
           </template>
         </v-list-item>
 
@@ -115,7 +120,7 @@ import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 
 export default {
-  name: 'AccountProfile',
+  name: 'AccountSettings',
   data() {
     return {
     }
@@ -131,6 +136,9 @@ export default {
   methods: {
     gotoChooseTier() {
       this.$router.push({name: 'ChooseTier'});
+    },
+    gotoAccountHistory() {
+      this.$router.push({name: 'AccountHistory'});
     },
   }
 }

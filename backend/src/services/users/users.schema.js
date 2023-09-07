@@ -7,12 +7,14 @@ import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
 import {
-  agreementsAcceptedSchema, subscriptionDetailSchema,
+  agreementsAcceptedSchema, journalElementSchema, journalTransactionSchema, subscriptionDetailSchema,
   SubscriptionStateMap,
   SubscriptionStateType, SubscriptionTermType,
   SubscriptionType, SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
+import {ObjectId} from "mongodb";
+import {screenNameHasher} from "../../screenNameFunctions.js";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -20,6 +22,8 @@ export const userSchema = Type.Object(
     _id: ObjectIdSchema(),
     email: Type.String({ format: "email"}),
     password: Type.Optional(Type.String()),
+    screenName: Type.String(),
+    screenNameHash: Type.Number(),
     firstName: Type.String(),
     lastName: Type.String(),
     createdAt: Type.Number(),
@@ -56,7 +60,7 @@ export const userExternalResolver = resolve({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'firstName', 'lastName'], {
+export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'screenName', 'firstName', 'lastName'], {
   $id: 'UserData'
 })
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
@@ -64,8 +68,30 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  screenNameHash: async (_value, message, _context) => {
+    return screenNameHasher(message.screenName)
+  },
   tier: async () => SubscriptionTypeMap.solo,
   nextTier: async () => null,
+  userAccounting: async (_value, _message, _context) => {
+    return {
+      ledgerBalances: {
+        Cash: 0,
+        ProcessorExpense: 0,
+        UnearnedRevenue: 0,
+        Revenue: 0,
+        SalesReturnsAndAllowances: 0,
+      },
+      journal: [
+        {
+          transactionId: new ObjectId(),
+          time: Date.now(),
+          description: "CREATION OF NEW ACCOUNT; TIER SET TO Solo",
+          entries: [],
+        }
+      ],
+    }
+  },
 })
 
 // Schema for updating existing entries
@@ -79,7 +105,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'firstName', 'lastName', 'tier', 'nextTier'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'screenName', 'screenNameHash', 'firstName', 'lastName', 'tier', 'nextTier'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),

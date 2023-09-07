@@ -4,6 +4,7 @@ import {updateTierNames} from "./update-tier-names.command.js";
 import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';
 import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
+import {addScreenNameCommand} from "./add-screen-name.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -23,6 +24,9 @@ async function runMigration() {
     //   break;
     case 'updateTos2023Aug31':
       await updateTos2023Aug31Command(app);
+      break;
+    case 'addScreenName':
+      await addScreenNameCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

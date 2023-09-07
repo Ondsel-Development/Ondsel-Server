@@ -41,9 +41,9 @@
           <v-list-item>
             <v-btn
               variant="text"
-              @click="gotoAccountProfile()"
+              @click="gotoAccountSettings()"
             >
-              account profile
+              account settings
             </v-btn>
           </v-list-item>
         </v-list>
@@ -105,8 +105,8 @@ export default {
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
-    gotoAccountProfile() {
-      this.$router.push({name: 'AccountProfile'});
+    gotoAccountSettings() {
+      this.$router.push({name: 'AccountSettings'});
     }
   },
 }
