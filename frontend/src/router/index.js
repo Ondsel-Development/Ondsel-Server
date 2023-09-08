@@ -1,5 +1,5 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter as _createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
 
 import Home from "@/views/Home";
@@ -97,45 +97,48 @@ const routes = [
   },
 ]
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes,
-})
+export function createRouter() {
+  const router = _createRouter({
+    history: createWebHistory(process.env.BASE_URL),
+    routes,
+  })
 
-router.beforeEach(async (to, from, next) => {
-  const link = router.resolve(to.path);
-  if (link.matched.length === 0) {
-    next('/404');
-    return;
-  }
-
-  if (to.meta && to.meta.checkIframe) {
-    to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
-  }
-
-  if (link.name === 'Login' || link.name === 'SignUp') {
-    try {
-      await store.dispatch('auth/authenticate');
-      next({ name: 'Models' });
-      return;
-    } catch (err) {
-    }
-  }
-  else if (to.meta && to.meta.requiresAuth) {
-    try {
-      await store.dispatch('auth/authenticate');
-    } catch (err) {
-      next({ name: 'Login' });
+  router.beforeEach(async (to, from, next) => {
+    const link = router.resolve(to.path);
+    if (link.matched.length === 0) {
+      next('/404');
       return;
     }
-  }
-  else if (to.meta && to.meta.tryAuth) {
-    try {
-      await store.dispatch('auth/authenticate');
-    } catch (err) {
-    }
-  }
-  next();
-});
 
-export default router
+    if (to.meta && to.meta.checkIframe) {
+      to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
+    }
+
+    if (link.name === 'Login' || link.name === 'SignUp') {
+      try {
+        await store.dispatch('auth/authenticate');
+        next({ name: 'Models' });
+        return;
+      } catch (err) {
+      }
+    }
+    else if (to.meta && to.meta.requiresAuth) {
+      try {
+        await store.dispatch('auth/authenticate');
+      } catch (err) {
+        next({ name: 'Login' });
+        return;
+      }
+    }
+    else if (to.meta && to.meta.tryAuth) {
+      try {
+        await store.dispatch('auth/authenticate');
+      } catch (err) {
+      }
+    }
+    next();
+  });
+  return router;
+}
+
+// export default router
