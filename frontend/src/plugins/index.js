@@ -12,7 +12,9 @@ import store from '../store'
 import { FeathersVuex } from './feathers-client'
 
 export function registerPlugins (app) {
-  loadFonts()
+  if (typeof window !== 'undefined') {
+    loadFonts();
+  }
   app
     .use(vuetify)
     // .use(router)

@@ -1,5 +1,5 @@
 // Composables
-import { createRouter as _createRouter, createWebHistory } from 'vue-router'
+import { createRouter as _createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import store from '@/store'
 
 import Home from "@/views/Home";
@@ -99,7 +99,7 @@ const routes = [
 
 export function createRouter() {
   const router = _createRouter({
-    history: createWebHistory(process.env.BASE_URL),
+    history: createMemoryHistory(process.env.BASE_URL),
     routes,
   })
 

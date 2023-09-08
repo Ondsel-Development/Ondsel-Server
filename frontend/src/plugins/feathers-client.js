@@ -9,7 +9,7 @@ const socket = io(import.meta.env.VITE_APP_API_URL, {transports: ['websocket']})
 
 const feathersClient = feathers()
   .configure(socketio(socket))
-  .configure(auth({ storage: window.localStorage }))
+  .configure(auth({ storage: global.localStorage }))
   .hooks({
     before: {
       all: [
@@ -23,7 +23,6 @@ const feathersClient = feathers()
 
 export default feathersClient
 
-// Setting up feathers-vuex
 const { makeServicePlugin, makeAuthPlugin, BaseModel, models, FeathersVuex } = feathersVuex(
   feathersClient,
   {
