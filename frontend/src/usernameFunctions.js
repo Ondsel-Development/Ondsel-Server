@@ -1,8 +1,8 @@
-// screen name library
+// username library
 
 // make sure all systems use the same algo. See:
-//    backend/src/screenNameFunctions.js
-//    frontend/src/screenNameFunctions.js
+//    backend/src/usernameFunctions.js
+//    frontend/src/usernameFunctions.js
 
 export function conformName(inputName) {
   // algo:
@@ -62,12 +62,12 @@ const crc32 = function(str) {
   return (crc ^ (-1)) >>> 0;
 };
 
-export function screenNameHasher(screenName) {
-  // simple 32-bit int CRC hash based on a "normalized" screen name
+export function usernameHasher(username) {
+  // simple 32-bit int CRC hash based on a "normalized" username
   // we make lower case so that "Bob" and "bob" match.
   // we remove underscores so that "BobSmith" and "Bob_Smith" match.
-  const loweredScreenName = screenName.toLowerCase();
-  const keyScreenName = loweredScreenName.replaceAll(/_/g, '');
-  const result = crc32(keyScreenName);
+  const loweredUsername = username.toLowerCase();
+  const keyUsername = loweredUsername.replaceAll(/_/g, '');
+  const result = crc32(keyUsername);
   return result;
 }

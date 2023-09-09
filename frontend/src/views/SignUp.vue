@@ -48,16 +48,16 @@
         ></v-text-field>
 
         <v-text-field
-          v-model="screenNameTemp"
-          label="Type Here to Enter Screen Name"
+          v-model="usernameTemp"
+          label="Type Here to Enter Username"
           :rules="[rules.isRequired, rules.nameConforms]"
           :disabled="isCreatePending"
         ></v-text-field>
 
         <v-text-field
-          v-model="user.screenName"
+          v-model="user.username"
           readonly
-          label="Public Screen Name (Derived)"
+          label="Public Username (Derived)"
           :rules="[rules.isRequired, rules.nameConforms]"
           :disabled="isCreatePending"
         ></v-text-field>
@@ -164,7 +164,7 @@
 import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
-import {conformName} from "@/screenNameFunctions";
+import {conformName} from "@/usernameFunctions";
 
 export default {
   name: 'SignUp',
@@ -173,7 +173,7 @@ export default {
     return {
       result: {},
       user: new models.api.User(),
-      screenNameTemp: '',
+      usernameTemp: '',
       acceptAgreement: new models.api.AcceptAgreement(),
       confirmPassword: '',
       isValid: false,
@@ -235,9 +235,9 @@ export default {
     },
     conformNameCheck(rawName) {
       const conformedName = conformName(rawName);
-      this.user.screenName = conformedName;
+      this.user.username = conformedName;
       if (conformedName.length < 4) {
-        return "requires at least 4 characters in derived screen name";
+        return "requires at least 4 characters in derived username";
       }
       return true;
     }

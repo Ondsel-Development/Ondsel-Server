@@ -7,9 +7,9 @@ import {
   specificAgreementType
 } from "../services/agreements/agreements.schema.js";
 import {ObjectId} from "mongodb";
-import {conformName, screenNameHasher} from "../screenNameFunctions.js";
+import {conformName, usernameHasher} from "../usernameFunctions.js";
 
-export async function addScreenNameCommand(app) {
+export async function addUsernameCommand(app) {
   const userService = app.service('users');
 
   console.log(">>> getting users list");
@@ -21,15 +21,15 @@ export async function addScreenNameCommand(app) {
   console.log(">>> examining each user");
   let ctr = 0;
   for (const userToChange of userList) {
-    if (!userToChange.screenName) {
-      let screenName = conformName(`${userToChange.firstName} ${userToChange.lastName}`);
-      let screenNameHash = screenNameHasher(screenName);
-      console.log(`>>> updating user "${userToChange.firstName} ${userToChange.lastName}" with screenName "${screenName}" and hash ${screenNameHash}`);
+    if (!userToChange.username) {
+      let username = conformName(`${userToChange.firstName} ${userToChange.lastName}`);
+      let usernameHash = usernameHasher(username);
+      console.log(`>>> updating user "${userToChange.firstName} ${userToChange.lastName}" with username "${username}" and hash ${usernameHash}`);
       await userService.patch(
         userToChange._id,
         {
-          screenName: screenName,
-          screenNameHash: screenNameHash,
+          username: username,
+          usernameHash: usernameHash,
         }
       );
       ctr ++;
