@@ -12,9 +12,9 @@
 
         <v-divider />
         <v-list-item>
-          <v-list-item-title>Screen Name</v-list-item-title>
+          <v-list-item-title>User Name</v-list-item-title>
           <v-list-item-subtitle>
-            {{ user.screenName }}
+            {{ user.username }}
           </v-list-item-subtitle>
         </v-list-item>
 
@@ -50,21 +50,9 @@
           <v-list-item-subtitle>
             **********
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn variant="outlined" color="default" size="small" @click="openChangePasswordDialog">
-                Change Password
-              </v-btn>
-            </v-list-item-action>
-          </template>
         </v-list-item>
 
       </v-list>
-      <ChangePassword
-        :is-active="isChangePasswordActive"
-        :model="user"
-        ref="ChangePassword"
-      />
     </v-card>
     <v-card
       variant="flat"
