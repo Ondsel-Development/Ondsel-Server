@@ -1,3 +1,5 @@
+import { email } from './email/email.js'
+
 import { runnerLogs } from './runner-logs/runner-logs.js'
 
 import { accountEvent } from './account-event/account-event.js'
@@ -17,6 +19,8 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(email)
+
   app.configure(runnerLogs)
 
   app.configure(accountEvent)
