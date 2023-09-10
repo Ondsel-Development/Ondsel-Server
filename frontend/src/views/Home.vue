@@ -69,9 +69,18 @@
               type="error"
               border="top"
               class="text-left"
-              v-if="error === 'InvalidFileType'"
+              v-else-if="error === 'InvalidFileType'"
             >
               <span>Only *.FCStd and *.OBJ files accepted.</span>
+            </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'UpgradeTier'"
+            >
+              <span>Please upgrade your tier.</span>
             </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
@@ -112,7 +121,11 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
+<<<<<<< HEAD
             <v-btn v-if="model && !error" icon flat @click="dialog = false">
+=======
+            <v-btn v-if="model && !error" icon flat @click="dialog = false" :disabled="!isModelLoaded">
+>>>>>>> 0888261 (frontend: user can perform actions based on it's tier)
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
             <v-btn v-else icon flat :to="{ name: 'Models' }">
@@ -225,16 +238,20 @@ export default {
             file.model = vm.model;
           });
           this.on('success', async file => {
-            await file.model.save();
-            vm.$router.replace(`/model/${vm.model._id}`);
-            await vm.model.patch({
-              id: vm.model._id,
-              data: {
-                shouldStartObjGeneration: true,
-                uniqueFileName: vm.uniqueFileName,
-              }
-            })
-            vm.uploadInProgress = false;
+            try {
+              await file.model.save();
+              vm.$router.replace(`/model/${vm.model._id}`);
+              await vm.model.patch({
+                id: vm.model._id,
+                data: {
+                  shouldStartObjGeneration: true,
+                  uniqueFileName: vm.uniqueFileName,
+                }
+              })
+              vm.uploadInProgress = false;
+            } catch (e) {
+              vm.error = 'UpgradeTier';
+            }
           });
           this.on('error', (file, message) => {
             if (!file.accepted) {

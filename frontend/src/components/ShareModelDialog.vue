@@ -14,6 +14,17 @@
         absolute
         bottom
       ></v-progress-linear>
+      <v-card-item>
+        <v-alert
+          variant="outlined"
+          type="error"
+          border="top"
+          class="text-left"
+          v-if="error === 'UpgradeTier'"
+        >
+          <span>Please upgrade your tier.</span>
+        </v-alert>
+      </v-card-item>
       <v-form ref="form" @submit.prevent="generateSharedModelUrl">
         <v-card-text>
           <v-text-field
@@ -139,7 +150,8 @@ export default {
     descriptionRules: [
       v => !!v || 'Description is required',
       v => (v && v.length <= 20) || 'Description must be less than 20 characters'
-    ]
+    ],
+    error: ''
   }),
   computed: {
     sharedModelUrl: (vm) => {
@@ -168,8 +180,13 @@ export default {
       sharedModel.canExportOBJ = this.permissions.canExportOBJ;
       sharedModel.canDownloadDefaultModel = this.permissions.canDownloadDefaultModel;
       sharedModel.cloneModelId = this.modelId;
-      this.tmpSharedModel = await sharedModel.create();
-      this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
+      try {
+        this.tmpSharedModel = await sharedModel.create();
+        this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
+      } catch (e) {
+        this.error = 'UpgradeTier';
+        this.isGeneratingLink = false;
+      }
     },
 
     async copyToClipboard(textToCopy) {
