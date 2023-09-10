@@ -6,6 +6,7 @@ import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import _ from 'lodash';
+import { canUserCreateShareLink } from '../hooks/permissions.js';
 import {
   sharedModelsDataValidator,
   sharedModelsPatchValidator,
@@ -108,6 +109,7 @@ export const sharedModels = (app) => {
         ),
       ],
       create: [
+        canUserCreateShareLink,
         iff(
           context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,
