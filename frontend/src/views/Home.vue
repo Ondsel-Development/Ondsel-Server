@@ -121,11 +121,7 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-<<<<<<< HEAD
             <v-btn v-if="model && !error" icon flat @click="dialog = false">
-=======
-            <v-btn v-if="model && !error" icon flat @click="dialog = false" :disabled="!isModelLoaded">
->>>>>>> 0888261 (frontend: user can perform actions based on it's tier)
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
             <v-btn v-else icon flat :to="{ name: 'Models' }">
