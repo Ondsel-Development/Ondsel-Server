@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { authManagementClient } from './services/auth-management/auth-management.shared.js'
+
 import { emailClient } from './services/email/email.shared.js'
 
 import { runnerLogsClient } from './services/runner-logs/runner-logs.shared.js'
@@ -55,6 +57,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(runnerLogsClient)
 
   client.configure(emailClient)
+
+  client.configure(authManagementClient)
 
   return client
 }

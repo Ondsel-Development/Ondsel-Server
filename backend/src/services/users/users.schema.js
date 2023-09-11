@@ -1,17 +1,13 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
 import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
-import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
+import { ObjectIdSchema } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
-
 import {
-  agreementsAcceptedSchema, journalElementSchema, journalTransactionSchema, subscriptionDetailSchema,
-  SubscriptionStateMap,
-  SubscriptionStateType, SubscriptionTermType,
-  SubscriptionType, SubscriptionTypeMap,
-  userAccountingSchema
+  agreementsAcceptedSchema, subscriptionDetailSchema, SubscriptionStateMap,
+  SubscriptionType, SubscriptionTypeMap, userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {usernameHasher} from "../../usernameFunctions.js";
@@ -19,19 +15,35 @@ import {usernameHasher} from "../../usernameFunctions.js";
 // Main data model schema
 export const userSchema = Type.Object(
   {
-    _id: ObjectIdSchema(),
+    _id: ObjectIdSchema(), // unlisted field
+
+    // private fields
     email: Type.String({ format: "email"}),
     password: Type.Optional(Type.String()),
-    username: Type.String(),
-    usernameHash: Type.Number(),
     firstName: Type.String(),
     lastName: Type.String(),
-    createdAt: Type.Number(),
-    updatedAt: Type.Number(),
-    tier: SubscriptionType,
-    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
+    // private fields (required by feathers-authentication-management)
+    isVerified: Type.Boolean(),
+    verifyToken: Type.String(), // for Email
+    verifyShortToken:	Type.String(), // for SMS
+    verifyExpires: Type.Number(),
+    verifyChanges: Type.Array(Type.String()),
+    resetToken: Type.String(), // for Email
+    resetShortToken: Type.String(), // for SMS
+    resetExpires: Type.Number(),
+    resetAttempts: Type.Number(),
+
+    // public fields
+    username: Type.String(),
+    createdAt: Type.Number(),
+    tier: SubscriptionType,
+
+    // unlisted fields (not private, but also not published on purpose)
+    usernameHash: Type.Number(),
+    updatedAt: Type.Number(),
+    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
@@ -39,13 +51,13 @@ export const userSchema = Type.Object(
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
 
-  tier: virtual(async (message, context) => {
+  tier: virtual(async (message, _context) => {
     return message.tier || SubscriptionTypeMap.solo;
   }),
-  nextTier: virtual(async (message, context) => {
+  nextTier: virtual(async (message, _context) => {
     return message.nextTier || null
   }),
-  subscriptionDetail: virtual(async (message, context) => {
+  subscriptionDetail: virtual(async (message, _context) => {
     return message.subscriptionDetail || {
       state: SubscriptionStateMap.good,
       term: null,

@@ -65,6 +65,7 @@
     "compression": "^1.7.4",
     "dauria": "^2.0.0",
     "dotenv": "^16.0.3",
+    "feathers-authentication-management": "^4.0.2",
     "feathers-blob": "^2.6.0",
     "feathers-hooks-common": "^7.0.1",
     "feathers-mailer": "^4.1.1",

@@ -1,3 +1,5 @@
+import { authManagement } from './auth-management/auth-management.js'
+
 import { email } from './email/email.js'
 
 import { runnerLogs } from './runner-logs/runner-logs.js'
@@ -19,6 +21,8 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(authManagement)
+
   app.configure(email)
 
   app.configure(runnerLogs)
