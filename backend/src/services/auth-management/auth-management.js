@@ -3,6 +3,8 @@ import {addVerification, AuthenticationManagementService, removeVerification} fr
 import {notifier} from "./notifier.js";
 import {authenticate} from "@feathersjs/authentication";
 import {discard, iff, isProvider} from "feathers-hooks-common";
+import {authManagementSchema} from "./auth-management.schema.js";
+import swagger from "feathers-swagger";
 
 const sendVerify = () => {
   return async (context) => {
@@ -25,8 +27,23 @@ export const authManagement = (app) => {
     authManagementPath,
     new AuthenticationManagementService(app, {
       notifier: notifier(app)
-    })
+    }),
+    {
+      // A list of all methods this service exposes externally
+      methods: ['create'],
+      // You can add additional custom events to be sent to clients here
+      events: [],
+      docs: swagger.createSwaggerServiceOptions({
+        schemas: { authManagementSchema },
+        docs: {
+          description: 'Managed Authentication Service',
+          idType: 'string',
+          securities: ['all'],
+        }
+      })
+    }
   )
+
   // Initialize hooks
   app.service(authManagementPath).hooks({
     around: {
