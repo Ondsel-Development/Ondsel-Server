@@ -2,7 +2,6 @@
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 import {iff, isProvider, preventChanges} from 'feathers-hooks-common'
-
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   userDataValidator,
@@ -20,9 +19,12 @@ import {
 } from './users.schema.js'
 import { UserService, getOptions } from './users.class.js'
 import { userPath, userMethods } from './users.shared.js'
+import {addVerification, removeVerification} from "feathers-authentication-management";
+import {notifier} from "../auth-management/notifier.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
+
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const user = (app) => {
@@ -59,7 +61,12 @@ export const user = (app) => {
       all: [schemaHooks.validateQuery(userQueryValidator), schemaHooks.resolveQuery(userQueryResolver)],
       find: [],
       get: [],
-      create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), uniqueUserValidator],
+      create: [
+        schemaHooks.validateData(userDataValidator),
+        schemaHooks.resolveData(userDataResolver),
+        uniqueUserValidator,
+        addVerification("auth-management"),
+      ],
       patch: [
         iff(isProvider('external'), preventChanges(
           false,
@@ -76,13 +83,18 @@ export const user = (app) => {
           "verifyToken",
         )),
         schemaHooks.validateData(userPatchValidator),
-        schemaHooks.resolveData(userPatchResolver), uniqueUserValidator
+        schemaHooks.resolveData(userPatchResolver),
+        uniqueUserValidator
       ],
       remove: []
     },
     after: {
       all: [],
-      create: [createSampleModels],
+      create: [
+        sendVerify(),
+        removeVerification(),
+        createSampleModels,
+      ],
     },
     error: {
       all: []
@@ -156,4 +168,18 @@ const createSampleModels = async (context) => {
   }
 
   return context
+}
+
+const sendVerify = () => {
+  return async (context) => {
+    const notifierInst = notifier(context.app);
+
+    const users = Array.isArray(context.result)
+      ? context.result
+      : [context.result];
+
+    await Promise.all(
+      users.map(async user => notifierInst("resendVerifySignup", user))
+    )
+  };
 }

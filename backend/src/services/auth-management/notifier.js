@@ -1,6 +1,6 @@
 // services/auth-management/notifier.js
 
-export const notifier  = (app) => {
+export const notifier = (app) => {
   function getLink(type, hash) {
     return "http://localhost:3030/" + type + "?token=" + hash;
   }

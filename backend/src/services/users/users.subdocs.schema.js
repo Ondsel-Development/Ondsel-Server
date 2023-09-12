@@ -13,6 +13,9 @@ export const SubscriptionTypeMap = {
   free: 'Free',
   premium: 'Premium',
 }
+
+export const SubscriptionTypeANON = "anonymous"
+
 export const SubscriptionType = StringEnum(
   [
     SubscriptionTypeMap.solo,

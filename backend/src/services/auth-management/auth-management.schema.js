@@ -18,6 +18,7 @@ export const authManagementSchema = Type.Object(
   {
     action: authManagementActionType,
     value: Type.Object(Type.Any()),
+    notifierOptions: Type.Optional(Type.Object(Type.Any())),
   },
   { $id: 'AuthManagement', additionalProperties: false }
 )

@@ -41,6 +41,8 @@
           <v-list-item-title>Email</v-list-item-title>
           <v-list-item-subtitle>
             {{ user.email }}
+            <v-chip v-if="user.isVerified">Verified</v-chip>
+            <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
           </v-list-item-subtitle>
         </v-list-item>
 

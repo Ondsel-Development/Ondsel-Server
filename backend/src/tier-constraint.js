@@ -1,7 +1,14 @@
 import _ from 'lodash';
+import {SubscriptionTypeANON} from "./services/users/users.subdocs.schema.js";
 
 
 export const tierConfig = {
+    SubscriptionTypeANON: {
+        maxModelObjects: 0,
+        maxShareLinksPerModel: 0,
+        canUpdateModelParameters: false,
+        canExportModel: false,
+    },
     Solo: {
         maxModelObjects: 50,
         maxShareLinksPerModel: 2,
@@ -23,5 +30,5 @@ export const tierConfig = {
 };
 
 export function getTierConfig(tier){
-    return _.get(tierConfig, tier);
+    return _.get(tierConfig, tier, SubscriptionTypeANON);
 }
