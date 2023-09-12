@@ -17,19 +17,22 @@ export const tierConstraintConfig = {
     maxModelObjects: 50,
     maxShareLinksPerModel: 2,
     canUpdateModelParameters: false,
-    canExportModel: false,
+    canExportModel: false, // TODO: shouldn't this be true?
+    canChooseExportForModel: false,
   },
   Peer: {
     maxModelObjects: 250,
     maxShareLinksPerModel: 10,
     canUpdateModelParameters: true,
     canExportModel: true,
+    canChooseExportForModel: true,
   },
   Enterprise: {
     maxModelObjects: 1000,
     maxShareLinksPerModel: 100,
     canUpdateModelParameters: true,
     canExportModel: true,
+    canChooseExportForModel: true,
   },
 };
 
@@ -77,18 +80,14 @@ class User extends BaseModel {
   }
 
   calculateRemainingModels(count) {
-    let total = 0;
-    switch (this.tier) {
-      case SubscriptionTypeMap.solo:
-        total = 50;
-        break;
-      case SubscriptionTypeMap.peer:
-        total = 250;
-        break;
-      case SubscriptionTypeMap.enterprise:
-        return `no limit (${count} active)`
+    if (this.tier === SubscriptionTypeMap.enterprise) {
+      return `no limit (${count} active)`;
     }
-    return total - count;
+    let max = tierConstraintConfig[this.tier].maxModelObjects;
+    if (count > max) {
+      return `exceeded! Maximum is ${max}, currently at ${count}.`;
+    }
+    return `${max - count}`;
   }
 
   get tierConfig() {
@@ -102,7 +101,7 @@ const servicePlugin = makeServicePlugin({
   servicePath
 })
 
-// Setup the client-side Feathers hooks.
+// Set up the client-side Feathers hooks.
 feathersClient.service(servicePath).hooks({
   before: {
     all: [],
