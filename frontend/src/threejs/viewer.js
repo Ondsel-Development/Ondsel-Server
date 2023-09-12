@@ -56,7 +56,7 @@ export class Viewer {
       FAR, // Far plane
     );
     this.camera.position.set(
-      0, 0, 1
+      1, -1, 1
     );
     this.scene.add(this.camera);
 

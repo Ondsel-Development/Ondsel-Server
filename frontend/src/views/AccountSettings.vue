@@ -130,7 +130,7 @@ export default {
       this.$router.push({name: 'AccountHistory'});
     },
     async getRemainingFiles() {
-      models.api.File.find({
+      models.api.Model.find({
         query: {userId: this.user._id}
       }).then(response => {
         this.remainingFiles = this.user.calculateRemainingModels(response.data.length);

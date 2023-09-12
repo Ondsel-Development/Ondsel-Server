@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
 export const SubscriptionTypeMap = {
@@ -5,11 +6,39 @@ export const SubscriptionTypeMap = {
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
+export const ANON = "anonymous"
 
 export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
   yearly: 'Yearly',
 }
+
+export const tierConstraintConfig = {
+  ANON: {
+    maxModelObjects: 0,
+    maxShareLinksPerModel: 0,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+  },
+  Solo: {
+    maxModelObjects: 50,
+    maxShareLinksPerModel: 2,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+  },
+  Peer: {
+    maxModelObjects: 250,
+    maxShareLinksPerModel: 10,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+  },
+  Enterprise: {
+    maxModelObjects: 1000,
+    maxShareLinksPerModel: 100,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+  },
+};
 
 class User extends BaseModel {
   constructor(data, options) {
@@ -55,18 +84,18 @@ class User extends BaseModel {
   }
 
   calculateRemainingModels(count) {
-    let total = 0;
-    switch (this.tier) {
-      case SubscriptionTypeMap.solo:
-        total = 50;
-        break;
-      case SubscriptionTypeMap.peer:
-        total = 250;
-        break;
-      case SubscriptionTypeMap.enterprise:
-        return `no limit (${count} active)`
+    if (this.tier === SubscriptionTypeMap.enterprise) {
+      return `no limit (${count} active)`;
     }
-    return total - count;
+    let max = this.tierConfig.maxModelObjects;
+    if (count > max) {
+      return `exceeded! Maximum is ${max}, currently at ${count}.`;
+    }
+    return `${max - count}`;
+  }
+
+  get tierConfig() {
+    return _.get(tierConstraintConfig, this.tier, ANON);
   }
 }
 const servicePath = 'users'
@@ -76,7 +105,7 @@ const servicePlugin = makeServicePlugin({
   servicePath
 })
 
-// Setup the client-side Feathers hooks.
+// Set up the client-side Feathers hooks.
 feathersClient.service(servicePath).hooks({
   before: {
     all: [],

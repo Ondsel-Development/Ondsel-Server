@@ -64,6 +64,24 @@
             >
               <span>Oops! The model you're looking for could not be found.</span>
             </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'InvalidFileType'"
+            >
+              <span>Only *.FCStd and *.OBJ files accepted.</span>
+            </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'UpgradeTier'"
+            >
+              <span>Please upgrade your tier.</span>
+            </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
             <v-card
@@ -79,7 +97,7 @@
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand"></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error"></v-progress-linear>
                     <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
@@ -103,7 +121,7 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-            <v-btn v-if="model" icon flat @click="dialog = false" :disabled="!isModelLoaded">
+            <v-btn v-if="model && !error" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
             <v-btn v-else icon flat :to="{ name: 'Models' }">
@@ -216,18 +234,25 @@ export default {
             file.model = vm.model;
           });
           this.on('success', async file => {
-            await file.model.save();
-            vm.$router.replace(`/model/${vm.model._id}`);
-            await vm.model.patch({
-              id: vm.model._id,
-              data: {
-                shouldStartObjGeneration: true,
-                uniqueFileName: vm.uniqueFileName,
-              }
-            })
-            vm.uploadInProgress = false;
+            try {
+              await file.model.save();
+              vm.$router.replace(`/model/${vm.model._id}`);
+              await vm.model.patch({
+                id: vm.model._id,
+                data: {
+                  shouldStartObjGeneration: true,
+                  uniqueFileName: vm.uniqueFileName,
+                }
+              })
+              vm.uploadInProgress = false;
+            } catch (e) {
+              vm.error = 'UpgradeTier';
+            }
           });
           this.on('error', (file, message) => {
+            if (!file.accepted) {
+              vm.error = 'InvalidFileType';
+            }
           })
         }
       }
