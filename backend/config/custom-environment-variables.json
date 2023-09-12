@@ -19,5 +19,6 @@
   "smtpHost": "SMTP_HOST",
   "smtpPort": "SMTP_PORT",
   "smtpUser": "SMTP_USER",
-  "smtpPass": "SMTP_PASS"
+  "smtpPass": "SMTP_PASS",
+  "frontendUrl": "FRONTEND_URL"
 }

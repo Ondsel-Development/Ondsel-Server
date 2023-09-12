@@ -16,6 +16,7 @@ import CancelTierChange from "@/views/CancelTierChange.vue";
 import LegalDoc from "@/views/LegalDoc.vue";
 import AccountSettings from "@/views/AccountSettings.vue";
 import AccountHistory from "@/views/AccountHistory.vue";
+import VerifySignup from "@/views/VerifySignup.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -90,6 +91,12 @@ const routes = [
     path: '/cancel-tier-change',
     component: CancelTierChange,
     name: 'CancelTierChange',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/verifySignup/:token',
+    component: VerifySignup,
+    name: 'VerifySignup',
     meta: { requiresAuth: true },
   },
   {
