@@ -16,7 +16,8 @@ import CancelTierChange from "@/views/CancelTierChange.vue";
 import LegalDoc from "@/views/LegalDoc.vue";
 import AccountSettings from "@/views/AccountSettings.vue";
 import AccountHistory from "@/views/AccountHistory.vue";
-import VerifySignup from "@/views/VerifySignup.vue";
+import VerifyEmail from "@/views/VerifyEmail.vue";
+import PendingVerification from "@/views/PendingVerification.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -94,10 +95,14 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/verifySignup/:token',
-    component: VerifySignup,
-    name: 'VerifySignup',
-    meta: { requiresAuth: true },
+    path: '/pending-verification',
+    component: PendingVerification,
+    name: 'PendingVerification',
+  },
+  {
+    path: '/verify-email/:token/:uid',
+    component: VerifyEmail,
+    name: 'VerifyEmail',
   },
   {
     path: '/login',

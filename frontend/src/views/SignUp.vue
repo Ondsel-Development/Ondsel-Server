@@ -216,16 +216,7 @@ export default {
             this.acceptAgreement.version = this.tosDoc.current.version;
             this.acceptAgreement.newAccount = true;
             this.acceptAgreement.create();
-            this.authenticate({
-              strategy: 'local',
-              ...this.user,
-            }).then(() => {
-              // done. go to choose-tier page
-              this.$router.push({name: 'ChooseTier'})
-            }).catch(() => {
-              this.showSnacker = true;
-              this.snackerMsg = "Internal Error: invalid login after signup"
-            })
+            this.$router.push({name: 'PendingVerification'})
           })
           .catch((e) => {
             this.snackerMsg = e.message;
