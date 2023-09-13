@@ -79,8 +79,12 @@ export default {
         }).then(() => {
           this.$router.push({ name: 'Models' })
         }).catch((e) => {
-          this.showSnacker = true;
-          this.snackerMsg = "Invalid login"
+          if (e.message.startsWith('AEV')) { // AEV = Awaiting Email Verification
+            this.$router.push({ name: 'PendingVerification' })
+          } else {
+            this.showSnacker = true;
+            this.snackerMsg = `Invalid login`
+          }
         })
       }
     }
