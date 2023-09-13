@@ -140,13 +140,30 @@ export const userQueryResolver = resolve({
 
 
 export const uniqueUserValidator = async (context) => {
+  const userService = context.app.service('users');
   if (context.data.email) {
-    const userService = context.app.service('users');
     const result = await userService.find({query: {email: context.data.email }});
     if (result.total > 0) {
-      throw new BadRequest('Invalid Parameters', {
+      throw new BadRequest('Invalid: Email already taken', {
         errors: { email: 'Email already taken' }
       })
     }
+  } else {
+    throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
+      errors: { email: 'Email address required' }
+    })
+  }
+  if (context.data.username) {
+    const hash = usernameHasher(context.data.username);
+    const result = await userService.find({query: {usernameHash: hash }});
+    if (result.total > 0) {
+      throw new BadRequest('Invalid: Username already taken', {
+        errors: { email: 'Username already taken' }
+      })
+    }
+  } else {
+    throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
+      errors: { email: 'Username required' }
+    })
   }
 }
