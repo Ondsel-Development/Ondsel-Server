@@ -26,12 +26,12 @@ export const userSchema = Type.Object(
     userAccounting: userAccountingSchema,
     // private fields (required by feathers-authentication-management)
     isVerified: Type.Boolean(),
-    verifyToken: Type.String(), // for Email
-    verifyShortToken:	Type.String(), // for SMS
-    verifyExpires: Type.Number(),
+    verifyToken: Type.Optional(Type.String()), // for Email
+    verifyShortToken:	Type.Optional(Type.String()), // for SMS
+    verifyExpires: Type.Optional(Type.Number()),
     verifyChanges: Type.Array(Type.String()),
-    resetToken: Type.String(), // for Email
-    resetShortToken: Type.String(), // for SMS
+    resetToken: Type.Optional(Type.String()), // for Email
+    resetShortToken: Type.Optional(Type.String()), // for SMS
     resetExpires: Type.Number(),
     resetAttempts: Type.Number(),
 

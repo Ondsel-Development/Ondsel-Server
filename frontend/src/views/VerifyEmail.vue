@@ -1,9 +1,12 @@
 <template>
   <v-container fluid class="fill-height">
     <v-card class="mx-auto" width="896" flat>
-      <v-card-title>Verify Email</v-card-title>
+      <v-card-title>Email Verification</v-card-title>
       <v-card-text>
-        <p>Login here to finish email verification.</p>
+        <h1 v-if="isVerified">Email Address Verified!</h1>
+        <h1  v-else>{{verificationMsg}}</h1>
+        <h1>&nbsp;</h1>
+        <p>{{loginMsg}}</p>
         <p>token: {{ token }}</p>
         <p>uid: {{ uid }}</p>
         <v-container width="400" style="top: -100px" flat>
@@ -23,7 +26,7 @@
             ></v-text-field>
 
             <v-card-actions>
-              <v-btn type="submit" block class="mt-2">Submit</v-btn>
+              <v-btn type="submit" block class="mt-2" :disabled="!isVerified">Submit</v-btn>
             </v-card-actions>
           </v-form>
         </v-container>
@@ -51,6 +54,9 @@ export default {
     return {
       result: {},
       isValid: false,
+      isVerified: false,
+      verificationMsg: 'please wait, verifying ...',
+      loginMsg: '',
       user: {
         email: '',
         password: ''
@@ -71,25 +77,32 @@ export default {
   mounted() {
     resetStores();
   },
+  async created() {
+    console.log("TOKEN=" + this.token);
+    await AuthManagement.create({
+      action: "verifySignupLong",
+      value: this.token,
+      notifierOptions: {},
+    }).then(() => {
+      this.isVerified = true;
+      this.loginMsg = 'Now please login.';
+    }).catch((e) => {
+      this.verificationMsg = e.message;
+    });
+  },
   methods: {
     ...mapActions('auth', ['authenticate']),
     async login() {
       if ( this.isValid ) {
-        // await AuthManagement.create({
-        //   action: "verifySignupLong",
-        //   value: this.token,
-        //   notifierOptions: {},
-        // }).then(() => {
-          this.authenticate({
-            strategy: 'local',
-            ...this.user,
-          }).then(() => {
-            this.$router.push({ name: 'ChooseTier' })
-          }).catch(() => {
-            this.showSnacker = true;
-            this.snackerMsg = "Invalid login"
-          })
-        // });
+        this.authenticate({
+          strategy: 'local',
+          ...this.user,
+        }).then(() => {
+          this.$router.push({ name: 'ChooseTier' })
+        }).catch(() => {
+          this.showSnacker = true;
+          this.snackerMsg = "Invalid login"
+        })
       }
     }
   }

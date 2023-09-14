@@ -49,7 +49,13 @@ export const user = (app) => {
   // Initialize hooks
   app.service(userPath).hooks({
     around: {
-      all: [schemaHooks.resolveExternal(userExternalResolver), schemaHooks.resolveResult(userResolver)],
+      all: [
+        // schemaHooks.resolveExternal(userExternalResolver),
+        // iff(
+        //   isProvider('external'),
+        //   schemaHooks.resolveResult(userResolver)
+        // ),
+      ],
       find: [authenticate('jwt')],
       get: [authenticate('jwt')],
       create: [],
@@ -58,9 +64,15 @@ export const user = (app) => {
       remove: [authenticate('jwt')]
     },
     before: {
-      all: [schemaHooks.validateQuery(userQueryValidator)],
+      all: [
+        // schemaHooks.validateQuery(userQueryValidator),
+        // iff(
+        //   isProvider('external'),
+        //   schemaHooks.resolveQuery(userQueryResolver)
+        // ),
+      ],
       find: [],
-      get: [schemaHooks.resolveQuery(userQueryResolver)],
+      get: [],
       create: [
         schemaHooks.validateData(userDataValidator),
         schemaHooks.resolveData(userDataResolver),
@@ -68,23 +80,23 @@ export const user = (app) => {
         addVerification("auth-management"),
       ],
       patch: [
-        iff(isProvider('external'), preventChanges(
-          false,
-          'tier',
-          'nextTier',
-          'subscriptionDetail.state',
-          "isVerified",
-          "resetExpires",
-          "resetShortToken",
-          "resetToken",
-          "verifyChanges",
-          "verifyExpires",
-          "verifyShortToken",
-          "verifyToken",
-        )),
-        schemaHooks.validateData(userPatchValidator),
-        schemaHooks.resolveData(userPatchResolver),
-        uniqueUserValidator
+        // iff(isProvider('external'), preventChanges(
+        //   false,
+        //   'tier',
+        //   'nextTier',
+        //   'subscriptionDetail.state',
+        //   "isVerified",
+        //   "resetExpires",
+        //   "resetShortToken",
+        //   "resetToken",
+        //   "verifyChanges",
+        //   "verifyExpires",
+        //   "verifyShortToken",
+        //   "verifyToken",
+        // )),
+        // schemaHooks.validateData(userPatchValidator),
+        // schemaHooks.resolveData(userPatchResolver),
+        // uniqueUserValidator
       ],
       remove: []
     },
