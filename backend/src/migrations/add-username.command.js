@@ -22,7 +22,8 @@ export async function addUsernameCommand(app) {
   let ctr = 0;
   for (const userToChange of userList) {
     if (!userToChange.username) {
-      let username = conformName(`${userToChange.firstName} ${userToChange.lastName}`);
+      let randomName = Math.random().toString(36).slice(2, 7);
+      let username = conformName(randomName);
       let usernameHash = usernameHasher(username);
       console.log(`>>> updating user "${userToChange.firstName} ${userToChange.lastName}" with username "${username}" and hash ${usernameHash}`);
       await userService.patch(
