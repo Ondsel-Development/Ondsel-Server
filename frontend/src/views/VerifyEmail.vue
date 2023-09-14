@@ -3,12 +3,11 @@
     <v-card class="mx-auto" width="896" flat>
       <v-card-title>Email Verification</v-card-title>
       <v-card-text>
-        <h1 v-if="isVerified">Email Address Verified!</h1>
-        <h1  v-else>{{verificationMsg}}</h1>
+        <h1>{{verificationMsg}}</h1>
         <h1>&nbsp;</h1>
+        <h1 v-if="isVerified">Email Address Verified!</h1>
         <p>{{loginMsg}}</p>
         <p>token: {{ token }}</p>
-        <p>uid: {{ uid }}</p>
         <v-container width="400" style="top: -100px" flat>
           <v-form v-model="isValid" @submit.prevent="login">
             <v-text-field
@@ -78,7 +77,6 @@ export default {
     resetStores();
   },
   async created() {
-    console.log("TOKEN=" + this.token);
     await AuthManagement.create({
       action: "verifySignupLong",
       value: this.token,
@@ -87,7 +85,14 @@ export default {
       this.isVerified = true;
       this.loginMsg = 'Now please login.';
     }).catch((e) => {
-      this.verificationMsg = e.message;
+      const msg = e.message;
+      if (msg === 'User not found.') {
+        this.isVerified = true;
+        this.loginMsg = 'Go ahead and login.'
+        this.verificationMsg = 'Verification code either already used or expired.'
+      } else {
+        this.verificationMsg = msg;
+      }
     });
   },
   methods: {
