@@ -117,7 +117,25 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier'])
+export const userQueryProperties = Type.Pick(userSchema, [
+  '_id',
+  'email',
+  'username',
+  'usernameHash',
+  'firstName',
+  'lastName',
+  'tier',
+  'nextTier',
+  'isVerified',
+  'verifyToken',
+  'verifyShortToken',
+  'verifyExpires',
+  'verifyChanges',
+  'resetToken',
+  'resetShortToken',
+  'resetExpires',
+  'resetAttempts',
+])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),

@@ -43,17 +43,18 @@
 import {mapActions} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {resetStores} from "@/store";
+import {AuthManagement} from "@/store/services/auth-management";
 
 export default {
   name: 'VerifyEmail',
   data() {
     return {
       result: {},
+      isValid: false,
       user: {
         email: '',
-        password: '',
+        password: ''
       },
-      isValid: false,
       rules: {
         isEmail: v => /.+@.+/.test(v) || 'Invalid Email address',
         isRequired: v => !!v || 'This field is required',
@@ -74,15 +75,21 @@ export default {
     ...mapActions('auth', ['authenticate']),
     async login() {
       if ( this.isValid ) {
-        await this.authenticate({
-          strategy: 'local',
-          ...this.user,
-        }).then(() => {
-          this.$router.push({ name: 'ChooseTier' })
-        }).catch(() => {
-          this.showSnacker = true;
-          this.snackerMsg = "Invalid login"
-        })
+        // await AuthManagement.create({
+        //   action: "verifySignupLong",
+        //   value: this.token,
+        //   notifierOptions: {},
+        // }).then(() => {
+          this.authenticate({
+            strategy: 'local',
+            ...this.user,
+          }).then(() => {
+            this.$router.push({ name: 'ChooseTier' })
+          }).catch(() => {
+            this.showSnacker = true;
+            this.snackerMsg = "Invalid login"
+          })
+        // });
       }
     }
   }

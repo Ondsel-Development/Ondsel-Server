@@ -1,6 +1,6 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
-class AuthManagement extends BaseModel {
+export class AuthManagement extends BaseModel {
   constructor(data, options) {
     super(data, options)
   }

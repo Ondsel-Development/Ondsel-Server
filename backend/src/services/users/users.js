@@ -58,9 +58,9 @@ export const user = (app) => {
       remove: [authenticate('jwt')]
     },
     before: {
-      all: [schemaHooks.validateQuery(userQueryValidator), schemaHooks.resolveQuery(userQueryResolver)],
+      all: [schemaHooks.validateQuery(userQueryValidator)],
       find: [],
-      get: [],
+      get: [schemaHooks.resolveQuery(userQueryResolver)],
       create: [
         schemaHooks.validateData(userDataValidator),
         schemaHooks.resolveData(userDataResolver),

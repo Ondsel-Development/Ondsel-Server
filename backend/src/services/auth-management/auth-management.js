@@ -27,22 +27,4 @@ export const authManagement = (app) => {
       })
     }
   )
-
-  // // Initialize hooks
-  // app.service(authManagementPath).hooks({
-  //   around: {
-  //     all: []
-  //   },
-  //   before: {
-  //     all: [
-  //       disallow('external')
-  //     ],
-  //   },
-  //   after: {
-  //     all: [],
-  //   },
-  //   error: {
-  //     all: []
-  //   }
-  // })
 }
