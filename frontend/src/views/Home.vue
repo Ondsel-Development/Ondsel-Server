@@ -69,9 +69,18 @@
               type="error"
               border="top"
               class="text-left"
-              v-if="error === 'InvalidFileType'"
+              v-else-if="error === 'InvalidFileType'"
             >
               <span>Only *.FCStd and *.OBJ files accepted.</span>
+            </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'UpgradeTier'"
+            >
+              <span>Please upgrade your tier.</span>
             </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
@@ -225,16 +234,20 @@ export default {
             file.model = vm.model;
           });
           this.on('success', async file => {
-            await file.model.save();
-            vm.$router.replace(`/model/${vm.model._id}`);
-            await vm.model.patch({
-              id: vm.model._id,
-              data: {
-                shouldStartObjGeneration: true,
-                uniqueFileName: vm.uniqueFileName,
-              }
-            })
-            vm.uploadInProgress = false;
+            try {
+              await file.model.save();
+              vm.$router.replace(`/model/${vm.model._id}`);
+              await vm.model.patch({
+                id: vm.model._id,
+                data: {
+                  shouldStartObjGeneration: true,
+                  uniqueFileName: vm.uniqueFileName,
+                }
+              })
+              vm.uploadInProgress = false;
+            } catch (e) {
+              vm.error = 'UpgradeTier';
+            }
           });
           this.on('error', (file, message) => {
             if (!file.accepted) {

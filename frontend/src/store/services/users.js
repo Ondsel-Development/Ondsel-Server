@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
 export const SubscriptionTypeMap = {
@@ -10,6 +11,27 @@ export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
   yearly: 'Yearly',
 }
+
+export const tierConstraintConfig = {
+  Solo: {
+    maxModelObjects: 50,
+    maxShareLinksPerModel: 2,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+  },
+  Peer: {
+    maxModelObjects: 250,
+    maxShareLinksPerModel: 10,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+  },
+  Enterprise: {
+    maxModelObjects: 1000,
+    maxShareLinksPerModel: 100,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+  },
+};
 
 class User extends BaseModel {
   constructor(data, options) {
@@ -51,6 +73,10 @@ class User extends BaseModel {
       tierName += ` -> ${this.nextTier}`
     }
     return tierName;
+  }
+
+  get tierConfig() {
+    return _.get(tierConstraintConfig, this.tier, SubscriptionTypeMap.solo);
   }
 }
 const servicePath = 'users'
