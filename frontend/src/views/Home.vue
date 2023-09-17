@@ -242,6 +242,7 @@ export default {
             vm.model = new Model({
               uniqueFileName: file.upload.filename,
               custFileName: file.name,
+              createSystemGeneratedShareLink: vm.generatePublicLink,
             })
             file.model = vm.model;
           });
