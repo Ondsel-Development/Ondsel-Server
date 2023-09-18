@@ -14,6 +14,8 @@ import InitialPurchaseForPeer from "@/views/InitialPurchaseForPeer.vue";
 import DowngradeToSolo from "@/views/DowngradeToSolo.vue";
 import CancelTierChange from "@/views/CancelTierChange.vue";
 import LegalDoc from "@/views/LegalDoc.vue";
+import AccountSettings from "@/views/AccountSettings.vue";
+import AccountHistory from "@/views/AccountHistory.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -53,6 +55,18 @@ const routes = [
     path: '/legal-document/:doc_name',
     component: LegalDoc,
     name: 'LegalDoc',
+  },
+  {
+    path: '/account-settings',
+    component: AccountSettings,
+    name: 'AccountSettings',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/account-history',
+    component: AccountHistory,
+    name: 'AccountHistory',
+    meta: { requiresAuth: true },
   },
   {
     path: '/choose-tier',

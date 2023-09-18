@@ -6,6 +6,7 @@ export const SubscriptionTypeMap = {
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
+export const ANON = "anonymous"
 
 export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
@@ -13,6 +14,12 @@ export const SubscriptionTermTypeMap = {
 }
 
 export const tierConstraintConfig = {
+  ANON: {
+    maxModelObjects: 0,
+    maxShareLinksPerModel: 0,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+  },
   Solo: {
     maxModelObjects: 50,
     maxShareLinksPerModel: 2,
@@ -46,6 +53,7 @@ class User extends BaseModel {
     return {
       email: '',
       password: '',
+      username: '',
       firstName: '',
       lastName: '',
     }
@@ -75,8 +83,19 @@ class User extends BaseModel {
     return tierName;
   }
 
+  calculateRemainingModels(count) {
+    if (this.tier === SubscriptionTypeMap.enterprise) {
+      return `no limit (${count} active)`;
+    }
+    let max = this.tierConfig.maxModelObjects;
+    if (count > max) {
+      return `exceeded! Maximum is ${max}, currently at ${count}.`;
+    }
+    return `${max - count}`;
+  }
+
   get tierConfig() {
-    return _.get(tierConstraintConfig, this.tier, SubscriptionTypeMap.solo);
+    return _.get(tierConstraintConfig, this.tier, ANON);
   }
 }
 const servicePath = 'users'
@@ -86,7 +105,7 @@ const servicePlugin = makeServicePlugin({
   servicePath
 })
 
-// Setup the client-side Feathers hooks.
+// Set up the client-side Feathers hooks.
 feathersClient.service(servicePath).hooks({
   before: {
     all: [],
