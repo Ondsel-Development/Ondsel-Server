@@ -102,6 +102,8 @@ import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import ChangePassword from "@/components/ChangePassword.vue";
 
+const { Model, User } = models.api;
+
 export default {
   name: 'AccountSettings',
   components: {ChangePassword},
@@ -115,7 +117,6 @@ export default {
     SubscriptionTypeMap() {
       return SubscriptionTypeMap
     },
-    User: () => models.api.User,
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
   },
@@ -130,11 +131,8 @@ export default {
       this.$router.push({name: 'AccountHistory'});
     },
     async getRemainingFiles() {
-      models.api.Model.find({
-        query: {userId: this.user._id}
-      }).then(response => {
-        this.remainingFiles = this.user.calculateRemainingModels(response.data.length);
-      });
+      const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
+      this.remainingFiles = this.user.calculateRemainingModels(models.data.length);
     },
     openChangePasswordDialog() {
       this.$refs.ChangePassword.$data.dialog = true;
