@@ -66,6 +66,7 @@
       <v-switch
         v-model="item.raw.isActive"
         hide-details
+        :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
         @update:modelValue="updateSharedModel(item.raw._id, {isActive: item.raw.isActive})"
       ></v-switch>
     </template>
@@ -207,6 +208,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('auth', ['user']),
     ...mapState('shared-models', ['isFindPending', 'isPatchPending', 'isRemovePending']),
     sharedModels: (vm) => {
       if (!vm.model?._id) {

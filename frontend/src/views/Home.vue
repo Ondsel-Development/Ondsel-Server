@@ -117,6 +117,17 @@
                   <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn id="dropzone-click-target">BROWSE</v-btn>
                 </div>
                 <div class="text-caption mt-2 mb-6">Allowed extensions: FCSTD, OBJ</div>
+                <div class="d-flex justify-center">
+                  <div>
+                    <v-checkbox
+                      v-model="generatePublicLink"
+                      :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
+                      label="Generate public link automatically"
+                      density="compact"
+                      hide-details>
+                    </v-checkbox>
+                  </div>
+                </div>
               </div>
             </v-card-item>
           </div>
@@ -184,6 +195,7 @@ export default {
     isReloadingOBJ: false,
     error: '',
     manageSharedModelsDrawer: false,
+    generatePublicLinkValue: null,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -230,6 +242,7 @@ export default {
             vm.model = new Model({
               uniqueFileName: file.upload.filename,
               custFileName: file.name,
+              createSystemGeneratedShareLink: vm.generatePublicLink,
             })
             file.model = vm.model;
           });
@@ -254,6 +267,19 @@ export default {
               vm.error = 'InvalidFileType';
             }
           })
+        }
+      }
+    },
+    generatePublicLink: {
+      get() {
+        if (this.generatePublicLinkValue == null) {
+          return this.user.tierConfig.defaultValueOfPublicLinkGeneration;
+        }
+        return this.generatePublicLinkValue;
+      },
+      set(val) {
+        if (this.user.tierConfig.canDisableAutomaticGenerationOfPublicLink){
+          this.generatePublicLinkValue = val;
         }
       }
     }
