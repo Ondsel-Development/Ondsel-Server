@@ -34,6 +34,13 @@
           <v-list-item-subtitle>
             {{ user.firstName }} {{ user.lastName }}
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn variant="outlined" color="default" size="small">
+                Change Name
+              </v-btn>
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
         <v-divider />
@@ -52,6 +59,24 @@
           <v-list-item-subtitle>
             **********
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openResetPasswordDialog()"
+              >
+                Reset Password
+              </v-btn>
+              <v-spacer></v-spacer>
+              <ResetPasswordDialog
+                :is-active="isResetPasswordDialogActive"
+                :user="user"
+                ref="resetPasswordDialog"
+              />
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
       </v-list>
@@ -102,18 +127,22 @@
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
-import ChangePassword from "@/components/ChangePassword.vue";
+import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
+import ShareLinkDialog from "@/components/ShareLinkDialog.vue";
 
 export default {
   name: 'AccountSettings',
-  components: {ChangePassword},
+  components: {ShareLinkDialog, ResetPasswordDialog},
   data() {
     return {
-      isChangePasswordActive: false,
+      isResetPasswordDialogActive: false,
       remainingFiles: "processing..."
     }
   },
   computed: {
+    // resetPassword() {
+    //   return resetPassword
+    // },
     SubscriptionTypeMap() {
       return SubscriptionTypeMap
     },
@@ -138,9 +167,11 @@ export default {
         this.remainingFiles = this.user.calculateRemainingModels(response.data.length);
       });
     },
-    openChangePasswordDialog() {
-      this.$refs.ChangePassword.$data.dialog = true;
-    },
+    openResetPasswordDialog() {
+      this.isResetPasswordDialogActive = true;
+      this.$refs.resetPasswordDialog.$data.dialog = true;
+    }
+
   }
 }
 </script>
