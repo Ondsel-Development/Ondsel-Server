@@ -6,6 +6,7 @@ import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import _ from 'lodash';
+import { canUserCreateShareLink } from '../hooks/permissions.js';
 import {
   sharedModelsDataValidator,
   sharedModelsPatchValidator,
@@ -22,6 +23,7 @@ import {
 } from './shared-models.schema.js'
 import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
+import { getTierConfig } from '../../tier-constraint.js';
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -108,6 +110,7 @@ export const sharedModels = (app) => {
         ),
       ],
       create: [
+        canUserCreateShareLink,
         iff(
           context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,
@@ -137,6 +140,10 @@ export const sharedModels = (app) => {
           )
         ),
         preventChanges(false, 'thumbnailUrl'),
+        iff(
+          context => !getTierConfig(context.params.user.tier).canDisableAutomaticGenerationOfPublicLink,
+          preventChanges(true, 'isActive')
+        ),
         iff(
           context => context.data.shouldCreateInstance,
           createUserInstance,

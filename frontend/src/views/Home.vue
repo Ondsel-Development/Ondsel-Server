@@ -21,12 +21,12 @@
         location="start"
       >See model attributes</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openShareModelDialog">
-      <v-icon>mdi-share-variant</v-icon>
+    <v-btn icon flat @click="sharedModelDrawerClicked">
+      <v-icon>mdi-format-list-checks</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
-      >Create a share link</v-tooltip>
+      >Manage share link</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="openExportModelDialog">
       <v-icon>mdi-file-export</v-icon>
@@ -64,6 +64,24 @@
             >
               <span>Oops! The model you're looking for could not be found.</span>
             </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'InvalidFileType'"
+            >
+              <span>Only *.FCStd and *.OBJ files accepted.</span>
+            </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'UpgradeTier'"
+            >
+              <span>Please upgrade your tier.</span>
+            </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
             <v-card
@@ -79,7 +97,7 @@
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand"></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error"></v-progress-linear>
                     <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
@@ -99,12 +117,26 @@
                   <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn id="dropzone-click-target">BROWSE</v-btn>
                 </div>
                 <div class="text-caption mt-2 mb-6">Allowed extensions: FCSTD, OBJ</div>
+                <div class="d-flex justify-center">
+                  <div>
+                    <v-checkbox
+                      v-model="generatePublicLink"
+                      :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
+                      label="Generate public link automatically"
+                      density="compact"
+                      hide-details>
+                    </v-checkbox>
+                  </div>
+                </div>
               </div>
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-            <v-btn icon flat @click="dialog = false" :disabled="!isModelLoaded">
+            <v-btn v-if="model && !error" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
+            </v-btn>
+            <v-btn v-else icon flat :to="{ name: 'Models' }">
+              <v-icon icon="mdi-arrow-left" size="x-large"></v-icon>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -119,20 +151,20 @@
       ref="attributeViewer"
       @update-model="updateModel"
     />
-    <ShareModelDialog
-      v-if="model"
-      :is-active="isShareModelDialogActive"
-      :model-id="model._id"
-      ref="shareModelDialog"
-      @update-model="updateModel"
-    />
     <ExportModelDialog
       v-if="model"
       :is-active="isExportModelDialogActive"
       :model="model"
       ref="exportModelDialog"
-      @update-model="updateModel"
     />
+    <v-navigation-drawer
+      v-model="manageSharedModelsDrawer"
+      location="right"
+      width="1100"
+      temporary
+    >
+      <MangeSharedModels :model="model"/>
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -142,16 +174,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-import ModelViewer from "@/components/ModelViewer";
+import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
-import ShareModelDialog from '@/components/ShareModelDialog';
 import ExportModelDialog from '@/components/ExportModelDialog';
+import MangeSharedModels from '@/components/MangeSharedModels';
 
-const { Model } = models.api;
+const { Model, SharedModel } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, ModelViewer, ShareModelDialog, ExportModelDialog },
+  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog },
   data: () => ({
     dialog: true,
     model: null,
@@ -162,6 +194,8 @@ export default {
     isExportModelDialogActive: false,
     isReloadingOBJ: false,
     error: '',
+    manageSharedModelsDrawer: false,
+    generatePublicLinkValue: null,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -208,23 +242,44 @@ export default {
             vm.model = new Model({
               uniqueFileName: file.upload.filename,
               custFileName: file.name,
+              createSystemGeneratedShareLink: vm.generatePublicLink,
             })
             file.model = vm.model;
           });
           this.on('success', async file => {
-            await file.model.save();
-            vm.$router.replace(`/model/${vm.model._id}`);
-            await vm.model.patch({
-              id: vm.model._id,
-              data: {
-                shouldStartObjGeneration: true,
-                uniqueFileName: vm.uniqueFileName,
-              }
-            })
-            vm.uploadInProgress = false;
+            try {
+              await file.model.save();
+              vm.$router.replace(`/model/${vm.model._id}`);
+              await vm.model.patch({
+                id: vm.model._id,
+                data: {
+                  shouldStartObjGeneration: true,
+                  uniqueFileName: vm.uniqueFileName,
+                }
+              })
+              vm.uploadInProgress = false;
+            } catch (e) {
+              vm.error = 'UpgradeTier';
+            }
           });
           this.on('error', (file, message) => {
+            if (!file.accepted) {
+              vm.error = 'InvalidFileType';
+            }
           })
+        }
+      }
+    },
+    generatePublicLink: {
+      get() {
+        if (this.generatePublicLinkValue == null) {
+          return this.user.tierConfig.defaultValueOfPublicLinkGeneration;
+        }
+        return this.generatePublicLinkValue;
+      },
+      set(val) {
+        if (this.user.tierConfig.canDisableAutomaticGenerationOfPublicLink){
+          this.generatePublicLinkValue = val;
         }
       }
     }
@@ -235,9 +290,6 @@ export default {
     },
     openAttributeViewer() {
       this.$refs.attributeViewer.$data.dialog = true;
-    },
-    openShareModelDialog() {
-      this.$refs.shareModelDialog.$data.dialog = true;
     },
     openExportModelDialog() {
       this.$refs.exportModelDialog.$data.dialog = true;
@@ -290,6 +342,15 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    async sharedModelDrawerClicked() {
+      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
+      await SharedModel.find({
+        query: {
+          cloneModelId: this.model._id,
+          $paginate: false
+        },
+      })
     },
   },
   watch: {

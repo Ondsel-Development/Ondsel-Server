@@ -7,8 +7,9 @@
           <p>
             <b>Congratulations!</b> Your account is now setup for Peer service.
           </p>
+          &nbsp;
           <p>
-            Please Login again to see your new credentials.
+            Click on "Continue" below to refresh your browser's cache.
           </p>
         </div>
         <div v-else>
@@ -30,10 +31,10 @@
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="transactionRecorded"
-               @click="goLogin"
-        >
-          Go To Login Page
+        <v-btn v-if="transactionRecorded">
+          <v-btn v-if="transactionRecorded">
+            <a href="/">continue</a>
+          </v-btn>
         </v-btn>
         <v-btn v-else
                @click="applySubscription"
@@ -77,9 +78,6 @@ export default {
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
-    async goLogin() {
-      this.$router.push({name: 'Login'})
-    },
     async applySubscription() {
       this.accountEvent.event = AccountEventTypeMap.initialSubscriptionPurchase;
       this.accountEvent.detail.subscription = SubscriptionTypeMap.peer;
@@ -96,11 +94,6 @@ export default {
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
-          this.authLogout().then(() => {
-          }).catch((e) => {
-            console.log(e);
-            console.log(e.message);
-          })
         })
         .catch((e) => {
           console.log(e);

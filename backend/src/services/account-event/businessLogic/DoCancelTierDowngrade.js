@@ -1,3 +1,4 @@
+import {addTransactionToUserAndSummarize, makeEmptyJournalTransaction, verifyBalanced} from "../../../accounting.js";
 
 
 export async function DoCancelTierDowngrade(context, user) {
@@ -12,9 +13,16 @@ export async function DoCancelTierDowngrade(context, user) {
     return;
   }
   //
-  // 2. this account event does NOT create a transaction.
-  //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
+  // 2. see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
+  let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
+  // no credits or debits as this action does not change anything financially (yet) but needs to be recorded for user history
+  let balanceMsg = verifyBalanced(transaction); // it is empty, so of course it will balance
+  if (balanceMsg !== "") {
+    context.data.resultMsg = balanceMsg;
+    return;
+  }
+  addTransactionToUserAndSummarize(user, transaction);
   //
   // 3. update the user doc
   //
@@ -22,6 +30,7 @@ export async function DoCancelTierDowngrade(context, user) {
   await context.app.service('users').patch(user._id, {
     nextTier: null,
     subscriptionDetail: user.subscriptionDetail,
+    userAccounting: user.userAccounting,
   });
   //
   // all is good; return message

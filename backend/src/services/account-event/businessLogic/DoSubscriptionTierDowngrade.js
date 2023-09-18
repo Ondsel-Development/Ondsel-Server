@@ -1,3 +1,11 @@
+import {
+  addTransactionToUserAndSummarize,
+  credit,
+  debit,
+  makeEmptyJournalTransaction,
+  verifyBalanced
+} from "../../../accounting.js";
+import {LedgerMap} from "../../users/users.subdocs.schema.js";
 
 
 export async function DoSubscriptionTierDowngrade(context, user) {
@@ -12,14 +20,23 @@ export async function DoSubscriptionTierDowngrade(context, user) {
     return;
   }
   //
-  // 2. this account event does NOT create a transaction.
-  //    see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
+  // 2. see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
+  let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
+  // debit(transaction, LedgerMap.cash, 0);
+  // credit(transaction, LedgerMap.unearnedRevenue, 0);
+  let balanceMsg = verifyBalanced(transaction); // it is empty, so of course it will balance
+  if (balanceMsg !== "") {
+    context.data.resultMsg = balanceMsg;
+    return;
+  }
+  addTransactionToUserAndSummarize(user, transaction);
   //
   // 3. update the user doc
   //
   await context.app.service('users').patch(user._id, {
     nextTier: detail.newTier,
+    userAccounting: user.userAccounting,
   });
   //
   // all is good; return message

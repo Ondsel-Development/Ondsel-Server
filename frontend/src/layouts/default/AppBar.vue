@@ -41,9 +41,9 @@
           <v-list-item>
             <v-btn
               variant="text"
-              @click="gotoChooseTier()"
+              @click="gotoAccountSettings()"
             >
-              {{ user.shortTierName }} (change)
+              account settings
             </v-btn>
           </v-list-item>
         </v-list>
@@ -98,15 +98,15 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
-    currentRouteName: (vm) => vm.$route.name
+    currentRouteName: (vm) => vm.$route.name,
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
-    gotoChooseTier() {
-      this.$router.push({name: 'ChooseTier'});
+    gotoAccountSettings() {
+      this.$router.push({name: 'AccountSettings'});
     }
   },
 }

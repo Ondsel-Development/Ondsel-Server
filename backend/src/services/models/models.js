@@ -7,6 +7,8 @@ import swagger from 'feathers-swagger';
 import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
+import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
+import { getTierConfig } from '../../tier-constraint.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -43,7 +45,6 @@ export const model = (app) => {
         securities: ['all'],
       }
     })
-
   })
 
   app.service(modelPath).publish((data, context) => {
@@ -83,6 +84,8 @@ export const model = (app) => {
       find: [],
       get: [],
       create: [
+        canUserCreateModel,
+        verifyToCreateSystemGeneratedShareLink,
         createFileVersionControlObject,
         schemaHooks.validateData(modelDataValidator),
         schemaHooks.resolveData(modelDataResolver)
@@ -156,12 +159,7 @@ export const model = (app) => {
 }
 
 const startObjGeneration = async (context) => {
-  if (!context.params.$triggerObjGeneration && context.id) {
-    const model = await context.service.get(context.id)
-    if (model.objUrl && (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise')) {
-      throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
-    }
-  }
+  await canUserUpdateModel(context);
 
   const { data, params } = context;
   let fileName = null
@@ -205,9 +203,7 @@ const startObjGeneration = async (context) => {
 };
 
 const startExport = async (context) => {
-  if (context.params.user.tier !== 'Premium' && context.params.user.tier !== 'Enterprise') {
-    throw new BadRequest('Please upgrade your plan to Premium or Enterprise tier');
-  }
+  await canUserExportModel(context);
   const { data, params } = context
   let fileName = null
   let attributes = {}
@@ -421,5 +417,18 @@ const feedSystemGeneratedSharedModel = async (context) => {
       )
     }
   }
+  return context;
+}
+
+
+const verifyToCreateSystemGeneratedShareLink = context => {
+  const { data } = context;
+  const tierConfig = getTierConfig(context.params.user.tier);
+  let createShareLink = tierConfig.defaultValueOfPublicLinkGeneration;
+  if ('createSystemGeneratedShareLink' in data && tierConfig.canDisableAutomaticGenerationOfPublicLink) {
+    createShareLink = data.createSystemGeneratedShareLink;
+  }
+  context.params.skipSystemGeneratedSharedModel = !createShareLink
+  context.data = _.omit(data, 'createSystemGeneratedShareLink');
   return context;
 }

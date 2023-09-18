@@ -20,9 +20,9 @@
           type="warning"
           border="top"
           class="text-left"
-          v-if="user && !user.isPeerTier && !user.isEnterpriseTier"
+          v-if="user && !user.tierConfig.canExportModel"
         >
-          Please upgrade your plan to <b>Peer</b> or <b>Enterprise</b> tier in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
+          Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
         </v-alert>
         <v-alert
           variant="outlined"
@@ -50,7 +50,7 @@
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.isPeerTier && !user.isEnterpriseTier && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.tierConfig.canExportModel && !(format === 'Default model'))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>
