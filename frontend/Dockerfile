@@ -9,7 +9,9 @@ WORKDIR /app
 # RUN npm version patch && npm install && npm run build
 RUN npm ci && npm run build
 
-FROM nginx
+FROM openresty/openresty
 RUN mkdir /app
 COPY --from=0 /app/dist /app
-COPY ./nginx.conf /etc/nginx/nginx.conf
+ADD ./nginx.conf /conf/nginx.conf
+
+CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;", "-p", "/app", "-c", "/conf/nginx.conf"]
