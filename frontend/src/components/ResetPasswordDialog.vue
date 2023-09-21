@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import {AuthManagement} from "@/store/services/auth-management";
+
 export default {
   name: 'ResetPasswordDialog',
   props: {
@@ -32,8 +34,18 @@ export default {
   computed: {
   },
   methods: {
-    sendResetEmail() {
-      this.dialog = false;
+    async sendResetEmail() {
+      await AuthManagement.create({
+        action: "sendResetPwd",
+        value: {email: this.user.email},
+        notifierOptions: {},
+      }).then(() => {
+        this.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        console.log(msg);
+        console.log(this.user.email);
+      });
     }
   },
 }

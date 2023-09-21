@@ -18,6 +18,7 @@ import AccountSettings from "@/views/AccountSettings.vue";
 import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
+import ChangePassword from "@/views/ChangePassword.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -103,6 +104,11 @@ const routes = [
     path: '/verify-email/:token/:uid',
     component: VerifyEmail,
     name: 'VerifyEmail',
+  },
+  {
+    path: '/change-password/:token/:uid',
+    component: ChangePassword,
+    name: 'ChangePassword',
   },
   {
     path: '/login',

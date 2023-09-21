@@ -6,24 +6,14 @@ import {StringEnum, Type} from "@feathersjs/typebox";
 export const authManagementActionTypeMap = {
   resendVerifySignup: 'resendVerifySignup',
   verifySignupLong: 'verifySignupLong',
-  // verifySignupShort: 'verifySignupShort',
-  // 'verifySignupSetPassword',
-  // 'sendResetPwd',
-  // 'resetPwd',
-  // 'passwordChange',
-  // 'identityChange',
+  sendResetPwd: 'sendResetPwd',
 }
 
 export const authManagementActionType = StringEnum(
   [
     authManagementActionTypeMap.resendVerifySignup,
     authManagementActionTypeMap.verifySignupLong,
-    // authManagementActionTypeMap.verifySignupShort,
-    // 'verifySignupSetPassword',
-    // 'sendResetPwd',
-    // 'resetPwd',
-    // 'passwordChange',
-    // 'identityChange',
+    authManagementActionTypeMap.sendResetPwd,
   ]
 )
 

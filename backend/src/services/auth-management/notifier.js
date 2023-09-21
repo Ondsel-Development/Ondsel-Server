@@ -1,6 +1,7 @@
 // services/auth-management/notifier.js
 
-import {authManagementActionType, authManagementActionTypeMap} from "./auth-management.schema.js";
+import {authManagementActionTypeMap} from "./auth-management.schema.js";
+import {BadRequest} from "@feathersjs/errors";
 
 export const notifier = (app) => {
   function getLink(type, hash, uid, baseUrl) {
@@ -19,32 +20,35 @@ export const notifier = (app) => {
   // The "type"s used below:
   // "resendVerifySignup" - used to send a verification email.
   // "verifySignupLong" - used to confirm verification and set user.isVerified=true; which sends an email also
-  // not used yet:
-  // "verifySignupShort" - used to confirm verification and set user.isVerified=true; which sends a txt message also
-  // "verifySignupSetPassword" from verifySignupSetPasswordLong and verifySignupSetPasswordShort API calls
-  // "sendResetPwd" from sendResetPwd API call
-  // "resetPwd" from resetPwdLong and resetPwdShort API calls
-  // "passwordChange" from passwordChange API call
-  // "identityChange" from identityChange API call
+  // "verifySignupShort" - (NOT ACTIVE YET) used to confirm verification and set user.isVerified=true; which sends a txt message also
+  // "sendResetPwd" - used to send a password-change email
   //
   // see https://feathers-a-m.netlify.app/service-calls.html for more detail
 
-  const verifyEmailMessage = "To verify, click here: ";
-
   return (type, user, notifierOptions = {}) => {
     const baseUrl = app.get('frontendUrl');
-    if (type === authManagementActionTypeMap.resendVerifySignup) {
-      return sendEmail({
-        to: user.email,
-        subject: "Please confirm this e-mail address for your Ondsel account",
-        text: verifyEmailMessage + getLink('verify-email', user.verifyToken, user._id, baseUrl),
-      });
-    } else if (type === authManagementActionTypeMap.verifySignupLong) {
-      return sendEmail({
-        to: user.email,
-        subject: "E-Mail address for Ondsel Account verified",
-        text: `Verification of ${user.email} complete. Thanks for working with us!`,
-      });
+    switch (type) {
+      case authManagementActionTypeMap.resendVerifySignup:
+        return sendEmail({
+          to: user.email,
+          subject: "Please confirm this e-mail address for your Ondsel account",
+          text: "To verify, click here: " + getLink('verify-email', user.verifyToken, user._id, baseUrl),
+        });
+      case authManagementActionTypeMap.verifySignupLong:
+        return sendEmail({
+          to: user.email,
+          subject: "E-Mail address for Ondsel Account verified",
+          text: `Verification of ${user.email} complete. Thanks for working with us!`,
+        });
+      case authManagementActionTypeMap.sendResetPwd:
+        return sendEmail({
+          to: user.email,
+          subject: "Reset password for your Ondsel account.",
+          text: `To reset your ${user.username} password, click here: `
+            + getLink('change-password', user.resetToken, user._id, baseUrl),
+        });
+      default:
+        throw new BadRequest("unhandled auth-management type");
     }
   };
 };
