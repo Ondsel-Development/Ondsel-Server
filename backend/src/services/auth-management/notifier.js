@@ -1,6 +1,6 @@
 // services/auth-management/notifier.js
 
-import {authManagementActionTypeMap} from "./auth-management.schema.js";
+import {authManagementActionTypeMap, resetPwdGENERIC} from "./auth-management.schema.js";
 import {BadRequest} from "@feathersjs/errors";
 
 export const notifier = (app) => {
@@ -22,6 +22,7 @@ export const notifier = (app) => {
   // "verifySignupLong" - used to confirm verification and set user.isVerified=true; which sends an email also
   // "verifySignupShort" - (NOT ACTIVE YET) used to confirm verification and set user.isVerified=true; which sends a txt message also
   // "sendResetPwd" - used to send a password-change email
+  // "resetPwdLong" - used to change the password using the resetToken
   //
   // see https://feathers-a-m.netlify.app/service-calls.html for more detail
 
@@ -47,8 +48,15 @@ export const notifier = (app) => {
           text: `To reset your ${user.username} password, click here: `
             + getLink('change-password', user.resetToken, user._id, baseUrl),
         });
+      case authManagementActionTypeMap.resetPwdLong:
+      case resetPwdGENERIC:
+        return sendEmail({
+          to: user.email,
+          subject: "Notification: Ondsel password has been change",
+          text: `Your password for ${user.username} has been successfully changed.!`,
+        });
       default:
-        throw new BadRequest("unhandled auth-management type");
+        throw new BadRequest(`unhandled auth-management type ${type}`);
     }
   };
 };

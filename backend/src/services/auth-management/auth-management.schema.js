@@ -7,13 +7,16 @@ export const authManagementActionTypeMap = {
   resendVerifySignup: 'resendVerifySignup',
   verifySignupLong: 'verifySignupLong',
   sendResetPwd: 'sendResetPwd',
+  resetPwdLong: 'resetPwdLong',
 }
+export const resetPwdGENERIC = 'resetPwd';
 
 export const authManagementActionType = StringEnum(
   [
     authManagementActionTypeMap.resendVerifySignup,
     authManagementActionTypeMap.verifySignupLong,
     authManagementActionTypeMap.sendResetPwd,
+    authManagementActionTypeMap.resetPwdLong,
   ]
 )
 

@@ -112,7 +112,7 @@ export const userPatchSchema = Type.Partial(userSchema, {
 })
 export const userPatchValidator = getValidator(userPatchSchema, dataValidator)
 export const userPatchResolver = resolve({
-  password: passwordHash({ strategy: 'local' }),
+  // password: passwordHash({ strategy: 'local' }),  // this was doing a double-hash with feathers-authentication-management
   updatedAt: async () => Date.now(),
 })
 
