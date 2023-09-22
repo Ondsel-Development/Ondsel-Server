@@ -18,4 +18,6 @@ COPY ./nginx_binaries/http_connect.lua /usr/local/openresty/lualib/resty/http_co
 COPY ./nginx_binaries/http_headers.lua /usr/local/openresty/lualib/resty/http_headers.lua
 COPY ./nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 
+EXPOSE 80
+
 CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
