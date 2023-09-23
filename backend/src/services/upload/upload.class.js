@@ -24,6 +24,10 @@ class UploadService {
     this.s3Client = s3Client;
   }
 
+  getPublicUrl(fileName, bucket) {
+    return `https://${this.options.app.get('awsClientModelBucket')}.s3.amazonaws.com/${fileName}`;
+  }
+
   async getSignedFileUrl(fileName, bucket, expiresIn) {
     const command = new GetObjectCommand({
       Bucket: bucket,
@@ -57,12 +61,15 @@ class UploadService {
   }
 
   async get(id, _params) {
-
     const bucketName = this.options.app.get('awsClientModelBucket');
     const isFileExist = await this.checkFileExists(bucketName, id);
     let url = '';
     if (isFileExist) {
-      url = await this.getSignedFileUrl(id, bucketName, 3600);
+      if (id.includes('public/')) {
+        url = this.getPublicUrl(id, bucketName);
+      } else {
+        url = await this.getSignedFileUrl(id, bucketName, 3600);
+      }
     }
     return { url: url };
   }
@@ -78,6 +85,11 @@ class UploadService {
       if (isFileExist) {
         throw new BadRequest('File already exists!');
       }
+    }
+
+    // Upload all thumbnails to public folder
+    if (generatedThumbnailRegex.test(data['id'])) {
+      data.id = `public/${data.id}`;
     }
 
     return await this.blobService.create(data, params);
