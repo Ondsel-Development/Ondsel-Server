@@ -2,11 +2,11 @@ import _ from 'lodash';
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
 export const SubscriptionTypeMap = {
+  unverified: 'Unverified',
   solo: 'Solo',
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
-export const ANON = "anonymous"
 
 export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
@@ -14,11 +14,13 @@ export const SubscriptionTermTypeMap = {
 }
 
 export const tierConstraintConfig = {
-  ANON: {
+  Unverified: {
     maxModelObjects: 0,
     maxShareLinksPerModel: 0,
     canUpdateModelParameters: false,
     canExportModel: false,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: false,
   },
   Solo: {
     maxModelObjects: 50,
@@ -81,14 +83,6 @@ class User extends BaseModel {
     return tierName;
   }
 
-  get shortTierName() {
-    let tierName = this.tier;
-    if (this.nextTier !== undefined && this.nextTier !== null) {
-      tierName += ` -> ${this.nextTier}`
-    }
-    return tierName;
-  }
-
   calculateRemainingModels(count) {
     if (this.tier === SubscriptionTypeMap.enterprise) {
       return `no limit (${count} active)`;
@@ -101,7 +95,7 @@ class User extends BaseModel {
   }
 
   get tierConfig() {
-    return _.get(tierConstraintConfig, this.tier, ANON);
+    return _.get(tierConstraintConfig, this.tier, SubscriptionTypeMap.unverified);
   }
 }
 const servicePath = 'users'

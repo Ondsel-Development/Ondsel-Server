@@ -34,13 +34,13 @@
           <v-list-item-subtitle>
             {{ user.firstName }} {{ user.lastName }}
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn variant="outlined" color="default" size="small">
-                Change Name
-              </v-btn>
-            </v-list-item-action>
-          </template>
+<!--          <template #append>-->
+<!--            <v-list-item-action>-->
+<!--              <v-btn variant="outlined" color="default" size="small">-->
+<!--                Change Name-->
+<!--              </v-btn>-->
+<!--            </v-list-item-action>-->
+<!--          </template>-->
         </v-list-item>
 
         <v-divider />

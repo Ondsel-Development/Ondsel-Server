@@ -16,10 +16,6 @@
 
 <script>
 
-import {mapState} from "vuex";
-import {models} from "@feathersjs/vuex";
-import {SubscriptionTypeMap} from "@/store/services/users";
-
 export default {
   name: 'PendingVerification',
   data() {

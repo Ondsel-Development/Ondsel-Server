@@ -52,7 +52,7 @@ export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
 
   tier: virtual(async (message, _context) => {
-    return message.tier || SubscriptionTypeMap.solo;
+    return message.tier || SubscriptionTypeMap.unverified;
   }),
   nextTier: virtual(async (message, _context) => {
     return message.nextTier || null
@@ -83,7 +83,7 @@ export const userDataResolver = resolve({
   usernameHash: async (_value, message, _context) => {
     return usernameHasher(message.username)
   },
-  tier: async () => SubscriptionTypeMap.solo,
+  tier: async () => SubscriptionTypeMap.unverified,
   nextTier: async () => null,
   userAccounting: async (_value, _message, _context) => {
     return {
@@ -98,7 +98,7 @@ export const userDataResolver = resolve({
         {
           transactionId: new ObjectId(),
           time: Date.now(),
-          description: "CREATION OF NEW ACCOUNT; TIER SET TO Solo",
+          description: "CREATION OF NEW ACCOUNT; TIER SET TO Unverified",
           entries: [],
         }
       ],

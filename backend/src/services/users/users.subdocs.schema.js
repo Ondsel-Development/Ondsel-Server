@@ -6,24 +6,20 @@ import {CurrencyType} from "../../currencies.js";
 import {agreementCategoryType} from "../agreements/agreements.schema.js";
 
 export const SubscriptionTypeMap = {
+  unverified: 'Unverified',
   solo: 'Solo',
   peer: 'Peer',
   enterprise: 'Enterprise',
-  // legacy entries TODO: remove on release after next
-  free: 'Free',
-  premium: 'Premium',
 }
 
 export const SubscriptionTypeANON = "anonymous"
 
 export const SubscriptionType = StringEnum(
   [
+    SubscriptionTypeMap.unverified,
     SubscriptionTypeMap.solo,
     SubscriptionTypeMap.peer,
     SubscriptionTypeMap.enterprise,
-    // legacy entries TODO: remove on release after next
-    SubscriptionTypeMap.free,
-    SubscriptionTypeMap.premium,
   ]
 )
 

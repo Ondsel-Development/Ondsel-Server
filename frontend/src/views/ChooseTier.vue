@@ -35,7 +35,7 @@
                        variant="text"
                        @click="goHome"
                 >
-                  Continue
+                  Choose Solo
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -139,7 +139,15 @@ export default {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
   },
+  async created() {
+    if (this.user.tier === SubscriptionTypeMap.unverified) {
+      await this.goAccountSettings();
+    }
+  },
   methods: {
+    async goAccountSettings() {
+      this.$router.push({name: 'AccountSettings'})
+    },
     async goHome() {
       this.$router.push({name: 'Models'})
     },

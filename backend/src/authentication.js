@@ -1,7 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/authentication.html
 import { AuthenticationService, JWTStrategy } from '@feathersjs/authentication'
 import { LocalStrategy } from '@feathersjs/authentication-local'
-import {CustomLocalStrategy} from "./custom-local-strategy.js";
 
 export const authentication = (app) => {
   const authentication = new AuthenticationService(app, 'authentication', {
@@ -61,7 +60,7 @@ export const authentication = (app) => {
 
 
   authentication.register('jwt', new JWTStrategy())
-  authentication.register('local', new CustomLocalStrategy())
+  authentication.register('local', new LocalStrategy())
 
   app.use('authentication', authentication)
 }

@@ -1,14 +1,20 @@
-import {addTransactionToUserAndSummarize, makeEmptyJournalTransaction, verifyBalanced} from "../../../accounting.js";
-import {SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
+import {
+  addTransactionToUserAndSummarize,
+  credit,
+  debit,
+  makeEmptyJournalTransaction,
+  verifyBalanced
+} from "../../../accounting.js";
+import {LedgerMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 
 
-export async function DoCancelTierDowngrade(context, user) {
+export async function DoStartSoloSubscriptionFromUnverified(context, user) {
   // it is presumed that the processor has a confirmed charge at this point
   // hook.success is set to false already
   //
   // 1. verify supplied data
   //
-  let detail = SubscriptionTierDowngradeVerification(context, user);
+  let detail = SoloStartVerification(context, user);
   if (detail.errMsg !== "") {
     context.data.resultMsg = detail.errMsg;
     return;
@@ -17,7 +23,6 @@ export async function DoCancelTierDowngrade(context, user) {
   // 2. see https://docs.google.com/document/d/1LE7otARHoOPTuj6iZQjg_IBzBWq0oZHFT-u_tt9YWII/edit?usp=sharing
   //
   let transaction = makeEmptyJournalTransaction(detail.desc, detail.note);
-  // no credits or debits as this action does not change anything financially (yet) but needs to be recorded for user history
   let balanceMsg = verifyBalanced(transaction); // it is empty, so of course it will balance
   if (balanceMsg !== "") {
     context.data.resultMsg = balanceMsg;
@@ -27,10 +32,8 @@ export async function DoCancelTierDowngrade(context, user) {
   //
   // 3. update the user doc
   //
-  user.subscriptionDetail.term = detail.newTerm;
   await context.app.service('users').patch(user._id, {
-    nextTier: null,
-    subscriptionDetail: user.subscriptionDetail,
+    nextTier: detail.newTier,
     userAccounting: user.userAccounting,
   });
   //
@@ -40,42 +43,37 @@ export async function DoCancelTierDowngrade(context, user) {
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
 }
 
-function SubscriptionTierDowngradeVerification(context, user) {
+function SoloStartVerification(context, user) {
   let result = {
     errMsg: "",
     desc: "",
     note: "",
-    newTerm: "",
+    newTier: "",
+  }
+  //
+  // starting with unverified
+  //
+  if (user.tier !== SubscriptionTypeMap.unverified) {
+    result.errMsg = 'This account function only works when starting from unverified.';
+    return result;
   }
   //
   // new tier
   //
+  result.newTier = context.data.detail.subscription;
   let currentTier = user.tier;
-  if (currentTier === SubscriptionTypeMap.unverified) {
-    result.errMsg = 'UNVERIFIED USERS CANNOT CHANGE TIERS';
-    return result;
-  }
   if (context.data.detail.currentSubscription !== currentTier) {
     result.errMsg = `CALLER TO API BELIEVES THE CURRENT TIER IS ${context.data.detail.currentSubscription} BUT IT IS NOT`;
     return result;
   }
-  if (context.data.subscription === null) {
-    result.errMsg = `YOU CANNOT CANCEL TO NULL`
-    return result;
-  }
-  //
-  // restored term
-  //
-  result.newTerm = context.data.detail.term;
-  if (result.newTerm === undefined || result.newTerm === null) {
-    result.errMsg = `THE PREVIOUS TERM MUST BE SUPPLIED`; // TODO: make this more elegant
-    return result;
+  if (result.newTier !== SubscriptionTypeMap.solo) {
+    result.errMsg = 'This account function only works when going to solo.';
   }
   //
   // descriptions for transaction
   //
   result.note = String(context.data.note);
-  result.desc = `CANCELLING DOWNGRADE TO ${user.nextTier}; NOW IS ${currentTier} AGAIN`;
+  result.desc = `ACCOUNT VERIFIED AND AUTOMATICALLY UPGRADED TO FREE ${result.newTier} TIER FROM ${currentTier}`;
   //
   // done
   //
