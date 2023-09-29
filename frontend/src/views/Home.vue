@@ -121,7 +121,7 @@
                   <div>
                     <v-checkbox
                       v-model="generatePublicLink"
-                      :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
+                      :disabled="!user.constraint.canDisableAutomaticGenerationOfPublicLink"
                       label="Generate public link automatically"
                       density="compact"
                       hide-details>
@@ -262,6 +262,7 @@ export default {
               vm.error = 'UpgradeTier';
             }
           });
+          // eslint-disable-next-line no-unused-vars
           this.on('error', (file, message) => {
             if (!file.accepted) {
               vm.error = 'InvalidFileType';
@@ -273,12 +274,12 @@ export default {
     generatePublicLink: {
       get() {
         if (this.generatePublicLinkValue == null) {
-          return this.user.tierConfig.defaultValueOfPublicLinkGeneration;
+          return this.user.constraint.defaultValueOfPublicLinkGeneration;
         }
         return this.generatePublicLinkValue;
       },
       set(val) {
-        if (this.user.tierConfig.canDisableAutomaticGenerationOfPublicLink){
+        if (this.user.constraint.canDisableAutomaticGenerationOfPublicLink){
           this.generatePublicLinkValue = val;
         }
       }

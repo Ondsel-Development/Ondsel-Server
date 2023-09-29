@@ -1,7 +1,21 @@
 // services/auth-management/notifier.js
 
-import {authManagementActionTypeMap, resetPwdGENERIC} from "./auth-management.schema.js";
+import {authManagementActionTypeMap, resetPwdGENERIC, verifySignupGENERIC} from "./auth-management.schema.js";
 import {BadRequest} from "@feathersjs/errors";
+import {
+  SubscriptionTermType,
+  SubscriptionTermTypeMap,
+  SubscriptionType,
+  SubscriptionTypeMap
+} from "../users/users.subdocs.schema.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {CurrencyType} from "../../currencies.js";
+import {
+  accountEventOptionsSchema,
+  AccountEventType,
+  AccountEventTypeMap
+} from "../account-event/account-event.schema.js";
+import {ObjectId} from "mongodb";
 
 export const notifier = (app) => {
   function getLink(type, hash, uid, baseUrl) {
@@ -26,7 +40,7 @@ export const notifier = (app) => {
   //
   // see https://feathers-a-m.netlify.app/service-calls.html for more detail
 
-  return (type, user, notifierOptions = {}) => {
+  return async (type, user, notifierOptions = {}) => {
     const baseUrl = app.get('frontendUrl');
     switch (type) {
       case authManagementActionTypeMap.resendVerifySignup:
@@ -36,6 +50,7 @@ export const notifier = (app) => {
           text: "To verify, click here: " + getLink('verify-email', user.verifyToken, user._id, baseUrl),
         });
       case authManagementActionTypeMap.verifySignupLong:
+      case verifySignupGENERIC:
         return sendEmail({
           to: user.email,
           subject: "E-Mail address for Ondsel Account verified",

@@ -6,8 +6,14 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
-  agreementsAcceptedSchema, subscriptionDetailSchema, SubscriptionStateMap,
-  SubscriptionType, SubscriptionTypeMap, userAccountingSchema
+  agreementsAcceptedSchema,
+  subscriptionConstraintMap,
+  SubscriptionConstraintsType,
+  subscriptionDetailSchema,
+  SubscriptionStateMap,
+  SubscriptionType,
+  SubscriptionTypeMap,
+  userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {usernameHasher} from "../../usernameFunctions.js";
@@ -39,6 +45,7 @@ export const userSchema = Type.Object(
     username: Type.String(),
     createdAt: Type.Number(),
     tier: SubscriptionType,
+    constraint: Type.Optional(SubscriptionConstraintsType),
 
     // unlisted fields (not private, but also not published on purpose)
     usernameHash: Type.Number(),
@@ -64,6 +71,9 @@ export const userResolver = resolve({
       anniversary: null,
     }
   }),
+  constraint: virtual(async (message, _context) => {
+    return subscriptionConstraintMap[message.tier || SubscriptionTypeMap.unverified]
+  }),
 })
 
 export const userExternalResolver = resolve({
@@ -84,6 +94,7 @@ export const userDataResolver = resolve({
     return usernameHasher(message.username)
   },
   tier: async () => SubscriptionTypeMap.unverified,
+  constraint: async () => null, // DO NOT STORE constraints; they are to be derived
   nextTier: async () => null,
   userAccounting: async (_value, _message, _context) => {
     return {
@@ -114,6 +125,7 @@ export const userPatchValidator = getValidator(userPatchSchema, dataValidator)
 export const userPatchResolver = resolve({
   // password: passwordHash({ strategy: 'local' }),  // this was doing a double-hash with feathers-authentication-management
   updatedAt: async () => Date.now(),
+  constraint: async () => null, // DO NOT STORE constraints; they are to be derived
 })
 
 // Schema for allowed query properties
@@ -135,6 +147,7 @@ export const userQueryProperties = Type.Pick(userSchema, [
   'resetShortToken',
   'resetExpires',
   'resetAttempts',
+  'constraint',
 ])
 export const userQuerySchema = Type.Intersect(
   [

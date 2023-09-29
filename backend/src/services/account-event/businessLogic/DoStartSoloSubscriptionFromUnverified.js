@@ -33,7 +33,8 @@ export async function DoStartSoloSubscriptionFromUnverified(context, user) {
   // 3. update the user doc
   //
   await context.app.service('users').patch(user._id, {
-    nextTier: detail.newTier,
+    tier: detail.newTier,
+    nextTier: null,
     userAccounting: user.userAccounting,
   });
   //

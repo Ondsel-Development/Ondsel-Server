@@ -66,6 +66,7 @@
                 color="default"
                 size="small"
                 @click.stop="openResetPasswordDialog()"
+                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
               >
                 Reset Password
               </v-btn>
@@ -97,7 +98,13 @@
           </v-list-item-subtitle>
           <template #append>
             <v-list-item-action>
-              <v-btn variant="outlined" color="default" size="small" @click="gotoChooseTier()">
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click="gotoChooseTier()"
+                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+              >
                 Choose New Tier
               </v-btn>
             </v-list-item-action>

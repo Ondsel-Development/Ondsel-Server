@@ -33,9 +33,9 @@
                 </v-btn>
                 <v-btn v-else
                        variant="text"
-                       @click="goHome"
+                       @click="goAccountSettings"
                 >
-                  Choose Solo
+                  Continue
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -70,7 +70,7 @@
                 </v-btn>
                 <v-btn v-else
                        variant="text"
-                       @click="goHome"
+                       @click="goAccountSettings"
                 >
                   Continue
                 </v-btn>
@@ -140,7 +140,7 @@ export default {
     ...mapState('auth', ['user']),
   },
   async created() {
-    if (this.user.tier === SubscriptionTypeMap.unverified) {
+    if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
       await this.goAccountSettings();
     }
   },

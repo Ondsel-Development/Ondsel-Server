@@ -13,41 +13,6 @@ export const SubscriptionTermTypeMap = {
   yearly: 'Yearly',
 }
 
-export const tierConstraintConfig = {
-  Unverified: {
-    maxModelObjects: 0,
-    maxShareLinksPerModel: 0,
-    canUpdateModelParameters: false,
-    canExportModel: false,
-    defaultValueOfPublicLinkGeneration: false,
-    canDisableAutomaticGenerationOfPublicLink: false,
-  },
-  Solo: {
-    maxModelObjects: 50,
-    maxShareLinksPerModel: 2,
-    canUpdateModelParameters: false,
-    canExportModel: false,
-    defaultValueOfPublicLinkGeneration: true,
-    canDisableAutomaticGenerationOfPublicLink: false,
-  },
-  Peer: {
-    maxModelObjects: 250,
-    maxShareLinksPerModel: 10,
-    canUpdateModelParameters: true,
-    canExportModel: true,
-    defaultValueOfPublicLinkGeneration: false,
-    canDisableAutomaticGenerationOfPublicLink: true,
-  },
-  Enterprise: {
-    maxModelObjects: 1000,
-    maxShareLinksPerModel: 100,
-    canUpdateModelParameters: true,
-    canExportModel: true,
-    defaultValueOfPublicLinkGeneration: false,
-    canDisableAutomaticGenerationOfPublicLink: true,
-  },
-};
-
 class User extends BaseModel {
   constructor(data, options) {
     super(data, options)
@@ -87,15 +52,11 @@ class User extends BaseModel {
     if (this.tier === SubscriptionTypeMap.enterprise) {
       return `no limit (${count} active)`;
     }
-    let max = this.tierConfig.maxModelObjects;
+    let max = this.constraint.maxModelObjects;
     if (count > max) {
       return `exceeded! Maximum is ${max}, currently at ${count}.`;
     }
     return `${max - count}`;
-  }
-
-  get tierConfig() {
-    return _.get(tierConstraintConfig, this.tier, SubscriptionTypeMap.unverified);
   }
 }
 const servicePath = 'users'

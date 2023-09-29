@@ -69,6 +69,66 @@ export const subscriptionDetailSchema= Type.Object(
   }
 );
 
+
+export const SubscriptionConstraintsType = Type.Object(
+  {
+    maxModelObjects: Type.Number(),
+    maxShareLinksPerModel: Type.Number(),
+    canUpload: Type.Boolean(),
+    canDownloadOriginal: Type.Boolean(),
+    canUpdateModelParameters: Type.Boolean(),
+    canExportModel: Type.Boolean(),
+    defaultValueOfPublicLinkGeneration: Type.Boolean(),
+    canDisableAutomaticGenerationOfPublicLink: Type.Boolean(),
+  }
+)
+
+
+export const subscriptionConstraintMap = {
+  'Unverified': {
+    maxModelObjects: 0,
+    maxShareLinksPerModel: 0,
+    canUpload: false,
+    canDownloadOriginal: false,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+  },
+  'Solo': {
+    maxModelObjects: 50,
+    maxShareLinksPerModel: 2,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+  },
+  'Peer': {
+    maxModelObjects: 250,
+    maxShareLinksPerModel: 10,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: true,
+  },
+  'Enterprise': {
+    maxModelObjects: 1000,
+    maxShareLinksPerModel: 100,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: true,
+  },
+};
+
+
+
 export const LedgerMap = {
   cash: 'Cash',
   processorExpense: 'ProcessorExpense',

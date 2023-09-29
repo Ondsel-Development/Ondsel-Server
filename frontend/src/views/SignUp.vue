@@ -49,18 +49,19 @@
 
         <v-text-field
           v-model="usernameTemp"
-          label="Type Here to Enter Username"
+          label="Text For The Username"
           :rules="[rules.isRequired, rules.nameConforms]"
           :disabled="isCreatePending"
         ></v-text-field>
 
-        <v-text-field
-          v-model="user.username"
-          readonly
-          label="Public Username (Derived)"
-          :rules="[rules.isRequired, rules.nameConforms]"
-          :disabled="isCreatePending"
-        ></v-text-field>
+        <v-card class="mx-auto" color="primary" variant="outlined">
+          <v-card-text v-if="user.username">
+            <b>{{user.username}}</b>
+          </v-card-text>
+          <v-card-text v-else>
+            <i>no username yet</i>
+          </v-card-text>
+        </v-card>
 
         <v-checkbox
           v-model="agreeToTOS"
@@ -116,7 +117,7 @@
         </v-checkbox>
 
         <v-card-actions>
-          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Submit</v-btn>
+          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2" color="primary">Submit</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>

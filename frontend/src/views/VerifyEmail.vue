@@ -46,6 +46,8 @@ import {mapActions} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {resetStores} from "@/store";
 import {AuthManagement} from "@/store/services/auth-management";
+import AccountEvent, {AccountEventTypeMap} from "@/store/services/accountEvent";
+import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
 
 export default {
   name: 'VerifyEmail',
@@ -68,6 +70,7 @@ export default {
       showSnacker: false,
       token: this.$route.params.token,
       uid: this.$route.params.uid,
+      accountEvent: new models.api.AccountEvent(),
     }
   },
   computed: {
@@ -87,7 +90,7 @@ export default {
     }).catch((e) => {
       const msg = e.message;
       if (msg === 'User not found.') {
-        this.isVerified = true;
+        this.isVerified = false;
         this.loginMsg = 'Go ahead and login.'
         this.verificationMsg = 'Verification code either already used or expired.'
       } else {
@@ -102,10 +105,37 @@ export default {
         this.authenticate({
           strategy: 'local',
           ...this.user,
-        }).then(() => {
-          this.$router.push({ name: 'ChooseTier' })
-        }).catch(() => {
+        }).then((result) => {
+          const updatedUser = result.user;
+          if (updatedUser.tier === SubscriptionTypeMap.unverified && updatedUser.isVerified === true) {
+            this.accountEvent.event = AccountEventTypeMap.startSoloSubscriptionFromUnverified;
+            this.accountEvent.userId = updatedUser._id,
+            this.accountEvent.createdAt = Date.now(),
+            this.accountEvent.note = "used feathersjs-auth-mgmt trigger on new account verification",
+            this.accountEvent.detail = {
+              subscription: SubscriptionTypeMap.solo,
+              term: SubscriptionTermTypeMap.monthly,
+              currentSubscription: SubscriptionTypeMap.unverified,
+            };
+            this.accountEvent.create()
+              .then(() => {
+                this.$router
+                  .push({ name: 'ChooseTier' })
+                  .then(() => { this.$router.go() }) // this forces a refresh on destination
+              })
+              .catch((e) => {
+                this.showSnacker = true;
+                console.log(`err: ${e.message}`);
+                this.snackerMsg = `Internal error upgrading to initial Solo tier`;
+              })
+          } else {
+            this.$router
+              .push({ name: 'AccountSettings' })
+              .then(() => { this.$router.go() }) // this forces a refresh on destination
+          }
+        }).catch((e) => {
           this.showSnacker = true;
+          console.log(`err: ${e.message}`);
           this.snackerMsg = "Invalid login"
         })
       }

@@ -10,6 +10,7 @@ export const authManagementActionTypeMap = {
   resetPwdLong: 'resetPwdLong',
 }
 export const resetPwdGENERIC = 'resetPwd';
+export const verifySignupGENERIC = 'verifySignup';
 
 export const authManagementActionType = StringEnum(
   [

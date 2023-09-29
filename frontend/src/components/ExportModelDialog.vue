@@ -15,25 +15,7 @@
         bottom
       ></v-progress-linear>
       <v-card-text>
-        <v-alert
-          variant="outlined"
-          type="warning"
-          border="top"
-          class="text-left"
-          v-if="user && !user.tierConfig.canExportModel"
-        >
-          Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
-        </v-alert>
-        <v-alert
-          variant="outlined"
-          type="warning"
-          border="top"
-          class="text-left"
-          v-if="!isAuthenticated"
-        >
-          <span v-if="sharedModel && sharedModel.canDownloadDefaultModel">You can only export default model without Login.</span>
-          <span v-else>Need to Login to export model.</span>
-        </v-alert>
+        <p>{{reason}}</p>
         <br>
           <v-select
             ref="inputFormatField"
@@ -50,7 +32,7 @@
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.tierConfig.canExportModel && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.constraint.canExportModel && !(format === 'Default model'))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>
@@ -80,7 +62,47 @@ export default {
     valid: false,
     format: null,
     isExportInProgress: false,
+    formats: [],
+    reason: '',
   }),
+  async created() {
+    if (this.model) {
+      this.formats = ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ'];
+      this.reason = "This is your model, so all formats are available for download.";
+      return;
+    }
+    if (this.sharedModel) {
+      this.formats = [];
+      if (this.sharedModel.canDownloadDefaultModel && (this.user && this.user.constraint.canDownloadOriginal)) {
+        this.formats.push('Default model');
+      }
+      if (this.sharedModel.canExportFCStd && (this.user && this.user.constraint.canExportModel)) {
+        this.formats.push('FCStd');
+      }
+      if (this.sharedModel.canExportSTEP && (this.user && this.user.constraint.canExportModel)) {
+        this.formats.push('STEP');
+      }
+      if (this.sharedModel.canExportSTL && (this.user && this.user.constraint.canExportModel)) {
+        this.formats.push('STL');
+      }
+      if (this.sharedModel.canExportOBJ && (this.user && this.user.constraint.canExportModel)) {
+        this.formats.push('OBJ');
+      }
+    }
+    if (this.user && this.user.constraint.canExportModel) {
+      this.reason = 'Your account level allows exports of all types.';
+    } else if (this.user && this.user.constraint.canDownloadOriginal && this.formats.length===1 && this.formats[0] == 'Default model') {
+      this.reason = `Your account level (${this.user.tier}) can download the original default file.`;
+    } else if (this.user && this.user.constraint.canDownloadOriginal && this.user.constraint.canExportModel && this.formats.length > 0) {
+      this.reason = `The owner of this model has given permission to download multiple formats. (${this.formats})`;
+    } else if (this.user && this.user.constraint.canDownloadOriginal) {
+      this.reason = 'Your account can normally download the original, but the owner of this model has this blocked.';
+    } else if (this.user && !this.user.constraint.canDownloadOriginal) {
+      this.reason = 'Your account needs to be verified before downloads work.';
+    } else {
+      this.reason = 'You must be logged in to download.';
+    }
+  },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
     ...mapGetters('auth', ['isAuthenticated']),
@@ -90,31 +112,6 @@ export default {
       }
       return vm.model;
     },
-    formats: (vm) => {
-      if (vm.model) {
-        return ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ']
-      }
-      const outputFormats = []
-      if (vm.sharedModel) {
-        if (vm.sharedModel.canDownloadDefaultModel) {
-          outputFormats.push('Default model');
-        }
-        if (vm.sharedModel.canExportFCStd) {
-          outputFormats.push('FCStd');
-        }
-        if (vm.sharedModel.canExportSTEP) {
-          outputFormats.push('STEP');
-        }
-        if (vm.sharedModel.canExportSTL) {
-          outputFormats.push('STL');
-        }
-        if (vm.sharedModel.canExportOBJ) {
-          outputFormats.push('OBJ');
-        }
-      }
-      return outputFormats;
-    },
-
   },
   methods: {
     async runExportCmd() {

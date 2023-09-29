@@ -8,6 +8,7 @@
           min-width="200"
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
+          :disabled="!loggedInUser || !loggedInUser.user.constraint.canUpload"
         >
           Upload New Model
         </v-btn>
@@ -169,6 +170,7 @@ export default {
   },
   computed: {
     ...mapState('shared-models', ['isFindPending']),
+    ...mapState('auth', { loggedInUser: 'payload' }),
     sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
   },
   methods: {

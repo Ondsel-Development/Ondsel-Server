@@ -75,6 +75,7 @@ export const AccountEventTypeMap = {
   subscriptionRefund: 'subscription-refund',
   subscriptionTierDowngrade: 'subscription-tier-downgrade',
   cancelTierDowngrade: 'cancel-tier-downgrade',
+  startSoloSubscriptionFromUnverified: 'start-solo-subscription-from-unverified',
 }
 
 export default servicePlugin
