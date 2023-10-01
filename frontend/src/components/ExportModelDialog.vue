@@ -43,8 +43,9 @@
 import axios from 'axios';
 import { models } from '@feathersjs/vuex';
 import { mapState, mapGetters } from 'vuex';
+import {SubscriptionTypeMap} from "@/store/services/users";
 
-const { Model, SharedModel } = models.api;
+const { SharedModel } = models.api;
 
 const uploadEndpoint = `${import.meta.env.VITE_APP_API_URL}upload`
 
@@ -66,41 +67,98 @@ export default {
     reason: '',
   }),
   async created() {
-    if (this.model) {
-      this.formats = ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ'];
-      this.reason = "This is your model, so all formats are available for download.";
+    if (this.user && (this.mainModel.userId === this.user._id)) {
+      let exportsForOthers = [];
+      if (this.sharedModel) {
+        let modelPerms = this.sharedModel;
+        if (modelPerms.canExportFCStd) {
+          exportsForOthers.push('FCStd');
+        }
+        if (modelPerms.canExportSTEP) {
+          exportsForOthers.push('STEP');
+        }
+        if (modelPerms.canExportSTL) {
+          exportsForOthers.push('STL');
+        }
+        if (modelPerms.canExportOBJ) {
+          exportsForOthers.push('OBJ');
+        }
+      }
+      if (this.user.constraint.canExportModel) {
+        this.formats = ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ'];
+        this.reason = "This is your model, so you can download the original or export other formats. ";
+      } else {
+        this.formats = ['Default model'];
+        this.reason = "This is your model. ";
+      }
+      if (this.sharedModel) {
+        if (this.sharedModel.canDownloadDefaultModel) {
+          this.reason += `${SubscriptionTypeMap.solo} users will be able to download the original. `;
+        }
+        if (exportsForOthers.length > 0) {
+          this.reason += `${SubscriptionTypeMap.peer} and ${SubscriptionTypeMap.enterprise} users will also be able to export [${exportsForOthers}]`;
+        }
+      }
       return;
     }
-    if (this.sharedModel) {
-      this.formats = [];
-      if (this.sharedModel.canDownloadDefaultModel && (this.user && this.user.constraint.canDownloadOriginal)) {
+    this.formats = [];
+    let shareAllowsDownload = false;
+    let shareAllowsOriginalDownload = false;
+    let shareAllows_ONLY_OriginalDownload = false;
+    const userAllowedOriginalDownload = this.user && this.user.constraint.canDownloadOriginal;
+    const userAllowedExportDownload = this.user && this.user.constraint.canExportModel;
+    if (this.sharedModel.canDownloadDefaultModel) {
+      shareAllowsDownload = true;
+      shareAllowsOriginalDownload = true;
+      shareAllows_ONLY_OriginalDownload = true; // might be set back to false below
+      if (userAllowedOriginalDownload) {
         this.formats.push('Default model');
       }
-      if (this.sharedModel.canExportFCStd && (this.user && this.user.constraint.canExportModel)) {
+    }
+    if (this.sharedModel.canExportFCStd) {
+      shareAllowsDownload = true;
+      shareAllows_ONLY_OriginalDownload = false;
+      if (userAllowedExportDownload)
+      {
         this.formats.push('FCStd');
       }
-      if (this.sharedModel.canExportSTEP && (this.user && this.user.constraint.canExportModel)) {
+    }
+    if (this.sharedModel.canExportSTEP) {
+      shareAllowsDownload = true;
+      shareAllows_ONLY_OriginalDownload = false;
+      if (userAllowedExportDownload) {
         this.formats.push('STEP');
       }
-      if (this.sharedModel.canExportSTL && (this.user && this.user.constraint.canExportModel)) {
+    }
+    if (this.sharedModel.canExportSTL) {
+      shareAllowsDownload = true;
+      shareAllows_ONLY_OriginalDownload = false;
+      if  (userAllowedExportDownload) {
         this.formats.push('STL');
       }
-      if (this.sharedModel.canExportOBJ && (this.user && this.user.constraint.canExportModel)) {
+    }
+    if (this.sharedModel.canExportOBJ) {
+      shareAllowsDownload = true;
+      if (userAllowedExportDownload) {
         this.formats.push('OBJ');
       }
     }
-    if (this.user && this.user.constraint.canExportModel) {
-      this.reason = 'Your account level allows exports of all types.';
-    } else if (this.user && this.user.constraint.canDownloadOriginal && this.formats.length===1 && this.formats[0] == 'Default model') {
-      this.reason = `Your account level (${this.user.tier}) can download the original default file.`;
-    } else if (this.user && this.user.constraint.canDownloadOriginal && this.user.constraint.canExportModel && this.formats.length > 0) {
-      this.reason = `The owner of this model has given permission to download multiple formats. (${this.formats})`;
-    } else if (this.user && this.user.constraint.canDownloadOriginal) {
-      this.reason = 'Your account can normally download the original, but the owner of this model has this blocked.';
-    } else if (this.user && !this.user.constraint.canDownloadOriginal) {
-      this.reason = 'Your account needs to be verified before downloads work.';
+    if (shareAllowsDownload) {
+      if (shareAllows_ONLY_OriginalDownload) {
+        if (userAllowedOriginalDownload) {
+          this.reason = `Your account level (${this.user.tier}) allows downloading the original model file.`;
+        } else {
+          this.reason = 'Your cannot download the original model file. Please login with a verified account.';
+        }
+      } else {
+        if (userAllowedOriginalDownload && !userAllowedExportDownload && shareAllowsOriginalDownload) {
+          this.reason = 'Your account allows the download of the original model file (but nothing more).';
+        } else {
+          this.reason = `The owner of this model has given permission to download the following formats. [${this.formats}]`;
+        }
+      }
     } else {
-      this.reason = 'You must be logged in to download.';
+      this.reason = `The owner of this model does not allow downloads with this shared link.`
     }
   },
   computed: {
