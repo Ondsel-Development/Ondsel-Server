@@ -4,6 +4,7 @@ import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
 import {agreementCategoryType} from "../agreements/agreements.schema.js";
+import _ from "lodash";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
@@ -127,7 +128,9 @@ export const subscriptionConstraintMap = {
   },
 };
 
-
+export function getConstraint(user){
+  return _.get(subscriptionConstraintMap, user.tier, SubscriptionTypeMap.unverified);
+}
 
 export const LedgerMap = {
   cash: 'Cash',

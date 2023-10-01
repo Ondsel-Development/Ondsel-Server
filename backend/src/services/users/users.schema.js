@@ -6,7 +6,7 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
-  agreementsAcceptedSchema,
+  agreementsAcceptedSchema, getConstraint,
   subscriptionConstraintMap,
   SubscriptionConstraintsType,
   subscriptionDetailSchema,
@@ -72,7 +72,7 @@ export const userResolver = resolve({
     }
   }),
   constraint: virtual(async (message, _context) => {
-    return subscriptionConstraintMap[message.tier || SubscriptionTypeMap.unverified]
+    return getConstraint(message);
   }),
 })
 
