@@ -67,7 +67,7 @@ export default {
     reason: '',
   }),
   async created() {
-    if (this.user && (this.mainModel.userId === this.user._id)) {
+    if (this.user && (this.mainModel.userId === this.loggedInUser._id)) {
       let exportsForOthers = [];
       if (this.sharedModel) {
         let modelPerms = this.sharedModel;
@@ -164,6 +164,7 @@ export default {
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
     ...mapGetters('auth', ['isAuthenticated']),
+    ...mapState('auth', { loggedInUser: 'payload' }),
     mainModel: (vm) => {
       if (vm.sharedModel) {
         return vm.sharedModelSubModel;
