@@ -109,6 +109,7 @@ const routes = [
     path: '/change-password/:token/:uid',
     component: ChangePassword,
     name: 'ChangePassword',
+    meta: { tryAuth: true },
   },
   {
     path: '/login',

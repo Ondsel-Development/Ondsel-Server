@@ -8,7 +8,7 @@
         <p>{{loginMsg}}</p>
         <p>token: {{ token }}</p>
         <v-container width="400" style="top: -100px" flat>
-          <v-form v-if="showForm" v-model="isValid" @submit.prevent="loginAndChangePassword">
+          <v-form v-if="showForm" v-model="isValid" @submit.prevent="changePasswordFormHandler">
             <v-text-field
               v-model="user.email"
               label="Email"
@@ -21,6 +21,7 @@
               label="Password"
               type="password"
               :rules="[rules.isRequired]"
+              v-if="!loggedInUser"
             ></v-text-field>
 
             <v-text-field
@@ -55,7 +56,7 @@
 
 <script>
 
-import {mapActions} from "vuex";
+import {mapActions, mapState} from "vuex";
 import {resetStores} from "@/store";
 import {AuthManagement} from "@/store/services/auth-management";
 
@@ -87,6 +88,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
   mounted() {
     resetStores();
@@ -95,38 +97,47 @@ export default {
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
+    async nowChangePassword() {
+      this.showSnacker = true;
+      this.snackerMsg = "Logged in. Attempting password change..."
+      AuthManagement.create({
+        action: "resetPwdLong",
+        value: {token: this.token, password: this.newPassword},
+        notifierOptions: {},
+      }).then(() => {
+        this.snackerMsg = "Password change success.";
+        this.verificationMsg = 'Password Changed!';
+        this.showForm = false;
+        this.$router.push({name: 'AccountSettings'});
+      }).catch((e) => {
+        const msg = e.message;
+        if (msg === 'User not found.') {
+          this.verificationMsg = 'This security token has either expired, already used, or replaced by a new one. Please visit the Account Setting page to try again.';
+        } else {
+          this.verificationMsg = 'Unable to reset password.';
+        }
+      });
+    },
     async loginAndChangePassword() {
       if ( this.isValid ) {
         this.authenticate({
           strategy: 'local',
           ...this.user,
-        }).then(() => {
-          this.showSnacker = true;
-          this.snackerMsg = "Logged in. Attempting password change..."
-          AuthManagement.create({
-            action: "resetPwdLong",
-            value: {token: this.token, password: this.newPassword},
-            notifierOptions: {},
-          }).then(() => {
-            this.snackerMsg = "Password change success.";
-            this.verificationMsg = 'Password Changed!';
-            this.showForm = false;
-          }).catch((e) => {
-            const msg = e.message;
-            if (msg === 'User not found.') {
-              this.verificationMsg = 'This security token has either expired, already used, or replaced by a new one. Please visit the Account Setting page to try again.';
-            } else {
-              this.verificationMsg = 'Unable to reset password.';
-            }
-          });
+        }).then(async () => {
+          await this.nowChangePassword();
         }).catch(() => {
           this.showSnacker = true;
           this.snackerMsg = "Invalid login"
         })
       }
     },
-    async login() {
-    }
+    async changePasswordFormHandler() {
+      if (this.loggedInUser) {
+        await this.nowChangePassword();
+      } else {
+        await this.loginAndChangePassword();
+      }
+    },
   }
 }
 </script>
