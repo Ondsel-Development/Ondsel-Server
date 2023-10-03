@@ -15,24 +15,42 @@
         bottom
       ></v-progress-linear>
       <v-card-text>
-        <p>{{reason}}</p>
+        <v-alert
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+          v-if="user && !user.tierConfig.canExportModel"
+        >
+          Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
+        </v-alert>
+        <v-alert
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+          v-if="!isAuthenticated"
+        >
+          <span v-if="sharedModel && sharedModel.canDownloadDefaultModel">You can only export default model without Login.</span>
+          <span v-else>Need to Login to export model.</span>
+        </v-alert>
         <br>
-          <v-select
-            ref="inputFormatField"
-            v-model="format"
-            :items="formats"
-            :disabled="isExportInProgress"
-            required
-            density="comfortable"
-            label="Select file format"
-          ></v-select>
+        <v-select
+          ref="inputFormatField"
+          v-model="format"
+          :items="formats"
+          :disabled="isExportInProgress"
+          required
+          density="comfortable"
+          label="Select file format"
+        ></v-select>
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.constraint.canExportModel && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.tierConfig.canExportModel && !(format === 'Default model'))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>
@@ -43,9 +61,8 @@
 import axios from 'axios';
 import { models } from '@feathersjs/vuex';
 import { mapState, mapGetters } from 'vuex';
-import {SubscriptionTypeMap} from "@/store/services/users";
 
-const { SharedModel } = models.api;
+const { Model, SharedModel } = models.api;
 
 const uploadEndpoint = `${import.meta.env.VITE_APP_API_URL}upload`
 
@@ -63,114 +80,41 @@ export default {
     valid: false,
     format: null,
     isExportInProgress: false,
-    formats: [],
-    reason: '',
   }),
-  async created() {
-    if (this.user && (this.mainModel.userId === this.loggedInUser._id)) {
-      let exportsForOthers = [];
-      if (this.sharedModel) {
-        let modelPerms = this.sharedModel;
-        if (modelPerms.canExportFCStd) {
-          exportsForOthers.push('FCStd');
-        }
-        if (modelPerms.canExportSTEP) {
-          exportsForOthers.push('STEP');
-        }
-        if (modelPerms.canExportSTL) {
-          exportsForOthers.push('STL');
-        }
-        if (modelPerms.canExportOBJ) {
-          exportsForOthers.push('OBJ');
-        }
-      }
-      if (this.user.constraint.canExportModel) {
-        this.formats = ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ'];
-        this.reason = "This is your model, so you can download the original or export other formats. ";
-      } else {
-        this.formats = ['Default model'];
-        this.reason = "This is your model. ";
-      }
-      if (this.sharedModel) {
-        if (this.sharedModel.canDownloadDefaultModel) {
-          this.reason += `${SubscriptionTypeMap.solo} users will be able to download the original. `;
-        }
-        if (exportsForOthers.length > 0) {
-          this.reason += `${SubscriptionTypeMap.peer} and ${SubscriptionTypeMap.enterprise} users will also be able to export [${exportsForOthers}]`;
-        }
-      }
-      return;
-    }
-    this.formats = [];
-    let shareAllowsDownload = false;
-    let shareAllowsOriginalDownload = false;
-    let shareAllows_ONLY_OriginalDownload = false;
-    const userAllowedOriginalDownload = this.user && this.user.constraint.canDownloadOriginal;
-    const userAllowedExportDownload = this.user && this.user.constraint.canExportModel;
-    if (this.sharedModel.canDownloadDefaultModel) {
-      shareAllowsDownload = true;
-      shareAllowsOriginalDownload = true;
-      shareAllows_ONLY_OriginalDownload = true; // might be set back to false below
-      if (userAllowedOriginalDownload) {
-        this.formats.push('Default model');
-      }
-    }
-    if (this.sharedModel.canExportFCStd) {
-      shareAllowsDownload = true;
-      shareAllows_ONLY_OriginalDownload = false;
-      if (userAllowedExportDownload)
-      {
-        this.formats.push('FCStd');
-      }
-    }
-    if (this.sharedModel.canExportSTEP) {
-      shareAllowsDownload = true;
-      shareAllows_ONLY_OriginalDownload = false;
-      if (userAllowedExportDownload) {
-        this.formats.push('STEP');
-      }
-    }
-    if (this.sharedModel.canExportSTL) {
-      shareAllowsDownload = true;
-      shareAllows_ONLY_OriginalDownload = false;
-      if  (userAllowedExportDownload) {
-        this.formats.push('STL');
-      }
-    }
-    if (this.sharedModel.canExportOBJ) {
-      shareAllowsDownload = true;
-      if (userAllowedExportDownload) {
-        this.formats.push('OBJ');
-      }
-    }
-    if (shareAllowsDownload) {
-      if (shareAllows_ONLY_OriginalDownload) {
-        if (userAllowedOriginalDownload) {
-          this.reason = `Your account level (${this.user.tier}) allows downloading the original model file.`;
-        } else {
-          this.reason = 'Your cannot download the original model file. Please login with a verified account.';
-        }
-      } else {
-        if (userAllowedOriginalDownload && !userAllowedExportDownload && shareAllowsOriginalDownload) {
-          this.reason = 'Your account allows the download of the original model file (but nothing more).';
-        } else {
-          this.reason = `The owner of this model has given permission to download the following formats. [${this.formats}]`;
-        }
-      }
-    } else {
-      this.reason = `The owner of this model does not allow downloads with this shared link.`
-    }
-  },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
     ...mapGetters('auth', ['isAuthenticated']),
-    ...mapState('auth', { loggedInUser: 'payload' }),
     mainModel: (vm) => {
       if (vm.sharedModel) {
         return vm.sharedModelSubModel;
       }
       return vm.model;
     },
+    formats: (vm) => {
+      if (vm.model) {
+        return ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ']
+      }
+      const outputFormats = []
+      if (vm.sharedModel) {
+        if (vm.sharedModel.canDownloadDefaultModel) {
+          outputFormats.push('Default model');
+        }
+        if (vm.sharedModel.canExportFCStd) {
+          outputFormats.push('FCStd');
+        }
+        if (vm.sharedModel.canExportSTEP) {
+          outputFormats.push('STEP');
+        }
+        if (vm.sharedModel.canExportSTL) {
+          outputFormats.push('STL');
+        }
+        if (vm.sharedModel.canExportOBJ) {
+          outputFormats.push('OBJ');
+        }
+      }
+      return outputFormats;
+    },
+
   },
   methods: {
     async runExportCmd() {

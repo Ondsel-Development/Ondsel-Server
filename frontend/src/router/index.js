@@ -99,11 +99,13 @@ const routes = [
     path: '/pending-verification',
     component: PendingVerification,
     name: 'PendingVerification',
+    meta: { tryAuth: true },
   },
   {
     path: '/verify-email/:token/:uid',
     component: VerifyEmail,
     name: 'VerifyEmail',
+    meta: { tryAuth: true },
   },
   {
     path: '/change-password/:token/:uid',

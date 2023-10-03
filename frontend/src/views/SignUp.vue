@@ -8,7 +8,7 @@
           indeterminate
         ></v-progress-linear>
       </template>
-      <v-form v-model="isValid" @submit.prevent="signUp">
+      <v-form v-model="isValid" ref="form" @submit.prevent="signUp">
         <v-text-field
           v-model="user.email"
           label="Email"
@@ -49,17 +49,17 @@
 
         <v-text-field
           v-model="usernameTemp"
-          label="Text For The Username"
-          :rules="[rules.isRequired, rules.nameConforms]"
+          label="Username"
+          :rules="[rules.isRequired, rules.nameConforms, rules.extraHint]"
           :disabled="isCreatePending"
         ></v-text-field>
 
         <v-card class="mx-auto" color="primary" variant="outlined">
           <v-card-text v-if="user.username">
-            <b>{{user.username}}</b>
+            <span class="font-weight-bold">{{user.username}}</span>
           </v-card-text>
           <v-card-text v-else>
-            <i>no username yet</i>
+            <span class="font-italic">no username yet</span>
           </v-card-text>
         </v-card>
 
@@ -187,6 +187,7 @@ export default {
         confirmTOS: v => v || 'Terms of Service must be understood',
         confirmPP: v => v || 'Privacy Policy must be understood',
         nameConforms: v => this.conformNameCheck(v),
+        extraHint: v => this.extraHintCheckForUsername(v),
       },
       agreeToTOS: false,
       agreeToPrivacyPolicy: false,
@@ -197,6 +198,8 @@ export default {
       ppDoc: {},
       ppMarkdown: '',
       ppDialog: false,
+      extraHintContent: '',
+      lastBadUsername: '',
     }
   },
   computed: {
@@ -210,26 +213,54 @@ export default {
         this.user.agreeToTOS = undefined; // now that we have confirmed these, we should remove from 'user create`
         this.user.agreeToPrivacyPolicy = undefined;
         await this.user.create()
-          .then(() => {
+          .then(async () => {
             // post agreement to TOS
             this.acceptAgreement.userId = this.user._id;
             this.acceptAgreement.category = 'terms-of-service';
             this.acceptAgreement.version = this.tosDoc.current.version;
             this.acceptAgreement.newAccount = true;
-            this.acceptAgreement.create();
+            await this.acceptAgreement.create();
+            await this.login();
             this.$router.push({name: 'PendingVerification'})
           })
           .catch((e) => {
+            if (e.message === "Invalid: Username already taken") {
+              this.extraHintContent = "username already taken";
+              this.lastBadUsername = this.usernameTemp;
+              this.$refs.form.validate();
+            }
             this.snackerMsg = e.message;
             this.showSnacker = true;
           });
       }
+    },
+    async login() {
+      await this.authenticate({
+        strategy: 'local',
+        ...this.user,
+      }).then(() => {
+      }).catch(() => {
+        // do nothing if it fails; it is quite possible that the new user has not fully distributed into
+        // MongoDB given the short turn around. This becomes more likely as we get bigger.
+      })
     },
     conformNameCheck(rawName) {
       const conformedName = conformName(rawName);
       this.user.username = conformedName;
       if (conformedName.length < 4) {
         return "requires at least 4 characters in derived username";
+      }
+      return true;
+    },
+    extraHintCheckForUsername(newRawName) {
+      if (this.lastBadUsername === '') {
+        return true;
+      }
+      if (this.extraHintContent === '') {
+        return true;
+      }
+      if (this.lastBadUsername === newRawName) {
+        return this.extraHintContent;
       }
       return true;
     }
