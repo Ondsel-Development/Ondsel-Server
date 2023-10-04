@@ -7,7 +7,6 @@ import {
   SubscriptionStateType,
   SubscriptionTermType,
   SubscriptionType,
-  userSummarySchema
 } from "../users/users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {CurrencyType} from "../../currencies.js";
