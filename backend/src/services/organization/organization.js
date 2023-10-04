@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import { softDelete } from 'feathers-hooks-common';
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -20,6 +20,8 @@ import {
 } from './organization.schema.js'
 import { OrganizationService, getOptions } from './organization.class.js'
 import { organizationPath, organizationMethods } from './organization.shared.js'
+import { addAdminsToOrganization } from './commands/addAdminsToOrganization.js';
+import { removeAdminsFromOrganization } from './commands/removeAdminsFromOrganization.js';
 
 export * from './organization.class.js'
 export * from './organization.schema.js'
@@ -71,6 +73,15 @@ export const organization = (app) => {
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
+        preventChanges(false, 'admins'),
+        iff(
+          context => context.data.shouldAddAdminsToOrganization,
+          addAdminsToOrganization
+        ),
+        iff(
+          context => context.data.shouldRemoveAdminsFromOrganization,
+          removeAdminsFromOrganization
+        ),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)
       ],

@@ -4,6 +4,7 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import { isProvider } from 'feathers-hooks-common';
 
 // Main data model schema
 export const organizationSchema = Type.Object(
@@ -60,6 +61,8 @@ export const organizationQuerySchema = Type.Intersect(
 export const organizationQueryValidator = getValidator(organizationQuerySchema, queryValidator)
 export const organizationQueryResolver = resolve({
   createdBy: async (value, user, context) => {
-    return context.params.user._id;
+    if(isProvider('external')(context)) {
+      return context.params.user._id;
+    }
   }
 })
