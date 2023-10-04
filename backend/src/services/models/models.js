@@ -406,7 +406,7 @@ const feedSystemGeneratedSharedModel = async (context) => {
 
     }
     if (context.data.isThumbnailGenerated && !systemGeneratedSharedModel.model.isThumbnailGenerated) {
-      uploadService.copy(`${context.id.toString()}_thumbnail.PNG`, `${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
+      uploadService.copy(`public/${context.id.toString()}_thumbnail.PNG`, `public/${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
       patchData['isThumbnailGenerated'] = true;
     }
     if (Object.keys(patchData).length) {

@@ -109,7 +109,7 @@ export const user = (app) => {
 const createSampleModels = async (context) => {
   const sampleModelFileName = 'ondsel.FCStd';
   const sampleModelObj = 'ondsel_generated.OBJ';
-  const sampleModelThumbnail = 'ondsel_thumbnail.PNG';
+  const sampleModelThumbnail = 'public/ondsel_thumbnail.PNG';
   const attributes = {
     "Fillet1": {
       "type": "length",

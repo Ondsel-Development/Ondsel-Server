@@ -68,7 +68,7 @@ export const modelResolver = resolve({
   thumbnailUrl: virtual(async(message, context) => {
     const { app } = context;
     if (message.isThumbnailGenerated) {
-      const r = await app.service('upload').get(`${message._id.toString()}_thumbnail.PNG`);
+      const r = await app.service('upload').get(`public/${message._id.toString()}_thumbnail.PNG`);
       return r.url
     }
     return '';
