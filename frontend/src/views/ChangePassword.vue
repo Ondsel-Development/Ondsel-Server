@@ -1,48 +1,42 @@
 <template>
   <v-container fluid class="fill-height">
-    <v-card class="mx-auto" width="896" flat>
+    <v-card class="mx-auto position-relative" width="400" style="top: -100px" flat>
       <v-card-title>Change Password</v-card-title>
+      <v-progress-linear
+        :active="pendingPasswordChange"
+        indeterminate
+        absolute
+        bottom
+      ></v-progress-linear>
       <v-card-text>
-        <h1>{{verificationMsg}}</h1>
-        <h1>&nbsp;</h1>
-        <p>{{loginMsg}}</p>
-        <p>token: {{ token }}</p>
-        <v-container width="400" style="top: -100px" flat>
-          <v-form v-if="showForm" v-model="isValid" @submit.prevent="changePasswordFormHandler">
-            <v-text-field
-              v-model="user.email"
-              label="Email"
-              :rules="[rules.isRequired, rules.isEmail]"
-              autofocus
-            ></v-text-field>
+        <p class="text-button">{{verificationMsg}}</p>
+        <p class="text-high-emphasis">{{loginMsg}}</p>
+        <v-form v-model="isValid" @submit.prevent="changePasswordFormHandler">
+          <v-text-field
+            v-model="user.email"
+            label="Email"
+            :rules="[rules.isRequired, rules.isEmail]"
+            autofocus
+          ></v-text-field>
 
-            <v-text-field
-              v-model="user.password"
-              label="Password"
-              type="password"
-              :rules="[rules.isRequired]"
-              v-if="!loggedInUser"
-            ></v-text-field>
+          <v-text-field
+            v-model="newPassword"
+            label="New Password"
+            type="password"
+            :rules="[rules.isRequired, rules.minCharacter]"
+          ></v-text-field>
 
-            <v-text-field
-              v-model="newPassword"
-              label="New Password"
-              type="password"
-              :rules="[rules.isRequired, rules.minCharacter]"
-            ></v-text-field>
+          <v-text-field
+            v-model="confirmPassword"
+            label="Confirm New Password"
+            type="password"
+            :rules="[rules.isRequired, rules.confirmPassword]"
+          ></v-text-field>
 
-            <v-text-field
-              v-model="confirmPassword"
-              label="Confirm New Password"
-              type="password"
-              :rules="[rules.isRequired, rules.confirmPassword]"
-            ></v-text-field>
-
-            <v-card-actions>
-              <v-btn type="submit" block class="mt-2" :disabled="!isValid">Submit</v-btn>
-            </v-card-actions>
-          </v-form>
-        </v-container>
+          <v-card-actions>
+            <v-btn type="submit" block class="mt-2" :disabled="!isValid || pendingPasswordChange">Submit</v-btn>
+          </v-card-actions>
+        </v-form>
         <v-snackbar
           :timeout="2000"
           v-model="showSnacker"
@@ -84,7 +78,7 @@ export default {
       uid: this.$route.params.uid,
       newPassword: '',
       confirmPassword: '',
-      showForm: true,
+      pendingPasswordChange: false,
     }
   },
   computed: {
@@ -97,46 +91,47 @@ export default {
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
+    ...mapActions('auth', {authLogout: 'logout'}),
+    logout() {
+      console.log("FORCED LOGOUT");
+      this.authLogout().then(() => this.$router.go() ); // logout and refresh page
+    },
     async nowChangePassword() {
-      this.showSnacker = true;
-      this.snackerMsg = "Logged in. Attempting password change..."
+      this.pendingPasswordChange = true;
       AuthManagement.create({
         action: "resetPwdLong",
         value: {token: this.token, password: this.newPassword},
         notifierOptions: {},
       }).then(() => {
-        this.snackerMsg = "Password change success.";
         this.verificationMsg = 'Password Changed!';
-        this.showForm = false;
-        this.$router.push({name: 'AccountSettings'});
+        if (this.loggedInUser) {
+          this.$router.push({name: 'Models'});
+        } else {
+          this.$router.push({name: 'Login'});
+        }
       }).catch((e) => {
         const msg = e.message;
+        console.log(msg);
         if (msg === 'User not found.') {
           this.verificationMsg = 'This security token has either expired, already used, or replaced by a new one. Please visit the Account Setting page to try again.';
+        } else if(msg === 'Password reset token has expired.') {
+          this.verificationMsg = 'This security token has expired. Please visit the "Account Settings" page to send a new Password Reset email.';
         } else {
           this.verificationMsg = 'Unable to reset password.';
         }
       });
-    },
-    async loginAndChangePassword() {
-      if ( this.isValid ) {
-        this.authenticate({
-          strategy: 'local',
-          ...this.user,
-        }).then(async () => {
-          await this.nowChangePassword();
-        }).catch(() => {
-          this.showSnacker = true;
-          this.snackerMsg = "Invalid login"
-        })
-      }
+      this.pendingPasswordChange = false;
     },
     async changePasswordFormHandler() {
       if (this.loggedInUser) {
-        await this.nowChangePassword();
-      } else {
-        await this.loginAndChangePassword();
+        if (this.loggedInUser.user.email !== this.user.email) {
+          // someone is trying to be hacker and resetting a different account with this token
+          // (the backend system should ALSO catch such border conditions.)
+          this.logout(); // forces a reset
+          return;
+        }
       }
+      await this.nowChangePassword();
     },
   }
 }

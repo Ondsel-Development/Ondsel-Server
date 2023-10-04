@@ -141,13 +141,10 @@ export default {
   },
   async created() {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
-      await this.goAccountSettings();
+      await this.goHome();
     }
   },
   methods: {
-    async goAccountSettings() {
-      this.$router.push({name: 'AccountSettings'})
-    },
     async goHome() {
       this.$router.push({name: 'Models'})
     },

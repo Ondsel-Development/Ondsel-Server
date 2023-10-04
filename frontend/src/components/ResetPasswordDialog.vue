@@ -8,12 +8,18 @@
       <template v-slot:title>
         <div class="text-center">Reset Password</div>
       </template>
+      <v-progress-linear
+        :active="pendingPasswordEmail"
+        indeterminate
+        absolute
+        bottom
+      ></v-progress-linear>
       <v-card-text>
         Clicking on "Send Email" below will cause Ondsel to send an email to {{user.email}}. The email will contain
         a link (containing a security code) allowing you to reset your password.
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="sendResetEmail()" color="primary">Send Email</v-btn>
+        <v-btn @click="sendResetEmail()" color="primary" :disabled="pendingPasswordEmail">Send Email</v-btn>
         <v-btn @click="dialog = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
@@ -29,12 +35,14 @@ export default {
     user: {}
   },
   data: () => ({
+    pendingPasswordEmail: false,
     dialog: false,
   }),
   computed: {
   },
   methods: {
     async sendResetEmail() {
+      this.pendingPasswordEmail = true;
       await AuthManagement.create({
         action: "sendResetPwd",
         value: {email: this.user.email},
@@ -46,6 +54,7 @@ export default {
         console.log(msg);
         console.log(this.user.email);
       });
+      this.pendingPasswordEmail = false;
     }
   },
 }
