@@ -12,7 +12,7 @@
         <v-text-field
           v-model="user.email"
           label="Email"
-          :rules="[rules.isRequired, rules.isEmail]"
+          :rules="[rules.isRequired, rules.isEmail, rules.extraHint]"
           :disabled="isCreatePending"
           autofocus
         ></v-text-field>
@@ -180,14 +180,14 @@ export default {
       isValid: false,
       snackerMsg: '',
       rules: {
-        isEmail: v => /.+@.+/.test(v) || 'Invalid Email address',
+        isEmail: v => /^\S+@\S+\.\S+$/.test(v) || 'Invalid Email address',
         isRequired: v => !!v || 'This field is required',
         minCharacter: v => (v && v.length >= 8) || 'Minimum 8 characters',
         confirmPassword: v => v === this.user.password || 'Password must match',
         confirmTOS: v => v || 'Terms of Service must be understood',
         confirmPP: v => v || 'Privacy Policy must be understood',
         nameConforms: v => this.conformNameCheck(v),
-        extraHint: v => this.extraHintCheckForUsername(v),
+        extraHint: v => this.extraHintCheck(v),
       },
       agreeToTOS: false,
       agreeToPrivacyPolicy: false,
@@ -200,6 +200,7 @@ export default {
       ppDialog: false,
       extraHintContent: '',
       lastBadUsername: '',
+      lastBadEmail: '',
     }
   },
   computed: {
@@ -208,10 +209,11 @@ export default {
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    },
     async signUp() {
       if (this.isValid) {
-        this.user.agreeToTOS = undefined; // now that we have confirmed these, we should remove from 'user create`
-        this.user.agreeToPrivacyPolicy = undefined;
         await this.user.create()
           .then(async () => {
             // post agreement to TOS
@@ -220,15 +222,22 @@ export default {
             this.acceptAgreement.version = this.tosDoc.current.version;
             this.acceptAgreement.newAccount = true;
             await this.acceptAgreement.create();
-            await this.login();
-            this.$router.push({name: 'PendingVerification'})
+            await this.sleep(200);  // wait for mongodb to distribute
+            await this.login(); // now use the new db data
+            this.$router.push({name: 'PendingVerification'}).then(() => { this.$router.go() })
           })
           .catch((e) => {
-            if (e.message === "Invalid: Username already taken") {
-              this.extraHintContent = "username already taken";
+            if (e.message === 'Invalid: Username already taken') {
+              this.extraHintContent = 'username already taken';
               this.lastBadUsername = this.usernameTemp;
               this.$refs.form.validate();
             }
+            if (e.message === 'Invalid: Email already taken') {
+              this.extraHintContent = 'email already taken';
+              this.lastBadEmail = this.user.email;
+              this.$refs.form.validate();
+            }
+            console.log(e.message);
             this.snackerMsg = e.message;
             this.showSnacker = true;
           });
@@ -239,7 +248,8 @@ export default {
         strategy: 'local',
         ...this.user,
       }).then(() => {
-      }).catch(() => {
+      }).catch((e) => {
+        console.log(e.message);
         // do nothing if it fails; it is quite possible that the new user has not fully distributed into
         // MongoDB given the short turn around. This becomes more likely as we get bigger.
       })
@@ -252,14 +262,14 @@ export default {
       }
       return true;
     },
-    extraHintCheckForUsername(newRawName) {
-      if (this.lastBadUsername === '') {
-        return true;
-      }
+    extraHintCheck(newRawString) {
       if (this.extraHintContent === '') {
         return true;
       }
-      if (this.lastBadUsername === newRawName) {
+      if (this.lastBadUsername === newRawString) {
+        return this.extraHintContent;
+      }
+      if (this.lastBadEmail === newRawString) {
         return this.extraHintContent;
       }
       return true;

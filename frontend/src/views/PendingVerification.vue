@@ -16,6 +16,8 @@
 
 <script>
 
+import {mapState} from "vuex";
+
 export default {
   name: 'PendingVerification',
   data() {
@@ -24,6 +26,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
   methods: {
   }
