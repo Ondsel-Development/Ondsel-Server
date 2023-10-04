@@ -6,6 +6,6 @@ export class OrganizationService extends MongoDBService {}
 export const getOptions = (app) => {
   return {
     paginate: app.get('paginate'),
-    Model: app.get('mongodbClient').then((db) => db.collection('organization'))
+    Model: app.get('mongodbClient').then((db) => db.collection('organizations'))
   }
 }

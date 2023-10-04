@@ -1,4 +1,4 @@
-import { organization } from './organization/organization.js'
+import { organization } from './organizations/organizations.js'
 
 import { runnerLogs } from './runner-logs/runner-logs.js'
 

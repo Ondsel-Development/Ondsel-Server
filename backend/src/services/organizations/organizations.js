@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
+import { iff, preventChanges, softDelete } from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -17,14 +17,14 @@ import {
   organizationDataSchema,
   organizationPatchSchema,
   organizationQuerySchema,
-} from './organization.schema.js'
-import { OrganizationService, getOptions } from './organization.class.js'
-import { organizationPath, organizationMethods } from './organization.shared.js'
+} from './organizations.schema.js'
+import { OrganizationService, getOptions } from './organizations.class.js'
+import { organizationPath, organizationMethods } from './organizations.shared.js'
 import { addAdminsToOrganization } from './commands/addAdminsToOrganization.js';
 import { removeAdminsFromOrganization } from './commands/removeAdminsFromOrganization.js';
 
-export * from './organization.class.js'
-export * from './organization.schema.js'
+export * from './organizations.class.js'
+export * from './organizations.schema.js'
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const organization = (app) => {
