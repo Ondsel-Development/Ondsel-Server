@@ -36,7 +36,7 @@
       >Export model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
+  <ModelViewer ref="modelViewer" @model:loaded="modelLoaded"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -352,6 +352,16 @@ export default {
         },
       })
     },
+    modelLoaded() {
+      if (this.isReloadingOBJ) {
+        this.$refs.attributeViewer.$data.dialog = false;
+        this.isReloadingOBJ = false;
+      } else {
+        this.dialog = false;
+      }
+      this.isModelLoaded = true;
+      setTimeout(() => this.uploadThumbnail(), 500);
+    },
   },
   watch: {
     'model.isObjGenerated'(v) {
@@ -361,16 +371,6 @@ export default {
         } else {
           this.$refs.modelViewer.init(this.model.objUrl);
         }
-
-        setTimeout(async () => {
-          if (this.isReloadingOBJ) {
-            this.$refs.attributeViewer.$data.dialog = false;
-            this.isReloadingOBJ = false;
-          } else {
-            this.dialog = false;
-          }
-          this.isModelLoaded = true;
-        }, 3000)
       }
     }
   }
