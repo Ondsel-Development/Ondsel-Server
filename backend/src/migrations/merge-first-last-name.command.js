@@ -37,8 +37,8 @@ export async function mergeFirstLastNameCommand(app) {
         userToChange._id,
         {
           name: newName,
-          firstName: null,
-          lastName: null,
+          firstName: undefined,
+          lastName: undefined,
         }
       );
       ctr ++;
