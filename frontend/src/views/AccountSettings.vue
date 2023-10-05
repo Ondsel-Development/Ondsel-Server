@@ -32,7 +32,7 @@
         <v-list-item>
           <v-list-item-title>Name</v-list-item-title>
           <v-list-item-subtitle>
-            {{ user.firstName }} {{ user.lastName }}
+            {{ user.name }}
           </v-list-item-subtitle>
         </v-list-item>
 
