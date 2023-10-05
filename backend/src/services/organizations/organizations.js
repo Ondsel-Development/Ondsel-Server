@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common';
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -20,7 +20,12 @@ import {
 } from './organizations.schema.js'
 import { OrganizationService, getOptions } from './organizations.class.js'
 import { organizationPath, organizationMethods } from './organizations.shared.js'
-import { isUserOwnerOrAdminOfOrganization, canUserCreateOrganization, assignOrganizationIdToUser } from './helpers.js';
+import {
+  isUserMemberOfOrganization,
+  isUserOwnerOrAdminOfOrganization,
+  canUserCreateOrganization,
+  assignOrganizationIdToUser
+} from './helpers.js';
 import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
 import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
 import { giveAdminAccessToUsersOfOrganization } from './commands/giveAdminAccessToUsersOfOrganization.js';
@@ -70,7 +75,9 @@ export const organization = (app) => {
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
       find: [],
-      get: [],
+      get: [
+        iff(isProvider('external'), isUserMemberOfOrganization)
+      ],
       create: [
         canUserCreateOrganization,
         schemaHooks.validateData(organizationDataValidator),
@@ -78,33 +85,22 @@ export const organization = (app) => {
       ],
       patch: [
         preventChanges(false, 'admins', 'users'),
+        isUserOwnerOrAdminOfOrganization,
         iff(
           context => context.data.shouldAddUsersToOrganization,
-          [
-            isUserOwnerOrAdminOfOrganization,
-            addUsersToOrganization
-          ]
+          addUsersToOrganization
         ),
         iff(
           context => context.data.shouldRemoveUsersFromOrganization,
-          [
-            isUserOwnerOrAdminOfOrganization,
-            removeUsersFromOrganization
-          ]
+          removeUsersFromOrganization
         ),
         iff(
           context => context.data.shouldGiveAdminAccessToUsersOfOrganization,
-          [
-            isUserOwnerOrAdminOfOrganization,
-            giveAdminAccessToUsersOfOrganization,
-          ]
+          giveAdminAccessToUsersOfOrganization,
         ),
         iff(
           context => context.data.shouldRevokeAdminAccessFromUsersOfOrganization,
-          [
-            isUserOwnerOrAdminOfOrganization,
-            revokeAdminAccessFromUsersOfOrganization,
-          ]
+          revokeAdminAccessFromUsersOfOrganization
         ),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)

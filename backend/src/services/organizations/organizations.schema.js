@@ -75,10 +75,4 @@ export const organizationQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const organizationQueryValidator = getValidator(organizationQuerySchema, queryValidator)
-export const organizationQueryResolver = resolve({
-  createdBy: async (value, user, context) => {
-    if(isProvider('external')(context)) {
-      return context.params.user._id;
-    }
-  }
-})
+export const organizationQueryResolver = resolve({})

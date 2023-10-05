@@ -1,5 +1,15 @@
 import { BadRequest } from '@feathersjs/errors';
 
+export const isUserMemberOfOrganization = async context => {
+  const organization = await context.service.get(context.id);
+
+  // Only Owner or Admins of Org allow to add users
+  if (organization.users.some(user => user._id.equals(context.params.user._id.toString()))) {
+    return context;
+  }
+  throw new BadRequest('You are not a member of organization');
+}
+
 export const isUserOwnerOrAdminOfOrganization = async context => {
   const organization = await context.service.get(context.id);
 
