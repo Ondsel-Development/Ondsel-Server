@@ -1,10 +1,18 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
+import _ from 'lodash';
 import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { isProvider } from 'feathers-hooks-common';
+
+const userDataSchema = Type.Intersect(
+  [
+    userSummarySchema,
+    Type.Object({ isAdmin: Type.Boolean() }),
+  ]
+)
 
 // Main data model schema
 export const organizationSchema = Type.Object(
@@ -14,7 +22,7 @@ export const organizationSchema = Type.Object(
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    admins: Type.Array(userSummarySchema),
+    users: Type.Array(userDataSchema),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -37,6 +45,14 @@ export const organizationDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  users: async (_value, _message, context) => {
+    return [
+      {
+        ..._.pick(context.params.user,  ['_id', 'username', 'email', 'firstName', 'lastName']),
+        isAdmin: true,
+      }
+    ]
+  },
 })
 
 // Schema for updating existing entries

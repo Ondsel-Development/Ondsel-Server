@@ -20,8 +20,11 @@ import {
 } from './organizations.schema.js'
 import { OrganizationService, getOptions } from './organizations.class.js'
 import { organizationPath, organizationMethods } from './organizations.shared.js'
-import { addAdminsToOrganization } from './commands/addAdminsToOrganization.js';
-import { removeAdminsFromOrganization } from './commands/removeAdminsFromOrganization.js';
+import { isUserOwnerOrAdminOfOrganization, canUserCreateOrganization, assignOrganizationIdToUser } from './helpers.js';
+import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
+import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
+import { giveAdminAccessToUsersOfOrganization } from './commands/giveAdminAccessToUsersOfOrganization.js';
+import { revokeAdminAccessFromUsersOfOrganization } from './commands/revokeAdminAccessFromUsersOfOrganization.js';
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -69,18 +72,39 @@ export const organization = (app) => {
       find: [],
       get: [],
       create: [
+        canUserCreateOrganization,
         schemaHooks.validateData(organizationDataValidator),
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
-        preventChanges(false, 'admins'),
+        preventChanges(false, 'admins', 'users'),
         iff(
-          context => context.data.shouldAddAdminsToOrganization,
-          addAdminsToOrganization
+          context => context.data.shouldAddUsersToOrganization,
+          [
+            isUserOwnerOrAdminOfOrganization,
+            addUsersToOrganization
+          ]
         ),
         iff(
-          context => context.data.shouldRemoveAdminsFromOrganization,
-          removeAdminsFromOrganization
+          context => context.data.shouldRemoveUsersFromOrganization,
+          [
+            isUserOwnerOrAdminOfOrganization,
+            removeUsersFromOrganization
+          ]
+        ),
+        iff(
+          context => context.data.shouldGiveAdminAccessToUsersOfOrganization,
+          [
+            isUserOwnerOrAdminOfOrganization,
+            giveAdminAccessToUsersOfOrganization,
+          ]
+        ),
+        iff(
+          context => context.data.shouldRevokeAdminAccessFromUsersOfOrganization,
+          [
+            isUserOwnerOrAdminOfOrganization,
+            revokeAdminAccessFromUsersOfOrganization,
+          ]
         ),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)
@@ -88,7 +112,11 @@ export const organization = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [
+      ],
+      create: [
+        assignOrganizationIdToUser,
+      ]
     },
     error: {
       all: []

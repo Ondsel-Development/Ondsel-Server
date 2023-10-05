@@ -21,6 +21,7 @@ export const userSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     email: Type.String({ format: "email"}),
+    organizationId: Type.Union([Type.Null(), ObjectIdSchema()]),
     password: Type.Optional(Type.String()),
     username: Type.String(),
     usernameHash: Type.Number(),
@@ -105,7 +106,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier', 'organizationId'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),
