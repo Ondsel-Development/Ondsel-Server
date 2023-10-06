@@ -6,6 +6,7 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
+import { organizationSummarySchema } from '../organizations/organizations.subdocs.schema.js';
 import {
   agreementsAcceptedSchema, journalElementSchema, journalTransactionSchema, subscriptionDetailSchema,
   SubscriptionStateMap,
@@ -22,6 +23,7 @@ export const userSchema = Type.Object(
     _id: ObjectIdSchema(),
     email: Type.String({ format: "email"}),
     organizationId: Type.Union([Type.Null(), ObjectIdSchema()]),
+    organizations: Type.Array(organizationSummarySchema),
     password: Type.Optional(Type.String()),
     username: Type.String(),
     usernameHash: Type.Number(),
@@ -106,7 +108,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier', 'organizationId'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),

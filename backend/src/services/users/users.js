@@ -61,7 +61,7 @@ export const user = (app) => {
       get: [],
       create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), uniqueUserValidator],
       patch: [
-        iff(isProvider('external'), preventChanges(false, 'tier', 'nextTier', 'subscriptionDetail.state', 'organizationId')),
+        iff(isProvider('external'), preventChanges(false, 'tier', 'nextTier', 'subscriptionDetail.state', 'organizations')),
         schemaHooks.validateData(userPatchValidator),
         schemaHooks.resolveData(userPatchResolver), uniqueUserValidator
       ],

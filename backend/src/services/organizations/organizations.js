@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
+import {disallow, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -74,7 +74,9 @@ export const organization = (app) => {
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
-      find: [],
+      find: [
+        iff(isProvider('external'), disallow())
+      ],
       get: [
         iff(isProvider('external'), isUserMemberOfOrganization)
       ],
