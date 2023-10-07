@@ -45,6 +45,7 @@ export const notifier = (app) => {
     switch (type) {
       case authManagementActionTypeMap.resendVerifySignup:
         return sendEmail({
+          from: 'contact@ondsel.com',
           to: user.email,
           subject: "Please confirm this e-mail address for your Ondsel account",
           text: "To verify, click here: " + getLink('verify-email', user.verifyToken, user._id, baseUrl),
@@ -52,12 +53,14 @@ export const notifier = (app) => {
       case authManagementActionTypeMap.verifySignupLong:
       case verifySignupGENERIC:
         return sendEmail({
+          from: 'contact@ondsel.com',
           to: user.email,
           subject: "E-Mail address for Ondsel Account verified",
           text: `Verification of ${user.email} complete. Thanks for working with us!`,
         });
       case authManagementActionTypeMap.sendResetPwd:
         return sendEmail({
+          from: 'contact@ondsel.com',
           to: user.email,
           subject: "Reset password for your Ondsel account.",
           text: `To reset your ${user.username} password, click here: `
@@ -66,6 +69,7 @@ export const notifier = (app) => {
       case authManagementActionTypeMap.resetPwdLong:
       case resetPwdGENERIC:
         return sendEmail({
+          from: 'contact@ondsel.com',
           to: user.email,
           subject: "Notification: Ondsel password has been change",
           text: `Your password for ${user.username} has been successfully changed.!`,
