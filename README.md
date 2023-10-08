@@ -24,6 +24,18 @@ $ npm ci
 $ npm run dev
 ```
 
+To run from Docker, recompile with:
+
+```bash
+sudo docker build -t frontend .
+```
+
+and run (or re-run) with:
+
+```bash
+sudo docker run --env-file .env -p 80:80 --rm --name frontend frontend:latest
+```
+
 ### Running backend
 
 - Go to the `backend` directory
