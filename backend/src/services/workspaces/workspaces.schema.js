@@ -1,24 +1,48 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
 import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
-import { ObjectIdSchema } from '@feathersjs/typebox'
+import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
+import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import { groupSummary } from '../groups/groups.subdocs.schema.js';
+
+const groupsOrUsers = Type.Object(
+  {
+    type: StringEnum(['User', 'Group']),
+    permission: StringEnum(['read', 'write']),
+    groupOrUser: Type.Union([userSummarySchema, groupSummary])
+  }
+)
 
 // Main data model schema
 export const workspaceSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    text: Type.String()
+    name: Type.String(),
+    description: Type.String(),
+    createdBy: ObjectIdSchema(),
+    createdAt: Type.Number(),
+    updatedAt: Type.Number(),
+    organizationId: ObjectIdSchema(),
+    // rootDirectory: <some>, TODO add this field later
+    groupsOrUsers: Type.Array(groupsOrUsers),
   },
   { $id: 'Workspace', additionalProperties: false }
 )
 export const workspaceValidator = getValidator(workspaceSchema, dataValidator)
 export const workspaceResolver = resolve({})
 
-export const workspaceExternalResolver = resolve({})
+export const workspaceExternalResolver = resolve({
+  createdBy: async (_value, _message, context) => {
+    // Associate the record with the id of the authenticated user
+    return context.params.user._id
+  },
+  createdAt: async () => Date.now(),
+  updatedAt: async () => Date.now(),
+})
 
 // Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['text'], {
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'description'], {
   $id: 'WorkspaceData'
 })
 export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
@@ -29,10 +53,12 @@ export const workspacePatchSchema = Type.Partial(workspaceSchema, {
   $id: 'WorkspacePatch'
 })
 export const workspacePatchValidator = getValidator(workspacePatchSchema, dataValidator)
-export const workspacePatchResolver = resolve({})
+export const workspacePatchResolver = resolve({
+  updatedAt: async () => Date.now(),
+})
 
 // Schema for allowed query properties
-export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'text'])
+export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'organizationId'])
 export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),
