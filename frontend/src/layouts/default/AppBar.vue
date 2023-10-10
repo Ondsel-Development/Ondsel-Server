@@ -35,7 +35,7 @@
       <v-card min-width="200">
         <v-list v-if="loggedInUser">
           <v-list-item
-            :title="`${loggedInUser.user.firstName} ${loggedInUser.user.lastName}`"
+            :title="`${loggedInUser.user.name}`"
           >
           </v-list-item>
           <v-list-item>

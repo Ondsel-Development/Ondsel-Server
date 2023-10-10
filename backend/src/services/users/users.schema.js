@@ -24,8 +24,9 @@ export const userSchema = Type.Object(
     password: Type.Optional(Type.String()),
     username: Type.String(),
     usernameHash: Type.Number(),
-    firstName: Type.String(),
-    lastName: Type.String(),
+    name: Type.String(),
+    firstName: Type.Optional(Type.String()), // deprecated
+    lastName: Type.Optional(Type.String()), // deprecated
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     tier: SubscriptionType,
@@ -60,7 +61,7 @@ export const userExternalResolver = resolve({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'firstName', 'lastName'], {
+export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'name'], {
   $id: 'UserData'
 })
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
@@ -105,7 +106,7 @@ export const userPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'firstName', 'lastName', 'tier', 'nextTier'])
+export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'name', 'tier', 'nextTier'])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),
