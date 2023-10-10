@@ -16,6 +16,7 @@ COPY --from=0 /app/dist /app
 COPY ./nginx_binaries/http.lua /usr/local/openresty/lualib/resty/http.lua
 COPY ./nginx_binaries/http_connect.lua /usr/local/openresty/lualib/resty/http_connect.lua
 COPY ./nginx_binaries/http_headers.lua /usr/local/openresty/lualib/resty/http_headers.lua
+COPY ./nginx_binaries/resolver.lua /usr/local/openresty/lualib/resty/resolver.lua
 COPY ./nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 
 EXPOSE 80
