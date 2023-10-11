@@ -6,20 +6,20 @@
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Reset Password</div>
+        <div class="text-center">Verify Email</div>
       </template>
       <v-progress-linear
-        :active="pendingPasswordEmail"
+        :active="pendingVerifyEmail"
         indeterminate
         absolute
         bottom
       ></v-progress-linear>
       <v-card-text>
         Clicking on "Send Email" below will cause Ondsel to send an email to {{user.email}}. The email will contain
-        a link (containing a security code) allowing you to reset your password.
+        a link (containing a security code) allowing you to verify the email account.
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="sendResetEmail()" color="primary" :disabled="pendingPasswordEmail">Send Email</v-btn>
+        <v-btn @click="sendVerifyEmail()" color="primary" :disabled="pendingVerifyEmail">Send Email</v-btn>
         <v-btn @click="dialog = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
@@ -30,21 +30,21 @@
 import {AuthManagement} from "@/store/services/auth-management";
 
 export default {
-  name: 'ResetPasswordDialog',
+  name: 'VerifyEmailDialog',
   props: {
     user: {}
   },
   data: () => ({
-    pendingPasswordEmail: false,
+    pendingVerifyEmail: false,
     dialog: false,
   }),
   computed: {
   },
   methods: {
-    async sendResetEmail() {
-      this.pendingPasswordEmail = true;
+    async sendVerifyEmail() {
+      this.pendingVerifyEmail = true;
       await AuthManagement.create({
-        action: "sendResetPwd",
+        action: "resendVerifySignup",
         value: {email: this.user.email},
         notifierOptions: {},
       }).then(() => {
@@ -53,7 +53,7 @@ export default {
         const msg = e.message;
         console.log(msg);
       });
-      this.pendingPasswordEmail = false;
+      this.pendingVerifyEmail = false;
     }
   },
 }
