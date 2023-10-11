@@ -18,7 +18,7 @@
           min-width="200"
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
-          v-if="loggedInUser.user.constraint.canUpload"
+          v-if="loggedInUser && loggedInUser.user.constraint.canUpload"
         >
           Upload New Model
         </v-btn>
