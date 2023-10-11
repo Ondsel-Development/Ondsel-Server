@@ -33,7 +33,7 @@
                 </v-btn>
                 <v-btn v-else
                        variant="text"
-                       @click="goAccountSettings"
+                       @click="goHome"
                 >
                   Continue
                 </v-btn>
@@ -70,7 +70,7 @@
                 </v-btn>
                 <v-btn v-else
                        variant="text"
-                       @click="goAccountSettings"
+                       @click="goHome"
                 >
                   Continue
                 </v-btn>
