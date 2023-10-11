@@ -18,15 +18,8 @@
         ></v-text-field>
 
         <v-text-field
-          v-model="user.firstName"
-          label="First name"
-          :rules="[rules.isRequired]"
-          :disabled="isCreatePending"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="user.lastName"
-          label="Last name"
+          v-model="user.name"
+          label="Name"
           :rules="[rules.isRequired]"
           :disabled="isCreatePending"
         ></v-text-field>

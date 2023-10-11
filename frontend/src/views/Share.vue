@@ -36,7 +36,7 @@
       >Share model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @load:mesh="uploadThumbnail"/>
+  <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -254,7 +254,17 @@ export default {
     openShareLinkDialog() {
       this.isShareLinkDialogActive = true;
       this.$refs.shareLinkDialog.$data.dialog = true;
-    }
+    },
+    modelLoaded() {
+      if (this.isReloadingOBJ) {
+        this.$refs.attributeViewer.$data.dialog = false;
+        this.isReloadingOBJ = false;
+      } else {
+        this.dialog = false;
+      }
+      this.isModelLoaded = true;
+      setTimeout(() => this.uploadThumbnail(), 500);
+    },
   },
   watch: {
     async 'model.isObjGenerated'(v) {
@@ -264,16 +274,6 @@ export default {
         } else {
           this.$refs.modelViewer.init(this.model.objUrl);
         }
-
-        setTimeout(async () => {
-          if (this.isReloadingOBJ) {
-            this.$refs.attributeViewer.$data.dialog = false;
-            this.isReloadingOBJ = false;
-          } else {
-            this.dialog = false;
-          }
-          this.isModelLoaded = true;
-        }, 3000)
       }
     }
   }

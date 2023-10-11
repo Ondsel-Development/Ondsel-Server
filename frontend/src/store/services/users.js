@@ -27,8 +27,7 @@ class User extends BaseModel {
       email: '',
       password: '',
       username: '',
-      firstName: '',
-      lastName: '',
+      name: '',
     }
   }
 

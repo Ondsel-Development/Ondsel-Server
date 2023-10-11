@@ -1,16 +1,18 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
 import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
-import { ObjectIdSchema } from '@feathersjs/typebox'
+import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
-  agreementsAcceptedSchema, getConstraint,
-  subscriptionConstraintMap,
-  SubscriptionConstraintsType,
+  agreementsAcceptedSchema,
+  journalElementSchema,
+  journalTransactionSchema,
   subscriptionDetailSchema,
   SubscriptionStateMap,
+  SubscriptionStateType,
+  SubscriptionTermType,
   SubscriptionType,
   SubscriptionTypeMap,
   userAccountingSchema
@@ -26,8 +28,9 @@ export const userSchema = Type.Object(
     // private fields
     email: Type.String({ format: "email"}),
     password: Type.Optional(Type.String()),
-    firstName: Type.String(),
-    lastName: Type.String(),
+    name:  Type.String(),
+    firstName: Type.String(), // deprecated
+    lastName: Type.String(), // deprecated
     subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
     // private fields (required by feathers-authentication-management)
@@ -82,7 +85,7 @@ export const userExternalResolver = resolve({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'firstName', 'lastName'], {
+export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'name'], {
   $id: 'UserData'
 })
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
@@ -134,8 +137,7 @@ export const userQueryProperties = Type.Pick(userSchema, [
   'email',
   'username',
   'usernameHash',
-  'firstName',
-  'lastName',
+  'name',
   'tier',
   'nextTier',
   'isVerified',
