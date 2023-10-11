@@ -52,7 +52,6 @@ export default {
       }).catch((e) => {
         const msg = e.message;
         console.log(msg);
-        console.log(this.user.email);
       });
       this.pendingVerifyEmail = false;
     }

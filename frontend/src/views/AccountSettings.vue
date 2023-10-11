@@ -78,7 +78,7 @@
             **********
           </v-list-item-subtitle>
           <template #append>
-            <v-list-item-action>
+            <v-list-item-action v-if="user.isVerified">
               <v-btn
                 variant="outlined"
                 color="default"
