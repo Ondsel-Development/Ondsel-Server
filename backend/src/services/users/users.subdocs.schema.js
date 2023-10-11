@@ -4,23 +4,23 @@ import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
 import {agreementCategoryType} from "../agreements/agreements.schema.js";
+import _ from "lodash";
 
 export const SubscriptionTypeMap = {
+  unverified: 'Unverified',
   solo: 'Solo',
   peer: 'Peer',
   enterprise: 'Enterprise',
-  // legacy entries TODO: remove on release after next
-  free: 'Free',
-  premium: 'Premium',
 }
+
+export const SubscriptionTypeANON = "anonymous"
+
 export const SubscriptionType = StringEnum(
   [
+    SubscriptionTypeMap.unverified,
     SubscriptionTypeMap.solo,
     SubscriptionTypeMap.peer,
     SubscriptionTypeMap.enterprise,
-    // legacy entries TODO: remove on release after next
-    SubscriptionTypeMap.free,
-    SubscriptionTypeMap.premium,
   ]
 )
 
@@ -69,6 +69,68 @@ export const subscriptionDetailSchema= Type.Object(
     anniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
   }
 );
+
+
+export const SubscriptionConstraintsType = Type.Object(
+  {
+    maxModelObjects: Type.Number(),
+    maxShareLinksPerModel: Type.Number(),
+    canUpload: Type.Boolean(),
+    canDownloadOriginal: Type.Boolean(),
+    canUpdateModelParameters: Type.Boolean(),
+    canExportModel: Type.Boolean(),
+    defaultValueOfPublicLinkGeneration: Type.Boolean(),
+    canDisableAutomaticGenerationOfPublicLink: Type.Boolean(),
+  }
+)
+
+
+export const subscriptionConstraintMap = {
+  'Unverified': {
+    maxModelObjects: 0,
+    maxShareLinksPerModel: 0,
+    canUpload: false,
+    canDownloadOriginal: false,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+  },
+  'Solo': {
+    maxModelObjects: 50,
+    maxShareLinksPerModel: 2,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+  },
+  'Peer': {
+    maxModelObjects: 250,
+    maxShareLinksPerModel: 10,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: true,
+  },
+  'Enterprise': {
+    maxModelObjects: 1000,
+    maxShareLinksPerModel: 100,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: true,
+    canExportModel: true,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: true,
+  },
+};
+
+export function getConstraint(user){
+  return _.get(subscriptionConstraintMap, user.tier, SubscriptionTypeMap.unverified);
+}
 
 export const LedgerMap = {
   cash: 'Cash',

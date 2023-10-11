@@ -98,6 +98,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   //
   // subscription tier checks
   //
+  if (user.tier === SubscriptionTypeMap.unverified) {
+    result.errMsg = 'UNVERIFIED USERS CANNOT CHANGE TIERS';
+    return result;
+  }
   if (context.data.detail === undefined ) {
     result.errMsg = "Detail required for this event type.";
     return result;
@@ -113,6 +117,10 @@ function InitialSubscriptionPurchaseVerification(context, user) {
   }
   if (subscription === SubscriptionTypeMap.solo) {
     result.errMsg = "You cannot subscribe to `Solo` in exchange for money."; // this might change later w 0 amt
+    return result;
+  }
+  if (subscription === SubscriptionTypeMap.unverified) {
+    result.errMsg = "You cannot subscribe to `Unverified` in exchange for money.";
     return result;
   }
   if (subscription === user.tier) {

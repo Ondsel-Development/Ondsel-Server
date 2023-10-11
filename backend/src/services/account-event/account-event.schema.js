@@ -20,6 +20,7 @@ export const AccountEventTypeMap = {
   subscriptionRefund: 'subscription-refund',
   subscriptionTierDowngrade: 'subscription-tier-downgrade',
   cancelTierDowngrade: 'cancel-tier-downgrade',
+  startSoloSubscriptionFromUnverified: 'start-solo-subscription-from-unverified',
   // TODO:
   // 'subscription-tier-upgrade'    // the amount needs to be properly pre-computed. make an API for that? to enterprise right now
 }
@@ -32,6 +33,7 @@ export const AccountEventType = StringEnum(
     AccountEventTypeMap.subscriptionRefund,
     AccountEventTypeMap.subscriptionTierDowngrade,
     AccountEventTypeMap.cancelTierDowngrade,
+    AccountEventTypeMap.startSoloSubscriptionFromUnverified,
   ]
 )
 

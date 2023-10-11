@@ -16,6 +16,9 @@ import CancelTierChange from "@/views/CancelTierChange.vue";
 import LegalDoc from "@/views/LegalDoc.vue";
 import AccountSettings from "@/views/AccountSettings.vue";
 import AccountHistory from "@/views/AccountHistory.vue";
+import VerifyEmail from "@/views/VerifyEmail.vue";
+import PendingVerification from "@/views/PendingVerification.vue";
+import ChangePassword from "@/views/ChangePassword.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -91,6 +94,24 @@ const routes = [
     component: CancelTierChange,
     name: 'CancelTierChange',
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/pending-verification',
+    component: PendingVerification,
+    name: 'PendingVerification',
+    meta: { tryAuth: true },
+  },
+  {
+    path: '/verify-email/:token/:uid',
+    component: VerifyEmail,
+    name: 'VerifyEmail',
+    meta: { tryAuth: true },
+  },
+  {
+    path: '/change-password/:token/:uid',
+    component: ChangePassword,
+    name: 'ChangePassword',
+    meta: { tryAuth: true },
   },
   {
     path: '/login',

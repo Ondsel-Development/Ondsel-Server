@@ -5,12 +5,17 @@ import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
-
 import {
-  agreementsAcceptedSchema, journalElementSchema, journalTransactionSchema, subscriptionDetailSchema,
+  agreementsAcceptedSchema, getConstraint,
+  journalElementSchema,
+  journalTransactionSchema,
+  SubscriptionConstraintsType,
+  subscriptionDetailSchema,
   SubscriptionStateMap,
-  SubscriptionStateType, SubscriptionTermType,
-  SubscriptionType, SubscriptionTypeMap,
+  SubscriptionStateType,
+  SubscriptionTermType,
+  SubscriptionType,
+  SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
@@ -19,20 +24,37 @@ import {usernameHasher} from "../../usernameFunctions.js";
 // Main data model schema
 export const userSchema = Type.Object(
   {
-    _id: ObjectIdSchema(),
+    _id: ObjectIdSchema(), // unlisted field
+
+    // private fields
     email: Type.String({ format: "email"}),
     password: Type.Optional(Type.String()),
-    username: Type.String(),
-    usernameHash: Type.Number(),
     name: Type.String(),
-    firstName: Type.Optional(Type.String()), // deprecated
-    lastName: Type.Optional(Type.String()), // deprecated
-    createdAt: Type.Number(),
-    updatedAt: Type.Number(),
-    tier: SubscriptionType,
-    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
+    firstName: Type.String(), // deprecated
+    lastName: Type.String(), // deprecated
     subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
+    // private fields (required by feathers-authentication-management)
+    isVerified: Type.Boolean(),
+    verifyToken: Type.Optional(Type.String()), // for Email
+    verifyShortToken:	Type.Optional(Type.String()), // for SMS
+    verifyExpires: Type.Optional(Type.Number()),
+    verifyChanges: Type.Array(Type.String()),
+    resetToken: Type.Optional(Type.String()), // for Email
+    resetShortToken: Type.Optional(Type.String()), // for SMS
+    resetExpires: Type.Number(),
+    resetAttempts: Type.Number(),
+
+    // public fields
+    username: Type.String(),
+    createdAt: Type.Number(),
+    tier: SubscriptionType,
+    constraint: Type.Optional(SubscriptionConstraintsType),
+
+    // unlisted fields (not private, but also not published on purpose)
+    usernameHash: Type.Number(),
+    updatedAt: Type.Number(),
+    nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
   },
   { $id: 'User', additionalProperties: false }
@@ -40,18 +62,21 @@ export const userSchema = Type.Object(
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
 
-  tier: virtual(async (message, context) => {
-    return message.tier || SubscriptionTypeMap.solo;
+  tier: virtual(async (message, _context) => {
+    return message.tier || SubscriptionTypeMap.unverified;
   }),
-  nextTier: virtual(async (message, context) => {
+  nextTier: virtual(async (message, _context) => {
     return message.nextTier || null
   }),
-  subscriptionDetail: virtual(async (message, context) => {
+  subscriptionDetail: virtual(async (message, _context) => {
     return message.subscriptionDetail || {
       state: SubscriptionStateMap.good,
       term: null,
       anniversary: null,
     }
+  }),
+  constraint: virtual(async (message, _context) => {
+    return getConstraint(message);
   }),
 })
 
@@ -72,7 +97,8 @@ export const userDataResolver = resolve({
   usernameHash: async (_value, message, _context) => {
     return usernameHasher(message.username)
   },
-  tier: async () => SubscriptionTypeMap.solo,
+  tier: async () => SubscriptionTypeMap.unverified,
+  constraint: async () => null, // DO NOT STORE constraints; they are to be derived
   nextTier: async () => null,
   userAccounting: async (_value, _message, _context) => {
     return {
@@ -87,7 +113,7 @@ export const userDataResolver = resolve({
         {
           transactionId: new ObjectId(),
           time: Date.now(),
-          description: "CREATION OF NEW ACCOUNT; TIER SET TO Solo",
+          description: "CREATION OF NEW ACCOUNT; TIER SET TO Unverified",
           entries: [],
         }
       ],
@@ -101,12 +127,31 @@ export const userPatchSchema = Type.Partial(userSchema, {
 })
 export const userPatchValidator = getValidator(userPatchSchema, dataValidator)
 export const userPatchResolver = resolve({
-  password: passwordHash({ strategy: 'local' }),
+  // password: passwordHash({ strategy: 'local' }),  // this was doing a double-hash with feathers-authentication-management
   updatedAt: async () => Date.now(),
+  constraint: async () => null, // DO NOT STORE constraints; they are to be derived
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['_id', 'email', 'username', 'usernameHash', 'name', 'tier', 'nextTier'])
+export const userQueryProperties = Type.Pick(userSchema, [
+  '_id',
+  'email',
+  'username',
+  'usernameHash',
+  'name',
+  'tier',
+  'nextTier',
+  'isVerified',
+  'verifyToken',
+  'verifyShortToken',
+  'verifyExpires',
+  'verifyChanges',
+  'resetToken',
+  'resetShortToken',
+  'resetExpires',
+  'resetAttempts',
+  'constraint',
+])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),
@@ -129,13 +174,30 @@ export const userQueryResolver = resolve({
 
 
 export const uniqueUserValidator = async (context) => {
+  const userService = context.app.service('users');
   if (context.data.email) {
-    const userService = context.app.service('users');
     const result = await userService.find({query: {email: context.data.email }});
     if (result.total > 0) {
-      throw new BadRequest('Invalid Parameters', {
+      throw new BadRequest('Invalid: Email already taken', {
         errors: { email: 'Email already taken' }
       })
     }
+  } else {
+    throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
+      errors: { email: 'Email address required' }
+    })
+  }
+  if (context.data.username) {
+    const hash = usernameHasher(context.data.username);
+    const result = await userService.find({query: {usernameHash: hash }});
+    if (result.total > 0) {
+      throw new BadRequest('Invalid: Username already taken', {
+        errors: { email: 'Username already taken' }
+      })
+    }
+  } else {
+    throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
+      errors: { email: 'Username required' }
+    })
   }
 }

@@ -23,7 +23,7 @@ import {
 } from './shared-models.schema.js'
 import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
-import { getTierConfig } from '../../tier-constraint.js';
+import {getConstraint} from "../users/users.subdocs.schema.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -141,7 +141,7 @@ export const sharedModels = (app) => {
         ),
         preventChanges(false, 'thumbnailUrl'),
         iff(
-          context => !getTierConfig(context.params.user.tier).canDisableAutomaticGenerationOfPublicLink,
+          context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
           preventChanges(true, 'isActive')
         ),
         iff(
