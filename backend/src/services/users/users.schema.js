@@ -6,9 +6,10 @@ import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
-  agreementsAcceptedSchema,
+  agreementsAcceptedSchema, getConstraint,
   journalElementSchema,
   journalTransactionSchema,
+  SubscriptionConstraintsType,
   subscriptionDetailSchema,
   SubscriptionStateMap,
   SubscriptionStateType,
@@ -28,7 +29,7 @@ export const userSchema = Type.Object(
     // private fields
     email: Type.String({ format: "email"}),
     password: Type.Optional(Type.String()),
-    name:  Type.String(),
+    name: Type.String(),
     firstName: Type.String(), // deprecated
     lastName: Type.String(), // deprecated
     subscriptionDetail: subscriptionDetailSchema,
