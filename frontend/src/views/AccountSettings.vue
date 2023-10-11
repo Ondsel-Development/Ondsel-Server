@@ -51,6 +51,24 @@
             <v-chip v-if="user.isVerified">Verified</v-chip>
             <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action v-if="!user.isVerified">
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openVerifyEmailDialog()"
+              >
+                Resend Verification
+              </v-btn>
+              <v-spacer></v-spacer>
+              <VerifyEmailDialog
+                :is-active="isVerifyEmailDialogActive"
+                :user="user"
+                ref="verifyEmailDialog"
+              />
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
         <v-divider />
@@ -136,15 +154,17 @@ import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
 import ShareLinkDialog from "@/components/ShareLinkDialog.vue";
+import VerifyEmailDialog from "@/components/VerifyEmailDialog.vue";
 
 const { Model, User } = models.api;
 
 export default {
   name: 'AccountSettings',
-  components: {ShareLinkDialog, ResetPasswordDialog},
+  components: {VerifyEmailDialog, ShareLinkDialog, ResetPasswordDialog},
   data() {
     return {
       isResetPasswordDialogActive: false,
+      isVerifyEmailDialogActive: false,
       remainingFiles: "processing..."
     }
   },
@@ -175,8 +195,11 @@ export default {
     openResetPasswordDialog() {
       this.isResetPasswordDialogActive = true;
       this.$refs.resetPasswordDialog.$data.dialog = true;
-    }
-
+    },
+    openVerifyEmailDialog() {
+      this.isVerifyEmailDialogActive = true;
+      this.$refs.verifyEmailDialog.$data.dialog = true;
+    },
   }
 }
 </script>
