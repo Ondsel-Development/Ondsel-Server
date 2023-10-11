@@ -65,7 +65,7 @@ export default {
   },
   created() {
     models.api.Agreements.find({
-      query: {category: 'terms-of-service'}
+      query: {category: this.category_name}
     }).then(response => {
       const agreement = (response.data.length > 0) ? response.data[0] : {current:{markdownContent: 'doc missing'}};
       this.specific_doc = agreement.current;

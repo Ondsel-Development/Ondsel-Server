@@ -8,7 +8,6 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
-import { getTierConfig } from '../../tier-constraint.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -25,6 +24,7 @@ import {
 } from './models.schema.js'
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
+import {getConstraint} from "../users/users.subdocs.schema.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -423,7 +423,7 @@ const feedSystemGeneratedSharedModel = async (context) => {
 
 const verifyToCreateSystemGeneratedShareLink = context => {
   const { data } = context;
-  const tierConfig = getTierConfig(context.params.user.tier);
+  const tierConfig = getConstraint(context.params.user);
   let createShareLink = tierConfig.defaultValueOfPublicLinkGeneration;
   if ('createSystemGeneratedShareLink' in data && tierConfig.canDisableAutomaticGenerationOfPublicLink) {
     createShareLink = data.createSystemGeneratedShareLink;

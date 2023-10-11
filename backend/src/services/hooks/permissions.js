@@ -1,5 +1,5 @@
-import {getTierConfig} from '../../tier-constraint.js';
 import {BadRequest} from '@feathersjs/errors';
+import {getConstraint} from "../users/users.subdocs.schema.js";
 
 
 const upgradeTierErrorMsg = 'Please upgrade your tier.'
@@ -14,7 +14,7 @@ export const canUserCreateModel = async context => {
       userId: user._id
     }
   });
-  const tierConfig = getTierConfig(user.tier);
+  const tierConfig = getConstraint(user);
   if (models.total >= tierConfig.maxModelObjects) {
     throw new BadRequest(upgradeTierErrorMsg);
   }
@@ -24,7 +24,7 @@ export const canUserCreateModel = async context => {
 
 export const canUserUpdateModel = async context => {
   if (!context.params.$triggerObjGeneration && context.id) {
-    const tierConfig = getTierConfig(context.params.user.tier);
+    const tierConfig = getConstraint(context.params.user);
     const model = await context.service.get(context.id);
     if (model.objUrl && !tierConfig.canUpdateModelParameters) {
       throw new BadRequest(upgradeTierErrorMsg);
@@ -34,7 +34,7 @@ export const canUserUpdateModel = async context => {
 }
 
 export const canUserExportModel = async context => {
-  const tierConfig = getTierConfig(context.params.user.tier);
+  const tierConfig = getConstraint(context.params.user);
   if (!tierConfig.canExportModel) {
     throw new BadRequest(upgradeTierErrorMsg);
   }
@@ -42,7 +42,7 @@ export const canUserExportModel = async context => {
 }
 
 export const canUserCreateShareLink = async context => {
-  const tierConfig = getTierConfig(context.params.user.tier);
+  const tierConfig = getConstraint(context.params.user);
 
   if (context.data.cloneModelId) {
     const sharedModels = await context.app.service('shared-models').find({

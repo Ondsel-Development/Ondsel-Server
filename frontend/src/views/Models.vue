@@ -18,6 +18,15 @@
           min-width="200"
           prepend-icon="mdi-plus"
           :to="{ name: 'Home'}"
+          v-if="loggedInUser && loggedInUser.user.constraint.canUpload"
+        >
+          Upload New Model
+        </v-btn>
+        <v-btn
+          min-width="200"
+          prepend-icon="mdi-plus"
+          v-else
+          disabled
         >
           Upload New Model
         </v-btn>
@@ -27,7 +36,7 @@
     <br>
     <v-row dense>
       <v-col
-        v-for="(model, i) in myModels.data"
+        v-for="(model) in myModels.data"
         :key="model._id"
         xs="12"
         sm="12"
@@ -159,7 +168,7 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import MangeSharedModels from '@/components/MangeSharedModels';
@@ -168,6 +177,7 @@ import DeleteDialog from '@/components/DeleteDialog.vue';
 const { Model, SharedModel } = models.api;
 
 export default {
+  // eslint-disable-next-line vue/multi-word-component-names
   name: 'Models',
   components: { MangeSharedModels, DeleteDialog },
   data: () => ({
@@ -185,7 +195,7 @@ export default {
   },
   async mounted() {
     await this.fetchModels();
-    window.addEventListener('scroll', e => {
+    window.addEventListener('scroll', () => {
       if(document.documentElement.scrollHeight <= window.scrollY + window.innerHeight + 1) {
         this.fetchModels();
       }
@@ -193,7 +203,8 @@ export default {
   },
   computed: {
     ...mapState('models', ['isFindPending']),
-    myModels: () => Model.findInStore({ query: { isSharedModel: false }})
+    myModels: () => Model.findInStore({ query: { isSharedModel: false }}),
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
   methods: {
     ...mapMutations('models', ['clearAll']),
@@ -215,12 +226,12 @@ export default {
         this.pagination.total = models.total;
       }
     },
-    async showRecent() {
-      this.pagination.skip = 0;
-      this.pagination.total = null;
-      await this.clearAll();
-      await this.fetchModels();
-    },
+    // async showRecent() {
+    //   this.pagination.skip = 0;
+    //   this.pagination.total = null;
+    //   await this.clearAll();
+    //   await this.fetchModels();
+    // },
     dateFormat(number) {
       const date = new Date(number);
       return date.toDateString();

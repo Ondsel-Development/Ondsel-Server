@@ -20,7 +20,7 @@
           type="warning"
           border="top"
           class="text-left"
-          v-if="user && !user.tierConfig.canExportModel"
+          v-if="user && !user.constraint.canExportModel"
         >
           Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
         </v-alert>
@@ -35,22 +35,22 @@
           <span v-else>Need to Login to export model.</span>
         </v-alert>
         <br>
-          <v-select
-            ref="inputFormatField"
-            v-model="format"
-            :items="formats"
-            :disabled="isExportInProgress"
-            required
-            density="comfortable"
-            label="Select file format"
-          ></v-select>
+        <v-select
+          ref="inputFormatField"
+          v-model="format"
+          :items="formats"
+          :disabled="isExportInProgress"
+          required
+          density="comfortable"
+          label="Select file format"
+        ></v-select>
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.tierConfig.canExportModel && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.constraint.canExportModel && !(format === 'Default model'))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>

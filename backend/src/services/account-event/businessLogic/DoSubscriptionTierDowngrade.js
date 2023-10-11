@@ -5,7 +5,7 @@ import {
   makeEmptyJournalTransaction,
   verifyBalanced
 } from "../../../accounting.js";
-import {LedgerMap} from "../../users/users.subdocs.schema.js";
+import {LedgerMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 
 
 export async function DoSubscriptionTierDowngrade(context, user) {
@@ -51,6 +51,10 @@ function SubscriptionTierDowngradeVerification(context, user) {
     desc: "",
     note: "",
     newTier: "",
+  }
+  if (user.tier === SubscriptionTypeMap.unverified) {
+    result.errMsg = 'UNVERIFIED USERS CANNOT CHANGE TIERS. It doesn\'t even make sense here.';
+    return result;
   }
   //
   // new tier

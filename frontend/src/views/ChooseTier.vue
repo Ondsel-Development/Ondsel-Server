@@ -139,6 +139,11 @@ export default {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
   },
+  async created() {
+    if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
+      await this.goHome();
+    }
+  },
   methods: {
     async goHome() {
       this.$router.push({name: 'Models'})
