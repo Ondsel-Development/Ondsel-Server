@@ -12,7 +12,7 @@ export const groupSchema = Type.Object(
     _id: ObjectIdSchema(),
     name: Type.String(),
     organizationId: ObjectIdSchema(),
-    members: Type.Array(userSummarySchema),
+    users: Type.Array(userSummarySchema),
     workspaces: Type.Array(workspaceSchema),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),

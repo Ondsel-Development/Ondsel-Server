@@ -58,6 +58,7 @@ export const modelResolver = resolve({
   //   return context.app.service('users').get(message.userId)
   // })
   objUrl: virtual(async(message, context) => {
+    console.log('\n\nOBJ URL\n\n')
     const { app } = context;
     if (message.isObjGenerated) {
       const r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
@@ -165,7 +166,21 @@ export const modelPatchResolver = resolve({
 // Schema for allowed query properties
 export const modelQueryProperties = Type.Pick(
   modelSchema,
-  ['_id', 'uniqueFileName', 'fileId', 'createdAt', 'updatedAt', 'isSharedModel', 'sharedModelId', 'userId', 'isSharedModelAnonymousType', 'deleted']
+  [
+    '_id',
+    'uniqueFileName',
+    'fileId',
+    'createdAt',
+    'updatedAt',
+    'isSharedModel',
+    'sharedModelId',
+    'userId',
+    'isSharedModelAnonymousType',
+    'deleted',
+    'attributes',
+    'objUrl',
+    'isObjGenerated'
+  ]
 )
 export const modelQuerySchema = Type.Intersect(
   [

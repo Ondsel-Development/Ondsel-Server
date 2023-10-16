@@ -1,5 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -10,10 +11,18 @@ import {
   groupExternalResolver,
   groupDataResolver,
   groupPatchResolver,
-  groupQueryResolver
+  groupQueryResolver,
+  groupSchema,
+  groupDataSchema,
+  groupPatchSchema,
+  groupQuerySchema,
 } from './groups.schema.js'
 import { GroupService, getOptions } from './groups.class.js'
 import { groupPath, groupMethods } from './groups.shared.js'
+import {iff, preventChanges} from "feathers-hooks-common";
+import { addUsersToGroup } from './commands/addUsersToGroup.js';
+import { removeUsersFromGroup } from './commands/removeUsersFromGroup.js';
+import { isUserOwnerOrAdminOfOrganization } from './helpers.js';
 
 export * from './groups.class.js'
 export * from './groups.schema.js'
@@ -25,7 +34,15 @@ export const group = (app) => {
     // A list of all methods this service exposes externally
     methods: groupMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { groupSchema, groupDataSchema, groupPatchSchema , groupQuerySchema, },
+      docs: {
+        description: 'A Group service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(groupPath).hooks({
@@ -41,7 +58,20 @@ export const group = (app) => {
       find: [],
       get: [],
       create: [schemaHooks.validateData(groupDataValidator), schemaHooks.resolveData(groupDataResolver)],
-      patch: [schemaHooks.validateData(groupPatchValidator), schemaHooks.resolveData(groupPatchResolver)],
+      patch: [
+        preventChanges(false, 'users'),
+        isUserOwnerOrAdminOfOrganization,
+        iff(
+          context => context.data.shouldAddUsersToGroup,
+          addUsersToGroup
+        ),
+        iff(
+          context => context.data.shouldRemoveUsersFromGroup,
+          removeUsersFromGroup
+        ),
+        schemaHooks.validateData(groupPatchValidator),
+        schemaHooks.resolveData(groupPatchResolver)
+      ],
       remove: []
     },
     after: {

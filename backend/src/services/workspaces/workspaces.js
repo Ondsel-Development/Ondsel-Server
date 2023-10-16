@@ -1,5 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -10,10 +11,20 @@ import {
   workspaceExternalResolver,
   workspaceDataResolver,
   workspacePatchResolver,
-  workspaceQueryResolver
+  workspaceQueryResolver,
+  workspaceDataSchema,
+  workspacePatchSchema,
+  workspaceQuerySchema,
+  workspaceSchema,
 } from './workspaces.schema.js'
 import { WorkspaceService, getOptions } from './workspaces.class.js'
 import { workspacePath, workspaceMethods } from './workspaces.shared.js'
+// import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
+import {iff, preventChanges} from "feathers-hooks-common";
+// import { addUsersOrGroupsToWorkspace } from './commands/addUsersOrGroupsToWorkspace.js';
+// import { removeGroupsFromWorkspace } from './commands/removeGroupsFromWorkspace.js';
+// import { addUsersToWorkspace } from './commands/addUsersToWorkspace.js';
+// import { removeUsersFromWorkspace } from './commands/removeUsersFromWorkspace.js';
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -25,7 +36,15 @@ export const workspace = (app) => {
     // A list of all methods this service exposes externally
     methods: workspaceMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { workspaceSchema, workspaceDataSchema, workspacePatchSchema , workspaceQuerySchema, },
+      docs: {
+        description: 'A Workspace service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(workspacePath).hooks({
@@ -48,6 +67,24 @@ export const workspace = (app) => {
         schemaHooks.resolveData(workspaceDataResolver)
       ],
       patch: [
+        // preventChanges(false, 'groupsOrUsers'),
+        // isUserOwnerOrAdminOfOrganization,
+        // iff(
+        //   context => context.data.shouldAddGroupsToWorkspace,
+        //   addUsersOrGroupsToWorkspace
+        // ),
+        // iff(
+        //   context => context.data.shouldRemoveGroupsFromWorkspace,
+        //   removeGroupsFromWorkspace
+        // ),
+        // iff(
+        //   context => context.data.shouldAddUsersToWorkspace,
+        //   addUsersToWorkspace
+        // ),
+        // iff(
+        //   context => context.data.shouldRemoveUsersFromWorkspace,
+        //   removeUsersFromWorkspace
+        // ),
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
       ],
