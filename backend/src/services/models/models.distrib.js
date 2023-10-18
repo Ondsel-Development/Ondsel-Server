@@ -17,7 +17,6 @@ export const modelSummarySchema = Type.Object(
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
     objUrl: Type.String(),
-    isSharedModel: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
   }
 )
@@ -28,7 +27,6 @@ export function buildModelSummary(model) {
     summary._id = model._id;
     summary.createdAt = model.createdAt;
     summary.objUrl = model.objUrl;
-    summary.isSharedModel = model.sharedModelId;
     summary.thumbnailUrl = model.thumbnailUrl;
   }
   return summary;
