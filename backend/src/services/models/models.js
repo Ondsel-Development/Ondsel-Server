@@ -137,12 +137,13 @@ export const model = (app) => {
         iff(
           context => context.result.fileId,
           async (context) => {
-            await context.app.service('file').patch(
+            await context.app.service('file').patch( // Later, this could be moved to the "distributeModelSummaries"
               context.result.fileId,
               {
                 modelId: context.result._id.toString(),
                 isSystemGenerated: context.result.isSharedModel,
               });
+            await distributeModelSummaries(context);
           },
         )
       ],

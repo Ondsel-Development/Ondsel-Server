@@ -4,7 +4,7 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 
 import { dataValidator, queryValidator } from '../../validators.js'
-import {getModelSummary, modelSummarySchema} from "../models/models.distrib.js";
+import { modelSummarySchema } from "../models/models.distrib.js";
 
 const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
@@ -63,9 +63,6 @@ export const fileDataResolver = resolve({
       return _value;
     }
     return fileSchema.properties.isSystemGenerated.default
-  },
-  model: async (_value, message, context) => {
-    return getModelSummary(context.app, message.modelId)
   }
 })
 

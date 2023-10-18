@@ -58,10 +58,12 @@ export async function getModelSummary(app, modelId) {
 
 export const distributeModelSummaries = async (context) => {
   const modelId = context.id;
-  const model = await getModelById(context.app, modelId);
-  const modelSummary = buildModelSummary(model);
-  if (modelSummary !== null) {
-    await applyModelSummaryToFile(context.app, model.fileId, modelSummary);
+  if (modelId !== undefined) {
+    const model = await getModelById(context.app, modelId);
+    const modelSummary = buildModelSummary(model);
+    if (modelSummary !== null) {
+      await applyModelSummaryToFile(context.app, model.fileId, modelSummary);
+    }
   }
   return context;
 }
