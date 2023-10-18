@@ -25,6 +25,7 @@ import {
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
+import {distributeModelSummaries} from "./models.distrib.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -150,6 +151,7 @@ export const model = (app) => {
           context => context.data.isObjGenerated || context.data.isThumbnailGenerated,
           feedSystemGeneratedSharedModel,
         ),
+        distributeModelSummaries,
       ]
     },
     error: {
