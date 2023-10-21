@@ -7,7 +7,7 @@ export const addUsersOrGroupsToWorkspace = async context => {
 
   const workspace = await context.service.get(context.id);
   const groupsOrUsersOfWorkspace = workspace.groupsOrUsers || [];
-  for (let groupId of data.groupIds) {
+  for (let groupId of data.groupsOrUsers) {
     if (!groupsOrUsersOfWorkspace.some(groupOrUser => groupOrUser.type === 'Group' && groupOrUser.groupOrUser._id.toString() === groupId)){
       const group = await groupService.get(groupId);
       groupsOrUsersOfWorkspace.push({
