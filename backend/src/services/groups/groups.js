@@ -55,8 +55,8 @@ export const group = (app) => {
     },
     before: {
       all: [schemaHooks.validateQuery(groupQueryValidator), schemaHooks.resolveQuery(groupQueryResolver)],
-      find: [],
-      get: [],
+      find: [userBelongingGroups],
+      get: [userBelongingGroups],
       create: [schemaHooks.validateData(groupDataValidator), schemaHooks.resolveData(groupDataResolver)],
       patch: [
         preventChanges(false, 'users'),
@@ -81,4 +81,13 @@ export const group = (app) => {
       all: []
     }
   })
+}
+
+
+const userBelongingGroups = async context => {
+  const userOrganizations = context.params.user.organizations || []
+  context.params.query.organizationId = {
+    $in: userOrganizations.map(org => org._id)
+  }
+  return context;
 }
