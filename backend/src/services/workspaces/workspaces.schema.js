@@ -32,7 +32,14 @@ export const workspaceSchema = Type.Object(
 export const workspaceValidator = getValidator(workspaceSchema, dataValidator)
 export const workspaceResolver = resolve({})
 
-export const workspaceExternalResolver = resolve({
+export const workspaceExternalResolver = resolve({})
+
+// Schema for creating new entries
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'description', 'organizationId'], {
+  $id: 'WorkspaceData'
+})
+export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
+export const workspaceDataResolver = resolve({
   createdBy: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
@@ -40,13 +47,6 @@ export const workspaceExternalResolver = resolve({
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
 })
-
-// Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'description'], {
-  $id: 'WorkspaceData'
-})
-export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
-export const workspaceDataResolver = resolve({})
 
 // Schema for updating existing entries
 export const workspacePatchSchema = Type.Partial(workspaceSchema, {

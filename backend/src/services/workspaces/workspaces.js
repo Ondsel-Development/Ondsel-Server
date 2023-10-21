@@ -19,12 +19,10 @@ import {
 } from './workspaces.schema.js'
 import { WorkspaceService, getOptions } from './workspaces.class.js'
 import { workspacePath, workspaceMethods } from './workspaces.shared.js'
-// import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
+import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
 import {iff, preventChanges} from "feathers-hooks-common";
-// import { addUsersOrGroupsToWorkspace } from './commands/addUsersOrGroupsToWorkspace.js';
-// import { removeGroupsFromWorkspace } from './commands/removeGroupsFromWorkspace.js';
-// import { addUsersToWorkspace } from './commands/addUsersToWorkspace.js';
-// import { removeUsersFromWorkspace } from './commands/removeUsersFromWorkspace.js';
+import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorkspace.js';
+import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -67,24 +65,16 @@ export const workspace = (app) => {
         schemaHooks.resolveData(workspaceDataResolver)
       ],
       patch: [
-        // preventChanges(false, 'groupsOrUsers'),
-        // isUserOwnerOrAdminOfOrganization,
-        // iff(
-        //   context => context.data.shouldAddGroupsToWorkspace,
-        //   addUsersOrGroupsToWorkspace
-        // ),
-        // iff(
-        //   context => context.data.shouldRemoveGroupsFromWorkspace,
-        //   removeGroupsFromWorkspace
-        // ),
-        // iff(
-        //   context => context.data.shouldAddUsersToWorkspace,
-        //   addUsersToWorkspace
-        // ),
-        // iff(
-        //   context => context.data.shouldRemoveUsersFromWorkspace,
-        //   removeUsersFromWorkspace
-        // ),
+        preventChanges(false, 'groupsOrUsers'),
+        isUserOwnerOrAdminOfOrganization,
+        iff(
+          context => context.data.shouldAddGroupsOrUsersToWorkspace,
+          addGroupsOrUsersToWorkspace
+        ),
+        iff(
+          context => context.data.shouldRemoveGroupsOrUsersFromWorkspace,
+          removeGroupsOrUsersFromWorkspace
+        ),
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
       ],

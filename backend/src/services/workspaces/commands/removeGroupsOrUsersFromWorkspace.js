@@ -1,16 +1,14 @@
 import _ from 'lodash';
 
-export const removeGroupsFromWorkspace = async (context) => {
+export const removeGroupsOrUsersFromWorkspace = async (context) => {
   const { data } = context;
-  const userService = context.app.service('users');
 
-  const group = await context.service.get(context.id);
-  let groupUsers = group.users || [];
-  for (let userId of data.userIds) {
-    if(groupUsers.some(user => user._id.toString() === userId)) {
-      groupUsers = groupUsers.filter(user => user._id.toString() !== userId);
-    }
+  const workspace = await context.service.get(context.id);
+  let groupsOrUsersOfWorkspace = workspace.groupsOrUsers || [];
+  for (let groupOrUserId of data.groupsOrUsersIds) {
+    groupsOrUsersOfWorkspace = groupsOrUsersOfWorkspace.filter(groupOrUserData => groupOrUserData.groupOrUser._id.toString() !== groupOrUserId)
   }
-  data.users = groupUsers;
-  context.data = _.omit(data, ['shouldRemoveUsersFromGroup', 'userIds']);
+  data.groupsOrUsers = groupsOrUsersOfWorkspace;
+  context.data = _.omit(data, ['shouldRemoveGroupsOrUsersFromWorkspace', 'groupsOrUsersIds']);
+  return context;
 }
