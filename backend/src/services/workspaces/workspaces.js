@@ -95,9 +95,11 @@ export const workspace = (app) => {
 
 
 const isUserBelongsToWorkspace = async context => {
-  const userOrganizations = context.params.user.organizations || []
-  context.params.query.organizationId = {
-    $in: userOrganizations.map(org => org._id)
+  if (context.params.user) {
+    const userOrganizations = context.params.user.organizations || []
+    context.params.query.organizationId = {
+      $in: userOrganizations.map(org => org._id)
+    }
   }
   return context;
 }
