@@ -58,7 +58,6 @@ export const modelResolver = resolve({
   //   return context.app.service('users').get(message.userId)
   // })
   objUrl: virtual(async(message, context) => {
-    console.log('\n\nOBJ URL\n\n')
     const { app } = context;
     if (message.isObjGenerated) {
       const r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
