@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export const removeUsersFromGroup = async (context) => {
+export const removeUsersFromGroup = async context => {
   const { data } = context;
   const userService = context.app.service('users');
 

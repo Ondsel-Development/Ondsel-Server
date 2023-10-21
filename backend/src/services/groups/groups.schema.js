@@ -4,7 +4,7 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
-import { workspaceSchema } from '../workspaces/workspaces.schema.js';
+import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 
 // Main data model schema
 export const groupSchema = Type.Object(
@@ -13,7 +13,7 @@ export const groupSchema = Type.Object(
     name: Type.String(),
     organizationId: ObjectIdSchema(),
     users: Type.Array(userSummarySchema),
-    workspaces: Type.Array(workspaceSchema),
+    workspaces: Type.Array(workspaceSummary),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
