@@ -58,8 +58,12 @@ export const workspace = (app) => {
         schemaHooks.validateQuery(workspaceQueryValidator),
         schemaHooks.resolveQuery(workspaceQueryResolver)
       ],
-      find: [],
-      get: [],
+      find: [
+        isUserBelongsToWorkspace,
+      ],
+      get: [
+        isUserBelongsToWorkspace,
+      ],
       create: [
         schemaHooks.validateData(workspaceDataValidator),
         schemaHooks.resolveData(workspaceDataResolver)
@@ -87,4 +91,13 @@ export const workspace = (app) => {
       all: []
     }
   })
+}
+
+
+const isUserBelongsToWorkspace = async context => {
+  const userOrganizations = context.params.user.organizations || []
+  context.params.query.organizationId = {
+    $in: userOrganizations.map(org => org._id)
+  }
+  return context;
 }
