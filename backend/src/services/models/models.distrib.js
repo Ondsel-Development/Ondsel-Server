@@ -16,7 +16,6 @@ export const modelSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
-    objUrl: Type.String(),
     thumbnailUrl: Type.String(),
   }
 )
@@ -26,7 +25,6 @@ export function buildModelSummary(model) {
   if (model) {
     summary._id = model._id;
     summary.createdAt = model.createdAt;
-    summary.objUrl = model.objUrl;
     summary.thumbnailUrl = model.thumbnailUrl;
   }
   return summary;
