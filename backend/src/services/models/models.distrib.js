@@ -16,7 +16,9 @@ export const modelSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
-    thumbnailUrl: Type.String(),
+    isObjGenerated: Type.Optional(Type.Boolean({default: false})),
+    isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
+    thumbnailUrlCache: Type.String(),
   }
 )
 
@@ -25,7 +27,9 @@ export function buildModelSummary(model) {
   if (model) {
     summary._id = model._id;
     summary.createdAt = model.createdAt;
-    summary.thumbnailUrl = model.thumbnailUrl;
+    summary.isObjGenerated = model.isObjGenerated;
+    summary.isThumbnailGenerated = model.isThumbnailGenerated;
+    summary.thumbnailUrlCache = model.thumbnailUrl; // when it finally generates, the model will compute it
   }
   return summary;
 }
