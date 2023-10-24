@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {iff, isProvider, preventChanges} from 'feathers-hooks-common'
+import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   userDataValidator,
@@ -15,12 +15,13 @@ import {
   userSchema,
   userDataSchema,
   userQuerySchema,
-  uniqueUserValidator
+  uniqueUserValidator, uniqueUserPatchValidator
 } from './users.schema.js'
 import { UserService, getOptions } from './users.class.js'
 import { userPath, userMethods } from './users.shared.js'
 import {addVerification, removeVerification} from "feathers-authentication-management";
 import {notifier} from "../auth-management/notifier.js";
+import { isEndUser } from "../../hooks/is-user.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -68,8 +69,12 @@ export const user = (app) => {
         addVerification("auth-management"),
       ],
       patch: [
+        preventChanges(
+          false,
+          'isTripe',
+        ),
         iff(
-          isProvider('external'),
+          isEndUser,
           preventChanges(
             false,
             'tier',
@@ -85,7 +90,7 @@ export const user = (app) => {
             "verifyToken",
           ),
           schemaHooks.validateData(userPatchValidator),
-          uniqueUserValidator,
+          uniqueUserPatchValidator,
         ),
         schemaHooks.resolveData(userPatchResolver),
       ],

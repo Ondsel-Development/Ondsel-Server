@@ -7,19 +7,16 @@ import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
   agreementsAcceptedSchema, getConstraint,
-  journalElementSchema,
-  journalTransactionSchema,
   SubscriptionConstraintsType,
   subscriptionDetailSchema,
   SubscriptionStateMap,
-  SubscriptionStateType,
-  SubscriptionTermType,
   SubscriptionType,
   SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {usernameHasher} from "../../usernameFunctions.js";
+import {isAdminUser} from "../../hooks/is-user.js";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -34,6 +31,7 @@ export const userSchema = Type.Object(
     lastName: Type.String(), // deprecated
     subscriptionDetail: subscriptionDetailSchema,
     userAccounting: userAccountingSchema,
+    isTripe: Type.Optional(Type.Boolean()),
     // private fields (required by feathers-authentication-management)
     isVerified: Type.Boolean(),
     verifyToken: Type.Optional(Type.String()), // for Email
@@ -61,7 +59,6 @@ export const userSchema = Type.Object(
 )
 export const userValidator = getValidator(userSchema, dataValidator)
 export const userResolver = resolve({
-
   tier: virtual(async (message, _context) => {
     return message.tier || SubscriptionTypeMap.unverified;
   }),
@@ -94,6 +91,7 @@ export const userDataResolver = resolve({
   password: passwordHash({ strategy: 'local' }),
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  isTripe: async () => null,
   usernameHash: async (_value, message, _context) => {
     return usernameHasher(message.username)
   },
@@ -162,12 +160,13 @@ export const userQuerySchema = Type.Intersect(
 )
 export const userQueryValidator = getValidator(userQuerySchema, queryValidator)
 export const userQueryResolver = resolve({
-  // If there is a user (e.g. with authentication), they are only allowed to see their own data
+  // If there is a user (e.g. with authentication) but not admin, they are only allowed to see their own data
   _id: async (value, user, context) => {
     if (context.params.user) {
-      return context.params.user._id
+      if (!isAdminUser(context.params.user)) {
+        return context.params.user._id
+      }
     }
-
     return value
   }
 })
@@ -199,5 +198,28 @@ export const uniqueUserValidator = async (context) => {
     throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
       errors: { email: 'Username required' }
     })
+  }
+}
+export const uniqueUserPatchValidator = async (context) => {
+  const userService = context.app.service('users');
+  if (context.data.email) {
+    const result = await userService.find({query: {email: context.data.email}});
+    if (result.total > 0) {
+      throw new BadRequest('Invalid: Email already taken', {
+        errors: {email: 'Email already taken'}
+      })
+    }
+  }
+  if (context.data.username) {
+    const hash = usernameHasher(context.data.username);
+    const result = await userService.find({query: {usernameHash: hash }});
+    if (result.total > 0) {
+      throw new BadRequest('Invalid: Username already taken', {
+        errors: { email: 'Username already taken' }
+      })
+    }
+  }
+  if (context.data.isTripe) {
+    throw new BadRequest('Invalid: tripetitude not settable via API');
   }
 }
