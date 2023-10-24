@@ -2,6 +2,7 @@
 import { authenticate } from '@feathersjs/authentication'
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
+import { iff, preventChanges } from "feathers-hooks-common";
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -48,6 +49,7 @@ export const directory = (app) => {
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
+        preventChanges(false, 'parentDirectory', 'workspace', 'files'),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
