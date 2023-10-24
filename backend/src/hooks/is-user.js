@@ -1,15 +1,14 @@
-import {isProvider} from "feathers-hooks-common";
 
 export const isEndUser = async (context) => {
-  let externalFlag = await isProvider('external');
-  if (externalFlag) {
-    if (isAdminUser(context.params?.user)) {
-      return false;
-    } else {
-      return true;
-    }
+  const provider = context.params.provider; // Internal calls are "undefined"
+  if (provider === undefined) {
+    return false;
   }
-  return false;
+  if (isAdminUser(context.params?.user)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 export const isAdminUser = (user) => {
@@ -20,3 +19,4 @@ export const isAdminUser = (user) => {
   }
   return false;
 }
+
