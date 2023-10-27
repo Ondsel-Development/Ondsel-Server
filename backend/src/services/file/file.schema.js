@@ -30,7 +30,7 @@ export const fileSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema),
-    directory: directorySummary,
+    directory: Type.Union([Type.Null(), directorySummary]),
     workspace: workspaceSummary,
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),

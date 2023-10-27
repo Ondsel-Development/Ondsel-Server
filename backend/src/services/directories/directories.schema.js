@@ -28,7 +28,7 @@ export const directoryResolver = resolve({})
 export const directoryExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const directoryDataSchema = Type.Pick(directorySchema, ['name', 'parentDirectory', 'workspace', 'files'], {
+export const directoryDataSchema = Type.Pick(directorySchema, ['name', 'parentDirectory', 'workspace'], {
   $id: 'DirectoryData'
 })
 export const directoryDataValidator = getValidator(directoryDataSchema, dataValidator)
@@ -37,6 +37,7 @@ export const directoryDataResolver = resolve({
     // Associate the record with the id of the authenticated user
     return context.params.user._id
   },
+  files: async () => [],
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
 })

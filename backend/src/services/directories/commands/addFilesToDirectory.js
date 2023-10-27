@@ -9,7 +9,7 @@ export const addFilesToDirectory = async context => {
   for (let fileId of data.fileIds) {
     if (!files.some(file => file._id.toString() === fileId)){
       const file = await fileService.get(fileId);
-      if (!directory.workspace._id.equals(file.workspace._id)){
+      if (!directory.workspace._id.equals(file.workspace?._id)){
         throw new BadRequest(
           `File (id: ${file._id.toString()} must belong to same directory workspace.`
         )
@@ -17,7 +17,7 @@ export const addFilesToDirectory = async context => {
       files.push(
         _.pick(file, ['_id', 'custFileName', 'modelId'])
       )
-      await fileService.patch(fileService._id, { directory: _.pick(directory, ['_id', 'name'])})
+      await fileService.patch(file._id, { directory: _.pick(directory, ['_id', 'name'])})
     }
   }
   data.files = files;

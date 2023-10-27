@@ -8,7 +8,7 @@ export const removeFilesFromDirectory = async context => {
   for (let fileId of data.fileIds) {
     if (files.some(file => file._id.toString() === fileId)){
       files = files.filter(file => file._id.toString() !== fileId);
-      await fileService.patch(fileId, { directory: {} });
+      await fileService.patch(fileId, { directory: null });
     }
   }
   data.files = files;
