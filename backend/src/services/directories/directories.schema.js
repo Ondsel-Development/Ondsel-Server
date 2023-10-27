@@ -12,7 +12,7 @@ export const directorySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     name: Type.String(),
-    parentDirectory: Type.Optional(directorySummary),
+    parentDirectory: Type.Optional(Type.Union([Type.Null(), directorySummary])),
     workspace: workspaceSummary,
     files: Type.Array(fileSummary),
     directories: Type.Array(directorySummary),

@@ -6,6 +6,8 @@ import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges } from "feathers-hooks-common";
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
+import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
+import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -64,7 +66,7 @@ export const directory = (app) => {
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
-        preventChanges(false, 'parentDirectory', 'workspace', 'files', 'directories'),
+        preventChanges(false, 'workspace', 'files', 'directories'),
         iff(
           context => context.data.shouldAddFilesToDirectory,
           addFilesToDirectory
@@ -72,6 +74,14 @@ export const directory = (app) => {
         iff(
           context => context.data.shouldRemoveFilesFromDirectory,
           removeFilesFromDirectory
+        ),
+        iff(
+          context => context.data.shouldAddDirectoriesToDirectory,
+          addDirectoriesToDirectory
+        ),
+        iff(
+          context => context.data.shouldRemoveDirectoriesFromDirectory,
+          removeDirectoriesFromDirectory,
         ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
