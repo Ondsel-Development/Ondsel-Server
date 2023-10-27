@@ -1,8 +1,11 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
+import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges } from "feathers-hooks-common";
+import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
+import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -11,7 +14,11 @@ import {
   directoryExternalResolver,
   directoryDataResolver,
   directoryPatchResolver,
-  directoryQueryResolver
+  directoryQueryResolver,
+  directorySchema,
+  directoryDataSchema,
+  directoryPatchSchema,
+  directoryQuerySchema
 } from './directories.schema.js'
 import { DirectoryService, getOptions } from './directories.class.js'
 import { directoryPath, directoryMethods } from './directories.shared.js'
@@ -26,7 +33,15 @@ export const directory = (app) => {
     // A list of all methods this service exposes externally
     methods: directoryMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { directorySchema, directoryDataSchema, directoryPatchSchema , directoryQuerySchema, },
+      docs: {
+        description: 'A organization service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(directoryPath).hooks({
@@ -49,7 +64,15 @@ export const directory = (app) => {
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
-        preventChanges(false, 'parentDirectory', 'workspace', 'files'),
+        preventChanges(false, 'parentDirectory', 'workspace', 'files', 'directories'),
+        iff(
+          context => context.data.shouldAddFilesToDirectory,
+          addFilesToDirectory
+        ),
+        iff(
+          context => context.data.shouldRemoveFilesFromDirectory,
+          removeFilesFromDirectory
+        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
