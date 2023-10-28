@@ -3,11 +3,12 @@ import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
-import { iff, preventChanges } from "feathers-hooks-common";
+import { iff, preventChanges, disallow } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
 import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
+import { userReadAccessDirectories, userWriteAccessDirectories } from './helpers.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -59,13 +60,18 @@ export const directory = (app) => {
         schemaHooks.validateQuery(directoryQueryValidator),
         schemaHooks.resolveQuery(directoryQueryResolver)
       ],
-      find: [],
-      get: [],
+      find: [
+        userReadAccessDirectories,
+      ],
+      get: [
+        userReadAccessDirectories,
+      ],
       create: [
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
+        userWriteAccessDirectories,
         preventChanges(false, 'workspace', 'files', 'directories'),
         iff(
           context => context.data.shouldAddFilesToDirectory,
@@ -86,7 +92,10 @@ export const directory = (app) => {
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
-      remove: []
+      remove: [
+        // TODO: Implement delete feature later
+        disallow(),
+      ]
     },
     after: {
       all: []
