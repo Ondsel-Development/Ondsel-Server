@@ -3,7 +3,7 @@ import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
-import { iff, preventChanges, disallow } from 'feathers-hooks-common';
+import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
@@ -61,17 +61,26 @@ export const directory = (app) => {
         schemaHooks.resolveQuery(directoryQueryResolver)
       ],
       find: [
-        userReadAccessDirectories,
+        iff(
+          isProvider('external'),
+          userReadAccessDirectories
+        )
       ],
       get: [
-        userReadAccessDirectories,
+        iff(
+          isProvider('external'),
+          userReadAccessDirectories
+        )
       ],
       create: [
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
-        userWriteAccessDirectories,
+        iff(
+          isProvider('external'),
+          userWriteAccessDirectories
+        ),
         preventChanges(false, 'workspace', 'files', 'directories'),
         iff(
           context => context.data.shouldAddFilesToDirectory,
