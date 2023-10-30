@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
+import { iff, preventChanges, isProvider } from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -20,9 +21,9 @@ import {
 import { WorkspaceService, getOptions } from './workspaces.class.js'
 import { workspacePath, workspaceMethods } from './workspaces.shared.js'
 import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
-import {iff, preventChanges} from "feathers-hooks-common";
 import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorkspace.js';
 import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
+import { isUserBelongsToWorkspace, createAndAssignRootDirectory } from './helpers.js';
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -70,7 +71,10 @@ export const workspace = (app) => {
       ],
       patch: [
         preventChanges(false, 'groupsOrUsers'),
-        isUserOwnerOrAdminOfOrganization,
+        iff(
+          isProvider('external'),
+          isUserOwnerOrAdminOfOrganization,
+        ),
         iff(
           context => context.data.shouldAddGroupsOrUsersToWorkspace,
           addGroupsOrUsersToWorkspace
@@ -85,21 +89,13 @@ export const workspace = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        createAndAssignRootDirectory,
+      ],
     },
     error: {
       all: []
     }
   })
-}
-
-
-const isUserBelongsToWorkspace = async context => {
-  if (context.params.user) {
-    const userOrganizations = context.params.user.organizations || []
-    context.params.query.organizationId = {
-      $in: userOrganizations.map(org => org._id)
-    }
-  }
-  return context;
 }

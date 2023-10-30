@@ -5,6 +5,7 @@ import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { groupSummary } from '../groups/groups.subdocs.schema.js';
+import { directorySummary } from '../directories/directories.subdocs.js';
 
 const groupsOrUsers = Type.Object(
   {
@@ -24,7 +25,7 @@ export const workspaceSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     organizationId: ObjectIdSchema(),
-    // rootDirectory: <some>, TODO add this field later
+    rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
   },
   { $id: 'Workspace', additionalProperties: false }
