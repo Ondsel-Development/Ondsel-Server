@@ -1,4 +1,5 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
+import _ from 'lodash';
 import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
@@ -47,6 +48,15 @@ export const workspaceDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  groupsOrUsers: async (_value, _message, _context) => {
+    return [
+      {
+        type: 'User',
+        permission: 'write',
+        groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'firstName', 'lastName']),
+      }
+    ]
+  }
 })
 
 // Schema for updating existing entries
