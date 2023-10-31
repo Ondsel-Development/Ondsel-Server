@@ -10,6 +10,7 @@
 //
 
 import { upsertGroupSummaryToOrganization } from '../organizations/organizations.distrib.js';
+import {upsertGroupSummarytoWorkspaces} from "../workspaces/workspaces.distrib.js";
 
 export function buildGroupSummary(group) {
   let summary = {};
@@ -35,8 +36,9 @@ export const distributeGroupSummaries = async (context) => {
         // owning org has a copy of the group
         await upsertGroupSummaryToOrganization(context, group.organizationId, groupSummary);
         // each workspace belonging to the group has a copy of the group summary
-        for (const workspace of group.workspaces) {
-          // TODO: await upsertGroupSummarytoWorkspaces(context, workspace._id, groupSummary);
+        const workspaceList = group.workspaces || [];
+        for (const workspace of workspaceList) {
+          await upsertGroupSummarytoWorkspaces(context, workspace._id, groupSummary);
         }
       }
     }

@@ -23,6 +23,7 @@ import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
 import {iff, preventChanges} from "feathers-hooks-common";
 import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorkspace.js';
 import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
+import {editGroupOrUserOnWorkspace} from "./commands/editGroupOrUserOnWorkspace.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -78,6 +79,10 @@ export const workspace = (app) => {
         iff(
           context => context.data.shouldRemoveGroupsOrUsersFromWorkspace,
           removeGroupsOrUsersFromWorkspace
+        ),
+        iff(
+          context => context.data.shouldEditGroupOrUserOnWorkspace,
+          editGroupOrUserOnWorkspace,
         ),
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
