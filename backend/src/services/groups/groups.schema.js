@@ -26,7 +26,8 @@ export const groupResolver = resolve({})
 export const groupExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const groupDataSchema = Type.Pick(groupSchema, ['name', 'organizationId', 'users'], {
+export const groupDataSchema = Type.Pick(groupSchema, ['_id', 'name', 'organizationId', 'users'], {
+  // note: _id and name can only be set by the internal system
   $id: 'GroupData'
 })
 export const groupDataValidator = getValidator(groupDataSchema, dataValidator)

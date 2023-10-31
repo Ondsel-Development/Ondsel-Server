@@ -57,6 +57,9 @@ export const organizationDataResolver = resolve({
       }
     ]
   },
+  groups: async() => [
+    { _id: new ObjectId(), name: 'Everybody' }
+  ]
 })
 
 // Schema for updating existing entries

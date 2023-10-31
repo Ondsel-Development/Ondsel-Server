@@ -58,7 +58,7 @@ export const group = (app) => {
       find: [userBelongingGroups],
       get: [userBelongingGroups],
       create: [
-        iff(isProvider('external'), preventChanges(false, 'users')),
+        iff(isProvider('external'), preventChanges(false, '_id', 'users')),
         schemaHooks.validateData(groupDataValidator),
         schemaHooks.resolveData(groupDataResolver)
       ],
