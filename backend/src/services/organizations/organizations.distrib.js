@@ -10,13 +10,39 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
-// nothing
+import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
+
+export function buildOrganizationSummary(org) {
+  let summary = {};
+  summary._id = org._id;
+  summary.name = org.name;
+  return summary;
+}
 
 //
 // DISTRIBUTE AFTER (HOOK)
 //
 
-// nothing
+export const distributeOrganizationSummaries = async (context) => {
+  // this function is for distributing changes from a PATCH
+  try {
+    const orgId = context.id;
+    if (orgId !== undefined) {
+      const org = await context.app.service('organizations').get(orgId);
+      const summaryChangeSeen = context.data.name !== undefined; // this is the only field that will trigger right now
+      if (summaryChangeSeen) {
+        const orgSummary = buildOrganizationSummary(org);
+        // the users have a summary of the org
+        for (const userSummary of org.users) {
+          await upsertOrganizationSummaryToUser(context, userSummary._id, orgSummary);
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
 
 //
 // UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops

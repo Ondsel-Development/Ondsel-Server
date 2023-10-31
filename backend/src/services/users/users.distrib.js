@@ -33,4 +33,20 @@ export function buildUserSummary(user) {
 //             These routines are used by _other_ collections after creation/update/deletion
 //
 
-// nothing
+export async function upsertOrganizationSummaryToUser(context, userId, orgSummary) {
+  const userService = context.app.service('users');
+  const user = await userService.get(userId);
+  let orgList = user.organizations || [];
+  const index = orgList.findIndex((o) => o._id.toString() === orgSummary._id.toString());
+  if (index === -1) {
+    orgList.push(orgSummary);
+  } else {
+    orgList[index] = orgSummary;
+  }
+  await userService.patch(
+    userId,
+    {
+      organizations: orgList,
+    }
+  );
+}
