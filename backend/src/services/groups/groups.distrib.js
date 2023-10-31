@@ -9,6 +9,9 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
+import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
+import {buildOrganizationSummary, upsertGroupSummaryToOrganization} from "../organizations/organizations.distrib.js";
+
 export function buildGroupSummary(group) {
   let summary = {};
   summary._id = group._id;
@@ -28,4 +31,25 @@ export function buildGroupSummary(group) {
 //             These routines are used by _other_ collections after creation/update/deletion
 //
 
-// nothing
+export const distributeGroupSummaries = async (context) => {
+  // this function is for distributing changes from a PATCH
+  try {
+    const groupId = context.id;
+    if (groupId !== undefined) {
+      const summaryChangeSeen = context.data.name !== undefined; // this is the only field that will trigger right now
+      if (summaryChangeSeen) {
+        const group = await context.app.service('groups').get(groupId);
+        const groupSummary = buildGroupSummary(group);
+        // owning org has a copy of the group
+        await upsertGroupSummaryToOrganization(context, group.organizationId, groupSummary);
+        // each workspace belonging to the group has a copy of the group summary
+        for (const workspace in group.workspaces) {
+          // TODO: await upsertGroupSummarytoWorkspaces(context, workspace._id, groupSummary);
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
