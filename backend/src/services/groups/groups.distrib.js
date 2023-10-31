@@ -23,13 +23,6 @@ export function buildGroupSummary(group) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
-// nothing
-
-//
-// UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops
-//             These routines are used by _other_ collections after creation/update/deletion
-//
-
 export const distributeGroupSummaries = async (context) => {
   // this function is for distributing changes from a PATCH
   try {
@@ -52,3 +45,10 @@ export const distributeGroupSummaries = async (context) => {
   }
   return context;
 }
+
+//
+// UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops
+//             These routines are used by _other_ collections after creation/update/deletion
+//
+
+// nothing
