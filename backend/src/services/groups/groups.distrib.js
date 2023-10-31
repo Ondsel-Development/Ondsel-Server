@@ -9,8 +9,7 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
-import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
-import {buildOrganizationSummary, upsertGroupSummaryToOrganization} from "../organizations/organizations.distrib.js";
+import { upsertGroupSummaryToOrganization } from '../organizations/organizations.distrib.js';
 
 export function buildGroupSummary(group) {
   let summary = {};
@@ -43,7 +42,7 @@ export const distributeGroupSummaries = async (context) => {
         // owning org has a copy of the group
         await upsertGroupSummaryToOrganization(context, group.organizationId, groupSummary);
         // each workspace belonging to the group has a copy of the group summary
-        for (const workspace in group.workspaces) {
+        for (const workspace of group.workspaces) {
           // TODO: await upsertGroupSummarytoWorkspaces(context, workspace._id, groupSummary);
         }
       }

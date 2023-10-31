@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import {upsertGroupSummaryToOrganization} from "../organizations.distrib.js";
+import {buildGroupSummary} from "../../groups/groups.distrib.js";
+import {buildUserSummary} from "../../users/users.distrib.js";
 
 export const addUsersToOrganization = async (context) => {
   const { data } = context;
@@ -18,9 +21,31 @@ export const addUsersToOrganization = async (context) => {
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
         userOrganizations.push(_.pick(organization, ['_id', 'name']));
         await userService.patch(user._id, { organizations: userOrganizations});
+        await addUserToDefaultingGroups(context, organization, user);
       }
     }
   }
   data.users = organizationUsers;
   context.data = _.omit(data, ['shouldAddUsersToOrganization', 'userIds']);
+}
+
+const addUserToDefaultingGroups = async (context, organization, user) => {
+  try {
+    const userSummary = buildUserSummary(user);
+    const groupService = context.app.service('groups');
+    for (const groupSum of organization.groups) {
+      const group = await groupService.get(groupSum._id);
+      if (group.takeAllNewUsers === true) {
+        await groupService.patch(
+          groupSum._id,
+          {
+            shouldAddUsersToGroup: true,
+            userIds: [user._id],
+          }
+        )
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
