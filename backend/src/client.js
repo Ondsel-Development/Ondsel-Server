@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { directoryClient } from './services/directories/directories.shared.js'
+
 import { groupClient } from './services/groups/groups.shared.js'
 
 import { workspaceClient } from './services/workspaces/workspaces.shared.js'
@@ -63,6 +65,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(workspaceClient)
 
   client.configure(groupClient)
+
+  client.configure(directoryClient)
 
   return client
 }

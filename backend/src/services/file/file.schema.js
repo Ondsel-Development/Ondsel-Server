@@ -4,6 +4,8 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 
 import { dataValidator, queryValidator } from '../../validators.js'
+import { directorySummary } from '../directories/directories.subdocs.js';
+import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 
 
 const fileVersionSchema = Type.Object({
@@ -28,6 +30,8 @@ export const fileSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema),
+    directory: Type.Union([Type.Null(), directorySummary]),
+    workspace: workspaceSummary,
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },

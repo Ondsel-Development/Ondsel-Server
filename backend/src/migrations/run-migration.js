@@ -5,6 +5,7 @@ import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';
 import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
 import {addUsernameCommand} from "./add-username.command.js";
+import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
 
 async function runMigration() {
   console.log('Migration start');
@@ -27,6 +28,9 @@ async function runMigration() {
       break;
     case 'addUsername':
       await addUsernameCommand(app);
+      break;
+    case 'migrateObjectsForSharedWorkspace':
+      await migrateObjectsForSharedWorkspaceCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
