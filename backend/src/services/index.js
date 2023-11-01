@@ -1,3 +1,9 @@
+import { directory } from './directories/directories.js'
+
+import { group } from './groups/groups.js'
+
+import { workspace } from './workspaces/workspaces.js'
+
 import { organization } from './organizations/organizations.js'
 
 import { runnerLogs } from './runner-logs/runner-logs.js'
@@ -19,6 +25,12 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(directory)
+
+  app.configure(group)
+
+  app.configure(workspace)
+
   app.configure(organization)
 
   app.configure(runnerLogs)
