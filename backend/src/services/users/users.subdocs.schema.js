@@ -29,8 +29,7 @@ export const userSummarySchema = Type.Object(
     _id: ObjectIdSchema(),
     username: Type.String(),
     email: Type.String({ format: "email"}),
-    firstName: Type.String(),
-    lastName: Type.String(),
+    name: Type.String(),
   }
 )
 
