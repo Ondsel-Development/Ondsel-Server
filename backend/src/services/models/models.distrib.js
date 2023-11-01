@@ -7,6 +7,7 @@
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {applyModelSummaryToFile} from "../file/file.distrib.js";
+import {hasDocumentChangedSummary} from "../../summary_support.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection
@@ -21,6 +22,10 @@ export const modelSummarySchema = Type.Object(
     thumbnailUrlCache: Type.String(),
   }
 )
+
+// These are the fields to monitor for changes from the _root_ document to be placed into a summary for distribution.
+// This list CANNOT contain any fields from a summary. And, they must be from the root of the document.
+export const modelChangeFieldsForSummary = ['createdAt', 'isObjGenerated', 'isThumbnailGenerated', 'thumbnailUrl'];
 
 export function buildModelSummary(model) {
   let summary = {};
@@ -59,13 +64,15 @@ export async function getModelSummary(app, modelId) {
 //
 
 export const distributeModelSummaries = async (context) => {
-  const modelId = context.id;
-  if (modelId !== undefined) {
-    const model = await getModelById(context.app, modelId);
-    const modelSummary = buildModelSummary(model);
-    if (modelSummary !== null) {
-      await applyModelSummaryToFile(context.app, model.fileId, modelSummary);
+  try {
+    if (hasDocumentChangedSummary(context, 'models', modelChangeFieldsForSummary)) {
+      // normally, the following line would work, but we are pulling thumbnailUrl virtually
+      // const modelSummary = buildModelSummary(context.result);
+      const modelSummary = await getModelSummary(context.app, context.id);
+      await applyModelSummaryToFile(context.app, context.result.fileId, modelSummary);
     }
+  } catch(error) {
+    console.log(error);
   }
   return context;
 }

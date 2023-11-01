@@ -26,6 +26,7 @@ import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {distributeModelSummaries} from "./models.distrib.js";
+import {getPriorDocumentForPatch} from "../../summary_support.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -80,7 +81,7 @@ export const model = (app) => {
           }
         }),
         schemaHooks.validateQuery(modelQueryValidator),
-        schemaHooks.resolveQuery(modelQueryResolver)
+        schemaHooks.resolveQuery(modelQueryResolver),
       ],
       find: [],
       get: [],
@@ -92,6 +93,7 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
+        getPriorDocumentForPatch('models'),
         preventChanges(false, 'isSharedModel', 'custFileName'),
         iff(
           context => context.data.shouldCommitNewVersion,
