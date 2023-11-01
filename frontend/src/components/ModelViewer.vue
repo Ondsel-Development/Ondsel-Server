@@ -14,7 +14,7 @@ export default {
       default: false,
     },
   },
-  emits: ['load:mesh'],
+  emits: ['model:loaded'],
   data: () => ({
     obj: null,
     objUrl: '',
@@ -38,7 +38,7 @@ export default {
         this.viewerHeight,
         this.viewport3d,
         window,
-        () => this.$emit('load:mesh')
+        () => this.$emit('model:loaded')
       )
       this.viewport3d.appendChild(this.viewer.renderer.domElement);
     },

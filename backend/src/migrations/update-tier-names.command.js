@@ -22,18 +22,18 @@ async function fixUser(userService, userChange){
   let newTier = null;
   switch (userChange.tier)
   {
-    case SubscriptionTypeMap.free:
-      newTier = SubscriptionTypeMap.solo;
-      break;
-    case SubscriptionTypeMap.premium:
-      newTier = SubscriptionTypeMap.peer;
-      break;
+    // case SubscriptionTypeMap.free:
+    //   newTier = SubscriptionTypeMap.solo;
+    //   break;
+    // case SubscriptionTypeMap.premium:
+    //   newTier = SubscriptionTypeMap.peer;
+    //   break;
     case SubscriptionTypeMap.enterprise:
     case SubscriptionTypeMap.peer:
       // do nothing
       break;
     default: // "missing" appears as "solo"; so both solo and missing are set to solo
-      newTier = SubscriptionTypeMap.solo;
+      newTier = SubscriptionTypeMap.unverified;
       break;
   }
   if (newTier !== null) {

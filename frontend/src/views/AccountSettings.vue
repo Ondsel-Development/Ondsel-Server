@@ -32,8 +32,15 @@
         <v-list-item>
           <v-list-item-title>Name</v-list-item-title>
           <v-list-item-subtitle>
-            {{ user.firstName }} {{ user.lastName }}
+            {{ user.name }}
           </v-list-item-subtitle>
+<!--          <template #append>-->
+<!--            <v-list-item-action>-->
+<!--              <v-btn variant="outlined" color="default" size="small">-->
+<!--                Change Name-->
+<!--              </v-btn>-->
+<!--            </v-list-item-action>-->
+<!--          </template>-->
         </v-list-item>
 
         <v-divider />
@@ -41,7 +48,27 @@
           <v-list-item-title>Email</v-list-item-title>
           <v-list-item-subtitle>
             {{ user.email }}
+            <v-chip v-if="user.isVerified">Verified</v-chip>
+            <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action v-if="!user.isVerified">
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openVerifyEmailDialog()"
+              >
+                Resend Verification
+              </v-btn>
+              <v-spacer></v-spacer>
+              <VerifyEmailDialog
+                :is-active="isVerifyEmailDialogActive"
+                :user="user"
+                ref="verifyEmailDialog"
+              />
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
         <v-divider />
@@ -50,6 +77,25 @@
           <v-list-item-subtitle>
             **********
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action v-if="user.isVerified">
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openResetPasswordDialog()"
+                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+              >
+                Reset Password
+              </v-btn>
+              <v-spacer></v-spacer>
+              <ResetPasswordDialog
+                :is-active="isResetPasswordDialogActive"
+                :user="user"
+                ref="resetPasswordDialog"
+              />
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
       </v-list>
@@ -70,7 +116,13 @@
           </v-list-item-subtitle>
           <template #append>
             <v-list-item-action>
-              <v-btn variant="outlined" color="default" size="small" @click="gotoChooseTier()">
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click="gotoChooseTier()"
+                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+              >
                 Choose New Tier
               </v-btn>
             </v-list-item-action>
@@ -100,20 +152,26 @@
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
-import ChangePassword from "@/components/ChangePassword.vue";
+import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
+import ShareLinkDialog from "@/components/ShareLinkDialog.vue";
+import VerifyEmailDialog from "@/components/VerifyEmailDialog.vue";
 
 const { Model, User } = models.api;
 
 export default {
   name: 'AccountSettings',
-  components: {ChangePassword},
+  components: {VerifyEmailDialog, ShareLinkDialog, ResetPasswordDialog},
   data() {
     return {
-      isChangePasswordActive: false,
+      isResetPasswordDialogActive: false,
+      isVerifyEmailDialogActive: false,
       remainingFiles: "processing..."
     }
   },
   computed: {
+    // resetPassword() {
+    //   return resetPassword
+    // },
     SubscriptionTypeMap() {
       return SubscriptionTypeMap
     },
@@ -134,8 +192,13 @@ export default {
       const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
       this.remainingFiles = this.user.calculateRemainingModels(models.data.length);
     },
-    openChangePasswordDialog() {
-      this.$refs.ChangePassword.$data.dialog = true;
+    openResetPasswordDialog() {
+      this.isResetPasswordDialogActive = true;
+      this.$refs.resetPasswordDialog.$data.dialog = true;
+    },
+    openVerifyEmailDialog() {
+      this.isVerifyEmailDialogActive = true;
+      this.$refs.verifyEmailDialog.$data.dialog = true;
     },
   }
 }

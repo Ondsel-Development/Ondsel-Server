@@ -6,7 +6,7 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { directorySummary } from '../directories/directories.subdocs.js';
 import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
-
+import { modelSummarySchema } from "../models/models.distrib.js";
 
 const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
@@ -26,6 +26,7 @@ export const fileSchema = Type.Object(
     currentVersionId: ObjectIdSchema(),
     userId: ObjectIdSchema(),
     modelId: Type.Optional(ObjectIdSchema()),
+    model: modelSummarySchema,
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -40,7 +41,7 @@ export const fileSchema = Type.Object(
 
 export const fileValidator = getValidator(fileSchema, dataValidator)
 export const fileResolver = resolve({
-  currentVersion: virtual(async(message, context) => {
+  currentVersion: virtual(async(message, _context) => {
     if (message.versions && message.currentVersionId ) {
       return message.versions.find(version => version._id.equals(message.currentVersionId) )
     }
@@ -61,12 +62,12 @@ export const fileDataResolver = resolve({
     // Associate the record with the id of the authenticated user
     return context.params.user._id
   },
-  isSystemGenerated: async (_value, _message, context) => {
+  isSystemGenerated: async (_value, _message, _context) => {
     if (_value) {
       return _value;
     }
     return fileSchema.properties.isSystemGenerated.default
-  },
+  }
 })
 
 // Schema for updating existing entries

@@ -2,49 +2,16 @@ import _ from 'lodash';
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
 export const SubscriptionTypeMap = {
+  unverified: 'Unverified',
   solo: 'Solo',
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
-export const ANON = "anonymous"
 
 export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
   yearly: 'Yearly',
 }
-
-export const tierConstraintConfig = {
-  ANON: {
-    maxModelObjects: 0,
-    maxShareLinksPerModel: 0,
-    canUpdateModelParameters: false,
-    canExportModel: false,
-  },
-  Solo: {
-    maxModelObjects: 50,
-    maxShareLinksPerModel: 2,
-    canUpdateModelParameters: false,
-    canExportModel: false,
-    defaultValueOfPublicLinkGeneration: true,
-    canDisableAutomaticGenerationOfPublicLink: false,
-  },
-  Peer: {
-    maxModelObjects: 250,
-    maxShareLinksPerModel: 10,
-    canUpdateModelParameters: true,
-    canExportModel: true,
-    defaultValueOfPublicLinkGeneration: false,
-    canDisableAutomaticGenerationOfPublicLink: true,
-  },
-  Enterprise: {
-    maxModelObjects: 1000,
-    maxShareLinksPerModel: 100,
-    canUpdateModelParameters: true,
-    canExportModel: true,
-    defaultValueOfPublicLinkGeneration: false,
-    canDisableAutomaticGenerationOfPublicLink: true,
-  },
-};
 
 class User extends BaseModel {
   constructor(data, options) {
@@ -60,8 +27,7 @@ class User extends BaseModel {
       email: '',
       password: '',
       username: '',
-      firstName: '',
-      lastName: '',
+      name: '',
     }
   }
 
@@ -81,27 +47,15 @@ class User extends BaseModel {
     return tierName;
   }
 
-  get shortTierName() {
-    let tierName = this.tier;
-    if (this.nextTier !== undefined && this.nextTier !== null) {
-      tierName += ` -> ${this.nextTier}`
-    }
-    return tierName;
-  }
-
   calculateRemainingModels(count) {
     if (this.tier === SubscriptionTypeMap.enterprise) {
       return `no limit (${count} active)`;
     }
-    let max = this.tierConfig.maxModelObjects;
+    let max = this.constraint.maxModelObjects;
     if (count > max) {
       return `exceeded! Maximum is ${max}, currently at ${count}.`;
     }
     return `${max - count}`;
-  }
-
-  get tierConfig() {
-    return _.get(tierConstraintConfig, this.tier, ANON);
   }
 }
 const servicePath = 'users'

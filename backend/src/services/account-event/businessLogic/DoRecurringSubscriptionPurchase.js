@@ -117,6 +117,10 @@ function RecurringSubscriptionPurchaseVerification(context, user) {
     result.errMsg = `A Solo tier does not need renewal.`;
     return result;
   }
+  if (subscription === SubscriptionTypeMap.unverified) {
+    result.errMsg = `A Unverified tier does not need renewal.`;
+    return result;
+  }
   let oldState = user.subscriptionDetail.state;
   if (oldState === SubscriptionStateMap.closed) {
     result.errMsg = "Cannot renew a subscription on a closed account.";
