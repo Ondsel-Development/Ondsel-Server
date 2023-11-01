@@ -1,10 +1,12 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
+import _ from 'lodash';
 import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { groupSummary } from '../groups/groups.subdocs.schema.js';
+import { directorySummary } from '../directories/directories.subdocs.js';
 
 const groupsOrUsers = Type.Object(
   {
@@ -24,7 +26,7 @@ export const workspaceSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     organizationId: ObjectIdSchema(),
-    // rootDirectory: <some>, TODO add this field later
+    rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
   },
   { $id: 'Workspace', additionalProperties: false }
@@ -46,6 +48,15 @@ export const workspaceDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  groupsOrUsers: async (_value, _message, _context) => {
+    return [
+      {
+        type: 'User',
+        permission: 'write',
+        groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'firstName', 'lastName']),
+      }
+    ]
+  }
 })
 
 // Schema for updating existing entries
