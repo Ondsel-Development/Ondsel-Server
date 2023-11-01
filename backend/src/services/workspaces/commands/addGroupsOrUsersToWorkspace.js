@@ -9,7 +9,7 @@ export const addGroupsOrUsersToWorkspace = async context => {
 
   const workspace = await context.service.get(context.id);
   let groupsOrUsersOfWorkspace = workspace.groupsOrUsers || [];
-  for (let { type, permission, groupOrUserId } of data.groupsOrUsersData) {
+  for (let [type, permission, groupOrUserId] of data.groupsOrUsersData) {
     if (!groupsOrUsersOfWorkspace.some(groupOrUser => groupOrUser.type === type && groupOrUser.groupOrUser._id.toString() === groupOrUserId)){
       if (type === 'Group') {
         const group = await groupService.get(groupOrUserId);
