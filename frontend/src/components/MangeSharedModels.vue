@@ -66,7 +66,7 @@
       <v-switch
         v-model="item.raw.isActive"
         hide-details
-        :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
+        :disabled="!user.constraint.canDisableAutomaticGenerationOfPublicLink"
         @update:modelValue="updateSharedModel(item.raw._id, {isActive: item.raw.isActive})"
       ></v-switch>
     </template>

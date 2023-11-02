@@ -23,7 +23,7 @@ import {
 } from './shared-models.schema.js'
 import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
-import { getTierConfig } from '../../tier-constraint.js';
+import {getConstraint} from "../users/users.subdocs.schema.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -141,7 +141,7 @@ export const sharedModels = (app) => {
         ),
         preventChanges(false, 'thumbnailUrl'),
         iff(
-          context => !getTierConfig(context.params.user.tier).canDisableAutomaticGenerationOfPublicLink,
+          context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
           preventChanges(true, 'isActive')
         ),
         iff(
@@ -185,19 +185,42 @@ const createClone = async (context) => {
   if ( data.cloneModelId ) {
     const model = await modelService.get(data.cloneModelId);
 
+    let isObjGenerated = false;
+    let shouldStartObjGeneration = true;
+
+    if (model.isObjGenerated) {
+      isObjGenerated = true;
+      shouldStartObjGeneration = false;
+    }
+    const isThumbnailGenerated = model.isThumbnailGenerated || false;
+
     const newModel = await modelService.create({
       'uniqueFileName': model.uniqueFileName,
       'custFileName': model.custFileName || model.file.custFileName,
-      'shouldStartObjGeneration': true,
+      'shouldStartObjGeneration': shouldStartObjGeneration,
       'isObjGenerationInProgress': false,
-      'isObjGenerated': false,
+      'isObjGenerated': isObjGenerated,
       'errorMsg': model.errorMsg,
       'attributes': model.attributes,
       'isSharedModel': true,
       'isSharedModelAnonymousType': true,
+      'isThumbnailGenerated': isThumbnailGenerated,
     }, {
       authentication: context.params.authentication,
     });
+
+    if (isObjGenerated) {
+      await context.app.service('upload').copy(
+        `${model._id.toString()}_generated.OBJ`,
+        `${newModel._id.toString()}_generated.OBJ`,
+      );
+    }
+    if (isThumbnailGenerated) {
+      await context.app.service('upload').copy(
+        `public/${model._id.toString()}_thumbnail.PNG`,
+        `public/${newModel._id.toString()}_thumbnail.PNG`,
+      );
+    }
     context.data['dummyModelId'] = newModel._id.toString();
     return context;
   }

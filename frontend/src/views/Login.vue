@@ -80,7 +80,7 @@ export default {
           this.$router.push({ name: 'Models' })
         }).catch((e) => {
           this.showSnacker = true;
-          this.snackerMsg = "Invalid login"
+          this.snackerMsg = `Invalid login`
         })
       }
     }

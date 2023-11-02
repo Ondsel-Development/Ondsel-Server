@@ -36,6 +36,8 @@ export async function DoSubscriptionServiceCompleted(context, user) {
     detail.newSubscriptionState = SubscriptionStateMap.good;
   } else if (detail.tierChanged && detail.tier === SubscriptionTypeMap.solo) {
     detail.newSubscriptionState = SubscriptionStateMap.good;
+  } else if (detail.tierChanged && detail.tier === SubscriptionTypeMap.unverified) {
+    detail.newSubscriptionState = SubscriptionStateMap.good;
   } else {
     detail.newSubscriptionState = SubscriptionStateMap.due;
   }

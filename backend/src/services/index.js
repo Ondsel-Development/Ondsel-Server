@@ -6,6 +6,10 @@ import { workspace } from './workspaces/workspaces.js'
 
 import { organization } from './organizations/organizations.js'
 
+import { authManagement } from './auth-management/auth-management.js'
+
+import { email } from './email/email.js'
+
 import { runnerLogs } from './runner-logs/runner-logs.js'
 
 import { accountEvent } from './account-event/account-event.js'
@@ -32,6 +36,10 @@ export const services = (app) => {
   app.configure(workspace)
 
   app.configure(organization)
+
+  app.configure(authManagement)
+
+  app.configure(email)
 
   app.configure(runnerLogs)
 

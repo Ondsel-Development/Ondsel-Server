@@ -9,6 +9,10 @@ import { workspaceClient } from './services/workspaces/workspaces.shared.js'
 
 import { organizationClient } from './services/organizations/organizations.shared.js'
 
+import { authManagementClient } from './services/auth-management/auth-management.shared.js'
+
+import { emailClient } from './services/email/email.shared.js'
+
 import { runnerLogsClient } from './services/runner-logs/runner-logs.shared.js'
 
 import { accountEventClient } from './services/account-event/account-event.shared.js'
@@ -67,6 +71,10 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(groupClient)
 
   client.configure(directoryClient)
+
+  client.configure(emailClient)
+
+  client.configure(authManagementClient)
 
   return client
 }

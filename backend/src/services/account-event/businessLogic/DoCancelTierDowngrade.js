@@ -1,4 +1,5 @@
 import {addTransactionToUserAndSummarize, makeEmptyJournalTransaction, verifyBalanced} from "../../../accounting.js";
+import {SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 
 
 export async function DoCancelTierDowngrade(context, user) {
@@ -50,6 +51,10 @@ function SubscriptionTierDowngradeVerification(context, user) {
   // new tier
   //
   let currentTier = user.tier;
+  if (currentTier === SubscriptionTypeMap.unverified) {
+    result.errMsg = 'UNVERIFIED USERS CANNOT CHANGE TIERS';
+    return result;
+  }
   if (context.data.detail.currentSubscription !== currentTier) {
     result.errMsg = `CALLER TO API BELIEVES THE CURRENT TIER IS ${context.data.detail.currentSubscription} BUT IT IS NOT`;
     return result;

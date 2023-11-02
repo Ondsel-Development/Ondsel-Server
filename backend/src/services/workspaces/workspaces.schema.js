@@ -53,7 +53,7 @@ export const workspaceDataResolver = resolve({
       {
         type: 'User',
         permission: 'write',
-        groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'firstName', 'lastName']),
+        groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'name']),
       }
     ]
   }

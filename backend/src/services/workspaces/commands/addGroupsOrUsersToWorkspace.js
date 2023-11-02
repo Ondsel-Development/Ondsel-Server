@@ -31,7 +31,7 @@ export const addGroupsOrUsersToWorkspace = async context => {
         groupsOrUsersOfWorkspace.push({
           type,
           permission,
-          groupOrUser: _.pick(user, ['_id', 'username', 'email', 'firstName', 'lastName']),
+          groupOrUser: _.pick(user, ['_id', 'username', 'email', 'name']),
         });
       } else {
         throw new BadRequest('Type must be either Group or User');

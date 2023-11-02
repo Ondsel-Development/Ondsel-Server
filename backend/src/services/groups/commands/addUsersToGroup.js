@@ -15,7 +15,7 @@ export const addUsersToGroup = async context => {
         throw new BadRequest(`User (id: ${userId}) must be a member to this group organization`)
       }
       groupUsers.push(
-        _.pick(user, ['_id', 'username', 'email', 'firstName', 'lastName'])
+        _.pick(user, ['_id', 'username', 'email', 'name'])
       );
     }
   }

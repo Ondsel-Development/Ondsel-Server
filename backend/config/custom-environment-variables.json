@@ -15,5 +15,10 @@
   "awsClientModelBucket": "AWS_CLIENT_MODELS_BUCKET",
   "awsRegion": "AWS_REGION",
   "fcWorkerUrl": "FC_WORKER_URL",
-  "mongodb": "DB_URL"
+  "mongodb": "DB_URL",
+  "smtpHost": "SMTP_HOST",
+  "smtpPort": "SMTP_PORT",
+  "smtpUser": "SMTP_USER",
+  "smtpPass": "SMTP_PASS",
+  "frontendUrl": "FRONTEND_URL"
 }

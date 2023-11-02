@@ -36,7 +36,7 @@
       >Export model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" @load:mesh="uploadThumbnail"/>
+  <ModelViewer ref="modelViewer" @model:loaded="modelLoaded"/>
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -121,7 +121,7 @@
                   <div>
                     <v-checkbox
                       v-model="generatePublicLink"
-                      :disabled="!user.tierConfig.canDisableAutomaticGenerationOfPublicLink"
+                      :disabled="!user.constraint.canDisableAutomaticGenerationOfPublicLink"
                       label="Generate public link automatically"
                       density="compact"
                       hide-details>
@@ -262,6 +262,7 @@ export default {
               vm.error = 'UpgradeTier';
             }
           });
+          // eslint-disable-next-line no-unused-vars
           this.on('error', (file, message) => {
             if (!file.accepted) {
               vm.error = 'InvalidFileType';
@@ -273,12 +274,12 @@ export default {
     generatePublicLink: {
       get() {
         if (this.generatePublicLinkValue == null) {
-          return this.user.tierConfig.defaultValueOfPublicLinkGeneration;
+          return this.user.constraint.defaultValueOfPublicLinkGeneration;
         }
         return this.generatePublicLinkValue;
       },
       set(val) {
-        if (this.user.tierConfig.canDisableAutomaticGenerationOfPublicLink){
+        if (this.user.constraint.canDisableAutomaticGenerationOfPublicLink){
           this.generatePublicLinkValue = val;
         }
       }
@@ -352,6 +353,16 @@ export default {
         },
       })
     },
+    modelLoaded() {
+      if (this.isReloadingOBJ) {
+        this.$refs.attributeViewer.$data.dialog = false;
+        this.isReloadingOBJ = false;
+      } else {
+        this.dialog = false;
+      }
+      this.isModelLoaded = true;
+      setTimeout(() => this.uploadThumbnail(), 500);
+    },
   },
   watch: {
     'model.isObjGenerated'(v) {
@@ -361,16 +372,6 @@ export default {
         } else {
           this.$refs.modelViewer.init(this.model.objUrl);
         }
-
-        setTimeout(async () => {
-          if (this.isReloadingOBJ) {
-            this.$refs.attributeViewer.$data.dialog = false;
-            this.isReloadingOBJ = false;
-          } else {
-            this.dialog = false;
-          }
-          this.isModelLoaded = true;
-        }, 3000)
       }
     }
   }

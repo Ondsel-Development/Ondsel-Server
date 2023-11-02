@@ -8,7 +8,6 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
-import { getTierConfig } from '../../tier-constraint.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -25,6 +24,8 @@ import {
 } from './models.schema.js'
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
+import {getConstraint} from "../users/users.subdocs.schema.js";
+import {distributeModelSummaries} from "./models.distrib.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -136,12 +137,13 @@ export const model = (app) => {
         iff(
           context => context.result.fileId,
           async (context) => {
-            await context.app.service('file').patch(
+            await context.app.service('file').patch( // Later, this could be moved to the "distributeModelSummaries"
               context.result.fileId,
               {
                 modelId: context.result._id.toString(),
                 isSystemGenerated: context.result.isSharedModel,
               });
+            await distributeModelSummaries(context);
           },
         )
       ],
@@ -150,6 +152,7 @@ export const model = (app) => {
           context => context.data.isObjGenerated || context.data.isThumbnailGenerated,
           feedSystemGeneratedSharedModel,
         ),
+        distributeModelSummaries,
       ]
     },
     error: {
@@ -423,7 +426,7 @@ const feedSystemGeneratedSharedModel = async (context) => {
 
 const verifyToCreateSystemGeneratedShareLink = context => {
   const { data } = context;
-  const tierConfig = getTierConfig(context.params.user.tier);
+  const tierConfig = getConstraint(context.params.user);
   let createShareLink = tierConfig.defaultValueOfPublicLinkGeneration;
   if ('createSystemGeneratedShareLink' in data && tierConfig.canDisableAutomaticGenerationOfPublicLink) {
     createShareLink = data.createSystemGeneratedShareLink;

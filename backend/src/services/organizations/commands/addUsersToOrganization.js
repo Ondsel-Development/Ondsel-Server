@@ -15,7 +15,7 @@ export const addUsersToOrganization = async (context) => {
       const userOrganizations = user.organizations || [];
 
       organizationUsers.push({
-        ..._.pick(user, ['_id', 'username', 'email', 'firstName', 'lastName']),
+        ..._.pick(user, ['_id', 'username', 'email', 'name']),
         isAdmin: false
       });
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
