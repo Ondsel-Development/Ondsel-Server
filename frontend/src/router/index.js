@@ -19,6 +19,7 @@ import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
+import ForgotPassword from "@/views/ForgotPassword.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -117,6 +118,11 @@ const routes = [
     path: '/login',
     component: Login,
     name: 'Login',
+  },
+  {
+    path: '/forgot-password',
+    component: ForgotPassword,
+    name: 'ForgotPassword',
   },
   {
     path: '/share/:id',

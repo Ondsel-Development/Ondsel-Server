@@ -25,6 +25,12 @@
           :disabled="isAuthenticatePending"
         ></v-text-field>
 
+        <div class="d-flex flex-row-reverse">
+          <p>
+            <a href="/forgot-password" class="text-sm-left">Forgotten password?</a>
+          </p>
+        </div>
+
         <v-card-actions>
         <v-btn type="submit" v-bind:disabled="isAuthenticatePending" block class="mt-2">Submit</v-btn>
         </v-card-actions>
