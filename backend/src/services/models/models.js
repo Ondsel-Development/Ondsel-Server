@@ -266,8 +266,9 @@ const createFileVersionControlObject = async context => {
         uniqueFileName: data.uniqueFileName,
         message: 'Initial commit',
         ...(data.fileUpdatedAt && {fileUpdatedAt: data.fileUpdatedAt})
-      }
-    }, {authentication: context.params.authentication,});
+      },
+      isSystemGenerated: _.get(data, 'isSharedModel', false),
+    }, { authentication: context.params.authentication,});
     data['fileId'] = file._id.toString();
     context.data = _.omit(data, 'uniqueFileName', 'custFileName');
   }
@@ -351,7 +352,8 @@ const createSharedModelObject = async (context) => {
     shouldCommitNewVersion: true,
     version: {
       uniqueFileName: originalFile.currentVersion.uniqueFileName,
-    }
+    },
+    isSystemGenerated: true,
   }, {
     authentication: context.params.authentication,
   })
