@@ -31,8 +31,8 @@ export const fileSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema),
-    directory: Type.Union([Type.Null(), directorySummary]),
-    workspace: workspaceSummary,
+    directory: Type.Optional(Type.Union([Type.Null(), directorySummary])),
+    workspace: Type.Optional(workspaceSummary),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -51,7 +51,7 @@ export const fileResolver = resolve({
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)

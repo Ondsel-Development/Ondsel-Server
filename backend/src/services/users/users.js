@@ -102,6 +102,7 @@ export const user = (app) => {
       create: [
         sendVerify(),
         removeVerification(),
+        createDefaultOrganization,
         createSampleModels,
       ],
     },
@@ -191,4 +192,16 @@ const sendVerify = () => {
       users.map(async user => notifierInst("resendVerifySignup", user))
     )
   };
+}
+
+const createDefaultOrganization = async context => {
+  const organizationService = context.app.service('organizations');
+  const workspaceService = context.app.service('workspaces');
+  const organization = await organizationService.create({ name: 'Personal' }, { user: context.result });
+  const workspace = await workspaceService.create(
+    { name: 'Default', description: 'Your workspace', organizationId: organization._id },
+    { user: user }
+  )
+  await context.service.patch(context.result._id, { defaultWorkspaceId: workspace._id });
+  return context;
 }

@@ -17,24 +17,33 @@ export async function migrateObjectsForSharedWorkspaceCommand(app) {
       { user: user }
     )
     console.log(`-- created workspace: (id: ${workspace._id.toString()})`);
+    await userService.patch(
+      user._id,
+      {
+        defaultWorkspaceId: workspace._id,
+      }
+    )
+    console.log(`-- patching user (id: ${user._id.toString()}) for defaultWorkspaceId`);
     const files = await fileService.find({ user: user, paginate: false })
     for (let file of files) {
-      console.log(`-- patching file (id: ${file._id.toString()})`);
-      await fileService.patch(
-        file._id,
-        {
-          workspace: _.pick(workspace, ['_id', 'name']),
-          directory: workspace.rootDirectory,
-        },
-        { user: user }
-      );
+      if (!file.isSystemGenerated) {
+        console.log(`-- patching file (id: ${file._id.toString()})`);
+        await fileService.patch(
+          file._id,
+          {
+            workspace: _.pick(workspace, ['_id', 'name']),
+            directory: workspace.rootDirectory,
+          },
+          { user: user }
+        );
+      }
     }
 
     await directoryService.patch(
       workspace.rootDirectory._id,
       {
         shouldAddFilesToDirectory: true,
-        fileIds: files.map(file => file._id)
+        fileIds: files.filter(file => !file.isSystemGenerated).map(file => file._id)
       },
       { user: user }
     );

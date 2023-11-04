@@ -27,7 +27,9 @@ export const userSchema = Type.Object(
 
     // private fields
     email: Type.String({ format: "email"}),
-    organizationId: Type.Union([Type.Null(), ObjectIdSchema()]),
+    // file object created under default workspace when no workspace is mentioned in file payload.
+    // This helps to support current frontend as it not supports shared-workspace feature yet.
+    defaultWorkspaceId: ObjectIdSchema(),
     organizations: Type.Array(organizationSummarySchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),
