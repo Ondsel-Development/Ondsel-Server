@@ -4,6 +4,8 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 
 import { dataValidator, queryValidator } from '../../validators.js'
+import { directorySummary } from '../directories/directories.subdocs.js';
+import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 import { modelSummarySchema } from "../models/models.distrib.js";
 
 const fileVersionSchema = Type.Object({
@@ -29,6 +31,8 @@ export const fileSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     versions: Type.Array(fileVersionSchema),
+    directory: Type.Optional(Type.Union([Type.Null(), directorySummary])),
+    workspace: Type.Optional(workspaceSummary),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -47,7 +51,7 @@ export const fileResolver = resolve({
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
