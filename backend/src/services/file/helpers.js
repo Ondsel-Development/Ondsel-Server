@@ -24,4 +24,5 @@ export const feedWorkspaceAndDirectory = async context => {
     data.directory = workspace.rootDirectory;
     context.data = data;
   }
+  return context;
 }
