@@ -16,8 +16,7 @@ export function buildUserSummary(user) {
     _id: user._id,
     username: user.username,
     email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
+    name: user.name,
   };
   return summary;
 }
