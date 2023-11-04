@@ -7,7 +7,7 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { feedWorkspaceAndDirectory } from './helpers.js';
+import { feedWorkspaceAndDirectory, addFileToDirectory } from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -113,7 +113,10 @@ export const file = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        addFileToDirectory,
+      ],
     },
     error: {
       all: []
