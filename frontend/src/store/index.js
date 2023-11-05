@@ -8,12 +8,28 @@ import agreements from "./services/agreements";
 import acceptAgreement from "@/store/services/accept-agreement";
 import file from "@/store/services/file";
 import authManagement from "@/store/services/auth-management";
+import organization from '@/store/services/organizations';
+import app from '@/store/services/app';
 
 const store =  new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
-  plugins: [user, auth, model, sharedModel, accountEvent, agreements, acceptAgreement, file, authManagement]
+  modules: {
+    app
+  },
+  plugins: [
+    user,
+    auth,
+    model,
+    sharedModel,
+    accountEvent,
+    agreements,
+    acceptAgreement,
+    file,
+    authManagement,
+    organization
+  ]
 })
 
 
