@@ -39,6 +39,23 @@
           >
           </v-list-item>
           <v-list-item>
+            <v-select
+              v-if="loggedInUser"
+              v-model="user.currentOrganizationId"
+              class="mt-2"
+              label="Organization"
+              density="compact"
+              variant="outlined"
+              :items="user.organizations"
+              item-title="name"
+              item-value="_id"
+              flat
+              hide-details
+              @update:modelValue="setOrganization"
+            >
+            </v-select>
+          </v-list-item>
+          <v-list-item>
             <v-btn
               variant="text"
               @click="gotoAccountSettings()"
@@ -102,11 +119,16 @@ export default {
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
+    ...mapActions('app', ['setCurrentOrganization']),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings'});
+    },
+    async setOrganization() {
+      const [org] = this.user.organizations.filter(org => org._id === this.user.currentOrganizationId);
+      await this.setCurrentOrganization(org);
     }
   },
 }
