@@ -26,3 +26,18 @@ export const feedWorkspaceAndDirectory = async context => {
   }
   return context;
 }
+
+
+export const addFileToDirectory = async context => {
+  const directorySerivce = context.app.service('directories');
+  if (context.result.directory) {
+    await directorySerivce.patch(
+      context.result.directory._id,
+      {
+        shouldAddFilesToDirectory: true,
+        fileIds: [context.result._id.toString()],
+      }
+    )
+  return context;
+  }
+}
