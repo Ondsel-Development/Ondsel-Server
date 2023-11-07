@@ -1,5 +1,5 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
-import { resolve } from '@feathersjs/schema'
+import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
@@ -14,6 +14,7 @@ export const groupSchema = Type.Object(
     organizationId: ObjectIdSchema(),
     users: Type.Array(userSummarySchema),
     workspaces: Type.Array(workspaceSummary),
+    takeAllNewUsers: Type.Boolean(), // when a user is added to a org, should this group see that user automatically?
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -26,11 +27,15 @@ export const groupResolver = resolve({})
 export const groupExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const groupDataSchema = Type.Pick(groupSchema, ['name', 'organizationId'], {
+export const groupDataSchema = Type.Pick(groupSchema, ['_id', 'name', 'organizationId', 'users', 'takeAllNewUsers'], {
+  // note: _id and name can only be set by the internal system
   $id: 'GroupData'
 })
 export const groupDataValidator = getValidator(groupDataSchema, dataValidator)
 export const groupDataResolver = resolve({
+  takeAllNewUsers: async (_value, message, _context) => {
+    return message.takeAllNewUsers || false
+  },
   createdBy: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id

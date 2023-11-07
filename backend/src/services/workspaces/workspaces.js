@@ -23,6 +23,7 @@ import { workspacePath, workspaceMethods } from './workspaces.shared.js'
 import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
 import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorkspace.js';
 import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
+import { editGroupOrUserOnWorkspace } from './commands/editGroupOrUserOnWorkspace.js';
 import { isUserBelongsToWorkspace, createAndAssignRootDirectory } from './helpers.js';
 
 export * from './workspaces.class.js'
@@ -82,6 +83,10 @@ export const workspace = (app) => {
         iff(
           context => context.data.shouldRemoveGroupsOrUsersFromWorkspace,
           removeGroupsOrUsersFromWorkspace
+        ),
+        iff(
+          context => context.data.shouldEditGroupOrUserOnWorkspace,
+          editGroupOrUserOnWorkspace,
         ),
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)

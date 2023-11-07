@@ -19,10 +19,11 @@ import {
 } from './groups.schema.js'
 import { GroupService, getOptions } from './groups.class.js'
 import { groupPath, groupMethods } from './groups.shared.js'
-import {iff, preventChanges} from "feathers-hooks-common";
+import {iff, isProvider, preventChanges} from "feathers-hooks-common";
 import { addUsersToGroup } from './commands/addUsersToGroup.js';
 import { removeUsersFromGroup } from './commands/removeUsersFromGroup.js';
 import { isUserOwnerOrAdminOfOrganization } from './helpers.js';
+import {distributeGroupSummaries} from "./groups.distrib.js";
 
 export * from './groups.class.js'
 export * from './groups.schema.js'
@@ -57,7 +58,11 @@ export const group = (app) => {
       all: [schemaHooks.validateQuery(groupQueryValidator), schemaHooks.resolveQuery(groupQueryResolver)],
       find: [userBelongingGroups],
       get: [userBelongingGroups],
-      create: [schemaHooks.validateData(groupDataValidator), schemaHooks.resolveData(groupDataResolver)],
+      create: [
+        iff(isProvider('external'), preventChanges(false, '_id', 'users')),
+        schemaHooks.validateData(groupDataValidator),
+        schemaHooks.resolveData(groupDataResolver)
+      ],
       patch: [
         preventChanges(false, 'users'),
         isUserOwnerOrAdminOfOrganization,
@@ -75,7 +80,10 @@ export const group = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      patch: [
+        distributeGroupSummaries,
+      ]
     },
     error: {
       all: []

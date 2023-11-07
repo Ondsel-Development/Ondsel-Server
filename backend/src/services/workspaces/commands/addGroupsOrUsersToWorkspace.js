@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
+import {buildWorkspaceSummary} from "../workspaces.distrib.js";
 
 export const addGroupsOrUsersToWorkspace = async context => {
   const { data } = context;
@@ -20,6 +21,7 @@ export const addGroupsOrUsersToWorkspace = async context => {
           permission,
           groupOrUser: _.pick(group, ['_id', 'name']),
         });
+        await upsertWorkspaceIntoGroup(groupService, workspace, group);
       } else if (type === 'User') {
         const user = await userService.get(groupOrUserId);
         const userOrganizations = user.organizations || [];
@@ -43,3 +45,20 @@ export const addGroupsOrUsersToWorkspace = async context => {
   context.data = _.omit(data, ['shouldAddGroupsOrUsersToWorkspace', 'groupsOrUsersData']);
   return context;
 }
+
+const upsertWorkspaceIntoGroup = async(groupService, workspace, group) => {
+  let workspaceList = group.workspaces || [];
+  let workspaceSummary = buildWorkspaceSummary(workspace);
+  const index = workspaceList.findIndex( (detail) => detail._id === workspace._id );
+  if (index === -1) {
+    workspaceList.push(workspaceSummary);
+  } else {
+    workspaceList[index] = workspaceSummary;
+  }
+  await groupService.patch(
+    group._id,
+    {
+      workspaces: workspaceList
+    }
+  );
+};

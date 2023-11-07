@@ -6,6 +6,8 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { isProvider } from 'feathers-hooks-common';
+import {groupSummary} from "../groups/groups.subdocs.schema.js";
+import {ObjectId} from "mongodb";
 
 const userDataSchema = Type.Intersect(
   [
@@ -23,6 +25,7 @@ export const organizationSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     users: Type.Array(userDataSchema),
+    groups: Type.Array(groupSummary),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -39,6 +42,7 @@ export const organizationDataSchema = Type.Pick(organizationSchema, ['name'], {
 })
 export const organizationDataValidator = getValidator(organizationDataSchema, dataValidator)
 export const organizationDataResolver = resolve({
+  _id: async() => new ObjectId(), // create purposefully rather than default to driver generation
   createdBy: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
@@ -53,6 +57,9 @@ export const organizationDataResolver = resolve({
       }
     ]
   },
+  groups: async() => [
+    { _id: new ObjectId(), name: 'Everybody' }
+  ]
 })
 
 // Schema for updating existing entries
