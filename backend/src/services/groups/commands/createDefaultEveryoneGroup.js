@@ -8,14 +8,14 @@ export const createDefaultEveryoneGroup = async (context) => {
 
   if (orgId !== undefined) {
     const groupService = context.app.service('groups');
-    const newGroup = await groupService.create({
+    await groupService.create({
       _id: thisGroup._id,
       name: thisGroup.name,
       organizationId: orgId,
       takeAllNewUsers: true,
       users: [firstUser],
     }, {
-      authentication: context.params.authentication,
+      user: context.params.user,
     });
   }
   return context;
