@@ -30,6 +30,8 @@ import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
 import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
 import { giveAdminAccessToUsersOfOrganization } from './commands/giveAdminAccessToUsersOfOrganization.js';
 import { revokeAdminAccessFromUsersOfOrganization } from './commands/revokeAdminAccessFromUsersOfOrganization.js';
+import { createDefaultEveryoneGroup } from '../groups/commands/createDefaultEveryoneGroup.js';
+import {distributeOrganizationSummaries} from "./organizations.distrib.js";
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -114,6 +116,10 @@ export const organization = (app) => {
       ],
       create: [
         assignOrganizationIdToUser,
+        createDefaultEveryoneGroup,
+      ],
+      patch: [
+        distributeOrganizationSummaries
       ]
     },
     error: {

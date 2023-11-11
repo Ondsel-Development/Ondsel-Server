@@ -1,6 +1,12 @@
 import { BadRequest } from '@feathersjs/errors';
 
 export const isUserOwnerOrAdminOfOrganization = async context => {
+
+  const provider = context.params.provider; // Internal calls are "undefined"
+  if (provider === undefined) {
+    return context;
+  }
+
   const group = await context.service.get(context.id);
   const organization = await context.app.service('organizations').get(group.organizationId);
 
