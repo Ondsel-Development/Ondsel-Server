@@ -7,6 +7,15 @@
       ONDSEL
     </v-app-bar-title>
 
+    <v-btn
+      v-if="loggedInUser"
+      variant="plain"
+      class="text-none"
+      flat
+      @click="$refs.selectedOrganization.$data.dialog = true;"
+    >
+      {{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}
+    </v-btn>
     <v-spacer></v-spacer>
 
     <v-btn flat v-if="!loggedInUser && currentRouteName !== 'SignUp'" :to="{ name: 'SignUp' }">
@@ -37,23 +46,6 @@
           <v-list-item
             :title="`${loggedInUser.user.name}`"
           >
-          </v-list-item>
-          <v-list-item>
-            <v-select
-              v-if="loggedInUser"
-              v-model="user.currentOrganizationId"
-              class="mt-2"
-              label="Organization"
-              density="compact"
-              variant="outlined"
-              :items="user.organizations"
-              item-title="name"
-              item-value="_id"
-              flat
-              hide-details
-              @update:modelValue="setOrganization"
-            >
-            </v-select>
           </v-list-item>
           <v-list-item>
             <v-btn
@@ -100,14 +92,17 @@
         <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
       </v-list>
     </v-navigation-drawer>
+    <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
+import SelectOrganization from '@/components/SelectOrganization';
 
 export default {
   name: 'AppBar',
 
+  components: { SelectOrganization },
   data: () => ({
     menu: false,
     drawer: false,
@@ -115,7 +110,16 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
+    currentOrganization() {
+      const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
+      if (currentOrganizationId) {
+        const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
+        return organization;
+      }
+      return this.userCurrentOrganization;
+    },
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
@@ -126,9 +130,14 @@ export default {
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings'});
     },
-    async setOrganization() {
-      const [org] = this.user.organizations.filter(org => org._id === this.user.currentOrganizationId);
-      await this.setCurrentOrganization(org);
+    extractOrganizationId(path) {
+      const regex = /\/org\/([^\/]+)/;
+      const match = path.match(regex);
+      if (match && match[1]) {
+        return match[1];
+      } else {
+        return null;
+      }
     }
   },
 }

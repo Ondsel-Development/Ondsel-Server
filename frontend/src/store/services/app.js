@@ -9,7 +9,17 @@ export default {
   namespaced: true,
   state,
   getters: {
-    currentOrganization: s => s.currentOrganization,
+    currentOrganization (state, getters, rootState, rootGetters) {
+      if (state.currentOrganization) {
+        return state.currentOrganization;
+      }
+      const user = rootGetters['auth/user'];
+      if (user && user.currentOrganizationId) {
+        const [organization] = user.organizations.filter(org => org._id === user.currentOrganizationId);
+        return organization;
+      }
+      return null;
+    }
   },
   mutations: {
     SET_CURRENT_ORGANIZATION: (stateIn, organization) => {

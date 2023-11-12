@@ -19,6 +19,7 @@ import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
+import OrganizationHome from '@/views/OrganizationHome';
 
 
 const isWindowLoadedInIframe = () => {
@@ -35,6 +36,12 @@ const routes = [
     path: '/model/:id?',
     component: Home,
     name: 'Home',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:id?',
+    component: OrganizationHome,
+    name: 'OrganizationHome',
     meta: { requiresAuth: true },
   },
   {
