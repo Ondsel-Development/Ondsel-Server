@@ -20,6 +20,7 @@ import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
 import OrganizationHome from '@/views/OrganizationHome';
+import CreateOrganization from '@/views/CreateOrganization';
 
 
 const isWindowLoadedInIframe = () => {
@@ -36,6 +37,12 @@ const routes = [
     path: '/model/:id?',
     component: Home,
     name: 'Home',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/create_organization',
+    component: CreateOrganization,
+    name: 'CreateOrganization',
     meta: { requiresAuth: true },
   },
   {

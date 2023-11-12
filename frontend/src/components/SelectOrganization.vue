@@ -39,6 +39,8 @@
         <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
           color="primary"
+          :to="{ name: 'CreateOrganization'}"
+          @click="dialog = false"
         >Create Organization</v-btn>
       </v-card-actions>
     </v-card>
