@@ -26,7 +26,9 @@ export const SubscriptionType = StringEnum(
 
 export const userSummarySchema = Type.Object(
   {
-    userId: ObjectIdSchema(),
+    _id: ObjectIdSchema(),
+    username: Type.String(),
+    email: Type.String({ format: "email"}),
     name: Type.String(),
   }
 )

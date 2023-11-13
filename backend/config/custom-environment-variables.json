@@ -20,5 +20,6 @@
   "smtpPort": "SMTP_PORT",
   "smtpUser": "SMTP_USER",
   "smtpPass": "SMTP_PASS",
-  "frontendUrl": "FRONTEND_URL"
+  "frontendUrl": "FRONTEND_URL",
+  "slackWebhookUrl": "SLACK_WEBHOOK_URL"
 }

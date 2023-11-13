@@ -5,6 +5,8 @@ import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
 import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
+
+import { organizationSummarySchema } from '../organizations/organizations.subdocs.schema.js';
 import {
   agreementsAcceptedSchema, getConstraint,
   SubscriptionConstraintsType,
@@ -25,6 +27,10 @@ export const userSchema = Type.Object(
 
     // private fields
     email: Type.String({ format: "email"}),
+    // file object created under default workspace when no workspace is mentioned in file payload.
+    // This helps to support current frontend as it not supports shared-workspace feature yet.
+    defaultWorkspaceId: ObjectIdSchema(),
+    organizations: Type.Array(organizationSummarySchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),
     firstName: Type.String(), // deprecated

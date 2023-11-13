@@ -1,6 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
+import axios from 'axios';
 import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -80,6 +81,7 @@ export const user = (app) => {
             'tier',
             'nextTier',
             'subscriptionDetail.state',
+            'organizations',
             "isVerified",
             "resetExpires",
             "resetShortToken",
@@ -101,7 +103,9 @@ export const user = (app) => {
       create: [
         sendVerify(),
         removeVerification(),
+        createDefaultOrganization,
         createSampleModels,
+        sendNotificationToSlack,
       ],
     },
     error: {
@@ -190,4 +194,34 @@ const sendVerify = () => {
       users.map(async user => notifierInst("resendVerifySignup", user))
     )
   };
+}
+
+const createDefaultOrganization = async context => {
+  const organizationService = context.app.service('organizations');
+  const workspaceService = context.app.service('workspaces');
+  const organization = await organizationService.create({ name: 'Personal' }, { user: context.result });
+  const workspace = await workspaceService.create(
+    { name: 'Default', description: 'Your workspace', organizationId: organization._id },
+    { user: user }
+  )
+  await context.service.patch(context.result._id, { defaultWorkspaceId: workspace._id });
+  return context;
+}
+
+
+const sendNotificationToSlack = async context => {
+  const webhookUrl = context.app.get('slackWebhookUrl');
+  if (webhookUrl) {
+    axios({
+      method: 'post',
+      url: webhookUrl,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        text: `🎉 New User Alert! 🎉\n\nName: *${context.result.name}*\nEmail: *${context.result.email}*`
+      }
+    });
+  }
+  return context;
 }

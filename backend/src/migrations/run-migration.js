@@ -2,6 +2,7 @@ import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';
 import {addUsernameCommand} from "./add-username.command.js";
+import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
 import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
 
@@ -32,6 +33,9 @@ async function runMigration() {
     //   break;
     case 'updateModelsForFiles':
       await updateModelsForFilesCommand(app);
+      break;
+    case 'migrateObjectsForSharedWorkspace':
+      await migrateObjectsForSharedWorkspaceCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
