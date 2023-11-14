@@ -1,6 +1,6 @@
 export const orgInvitesPath = 'org-invites'
 
-export const orgInvitesMethods = ['find', 'get', 'create', 'patch', 'remove']
+export const orgInvitesMethods = ['find', 'create', 'patch']
 
 export const orgInvitesClient = (client) => {
   const connection = client.get('connection')

@@ -3,7 +3,9 @@ import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import {InviteNatureType, orgInvitesResultSchema} from "./org-invites.subdocs.schema.js";
+import { InviteNatureType, orgInvitesResultSchema } from "./org-invites.subdocs.schema.js";
+import { userSummarySchema } from "../users/users.subdocs.schema.js";
+import { buildUserSummary } from "../users/users.distrib.js";
 
 // Main data model schema
 export const orgInvitesSchema = Type.Object(
@@ -12,6 +14,7 @@ export const orgInvitesSchema = Type.Object(
     inviteNature: InviteNatureType,
     inviteToken: Type.Optional(Type.String()),
     toEmail: Type.String({ format: "email"}),
+    personInviting: userSummarySchema,
     createdAt: Type.Number(),
     organizationId: ObjectIdSchema(),
     active: Type.Boolean(),
@@ -33,7 +36,18 @@ export const orgInvitesDataSchema = Type.Pick(orgInvitesSchema, [
   $id: 'OrgInvitesData'
 })
 export const orgInvitesDataValidator = getValidator(orgInvitesDataSchema, dataValidator)
-export const orgInvitesDataResolver = resolve({})
+const TOKEN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+export const orgInvitesDataResolver = resolve({
+  inviteToken: async() => {
+    return [...Array(30)].reduce(a=>a+TOKEN_CHARS[~~(Math.random()*TOKEN_CHARS.length)],'');
+  },
+  personInviting: async (_value, _message, context) => {
+    return buildUserSummary(context.params.user)
+  },
+  createdAt: async () => Date.now(),
+  active: async () => true,
+  result: async () => {},
+})
 
 // Schema for updating existing entries
 export const orgInvitesPatchSchema = Type.Partial(orgInvitesSchema, {

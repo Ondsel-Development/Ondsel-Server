@@ -10,10 +10,12 @@ import {
   orgInvitesExternalResolver,
   orgInvitesDataResolver,
   orgInvitesPatchResolver,
-  orgInvitesQueryResolver
+  orgInvitesQueryResolver, orgInvitesSchema
 } from './org-invites.schema.js'
 import { OrgInvitesService, getOptions } from './org-invites.class.js'
 import { orgInvitesPath, orgInvitesMethods } from './org-invites.shared.js'
+import swagger from "feathers-swagger";
+import {acceptAgreementSchema} from "../agreements/accept/accept.schema.js";
 
 export * from './org-invites.class.js'
 export * from './org-invites.schema.js'
@@ -25,7 +27,15 @@ export const orgInvites = (app) => {
     // A list of all methods this service exposes externally
     methods: orgInvitesMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { orgInvitesSchema },
+      docs: {
+        description: 'An service handling inviting users to an organization',
+        idType: 'string',
+        securities: ['all'],
+      }
+    }),
   })
   // Initialize hooks
   app.service(orgInvitesPath).hooks({
