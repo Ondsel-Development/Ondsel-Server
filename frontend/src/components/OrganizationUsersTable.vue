@@ -19,6 +19,7 @@
         <v-btn
           dark
           class="mb-2"
+          @click="$refs.inviteUserDialog.$data.dialog = true;"
         >
           Invite new user
         </v-btn>
@@ -32,14 +33,18 @@
       </v-icon>
     </template>
   </v-data-table>
+  <invite-user-dialog ref="inviteUserDialog" :organization="organization" />
 </template>
 
 <script>
+import InviteUserDialog from '@/components/InviteUserDialog.vue';
+
 export default {
   name: "OrganizationUsersTable",
   props: {
     organization: Object,
   },
+  components: { InviteUserDialog },
   data: () => ({
     headers: [
       {
