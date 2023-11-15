@@ -16,6 +16,12 @@ import { OrgInvitesService, getOptions } from './org-invites.class.js'
 import { orgInvitesPath, orgInvitesMethods } from './org-invites.shared.js'
 import swagger from "feathers-swagger";
 import {acceptAgreementSchema} from "../agreements/accept/accept.schema.js";
+import {notifier} from "../auth-management/notifier.js";
+import {authManagementActionTypeMap} from "../auth-management/auth-management.schema.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {InviteNatureType, orgInvitesResultSchema} from "./org-invites.subdocs.schema.js";
+import {userSummarySchema} from "../users/users.subdocs.schema.js";
+import axios from "axios";
 
 export * from './org-invites.class.js'
 export * from './org-invites.schema.js'
@@ -64,10 +70,25 @@ export const orgInvites = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [sendOrgInvitation],
     },
     error: {
       all: []
     }
   })
+}
+
+const sendOrgInvitation = async context => {
+  const notifierInst = notifier(context.app);
+  const details = {
+    inviteId: context.result._id,
+    email: context.result.toEmail,
+    inviteToken: context.result.inviteToken,
+    personInviting: context.result.personInviting,
+    organization: context.result.organization,
+  }
+
+  await notifierInst(authManagementActionTypeMap.sendOrgInviteEmail, details);
+  return context;
 }

@@ -74,6 +74,16 @@ export const notifier = (app) => {
           subject: "Notification: Ondsel password has been change",
           text: `Your password for ${user.username} has been successfully changed.!`,
         });
+      case authManagementActionTypeMap.sendOrgInviteEmail:
+        // in this context, "user" is detail from the org invite; see 'org-invites.class.js' for detail
+        const invite = user;
+        return sendEmail({
+          from: 'contact@ondsel.com',
+          to: invite.email,
+          subject: `[Ondsel] You have been invited to organization ${invite.organization.name}`,
+          text: `You have been invited to join organization ${invite.organization.name}.`
+            + getLink('join-org', invite.inviteToken, invite.organization._id, baseUrl),
+        });
       default:
         throw new BadRequest(`unhandled auth-management type ${type}`);
     }

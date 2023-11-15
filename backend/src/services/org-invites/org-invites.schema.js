@@ -6,6 +6,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { InviteNatureType, orgInvitesResultSchema } from "./org-invites.subdocs.schema.js";
 import { userSummarySchema } from "../users/users.subdocs.schema.js";
 import { buildUserSummary } from "../users/users.distrib.js";
+import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 
 // Main data model schema
 export const orgInvitesSchema = Type.Object(
@@ -16,7 +17,7 @@ export const orgInvitesSchema = Type.Object(
     toEmail: Type.String({ format: "email"}),
     personInviting: userSummarySchema,
     createdAt: Type.Number(),
-    organizationId: ObjectIdSchema(),
+    organization: organizationSummarySchema,
     active: Type.Boolean(),
     result: orgInvitesResultSchema,
   },
@@ -31,7 +32,7 @@ export const orgInvitesExternalResolver = resolve({})
 export const orgInvitesDataSchema = Type.Pick(orgInvitesSchema, [
   'inviteNature',
   'toEmail',
-  'organizationId'
+  'organization'
 ], {
   $id: 'OrgInvitesData'
 })
@@ -61,7 +62,7 @@ export const orgInvitesQueryProperties = Type.Pick(orgInvitesSchema, [
   '_id',
   'inviteNature',
   'toEmail',
-  'organizationId',
+  'organization',
   'active',
 ])
 export const orgInvitesQuerySchema = Type.Intersect(
