@@ -2,20 +2,7 @@
 
 import {authManagementActionTypeMap, resetPwdGENERIC, verifySignupGENERIC} from "./auth-management.schema.js";
 import {BadRequest} from "@feathersjs/errors";
-import {
-  SubscriptionTermType,
-  SubscriptionTermTypeMap,
-  SubscriptionType,
-  SubscriptionTypeMap
-} from "../users/users.subdocs.schema.js";
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {CurrencyType} from "../../currencies.js";
-import {
-  accountEventOptionsSchema,
-  AccountEventType,
-  AccountEventTypeMap
-} from "../account-event/account-event.schema.js";
-import {ObjectId} from "mongodb";
+import {orgInviteStateTypeMap} from "../org-invites/org-invites.subdocs.schema.js";
 
 export const notifier = (app) => {
   function getLink(type, hash, uid, baseUrl) {
@@ -42,6 +29,7 @@ export const notifier = (app) => {
 
   return async (type, user, notifierOptions = {}) => {
     const baseUrl = app.get('frontendUrl');
+    const invite = user; // an alias for some contexts; see 'org-invites.class.js' for detail
     switch (type) {
       case authManagementActionTypeMap.resendVerifySignup:
         return sendEmail({
@@ -72,17 +60,22 @@ export const notifier = (app) => {
           from: 'contact@ondsel.com',
           to: user.email,
           subject: "Notification: Ondsel password has been change",
-          text: `Your password for ${user.username} has been successfully changed.!`,
+          text: `Your password for ${user.username} has been successfully changed!`,
         });
-      case authManagementActionTypeMap.sendOrgInviteEmail:
-        // in this context, "user" is detail from the org invite; see 'org-invites.class.js' for detail
-        const invite = user;
+      case orgInviteStateTypeMap.sendOrgInviteEmail:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email,
           subject: `[Ondsel] You have been invited to organization ${invite.organization.name}`,
-          text: `You have been invited to join organization ${invite.organization.name}.`
+          text: `You have been invited to join organization ${invite.organization.name}. `
             + getLink('join-org', invite.inviteToken, invite.organization._id, baseUrl),
+        });
+      case orgInviteStateTypeMap.verifyOrgInviteEmail:
+        return sendEmail({
+          from: 'contact@ondsel.com',
+          to: invite.email, // NOTE: this email is the User's email; NOT the invite's original email (if different)
+          subject: `[Ondsel] You have been Accepted to organization ${invite.organization.name}`,
+          text: `You are now part of organization ${invite.organization.name}.`,
         });
       default:
         throw new BadRequest(`unhandled auth-management type ${type}`);

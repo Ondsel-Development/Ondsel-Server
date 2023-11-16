@@ -3,16 +3,16 @@ import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import { InviteNatureType, orgInvitesResultSchema } from "./org-invites.subdocs.schema.js";
+import { orgInvitesResultSchema, orgInviteStateType } from "./org-invites.subdocs.schema.js";
 import { userSummarySchema } from "../users/users.subdocs.schema.js";
-import { buildUserSummary } from "../users/users.distrib.js";
-import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
+import { organizationSummarySchema } from "../organizations/organizations.subdocs.schema.js";
 
 // Main data model schema
 export const orgInvitesSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    inviteNature: InviteNatureType,
+    state: orgInviteStateType,
+    //
     inviteToken: Type.Optional(Type.String()),
     toEmail: Type.String({ format: "email"}),
     personInviting: userSummarySchema,
@@ -30,20 +30,17 @@ export const orgInvitesExternalResolver = resolve({})
 
 // Schema for creating new entries
 export const orgInvitesDataSchema = Type.Pick(orgInvitesSchema, [
-  'inviteNature',
+  'state',
   'toEmail',
   'organization'
 ], {
   $id: 'OrgInvitesData'
 })
 export const orgInvitesDataValidator = getValidator(orgInvitesDataSchema, dataValidator)
-const TOKEN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const TOKEN_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 export const orgInvitesDataResolver = resolve({
   inviteToken: async() => {
     return [...Array(30)].reduce(a=>a+TOKEN_CHARS[~~(Math.random()*TOKEN_CHARS.length)],'');
-  },
-  personInviting: async (_value, _message, context) => {
-    return buildUserSummary(context.params.user)
   },
   createdAt: async () => Date.now(),
   active: async () => true,
@@ -60,7 +57,7 @@ export const orgInvitesPatchResolver = resolve({})
 // Schema for allowed query properties
 export const orgInvitesQueryProperties = Type.Pick(orgInvitesSchema, [
   '_id',
-  'inviteNature',
+  'state',
   'toEmail',
   'organization',
   'active',

@@ -15,13 +15,11 @@ import {
 import { OrgInvitesService, getOptions } from './org-invites.class.js'
 import { orgInvitesPath, orgInvitesMethods } from './org-invites.shared.js'
 import swagger from "feathers-swagger";
-import {acceptAgreementSchema} from "../agreements/accept/accept.schema.js";
-import {notifier} from "../auth-management/notifier.js";
-import {authManagementActionTypeMap} from "../auth-management/auth-management.schema.js";
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {InviteNatureType, orgInvitesResultSchema} from "./org-invites.subdocs.schema.js";
-import {userSummarySchema} from "../users/users.subdocs.schema.js";
-import axios from "axios";
+import { notifier } from "../auth-management/notifier.js";
+import { BadRequest } from "@feathersjs/errors";
+import { doAddUserToOrganization } from "./hooks/DoAddUserToOrganization.js";
+import { buildOrganizationSummary } from "../organizations/organizations.distrib.js";
+import { orgInviteStateTypeMap } from "./org-invites.subdocs.schema.js";
 
 export * from './org-invites.class.js'
 export * from './org-invites.schema.js'
@@ -61,11 +59,17 @@ export const orgInvites = (app) => {
       get: [],
       create: [
         schemaHooks.validateData(orgInvitesDataValidator),
-        schemaHooks.resolveData(orgInvitesDataResolver)
+        schemaHooks.resolveData(orgInvitesDataResolver),
+        isLoggedInUserOwnerOrAdminOfOrganization,
+        validateExtraCreateDetails,
       ],
       patch: [
         schemaHooks.validateData(orgInvitesPatchValidator),
-        schemaHooks.resolveData(orgInvitesPatchResolver)
+        schemaHooks.resolveData(orgInvitesPatchResolver),
+        isLoggedInUserOwnerOrAdminOfOrganization,
+        validateExtraPatchDetails,
+        doAddUserToOrganization,
+        sendOrgInviteConfirmation,
       ],
       remove: []
     },
@@ -88,7 +92,56 @@ const sendOrgInvitation = async context => {
     personInviting: context.result.personInviting,
     organization: context.result.organization,
   }
-
-  await notifierInst(authManagementActionTypeMap.sendOrgInviteEmail, details);
+  await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
   return context;
 }
+const sendOrgInviteConfirmation = async context => {
+  if (context.result.state !== orgInviteStateTypeMap.verifyOrgInviteEmail) {
+    return context;
+  }
+  const notifierInst = notifier(context.app);
+  const details = {
+    inviteId: context.result._id, // not used
+    email: context.data.userDetail.email,
+    organization: buildOrganizationSummary(context.data.orgDetail),
+  }
+  await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
+  return context;
+}
+
+export const validateExtraPatchDetails = async (context) => {
+  switch (context.data.state) {
+    case orgInviteStateTypeMap.cancelOrgInvite:
+      if (!context.data.result) {
+        context.data.result = {}
+      }
+      // setting the date and making active=false are the only real "actions" from cancelling an invitation.
+      // The "cancelledByUserId" and "notes" are ideally set, but not strictly required.
+      context.data.result.acceptedAt = Date.now(); // override anything sent; server sets this officially
+      context.data.active = false;
+      break;
+    case orgInviteStateTypeMap.verifyOrgInviteEmail:
+      context.data.active = false;
+      break;
+    default:
+      throw new BadRequest('Invalid: authAction not allowed on PUT');
+  }
+}
+export const validateExtraCreateDetails = async (context) => {
+  if (orgInviteStateTypeMap.sendOrgInviteEmail !== context.data.state) {
+    throw new BadRequest('Invalid: authAction not allowed on POST')
+  }
+}
+
+export const isLoggedInUserOwnerOrAdminOfOrganization = async context => {
+  const invite = await context.app.service('org-invites').get(context.data._id);
+  const organization = await context.service('organizations').get(invite.organization._id);
+
+  if (
+    context.params.user._id.equals(organization.createdBy)
+    || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
+    return context;
+  }
+  throw new BadRequest('Only admins of organization allow to perform this action');
+}
+
