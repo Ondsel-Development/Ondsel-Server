@@ -66,7 +66,6 @@ export const orgInvites = (app) => {
       patch: [
         schemaHooks.validateData(orgInvitesPatchValidator),
         schemaHooks.resolveData(orgInvitesPatchResolver),
-        isLoggedInUserOwnerOrAdminOfOrganization,
         validateExtraPatchDetails,
         doAddUserToOrganization,
         sendOrgInviteConfirmation,
@@ -134,8 +133,7 @@ export const validateExtraCreateDetails = async (context) => {
 }
 
 export const isLoggedInUserOwnerOrAdminOfOrganization = async context => {
-  const invite = await context.app.service('org-invites').get(context.data._id);
-  const organization = await context.service('organizations').get(invite.organization._id);
+  const organization = await context.app.service('organizations').get(context.data.organization._id);
 
   if (
     context.params.user._id.equals(organization.createdBy)

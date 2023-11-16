@@ -6,6 +6,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { orgInvitesResultSchema, orgInviteStateType } from "./org-invites.subdocs.schema.js";
 import { userSummarySchema } from "../users/users.subdocs.schema.js";
 import { organizationSummarySchema } from "../organizations/organizations.subdocs.schema.js";
+import { v4 as uuidv4 } from 'uuid';
 
 // Main data model schema
 export const orgInvitesSchema = Type.Object(
@@ -37,11 +38,8 @@ export const orgInvitesDataSchema = Type.Pick(orgInvitesSchema, [
   $id: 'OrgInvitesData'
 })
 export const orgInvitesDataValidator = getValidator(orgInvitesDataSchema, dataValidator)
-const TOKEN_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 export const orgInvitesDataResolver = resolve({
-  inviteToken: async() => {
-    return [...Array(30)].reduce(a=>a+TOKEN_CHARS[~~(Math.random()*TOKEN_CHARS.length)],'');
-  },
+  inviteToken: async() => uuidv4(),
   createdAt: async () => Date.now(),
   active: async () => true,
   result: async () => {},
