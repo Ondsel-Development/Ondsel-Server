@@ -7,6 +7,8 @@ import { orgInvitesResultSchema, orgInviteStateType } from "./org-invites.subdoc
 import { userSummarySchema } from "../users/users.subdocs.schema.js";
 import { organizationSummarySchema } from "../organizations/organizations.subdocs.schema.js";
 import { v4 as uuidv4 } from 'uuid';
+import {buildUserSummary} from "../users/users.distrib.js";
+import _ from "lodash";
 
 // Main data model schema
 export const orgInvitesSchema = Type.Object(
@@ -39,6 +41,9 @@ export const orgInvitesDataSchema = Type.Pick(orgInvitesSchema, [
 })
 export const orgInvitesDataValidator = getValidator(orgInvitesDataSchema, dataValidator)
 export const orgInvitesDataResolver = resolve({
+  personInviting: async(_value, _message, context) => {
+    return buildUserSummary(context.params.user);
+  },
   inviteToken: async() => uuidv4(),
   createdAt: async () => Date.now(),
   active: async () => true,

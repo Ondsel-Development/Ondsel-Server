@@ -66,8 +66,9 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email,
-          subject: `[Ondsel] You have been invited to organization ${invite.organization.name}`,
-          text: `You have been invited to join organization ${invite.organization.name}. `
+          subject: `[Ondsel] You have been invited to org ${invite.organization.name}`,
+          text: `You have been invited to join an organization titled "${invite.organization.name}".\n`
+            + `Click on the following link to accept: `
             + getLink('join-org', invite.inviteToken, invite.organization._id, baseUrl),
         });
       case orgInviteStateTypeMap.verifyOrgInviteEmail:

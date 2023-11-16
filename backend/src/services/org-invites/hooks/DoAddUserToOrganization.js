@@ -14,6 +14,7 @@ export const doAddUserToOrganization = async (context) => {
   if (!invite) {
     throw new BadRequest(`Invalid: cannot find original invite.`);
   }
+  context.dbref.invite = invite;
   //
   // GET User
   //
@@ -22,17 +23,12 @@ export const doAddUserToOrganization = async (context) => {
   if (!user) {
     throw new BadRequest(`Invalid: cannot find user ${userId} from result object`);
   }
-  context.data.userDetail = user; // this is a hack for confirmation email later. "userDetail" is not part of the schema
+  context.dbref.user = user; // this is a hack for confirmation email later. "userDetail" is not part of the schema
   //
   // GET Org
   //
   const orgService = context.app.service('organizations');
-  const orgId = invite.organization._id;
-  const org = await orgService.get(orgId);
-  if (!org) {
-    throw new BadRequest(`Invalid: cannot find org ${orgId} from original invite`);
-  }
-  context.data.orgDetail = user; // this is a hack for confirmation email later. "orgDetail" is not part of the schema
+  const org = context.dbref.organization;
   //
   // Add them to the org.
   //

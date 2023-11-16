@@ -60,12 +60,14 @@ export const orgInvites = (app) => {
       create: [
         schemaHooks.validateData(orgInvitesDataValidator),
         schemaHooks.resolveData(orgInvitesDataResolver),
-        isLoggedInUserOwnerOrAdminOfOrganization,
+        getOrgDetails,
+        isLoggedInUserOwnerOrAdminOfInvitableOrganization,
         validateExtraCreateDetails,
       ],
       patch: [
         schemaHooks.validateData(orgInvitesPatchValidator),
         schemaHooks.resolveData(orgInvitesPatchResolver),
+        getOrgDetails,
         validateExtraPatchDetails,
         doAddUserToOrganization,
         sendOrgInviteConfirmation,
@@ -88,8 +90,7 @@ const sendOrgInvitation = async context => {
     inviteId: context.result._id,
     email: context.result.toEmail,
     inviteToken: context.result.inviteToken,
-    personInviting: context.result.personInviting,
-    organization: context.result.organization,
+    organization: buildOrganizationSummary(context.dbref.organization),
   }
   await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
   return context;
@@ -100,9 +101,8 @@ const sendOrgInviteConfirmation = async context => {
   }
   const notifierInst = notifier(context.app);
   const details = {
-    inviteId: context.result._id, // not used
-    email: context.data.userDetail.email,
-    organization: buildOrganizationSummary(context.data.orgDetail),
+    email: context.dbref.user.email,
+    organization: buildOrganizationSummary(context.dbref.organization),
   }
   await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
   return context;
@@ -132,9 +132,8 @@ export const validateExtraCreateDetails = async (context) => {
   }
 }
 
-export const isLoggedInUserOwnerOrAdminOfOrganization = async context => {
-  const organization = await context.app.service('organizations').get(context.data.organization._id);
-
+export const isLoggedInUserOwnerOrAdminOfInvitableOrganization = async context => {
+  const organization = context.dbref.organization;
   if (
     context.params.user._id.equals(organization.createdBy)
     || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
@@ -143,3 +142,13 @@ export const isLoggedInUserOwnerOrAdminOfOrganization = async context => {
   throw new BadRequest('Only admins of organization allow to perform this action');
 }
 
+export const getOrgDetails = async context => {
+  const organization = await context.app.service('organizations').get(context.data.organization._id);
+  if (!organization) {
+    throw new BadRequest(`Cannot find org ${context.data.organization._id}`);
+  }
+  if (!context.dbref) {
+    context.dbref = {};
+  }
+  context.dbref.organization = organization;
+}
