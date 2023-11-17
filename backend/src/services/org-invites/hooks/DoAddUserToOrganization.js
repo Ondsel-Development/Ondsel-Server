@@ -7,40 +7,48 @@ export const doAddUserToOrganization = async (context) => {
   if (context.data.state !== orgInviteStateTypeMap.verifyOrgInviteEmail) {
     return context;
   }
-  //
-  // GET ORIGINAL invite; do NOT trust the put details
-  //
-  const invite = await context.app.service('org-invites').get(context.data._id);
-  if (!invite) {
-    throw new BadRequest(`Invalid: cannot find original invite.`);
+  if (!context.data.result) {
+    context.data.result = {}
   }
-  context.dbref.invite = invite;
   //
-  // GET User
+  // verify passedTokenConfirmation matches
   //
-  const userId = context.data.result.userId;
-  const user = await context.app.service('users').get(userId);
-  if (!user) {
-    throw new BadRequest(`Invalid: cannot find user ${userId} from result object`);
+  if (context.data.inviteToken) {
+    throw new BadRequest('Invalid: inviteToken cannot be changed');
   }
+  if (context.data.passedTokenConfirmation !== context.dbref.invite.inviteToken) {
+    throw new BadRequest('Invalid: passedTokenConfirmation does not match');
+  }
+  //
+  // GET Logged-In User
+  //
+  const user = context.params.user;
   context.dbref.user = user; // this is a hack for confirmation email later. "userDetail" is not part of the schema
   //
   // GET Org
   //
   const orgService = context.app.service('organizations');
-  const org = context.dbref.organization;
+  const org = context.dbref.organization; // should be set by getOrgDetail hook earlier in org-invites.js
+  //
+  // Exit if already belonging
+  //
+  if (org.users.some(u => u._id.toString() === user._id.toString())) { // skip if already added
+    context.data.result.log = `WARNING: consumed but user ${user._id} already part of org`;
+    return context;
+  } else {
+    if (!context.data.result.note) {
+      context.data.result.userId = user._id;
+      context.data.result.log = `user ${user._id} added to org`;
+    }
+  }
   //
   // Add them to the org.
   //
-  const newUser = {
-    ..._.pick(user, ['_id', 'username', 'name']),
-    isAdmin: false
-  };
-  org.users.push(newUser);
   await orgService.patch(
     org._id,
     {
-      users: org.users
+      shouldAddUsersToOrganization: true,
+      userIds: [user._id],
     }
   );
   //

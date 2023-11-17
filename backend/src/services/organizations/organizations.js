@@ -89,7 +89,7 @@ export const organization = (app) => {
       ],
       patch: [
         preventChanges(false, 'admins', 'users'),
-        isUserOwnerOrAdminOfOrganization,
+        iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(
           context => context.data.shouldAddUsersToOrganization,
           addUsersToOrganization

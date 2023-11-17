@@ -16,9 +16,10 @@ export const orgInviteStateType = StringEnum(
 
 export const orgInvitesResultSchema = Type.Object(
   {
-    userId: ObjectIdSchema(), // on acceptance, this is the user who accepted
-    handledAt: Type.Number(), // Date/Time
-    note: Type.String(),
-    cancelledByUserId: ObjectIdSchema(), // set by org member who cancelled it (if cancelled)
+    userId: Type.Optional(ObjectIdSchema()), // on acceptance, this is the user who accepted
+    handledAt: Type.Optional(Type.Number()), // Date/Time
+    note: Type.Optional(Type.String()),
+    log: Type.Optional(Type.String()),
+    cancelledByUserId: Type.Optional(ObjectIdSchema()), // set by org member who cancelled it (if cancelled)
   }
 )

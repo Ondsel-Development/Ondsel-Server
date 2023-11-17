@@ -8,7 +8,7 @@ export const addUsersToGroup = async context => {
   const group = await context.service.get(context.id);
   const groupUsers = group.users || [];
   for (let userId of data.userIds) {
-    if (!groupUsers.some(user => user._id.toString() === userId)){
+    if (!groupUsers.some(user => user._id.toString() === userId.toString())){
       const user = await userService.get(userId);
       const userOrganizations = user.organizations || [];
       if (!userOrganizations.some(org => group.organizationId.equals(org._id))) {

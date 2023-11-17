@@ -23,6 +23,8 @@ export const orgInvitesSchema = Type.Object(
     organization: organizationSummarySchema,
     active: Type.Boolean(),
     result: orgInvitesResultSchema,
+    //
+    passedTokenConfirmation: Type.Optional(Type.String())
   },
   { $id: 'OrgInvites', additionalProperties: false }
 )
@@ -48,6 +50,7 @@ export const orgInvitesDataResolver = resolve({
   createdAt: async () => Date.now(),
   active: async () => true,
   result: async () => {},
+  passedTokenConfirmation: async() => null,
 })
 
 // Schema for updating existing entries

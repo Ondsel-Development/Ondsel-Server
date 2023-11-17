@@ -1,6 +1,5 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   orgInvitesDataValidator,
@@ -23,6 +22,48 @@ import { orgInviteStateTypeMap } from "./org-invites.subdocs.schema.js";
 
 export * from './org-invites.class.js'
 export * from './org-invites.schema.js'
+
+/*
+Examples of use
+
+For creation with POST. User generating the invite is logged in.:
+
+  {
+    "state": "sendOrgInviteEmail",
+    "toEmail": "john@cattailcreek9.com",
+    "organization": {
+      "_id": "65567d7d0dc31ea4aeee307d",
+      "name": "pool company"
+    }
+  }
+
+For accepting and invite with a PATCH /org-invites/6557efc97854628b50509ddd. USER accepting the invite is logged in.
+
+  {
+    "state": "verifyOrgInviteEmail",
+    "passedTokenConfirmation": "c2b0e42b-fb7c-4eb0-b77c-a76852f42d5d",
+    "result": {
+      "note": "On web interface, user john_something accept invite to pool company."
+    }
+  }
+
+The "result" part is optional. The date/time of handling and log is set in the result object by the API.
+The users official Ondsel email address is used for the confirmation email, regardless of the invitation address.
+
+For a user rejecting an invite (or an org member cancelling and invite) with a PAtCH. USER taking action must be logged
+in:
+
+  {
+    "state": "cancelOrgInvite",
+    "result": {
+      "note": "larry of pool_company cancelled the invite"
+    }
+  }
+
+The "result" part is optional but a good idea. The date/time of handling and log is set in the result object by the API.
+
+*/
+
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const orgInvites = (app) => {
@@ -67,6 +108,7 @@ export const orgInvites = (app) => {
       patch: [
         schemaHooks.validateData(orgInvitesPatchValidator),
         schemaHooks.resolveData(orgInvitesPatchResolver),
+        getInviteDetails, // never trust a patch for truth
         getOrgDetails,
         validateExtraPatchDetails,
         doAddUserToOrganization,
@@ -96,39 +138,46 @@ const sendOrgInvitation = async context => {
   return context;
 }
 const sendOrgInviteConfirmation = async context => {
-  if (context.result.state !== orgInviteStateTypeMap.verifyOrgInviteEmail) {
+  if (context.data.state !== orgInviteStateTypeMap.verifyOrgInviteEmail) {
     return context;
   }
   const notifierInst = notifier(context.app);
   const details = {
-    email: context.dbref.user.email,
+    email: context.dbref.user.email, // using actual USER's email, not the invitation email
     organization: buildOrganizationSummary(context.dbref.organization),
   }
-  await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
+  await notifierInst(orgInviteStateTypeMap.verifyOrgInviteEmail, details);
   return context;
 }
 
 export const validateExtraPatchDetails = async (context) => {
+  if (context.dbref.invite.active === false) {
+    throw new BadRequest("Invalid: invite already inactive.");
+  }
+  if (!context.data.result) {
+    context.data.result = {}
+  }
   switch (context.data.state) {
     case orgInviteStateTypeMap.cancelOrgInvite:
-      if (!context.data.result) {
-        context.data.result = {}
-      }
       // setting the date and making active=false are the only real "actions" from cancelling an invitation.
-      // The "cancelledByUserId" and "notes" are ideally set, but not strictly required.
-      context.data.result.acceptedAt = Date.now(); // override anything sent; server sets this officially
+      // The result."notes" are ideally set, but not strictly required.
+      context.data.result.cancelledByUserId = context.params.user._id;
+      context.data.result.handledAt = Date.now(); // override anything sent; server sets this officially
       context.data.active = false;
+      context.data.result.log = "invite set active=false";
       break;
     case orgInviteStateTypeMap.verifyOrgInviteEmail:
+      context.data.result.handledAt = Date.now(); // override anything sent; server sets this officially
       context.data.active = false;
       break;
     default:
-      throw new BadRequest('Invalid: authAction not allowed on PUT');
+      throw new BadRequest('Invalid: state "${context.data.state}" not allowed on PATCH');
   }
+  return context;
 }
 export const validateExtraCreateDetails = async (context) => {
   if (orgInviteStateTypeMap.sendOrgInviteEmail !== context.data.state) {
-    throw new BadRequest('Invalid: authAction not allowed on POST')
+    throw new BadRequest(`Invalid: state "${context.data.state}" not allowed on POST`)
   }
 }
 
@@ -143,12 +192,26 @@ export const isLoggedInUserOwnerOrAdminOfInvitableOrganization = async context =
 }
 
 export const getOrgDetails = async context => {
-  const organization = await context.app.service('organizations').get(context.data.organization._id);
+  let orgId = context.data.organization?._id;
+  if (context.dbref?.invite) {
+    orgId = context.dbref.invite.organization._id; // if we have authoritative answer, use it instead
+  }
+  const organization = await context.app.service('organizations').get(orgId);
   if (!organization) {
-    throw new BadRequest(`Cannot find org ${context.data.organization._id}`);
+    throw new BadRequest(`Cannot find org ${orgId}`);
   }
   if (!context.dbref) {
     context.dbref = {};
   }
   context.dbref.organization = organization;
+}
+export const getInviteDetails = async context => {
+  const invite = await context.app.service('org-invites').get(context.id);
+  if (!invite) {
+    throw new BadRequest(`Cannot find invite ${context.id}`);
+  }
+  if (!context.dbref) {
+    context.dbref = {};
+  }
+  context.dbref.invite = invite;
 }
