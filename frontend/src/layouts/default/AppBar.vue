@@ -4,13 +4,15 @@
 
     <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="ml-2 mr-n3"></v-img>
     <v-app-bar-title>
-      ONDSEL
+      <router-link to="/" style="text-decoration: none; color: inherit;">
+        ONDSEL
+      </router-link>
     </v-app-bar-title>
 
     <v-btn
       v-if="loggedInUser"
       variant="plain"
-      class="text-none"
+      class="text-h6 text-decoration-underline"
       flat
       @click="$refs.selectedOrganization.$data.dialog = true;"
     >
