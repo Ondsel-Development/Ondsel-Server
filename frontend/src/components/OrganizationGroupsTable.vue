@@ -2,7 +2,7 @@
   <v-data-table
     v-if="organization"
     :headers="headers"
-    :items="Array.from({ length: 5 }, () => organization.groups).flat()"
+    :items="organization.groups"
     :sort-by="[{ key: 'name', order: 'asc' }]"
   >
     <template v-slot:top>
@@ -19,6 +19,7 @@
         <v-btn
           dark
           class="mb-2"
+          @click="$refs.createGroupDialog.$data.dialog = true;"
         >
           Add Group
         </v-btn>
@@ -32,14 +33,18 @@
       </v-icon>
     </template>
   </v-data-table>
+  <create-group-dialog ref="createGroupDialog" :organization="organization" />
 </template>
 
 <script>
+import CreateGroupDialog from '@/components/CreateGroupDialog.vue';
+
 export default {
   name: "OrganizationGroupsTable",
   props: {
     organization: Object,
   },
+  components: { CreateGroupDialog },
   data: () => ({
     headers: [
       {
