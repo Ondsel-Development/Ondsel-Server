@@ -1,15 +1,15 @@
 <template>
   <v-data-table
-    v-if="organization"
+    v-if="group"
     :headers="headers"
-    :items="organization.groups"
+    :items="group.users"
     :sort-by="[{ key: 'name', order: 'asc' }]"
   >
     <template v-slot:top>
       <v-toolbar
         flat
       >
-        <v-toolbar-title>Groups</v-toolbar-title>
+        <v-toolbar-title>Users</v-toolbar-title>
         <v-divider
           class="mx-4"
           inset
@@ -19,33 +19,35 @@
         <v-btn
           dark
           class="mb-2"
-          @click="$refs.createGroupDialog.$data.dialog = true;"
+          @click="openAddUsersToGroupDialog"
         >
-          Add Group
+          Add / Remove User
         </v-btn>
       </v-toolbar>
     </template>
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
-        @click="$router.push({ name: 'EditGroup', params: { id: item.value._id } })"
       >
         mdi-pencil
       </v-icon>
     </template>
   </v-data-table>
-  <create-group-dialog ref="createGroupDialog" :organization="organization" />
+  <add-users-to-group-dialog ref="addUsersToGroupDialog" :group="group" :organization="organization" />
 </template>
 
 <script>
-import CreateGroupDialog from '@/components/CreateGroupDialog.vue';
+import { models } from '@feathersjs/vuex';
+import AddUsersToGroupDialog from '@/components/AddUsersToGroupDialog.vue';
+
+const { Organization } = models.api;
 
 export default {
-  name: "OrganizationGroupsTable",
+  name: "GroupUsersTable",
   props: {
-    organization: Object,
+    group: Object,
   },
-  components: { CreateGroupDialog },
+  components: { AddUsersToGroupDialog },
   data: () => ({
     headers: [
       {
@@ -55,13 +57,27 @@ export default {
         key: 'name',
       },
       {
+        title: 'Username',
+        sortable: true,
+        key: 'username'
+      },
+      {
         title: 'Actions',
         align: 'end',
         key: 'actions',
         sortable: false
       },
     ],
-  })
+  }),
+  computed: {
+    organization: vm => Organization.getFromStore(vm.group.organizationId),
+  },
+  methods: {
+    async openAddUsersToGroupDialog() {
+      await Organization.get(this.group.organizationId);
+      this.$refs.addUsersToGroupDialog.activeDialog();
+    }
+  }
 }
 </script>
 
