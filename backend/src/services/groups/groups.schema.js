@@ -12,7 +12,7 @@ export const groupSchema = Type.Object(
     _id: ObjectIdSchema(),
     name: Type.String(),
     organizationId: ObjectIdSchema(),
-    users: Type.Array(userSummarySchema),
+    users: Type.Optional(Type.Array(userSummarySchema)),
     workspaces: Type.Array(workspaceSummary),
     takeAllNewUsers: Type.Boolean(), // when a user is added to a org, should this group see that user automatically?
     createdBy: ObjectIdSchema(),
@@ -27,7 +27,7 @@ export const groupResolver = resolve({})
 export const groupExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const groupDataSchema = Type.Pick(groupSchema, ['_id', 'name', 'organizationId', 'users', 'takeAllNewUsers'], {
+export const groupDataSchema = Type.Pick(groupSchema, ['name', 'organizationId', 'users', 'takeAllNewUsers'], {
   // note: _id and name can only be set by the internal system
   $id: 'GroupData'
 })
