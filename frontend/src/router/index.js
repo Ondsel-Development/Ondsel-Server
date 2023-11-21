@@ -24,6 +24,7 @@ import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
 import JoinOrganization from '@/views/JoinOrganization';
+import DirectoryListView from "@/views/DirectoryListView";
 
 
 const isWindowLoadedInIframe = () => {
@@ -36,6 +37,12 @@ const isWindowLoadedInIframe = () => {
 
 
 const routes = [
+  {
+    path: '/directory',
+    component: DirectoryListView,
+    name: 'DirectoryListView',
+    meta: { requiresAuth: true },
+  },
   {
     path: '/model/:id?',
     component: Home,
