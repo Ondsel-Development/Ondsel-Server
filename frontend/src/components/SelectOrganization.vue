@@ -26,6 +26,12 @@
             <template #title>{{ organization.name }}</template>
             <template #append>
               <v-btn
+                icon="mdi-wrench"
+                variant="text"
+                flat
+                @click="goToOrganizationEdit(organization)"
+              />
+              <v-btn
                 icon="mdi-arrow-right"
                 variant="text"
                 flat
@@ -39,6 +45,8 @@
         <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
           color="primary"
+          :to="{ name: 'CreateOrganization'}"
+          @click="dialog = false"
         >Create Organization</v-btn>
       </v-card-actions>
     </v-card>
@@ -72,6 +80,12 @@ export default {
       this.$router.push({ name: 'OrganizationHome', params: { id: organization._id } });
       this.dialog = false;
     },
+    async goToOrganizationEdit(organization) {
+      const { Organization } = models.api;
+      await Organization.get(organization._id);
+      this.$router.push({ name: 'EditOrganization', params: { id: organization._id } });
+      this.dialog = false;
+    }
   }
 }
 </script>

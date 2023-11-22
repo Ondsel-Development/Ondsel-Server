@@ -20,6 +20,9 @@ import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
 import OrganizationHome from '@/views/OrganizationHome';
+import CreateOrganization from '@/views/CreateOrganization';
+import EditOrganization from '@/views/EditOrganization';
+import EditGroup from '@/views/EditGroup';
 
 
 const isWindowLoadedInIframe = () => {
@@ -39,9 +42,27 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:id?',
+    path: '/create_organization',
+    component: CreateOrganization,
+    name: 'CreateOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:id',
     component: OrganizationHome,
     name: 'OrganizationHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:id/edit',
+    component: EditOrganization,
+    name: 'EditOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/group/:id/edit',
+    component: EditGroup,
+    name: 'EditGroup',
     meta: { requiresAuth: true },
   },
   {
