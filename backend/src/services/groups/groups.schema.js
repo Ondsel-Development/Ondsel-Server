@@ -42,6 +42,9 @@ export const groupDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  users: async (_value, message, _context) => {
+    return message.users || [];
+  }
 })
 
 // Schema for updating existing entries

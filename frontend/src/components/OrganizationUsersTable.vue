@@ -2,7 +2,7 @@
   <v-data-table
     v-if="organization"
     :headers="headers"
-    :items="Array.from({ length: 4 }, () => organization.users).flat()"
+    :items="organization.users"
     :sort-by="[{ key: 'name', order: 'asc' }]"
   >
     <template v-slot:top>
