@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import auth from './store.auth'
+import app from '@/store/services/app';
 import user from './services/users';
 import model from './services/models';
 import sharedModel from './services/sharedModel';
@@ -10,7 +11,7 @@ import file from "@/store/services/file";
 import authManagement from "@/store/services/auth-management";
 import organization from '@/store/services/organizations';
 import group from '@/store/services/groups';
-import app from '@/store/services/app';
+import orgInvite from '@/store/services/orgInvites';
 
 const store =  new Vuex.Store({
   state: {},
@@ -31,6 +32,7 @@ const store =  new Vuex.Store({
     authManagement,
     organization,
     group,
+    orgInvite,
   ]
 })
 

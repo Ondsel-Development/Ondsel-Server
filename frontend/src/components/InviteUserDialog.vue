@@ -9,18 +9,26 @@
         <div class="text-center">Create Invite to <b>{{ organization.name }}</b></div>
       </template>
       <v-progress-linear
-        :active="isInviteInProgress"
+        :active="isCreatePending"
         indeterminate
         absolute
         bottom
       ></v-progress-linear>
       <v-form ref="form" @submit.prevent="inviteUser">
         <v-card-text>
+          <v-alert
+            v-if="label"
+            :type="label.type"
+            variant="outlined"
+            class="mb-2"
+          >
+            {{ label.msg }}
+          </v-alert>
           <v-text-field
             v-model.trim="email"
             label="Email"
             hint="Enter invite user email"
-            :disabled="isInviteInProgress"
+            :disabled="isCreatePending"
             :rules="[rules.isEmail]"
           ></v-text-field>
         </v-card-text>
@@ -29,7 +37,7 @@
           <v-btn
             type="submit"
             color="primary"
-            :disabled="isInviteInProgress"
+            :disabled="isCreatePending"
           >Send</v-btn>
         </v-card-actions>
       </v-form>
@@ -38,6 +46,11 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import { models } from "@feathersjs/vuex";
+
+const { OrgInvite } = models.api;
+
 export default {
   name: "InviteUserDialog",
   props: {
@@ -46,21 +59,40 @@ export default {
   data: () => ({
     dialog: false,
     email: '',
-    isInviteInProgress: false,
     rules: {
       isEmail: v => /^\S+@\S+\.\S+$/.test(v) || 'Invalid Email address',
-    }
+    },
+    label: undefined,
   }),
+  computed: {
+    ...mapState('org-invites', ['isCreatePending']),
+  },
   methods: {
     async inviteUser() {
       const { valid } = await this.$refs.form.validate();
       if (!valid) {
         return;
       }
-      this.isInviteInProgress = true;
-      console.log(`Inviting ${this.email} user to ${this.organization.name}...`)
-      this.isInviteInProgress = false;
-      this.dialog = false;
+
+      try {
+        await OrgInvite.create({
+          state: "sendOrgInviteEmail",
+          toEmail: this.email,
+          organization: {
+            _id: this.organization._id,
+            name: this.organization.name,
+          }
+        });
+        this.label = {
+          type: 'success',
+          msg: `Invitation successfully sent to ${this.email}`
+        }
+      } catch (e) {
+        this.label = {
+          type: 'error',
+          msg: 'Internal Server error'
+        }
+      }
     }
   }
 }
