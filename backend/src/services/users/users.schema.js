@@ -30,6 +30,7 @@ export const userSchema = Type.Object(
     // file object created under default workspace when no workspace is mentioned in file payload.
     // This helps to support current frontend as it not supports shared-workspace feature yet.
     defaultWorkspaceId: ObjectIdSchema(),
+    currentOrganizationId: ObjectIdSchema(),
     organizations: Type.Array(organizationSummarySchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),

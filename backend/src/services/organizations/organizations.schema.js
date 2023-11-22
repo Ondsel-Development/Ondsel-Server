@@ -5,7 +5,6 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
-import { isProvider } from 'feathers-hooks-common';
 import {groupSummary} from "../groups/groups.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 
@@ -57,9 +56,6 @@ export const organizationDataResolver = resolve({
       }
     ]
   },
-  groups: async() => [
-    { _id: new ObjectId(), name: 'Everybody' }
-  ]
 })
 
 // Schema for updating existing entries
