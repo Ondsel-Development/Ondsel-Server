@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 const { Organization } = models.api;
@@ -44,9 +44,11 @@ export default {
     ...mapState('organizations', ['isCreatePending'])
   },
   methods: {
+    ...mapActions('app', ['setCurrentOrganization']),
     async createOrganization() {
       const org = await this.organization.create();
-      this.$router.push({ name: 'OrganizationHome', params: { id: org._id } });
+      await this.setCurrentOrganization(Organization.getFromStore(org._id));
+      this.$router.push({ name: 'EditOrganization', params: { id: org._id } });
     }
   }
 }

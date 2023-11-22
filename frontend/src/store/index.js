@@ -9,6 +9,7 @@ import acceptAgreement from "@/store/services/accept-agreement";
 import file from "@/store/services/file";
 import authManagement from "@/store/services/auth-management";
 import organization from '@/store/services/organizations';
+import group from '@/store/services/groups';
 import app from '@/store/services/app';
 
 const store =  new Vuex.Store({
@@ -28,7 +29,8 @@ const store =  new Vuex.Store({
     acceptAgreement,
     file,
     authManagement,
-    organization
+    organization,
+    group,
   ]
 })
 
