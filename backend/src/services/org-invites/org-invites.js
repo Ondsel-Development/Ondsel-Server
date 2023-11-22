@@ -19,6 +19,7 @@ import { BadRequest } from "@feathersjs/errors";
 import { doAddUserToOrganization } from "./hooks/DoAddUserToOrganization.js";
 import { buildOrganizationSummary } from "../organizations/organizations.distrib.js";
 import { orgInviteStateTypeMap } from "./org-invites.subdocs.schema.js";
+import { iff, isProvider } from "feathers-hooks-common";
 
 export * from './org-invites.class.js'
 export * from './org-invites.schema.js'
@@ -118,6 +119,12 @@ export const orgInvites = (app) => {
     },
     after: {
       all: [],
+      get: [
+        iff(
+          isProvider('external'),
+          blockSecurityDetails,
+        )
+      ],
       create: [sendOrgInvitation],
     },
     error: {
@@ -135,6 +142,12 @@ const sendOrgInvitation = async context => {
     organization: buildOrganizationSummary(context.dbref.organization),
   }
   await notifierInst(orgInviteStateTypeMap.sendOrgInviteEmail, details);
+  return context;
+}
+const blockSecurityDetails = async context => {
+  context.result.inviteToken = "/redacted/";
+  context.result.passedTokenConfirmation = "/redacted/";
+  context.result.toEmail = "/redacted/";
   return context;
 }
 const sendOrgInviteConfirmation = async context => {
