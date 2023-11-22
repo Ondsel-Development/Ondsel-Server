@@ -51,10 +51,9 @@ export const distributeOrganizationSummaries = async (context) => {
 
 export async function upsertGroupSummaryToOrganization(context, orgId, groupSummary) {
   const orgService = context.app.service('organizations');
-  const org = await orgService.find(orgId);
+  const org = await orgService.get(orgId);
   let groupList = org.groups || [];
-  const matchingOrg = (orgDetail) => orgDetail._id === orgId;
-  const index = groupList.findIndex(matchingOrg);
+  const index = groupList.findIndex(group => group._id.equals(groupSummary._id));
   if (index === -1) {
     groupList.push(groupSummary);
   } else {
