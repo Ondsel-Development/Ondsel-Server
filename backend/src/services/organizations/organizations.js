@@ -31,7 +31,8 @@ import { removeUsersFromOrganization } from './commands/removeUsersFromOrganizat
 import { giveAdminAccessToUsersOfOrganization } from './commands/giveAdminAccessToUsersOfOrganization.js';
 import { revokeAdminAccessFromUsersOfOrganization } from './commands/revokeAdminAccessFromUsersOfOrganization.js';
 import { createDefaultEveryoneGroup } from '../groups/commands/createDefaultEveryoneGroup.js';
-import {distributeOrganizationSummaries} from "./organizations.distrib.js";
+import { distributeOrganizationSummaries } from './organizations.distrib.js';
+import { addGroupsToOrganization } from './commands/addGroupsToOrganization.js';
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -53,6 +54,11 @@ export const organization = (app) => {
       }
     })
   })
+
+  app.service(organizationPath).publish((data, context) => {
+    return app.channel(context.result.users.map(user => user._id.toString()))
+  })
+
   // Initialize hooks
   app.service(organizationPath).hooks({
     around: {
@@ -105,6 +111,10 @@ export const organization = (app) => {
         iff(
           context => context.data.shouldRevokeAdminAccessFromUsersOfOrganization,
           revokeAdminAccessFromUsersOfOrganization
+        ),
+        iff(
+          context => context.data.shouldAddGroupsToOrganization,
+          addGroupsToOrganization,
         ),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)

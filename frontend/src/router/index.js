@@ -22,6 +22,7 @@ import ChangePassword from "@/views/ChangePassword.vue";
 import OrganizationHome from '@/views/OrganizationHome';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
+import EditGroup from '@/views/EditGroup';
 
 
 const isWindowLoadedInIframe = () => {
@@ -56,6 +57,12 @@ const routes = [
     path: '/org/:id/edit',
     component: EditOrganization,
     name: 'EditOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/group/:id/edit',
+    component: EditGroup,
+    name: 'EditGroup',
     meta: { requiresAuth: true },
   },
   {
