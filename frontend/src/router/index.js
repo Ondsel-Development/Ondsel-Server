@@ -23,6 +23,7 @@ import OrganizationHome from '@/views/OrganizationHome';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
+import JoinOrganization from '@/views/JoinOrganization';
 
 
 const isWindowLoadedInIframe = () => {
@@ -157,6 +158,12 @@ const routes = [
     component: PageNotFound,
     name: 'PageNotFound',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/join-org/:token/:id',
+    component: JoinOrganization,
+    name: 'JoinOrganization',
+    meta: { requiresAuth: true },
   },
 ]
 
