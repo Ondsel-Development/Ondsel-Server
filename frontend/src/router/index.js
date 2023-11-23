@@ -23,8 +23,12 @@ import OrganizationHome from '@/views/OrganizationHome';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
+<<<<<<< HEAD
 import JoinOrganization from '@/views/JoinOrganization';
 import DirectoryListView from "@/views/DirectoryListView";
+=======
+import DirectoryListViewPage from "@/views/DirectoryListViewPage.vue";
+>>>>>>> 88661c3 (tmp save)
 
 
 const isWindowLoadedInIframe = () => {
@@ -39,7 +43,7 @@ const isWindowLoadedInIframe = () => {
 const routes = [
   {
     path: '/directory',
-    component: DirectoryListView,
+    component: DirectoryListViewPage,
     name: 'DirectoryListView',
     meta: { requiresAuth: true },
   },
