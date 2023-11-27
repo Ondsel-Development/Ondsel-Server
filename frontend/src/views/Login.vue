@@ -28,6 +28,13 @@
         <v-card-actions>
         <v-btn type="submit" v-bind:disabled="isAuthenticatePending" block class="mt-2">Submit</v-btn>
         </v-card-actions>
+
+        <v-row justify="end">
+          <v-col class="text-right">
+            <v-btn size="x-small" variant="text" href="/forgot-password">Forgot Password?</v-btn>
+          </v-col>
+        </v-row>
+
       </v-form>
     </v-card>
     <v-snackbar
