@@ -31,7 +31,17 @@
 
         <v-row justify="end">
           <v-col class="text-right">
-            <v-btn size="x-small" variant="text" href="/forgot-password">Forgot Password?</v-btn>
+            <v-btn
+              size="x-small"
+              variant="text"
+              @click.stop="openForgotPasswordDialog()">
+              Forgot Password?
+            </v-btn>
+            <v-spacer></v-spacer>
+            <ForgotPasswordDialog
+              :is-active="isForgotPasswordDialogActive"
+              ref="forgotPasswordDialog"
+            />
           </v-col>
         </v-row>
 
@@ -50,9 +60,11 @@
 import { mapState, mapActions } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import { resetStores } from '@/store';
+import ForgotPasswordDialog from "@/components/ForgotPasswordDialog.vue";
 
 export default {
   name: 'Login',
+  components: {ForgotPasswordDialog},
   data() {
     return {
       result: {},
@@ -66,7 +78,8 @@ export default {
         isRequired: v => !!v || 'This field is required',
       },
       snackerMsg: '',
-      showSnacker: false
+      showSnacker: false,
+      isForgotPasswordDialogActive: false,
     }
   },
   computed: {
@@ -90,7 +103,12 @@ export default {
           this.snackerMsg = `Invalid login`
         })
       }
-    }
+    },
+    openForgotPasswordDialog() {
+      this.isForgotPasswordDialogActive = true;
+      this.$refs.forgotPasswordDialog.$data.dialog = true;
+    },
+
   }
 }
 </script>
