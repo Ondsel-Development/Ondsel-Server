@@ -23,12 +23,8 @@ import OrganizationHome from '@/views/OrganizationHome';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
-<<<<<<< HEAD
 import JoinOrganization from '@/views/JoinOrganization';
-import DirectoryListView from "@/views/DirectoryListView";
-=======
-import DirectoryListViewPage from "@/views/DirectoryListViewPage.vue";
->>>>>>> 88661c3 (tmp save)
+import WorkspaceHome from '@/views/WorkspaceHome.vue';
 
 
 const isWindowLoadedInIframe = () => {
@@ -41,12 +37,6 @@ const isWindowLoadedInIframe = () => {
 
 
 const routes = [
-  {
-    path: '/directory',
-    component: DirectoryListViewPage,
-    name: 'DirectoryListView',
-    meta: { requiresAuth: true },
-  },
   {
     path: '/model/:id?',
     component: Home,
@@ -75,6 +65,12 @@ const routes = [
     path: '/group/:id/edit',
     component: EditGroup,
     name: 'EditGroup',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/workspace/:id',
+    component: WorkspaceHome,
+    name: 'WorkspaceHome',
     meta: { requiresAuth: true },
   },
   {

@@ -1,68 +1,80 @@
 <template>
-  <v-app>
-    <v-container>
-      <v-row>
-        <v-col>
-          <v-list two-line>
-            <template v-for="item in files">
-              <v-list-item :key="item.name" v-if="item.type === 'file'">
-                <v-list-item-content>
-                  <v-list-item-title>{{ item.name }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-list-item :key="item.name" v-else>
-                <v-list-item-content>
-                  <v-list-item-title @click="toggleFolder(item)">
-                    <v-icon>{{ openFolders.includes(item) ? 'mdi-folder-open' : 'mdi-folder' }}</v-icon>
-                    {{ item.name }}
-                  </v-list-item-title>
-                </v-list-item-content>
-
-<!--                {{ openFolders.includes(item) }}-->
-                <directory-list-view :files="item.children" :openFolders="openFolders" v-if="openFolders.includes(item)" />
-
-<!--                <v-list-group :value="openFolders.includes(item)" @input="toggleFolder(item)" :prepend-icon="openFolders.includes(item) ? 'mdi-folder-open' : 'mdi-folder'">-->
-<!--                  <template v-slot:activator>-->
-<!--                    &lt;!&ndash; Empty activator to prevent clicking on the list item itself &ndash;&gt;-->
-<!--                  </template>-->
-
-<!--                  <v-list>-->
-<!--                    <v-list-item-content>-->
-<!--                      <v-list-item-title>-->
-<!--                        yes yes-->
-<!--                      </v-list-item-title>-->
-<!--                    </v-list-item-content>-->
-<!--                    {{ openFolders.includes(item) }}-->
-<!--                    &lt;!&ndash; Use the component directly here &ndash;&gt;-->
-<!--                    <directory-list-view :files="item.children" :openFolders="openFolders" v-if="openFolders.includes(item)" />-->
-<!--                  </v-list>-->
-<!--                </v-list-group>-->
-              </v-list-item>
-            </template>
-          </v-list>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
+  <v-list v-if="directory" density="compact">
+    <v-list-item
+      v-for="file in directory.files"
+      :key="file._id"
+      :value="file"
+      variant="flat"
+    >
+      <v-list-item-title
+        class="text-body-2"
+        @click="$emit('selectedFile', file)"
+      >
+        {{ getItemPath(file.custFileName) }}
+      </v-list-item-title>
+    </v-list-item>
+    <template
+      v-for="dir in directory.directories"
+      :key="dir._id"
+    >
+      <v-list-item
+        variant="flat"
+      >
+        <template v-slot:prepend>
+          <v-icon
+            class="mr-1"
+            :icon="openDirectories.find(d => d._id === dir._id) ? 'mdi-folder-open' : 'mdi-folder'"
+          ></v-icon>
+        </template>
+        <v-list-item-title
+          class="text-body-2"
+          @click="toggleDirectory(dir); $emit('selectedDirectory', dir);"
+        >
+          {{ getItemPath(dir.name) }}
+        </v-list-item-title>
+      </v-list-item>
+      <directory-list-view
+        v-if="openDirectories.find(d => d._id === dir._id)"
+        :directory="openDirectories.find(d => d._id === dir._id)"
+        :parent-directory-path="getItemPath(dir.name)+'/'"
+        @selected-file="file => $emit('selectedFile', file)"
+        @selected-directory="dir => $emit('selectedDirectory', dir)"
+      />
+    </template>
+  </v-list>
 </template>
 
 <script>
+import { models } from '@feathersjs/vuex';
+
+const { Directory } = models.api;
+
 export default {
   name: 'DirectoryListView',
+  emits: ['selectedFile', 'selectedDirectory'],
   props: {
-    files: Array,
-    openFolders: Array,
+    directory: Object,
+    parentDirectoryPath: String,
+  },
+  data: () => ({
+    openDirectories: [],
+  }),
+  computed: {
   },
   methods: {
-    toggleFolder(folder) {
-      const index = this.openFolders.indexOf(folder);
-      if (index !== -1) {
-        this.openFolders.splice(index, 1);
-      } else {
-        this.openFolders.push(folder);
-      }
+    getItemPath(item) {
+      return `${this.parentDirectoryPath}${item}`;
     },
+    async toggleDirectory(directorySubdocs) {
+      const index = this.openDirectories.findIndex(d => d._id === directorySubdocs._id);
+      if (index > -1) {
+        this.openDirectories.splice(index, 1);
+        return;
+      }
+      await Directory.get(directorySubdocs._id);
+      const directory = Directory.getFromStore(directorySubdocs._id);
+      this.openDirectories.push(directory);
+    }
   },
 };
 </script>
