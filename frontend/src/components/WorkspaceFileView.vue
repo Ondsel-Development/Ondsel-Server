@@ -22,7 +22,14 @@
     </v-row>
     <v-row>
       <v-spacer />
-      <v-btn flat>Download Active</v-btn>
+      <v-btn
+        :disabled="isFileDownloadInProgress"
+        :loading="isFileDownloadInProgress"
+        @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
+        flat
+      >
+        Download Active
+      </v-btn>
       <v-btn flat>Upload New Version</v-btn>
     </v-row>
   </v-container>
@@ -30,6 +37,7 @@
 
 <script>
 import FileVersionsTable from '@/components/FileVersionsTable.vue';
+import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 
 export default {
   name: 'WorkspaceFileView',
@@ -37,6 +45,7 @@ export default {
   props: {
     file: Object,
   },
+  mixins: [fileDownloadMixin],
   data: () => ({
   }),
 }

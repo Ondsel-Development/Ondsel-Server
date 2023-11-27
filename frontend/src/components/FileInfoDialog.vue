@@ -28,6 +28,9 @@
         <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
           color="primary"
+          :disabled="isFileDownloadInProgress"
+          :loading="isFileDownloadInProgress"
+          @click="downloadFile(selectedFileVersion.uniqueFileName, `${selectedFileVersion._id.substr(-6)}_${file.custFileName}`)"
         >Download Copy</v-btn>
         <v-btn
           color="primary"
@@ -39,12 +42,15 @@
 </template>
 
 <script>
+import fileDownloadMixin from '@/mixins/fileDownloadMixin';
+
 export default {
   name: "FileInfoDialog",
   props: {
     file: Object,
     selectedFileVersion: Object,
   },
+  mixins: [fileDownloadMixin],
   data: () => ({
     dialog: false,
   }),
