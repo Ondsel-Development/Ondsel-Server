@@ -19,7 +19,7 @@ export const addUsersToOrganization = async (context) => {
         isAdmin: false
       });
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
-        userOrganizations.push(_.pick(organization, ['_id', 'name']));
+        userOrganizations.push(_.pick(organization, ['_id', 'name', 'refName']));
         await userService.patch(user._id, { organizations: userOrganizations});
         await addUserToDefaultingGroups(context, organization, user);
       }

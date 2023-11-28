@@ -36,7 +36,7 @@ export const assignOrganizationIdToUser = async context => {
   const userService = context.app.service('users');
   const user = await userService.get(context.params.user._id);
   const userOrganizations = user.organizations || [];
-  userOrganizations.push(_.pick(context.result, ['_id', 'name']));
+  userOrganizations.push(_.pick(context.result, ['_id', 'name', 'refName']));
 
   await context.app.service('users').patch(context.result.createdBy, { organizations: userOrganizations });
   return context;

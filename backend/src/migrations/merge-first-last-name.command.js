@@ -7,7 +7,7 @@ import {
   specificAgreementType
 } from "../services/agreements/agreements.schema.js";
 import {ObjectId} from "mongodb";
-import {conformName, usernameHasher} from "../usernameFunctions.js";
+import {conformRefName, refNameHasher} from "../refNameFunctions.js";
 
 export async function mergeFirstLastNameCommand(app) {
   const userService = app.service('users');

@@ -16,7 +16,7 @@ import {
   organizationSchema,
   organizationDataSchema,
   organizationPatchSchema,
-  organizationQuerySchema,
+  organizationQuerySchema, uniqueOrgValidator,
 } from './organizations.schema.js'
 import { OrganizationService, getOptions } from './organizations.class.js'
 import { organizationPath, organizationMethods } from './organizations.shared.js'
@@ -89,6 +89,7 @@ export const organization = (app) => {
         iff(isProvider('external'), isUserMemberOfOrganization)
       ],
       create: [
+        uniqueOrgValidator,
         canUserCreateOrganization,
         schemaHooks.validateData(organizationDataValidator),
         schemaHooks.resolveData(organizationDataResolver)
