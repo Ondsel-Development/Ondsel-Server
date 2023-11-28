@@ -42,7 +42,7 @@
 </template>
 
 <script>
-
+import {AuthManagement} from "@/store/services/auth-management";
 export default {
   name: 'ForgotPasswordDialog',
   data: () => ({
@@ -62,16 +62,16 @@ export default {
   methods: {
     async sendResetEmail() {
       this.pendingPasswordEmail = true;
-      // await AuthManagement.create({
-      //   action: "sendResetPwd",
-      //   value: {email: this.email},
-      //   notifierOptions: {},
-      // }).then(() => {
-      //   this.dialog = false;
-      // }).catch((e) => {
-      //   const msg = e.message;
-      //   console.log(msg);
-      // });
+      await AuthManagement.create({
+        action: "sendResetPwd",
+        value: {email: this.email},
+        notifierOptions: {},
+      }).then(() => {
+        this.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        console.log(msg);
+      });
       this.pendingPasswordEmail = false;
     }
   },
