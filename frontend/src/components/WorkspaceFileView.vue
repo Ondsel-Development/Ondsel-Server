@@ -30,18 +30,24 @@
       >
         Download Active
       </v-btn>
-      <v-btn flat>Upload New Version</v-btn>
+      <v-btn
+        flat
+        @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
+      >Upload New Version</v-btn>
     </v-row>
+    <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
   </v-container>
 </template>
 
 <script>
 import FileVersionsTable from '@/components/FileVersionsTable.vue';
+import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.vue';
+
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 
 export default {
   name: 'WorkspaceFileView',
-  components: { FileVersionsTable },
+  components: { FileVersionsTable, UploadNewVersionFileDialog },
   props: {
     file: Object,
   },

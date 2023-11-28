@@ -121,7 +121,7 @@ export default {
         includeStyling: false,
         url: `${h}upload`,
         paramName: 'file',
-        parallelUploads: 2,
+        parallelUploads: 5,
         headers: {
           Authorization: vm.accessToken,
         },
