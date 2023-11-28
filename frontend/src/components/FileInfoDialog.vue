@@ -34,6 +34,8 @@
         >Download Copy</v-btn>
         <v-btn
           color="primary"
+          :loading="isPatchPending"
+          @click="checkoutToVersion"
         >Set as Active</v-btn>
       </v-card-actions>
     </v-card>
@@ -42,6 +44,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 
 export default {
@@ -55,6 +58,7 @@ export default {
     dialog: false,
   }),
   computed: {
+    ...mapState('file', ['isPatchPending']),
     tableData: (vm) => ([
       {
         name: 'What',
@@ -73,6 +77,17 @@ export default {
         value: vm.selectedFileVersion.message
       },
     ])
+  },
+  methods: {
+    async checkoutToVersion() {
+      await this.file.patch({
+        data: {
+          shouldCheckoutToVersion: true,
+          versionId: this.selectedFileVersion._id,
+        }
+      });
+      this.dialog = false;
+    }
   }
 }
 </script>
