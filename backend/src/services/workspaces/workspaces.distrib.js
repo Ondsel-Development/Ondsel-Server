@@ -13,6 +13,7 @@ export function buildWorkspaceSummary(workspace) {
   return {
     _id: workspace._id,
     name: workspace.name,
+    refName: workspace.refName,
   };
 }
 
