@@ -23,7 +23,7 @@ export const organizationSchema = Type.Object(
     _id: ObjectIdSchema(),
     name: Type.String(),
     refName: Type.String(),
-    refNameHash: Type.String(), // later indexed, used for finding case-insensitive duplicates
+    refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
