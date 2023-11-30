@@ -8,7 +8,7 @@ import { directorySummary } from '../directories/directories.subdocs.js';
 import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 import { modelSummarySchema } from "../models/models.distrib.js";
 
-const fileVersionSchema = Type.Object({
+export const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
   uniqueFileName: Type.String(),
   userId: ObjectIdSchema(),

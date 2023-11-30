@@ -24,6 +24,7 @@ import {
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
+import {distributeFileSummaries} from "./file.distrib.js";
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -117,6 +118,9 @@ export const file = (app) => {
       create: [
         addFileToDirectory,
       ],
+      patch: [
+        distributeFileSummaries,
+      ]
     },
     error: {
       all: []

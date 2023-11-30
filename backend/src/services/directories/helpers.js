@@ -44,3 +44,26 @@ export const userWriteAccessDirectories = async context => {
   }
   return context;
 }
+
+
+export async function forDirectoryUpdateFileSummary(context, dirId, fileSummary) {
+  // limited patch designed to not spin up a summary-update loop; often stored in *.distrib.js file
+  const directoryService = context.app.service('directories');
+  const dir = await directoryService.get(dirId);
+  let fileList = dir.files || [];
+  const index = fileList.findIndex(file => file._id.equals(fileSummary._id));
+  if (index === -1) {
+    fileList.push(fileSummary);
+  } else {
+    fileList[index] = fileSummary;
+  }
+  await directoryService.patch(
+    dirId,
+    {
+      files: fileList,
+    },
+    {
+      authentication: context.params.authentication,
+    }
+  );
+}
