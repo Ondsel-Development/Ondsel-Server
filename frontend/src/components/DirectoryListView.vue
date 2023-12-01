@@ -1,4 +1,16 @@
 <template>
+  <v-list v-if="rootDirectory" density="compact">
+    <v-list-item variant="flat" @click="toggleRootDirectory(); $emit('selectedDirectory', rootDirectory, rootDirectory.name);">
+      {{ rootDirectory.name }}
+    </v-list-item>
+    <directory-list-view
+      v-if="openRootDirectory"
+      :directory="rootDirectory"
+      :parent-directory-path="rootDirectory.name"
+      @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
+      @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
+    />
+  </v-list>
   <v-list v-if="directory" density="compact">
     <v-list-item
       v-for="file in directory.files"
@@ -8,7 +20,7 @@
     >
       <v-list-item-title
         class="text-body-2"
-        @click="$emit('selectedFile', file)"
+        @click="$emit('selectedFile', file, getItemPath(file.custFileName))"
       >
         {{ getItemPath(file.custFileName) }}
       </v-list-item-title>
@@ -28,7 +40,7 @@
         </template>
         <v-list-item-title
           class="text-body-2"
-          @click="toggleDirectory(dir); $emit('selectedDirectory', dir);"
+          @click="toggleDirectory(dir); $emit('selectedDirectory', dir, getItemPath(dir.name));"
         >
           {{ getItemPath(dir.name) }}
         </v-list-item-title>
@@ -37,8 +49,8 @@
         v-if="openDirectories.find(d => d._id === dir._id)"
         :directory="openDirectories.find(d => d._id === dir._id)"
         :parent-directory-path="getItemPath(dir.name)+'/'"
-        @selected-file="file => $emit('selectedFile', file)"
-        @selected-directory="dir => $emit('selectedDirectory', dir)"
+        @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
+        @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
       />
     </template>
   </v-list>
@@ -53,11 +65,16 @@ export default {
   name: 'DirectoryListView',
   emits: ['selectedFile', 'selectedDirectory'],
   props: {
+    rootDirectory: {
+      required: false,
+      type: Object,
+    },
     directory: Object,
     parentDirectoryPath: String,
   },
   data: () => ({
     openDirectories: [],
+    openRootDirectory: true,
   }),
   computed: {
   },
@@ -74,6 +91,9 @@ export default {
       await Directory.get(directorySubdocs._id);
       const directory = Directory.getFromStore(directorySubdocs._id);
       this.openDirectories.push(directory);
+    },
+    toggleRootDirectory() {
+      this.openRootDirectory = !this.openRootDirectory;
     }
   },
 };
