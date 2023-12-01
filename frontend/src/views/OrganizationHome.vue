@@ -107,13 +107,14 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      await Workspace.get(workspace._id);
       this.$router.push({ name: 'WorkspaceHome', params: { id: workspace._id } });
     }
   },
   watch: {
-    async '$route.params.id'() {
-      this.fetchWorkspaces();
+    async '$route'(to, from) {
+      if (to.name === 'OrganizationHome') {
+        this.fetchWorkspaces();
+      }
     }
   }
 }
