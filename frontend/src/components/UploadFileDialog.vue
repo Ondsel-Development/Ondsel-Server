@@ -167,6 +167,7 @@ export default {
                   uploadInProgress: false,
                 };
               }
+              vm.dialog = false;
             } catch (e) {
               if (index > -1) {
                 vm.files[index].status = {
