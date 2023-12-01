@@ -1,6 +1,16 @@
 <template>
   <v-list v-if="rootDirectory" density="compact">
-    <v-list-item variant="flat" @click="toggleRootDirectory(); $emit('selectedDirectory', rootDirectory, rootDirectory.name);">
+    <v-list-item
+      variant="flat"
+      class="show-indent"
+      @click="toggleRootDirectory(); $emit('selectedDirectory', rootDirectory, rootDirectory.name);"
+    >
+      <template v-slot:prepend>
+        <v-icon
+          class="mr-1"
+          :icon="openRootDirectory ? 'mdi-folder-open' : 'mdi-folder'"
+        ></v-icon>
+      </template>
       {{ rootDirectory.name }}
     </v-list-item>
     <directory-list-view
@@ -11,18 +21,19 @@
       @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
     />
   </v-list>
-  <v-list v-if="directory" density="compact">
+  <v-list v-if="directory" density="compact" class="ml-4">
     <v-list-item
       v-for="file in directory.files"
       :key="file._id"
       :value="file"
       variant="flat"
+      class="show-indent"
     >
       <v-list-item-title
         class="text-body-2"
         @click="$emit('selectedFile', file, getItemPath(file.custFileName))"
       >
-        {{ getItemPath(file.custFileName) }}
+        {{ file.custFileName }}
       </v-list-item-title>
     </v-list-item>
     <template
@@ -31,6 +42,7 @@
     >
       <v-list-item
         variant="flat"
+        class="show-indent"
       >
         <template v-slot:prepend>
           <v-icon
@@ -42,7 +54,7 @@
           class="text-body-2"
           @click="toggleDirectory(dir); $emit('selectedDirectory', dir, getItemPath(dir.name));"
         >
-          {{ getItemPath(dir.name) }}
+          {{ dir.name }}
         </v-list-item-title>
       </v-list-item>
       <directory-list-view
@@ -98,3 +110,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.show-indent {
+  border-left-style: solid;
+  border-left-color: grey;
+  border-left-width: 1px;
+}
+</style>
