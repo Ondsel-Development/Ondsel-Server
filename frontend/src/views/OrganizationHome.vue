@@ -35,6 +35,9 @@
     <template v-if="workspaces.data.length && isFindPending">
       <v-progress-circular indeterminate></v-progress-circular>
     </template>
+    <template v-else-if="workspaces.data.length === 0">
+      <div class="text-grey-darken-1">No workspace exist!</div>
+    </template>
     <template v-else-if="workspaces.data.length === paginationData[orgId].total">
       <div class="text-grey-darken-1">You reached the end!</div>
     </template>
