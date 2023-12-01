@@ -7,7 +7,7 @@
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
-        <v-card class="mx-auto" height="220px" @click="$emit('openFile', file, `${directoryPath}/${file.custFileName}`)">
+        <v-card class="mx-auto" height="220" @click="$emit('openFile', file, `${directoryPath}/${file.custFileName}`)">
           <v-sheet
             color="#F4F4F4"
             height="150px"
@@ -21,7 +21,7 @@
         </v-card>
       </v-col>
       <v-col cols="3" v-for="dir in directory.directories" :key="dir._id">
-        <v-card class="mx-auto" @click="openDirectory(dir)">
+        <v-card class="mx-auto" height="220" @click="openDirectory(dir)">
           <v-sheet
             color="#F4F4F4"
             height="150px"
@@ -29,7 +29,7 @@
           >
             <v-icon icon="mdi-folder" style="color: #8D8D8D" cover />
           </v-sheet>
-          <v-card-text>
+          <v-card-text class="text-body-2 text-center">
             {{ dir.name }}
           </v-card-text>
         </v-card>
