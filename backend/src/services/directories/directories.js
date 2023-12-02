@@ -46,6 +46,11 @@ export const directory = (app) => {
       }
     })
   })
+
+  app.service(directoryPath).publish((data, context) => {
+    return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+  })
+
   // Initialize hooks
   app.service(directoryPath).hooks({
     around: {
