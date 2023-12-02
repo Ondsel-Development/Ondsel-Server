@@ -3,15 +3,20 @@
     <v-list-item
       variant="flat"
       class="show-indent"
-      @click="toggleRootDirectory(); $emit('selectedDirectory', rootDirectory, rootDirectory.name);"
     >
       <template v-slot:prepend>
-        <v-icon
-          class="mr-1"
-          :icon="openRootDirectory ? 'mdi-folder-open' : 'mdi-folder'"
-        ></v-icon>
+        <v-btn
+          :icon="openRootDirectory ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+          size="x-small"
+          variant="text"
+          @click="toggleRootDirectory"
+        ></v-btn>
       </template>
-      {{ rootDirectory.name }}
+      <v-list-item-title
+        @click="$emit('selectedDirectory', rootDirectory, rootDirectory.name);"
+      >
+        {{ rootDirectory.name }}
+      </v-list-item-title>
     </v-list-item>
     <directory-list-view
       v-if="openRootDirectory"
@@ -21,7 +26,7 @@
       @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
     />
   </v-list>
-  <v-list v-if="directory" density="compact" class="ml-4">
+  <v-list v-if="directory" density="compact" class="ml-2">
     <v-list-item
       v-for="file in directory.files"
       :key="file._id"
@@ -45,14 +50,16 @@
         class="show-indent"
       >
         <template v-slot:prepend>
-          <v-icon
-            class="mr-1"
-            :icon="openDirectories.find(d => d._id === dir._id) ? 'mdi-folder-open' : 'mdi-folder'"
-          ></v-icon>
+          <v-btn
+            :icon="openDirectories.find(d => d._id === dir._id) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+            size="x-small"
+            variant="text"
+            @click="toggleDirectory(dir)"
+          ></v-btn>
         </template>
         <v-list-item-title
           class="text-body-2"
-          @click="toggleDirectory(dir); $emit('selectedDirectory', dir, getItemPath(dir.name));"
+          @click="$emit('selectedDirectory', dir, getItemPath(dir.name));"
         >
           {{ dir.name }}
         </v-list-item-title>
