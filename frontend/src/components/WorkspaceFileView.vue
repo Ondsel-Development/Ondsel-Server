@@ -2,6 +2,14 @@
   <v-container fluid class="mt-4">
     <v-row>
       <v-spacer />
+      <a
+        v-if="file.modelId"
+        :href="fileModelUrl"
+        target="blank"
+        style="text-decoration: none; color: inherit;"
+      >
+        <v-btn flat>Explore</v-btn>
+      </a>
       <v-btn
         :disabled="isFileDownloadInProgress"
         :loading="isFileDownloadInProgress"
@@ -54,6 +62,9 @@ export default {
   mixins: [fileDownloadMixin],
   data: () => ({
   }),
+  computed: {
+    fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
+  },
 }
 </script>
 
