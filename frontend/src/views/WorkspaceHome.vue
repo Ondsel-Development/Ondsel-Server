@@ -32,8 +32,8 @@
           v-else
           :directory="activeDirectory || directory"
           :directoryPath="activePath === '/' ? '' : activePath"
-          @open-file="(file, filePath) => { activeFile = file; activePath = filePath; }"
-          @open-directory="(dir, dirPath) => { activeDirectory = dir; activePath = dirPath }"
+          @open-file="clickedFile"
+          @open-directory="clickedDirectory"
         />
       </v-col>
     </v-row>
@@ -83,19 +83,21 @@ export default {
       let file = File.getFromStore(fileSubDocs._id);
       if (!file) {
         await File.get(fileSubDocs._id);
+        file = File.getFromStore(fileSubDocs._id);
       }
       this.activeDirectory = null;
-      this.activeFile = File.getFromStore(fileSubDocs._id);
+      this.activeFile = file;
       this.activePath = filePath;
     },
-    async clickedDirectory(directorySubDocs, dirpath) {
+    async clickedDirectory(directorySubDocs, dirPath) {
       let directory = Directory.getFromStore(directorySubDocs._id);
       if (!directory) {
         await Directory.get(directorySubDocs._id);
+        directory = Directory.getFromStore(directorySubDocs._id);
       }
       this.activeFile = null;
-      this.activeDirectory = Directory.getFromStore(directorySubDocs._id);
-      this.activePath = dirpath;
+      this.activeDirectory = directory;
+      this.activePath = dirPath;
     }
   },
 };
