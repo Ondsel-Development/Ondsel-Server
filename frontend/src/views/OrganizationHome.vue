@@ -24,6 +24,7 @@
             <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
           </template>
           <template v-slot:append>
+            <v-btn icon="mdi-pencil" flat @click="goToWorkspaceEdit(workspace)"/>
             <v-btn icon="mdi-arrow-right" flat @click="goToWorkspaceHome(workspace)"/>
           </template>
         </v-card>
@@ -111,6 +112,9 @@ export default {
     },
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'WorkspaceHome', params: { id: workspace._id } });
+    },
+    async goToWorkspaceEdit(workspace) {
+      this.$router.push({ name: 'EditWorkspace', params: { id: workspace._id } });
     }
   },
   watch: {
