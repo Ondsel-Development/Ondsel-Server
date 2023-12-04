@@ -28,23 +28,26 @@
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
+        @click="openEditUserDialog(item.value)"
       >
         mdi-pencil
       </v-icon>
     </template>
   </v-data-table>
   <invite-user-dialog ref="inviteUserDialog" :organization="organization" />
+  <organization-user-dialog ref="organizationUserDialog" :organization="organization" :user="activeUser" />
 </template>
 
 <script>
 import InviteUserDialog from '@/components/InviteUserDialog.vue';
+import OrganizationUserDialog from '@/components/OrganizationUserDialog.vue';
 
 export default {
   name: "OrganizationUsersTable",
   props: {
     organization: Object,
   },
-  components: { InviteUserDialog },
+  components: { InviteUserDialog, OrganizationUserDialog },
   data: () => ({
     headers: [
       {
@@ -65,7 +68,14 @@ export default {
         sortable: false
       },
     ],
-  })
+    activeUser: undefined,
+  }),
+  methods: {
+    openEditUserDialog(userSubDocs) {
+      this.activeUser = userSubDocs;
+      this.$refs.organizationUserDialog.openDialog();
+    }
+  }
 }
 </script>
 
