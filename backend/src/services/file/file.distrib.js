@@ -23,8 +23,10 @@ export function buildFileSummary(file) {
     custFileName: file.custFileName,
     modelId: file.modelId,
     currentVersion: currentVersion,
-    thumbnailUrlCache: file.thumbnailUrlCache,
   };
+  if (file.thumbnailUrlCache) {
+    summary.thumbnailUrlCache = file.thumbnailUrlCache;
+  }
   return summary;
 }
 
