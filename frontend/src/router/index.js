@@ -24,6 +24,8 @@ import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
 import JoinOrganization from '@/views/JoinOrganization';
+import WorkspaceHome from '@/views/WorkspaceHome.vue';
+import EditWorkspace from '@/views/EditWorkspace.vue';
 
 
 const isWindowLoadedInIframe = () => {
@@ -64,6 +66,18 @@ const routes = [
     path: '/group/:id/edit',
     component: EditGroup,
     name: 'EditGroup',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/workspace/:id',
+    component: WorkspaceHome,
+    name: 'WorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/workspace/:id/edit',
+    component: EditWorkspace,
+    name: 'EditWorkspace',
     meta: { requiresAuth: true },
   },
   {

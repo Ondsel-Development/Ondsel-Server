@@ -2,7 +2,7 @@
   <v-container v-if="organization">
     <!--      {{ organization }}-->
     <v-row>
-      <div class="text-body-1">Organization&nbsp</div>
+      <div class="text-body-1">Organization&nbsp;</div>
       <div class="text-body-1 font-weight-bold">{{ organization.name }}</div>
     </v-row>
     <v-row class="mt-12">

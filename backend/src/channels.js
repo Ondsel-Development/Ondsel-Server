@@ -22,6 +22,10 @@ export const channels = (app) => {
       // Add it to the authenticated user channel
       app.channel('authenticated').join(connection)
       app.channel(user._id.toString()).join(connection)
+
+      app.service('workspaces').find({query: { $select: ['_id']}, user: user, paginate: false}).then(
+        workspaces => app.channel(workspaces.map(workspace => `workspace/${workspace._id.toString()}`)).join(connection)
+      );
     }
   })
 

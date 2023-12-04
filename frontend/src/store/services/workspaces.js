@@ -1,22 +1,20 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
-class File extends BaseModel {
+class Workspace extends BaseModel {
   constructor(data, options) {
     super(data, options)
   }
   // Required for $FeathersVuex plugin to work after production transpile.
-  static modelName = 'File'
+  static modelName = 'Workspace'
   // Define default properties here
   static instanceDefaults() {
     return {
-      custFileName: undefined,
-      isSystemGenerated: false,
     }
   }
 }
-const servicePath = 'file'
+const servicePath = 'workspaces'
 const servicePlugin = makeServicePlugin({
-  'Model': File,
+  'Model': Workspace,
   service: feathersClient.service(servicePath),
   servicePath
 })
