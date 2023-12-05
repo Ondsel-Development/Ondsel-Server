@@ -12,17 +12,23 @@
 import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {forDirectoryUpdateFileSummary} from "../directories/helpers.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {fileVersionSchema} from "./file.schema.js";
 
 export function buildFileSummary(file) {
-  let currentVersion = file.versions.find((ver) => ver._id === file.currentVersionId);
-  if (currentVersion === undefined) {
-    currentVersion = {};
-  }
   let summary = {
     _id: file._id,
     custFileName: file.custFileName,
     modelId: file.modelId,
-    currentVersion: currentVersion,
+    currentVersion: {
+      _id: file.currentVersion._id,
+      uniqueFileName: file.currentVersion.uniqueFileName,
+      userId: file.currentVersion.userId,
+      message: file.currentVersion.message,
+      createdAt: file.currentVersion.createdAt,
+      fileUpdatedAt: file.currentVersion.fileUpdatedAt,
+      additionalData: {},
+    },
   };
   if (file.thumbnailUrlCache) {
     summary.thumbnailUrlCache = file.thumbnailUrlCache;
