@@ -38,6 +38,7 @@ export const directoryDataResolver = resolve({
     return context.params.user._id
   },
   files: async () => [],
+  directories: async () => [],
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
 })

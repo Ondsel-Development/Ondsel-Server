@@ -1,9 +1,18 @@
 import _ from 'lodash';
+import {BadRequest} from "@feathersjs/errors";
 
 
 export const isUserBelongsToWorkspace = async context => {
   if (context.params.user) {
     const userOrganizations = context.params.user.organizations || []
+
+    if (context.params.query.organizationId) {
+      if (userOrganizations.find(org => org._id.equals(context.params.query.organizationId))) {
+        return context;
+      }
+      throw new BadRequest('You are not the member of this organization');
+    }
+
     context.params.query.organizationId = {
       $in: userOrganizations.map(org => org._id)
     }

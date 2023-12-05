@@ -46,6 +46,11 @@ export const file = (app) => {
       }
     })
   })
+
+  app.service(filePath).publish((data, context) => {
+    return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+  })
+
   // Initialize hooks
   app.service(filePath).hooks({
     around: {
