@@ -7,6 +7,7 @@ import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
 import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
+import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -38,6 +39,9 @@ async function runMigration() {
       break;
     case 'migrateObjectsForSharedWorkspace':
       await migrateObjectsForSharedWorkspaceCommand(app);
+      break;
+    case 'addMissingRefNames':
+      await addMissingRefNamesCommand(app)
       break;
     default:
       console.error('Please specify the migration command.')
