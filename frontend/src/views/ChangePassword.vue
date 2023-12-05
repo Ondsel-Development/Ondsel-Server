@@ -9,16 +9,9 @@
         bottom
       ></v-progress-linear>
       <v-card-text>
+        <p class="text-high-emphasis">{{forgotPasswordMsg}}</p>
         <p class="text-button">{{verificationMsg}}</p>
-        <p class="text-high-emphasis">{{loginMsg}}</p>
         <v-form v-model="isValid" @submit.prevent="changePasswordFormHandler">
-          <v-text-field
-            v-model="user.email"
-            label="Email"
-            :rules="[rules.isRequired, rules.isEmail]"
-            autofocus
-          ></v-text-field>
-
           <v-text-field
             v-model="newPassword"
             label="New Password"
@@ -53,6 +46,8 @@
 import {mapActions, mapState} from "vuex";
 import {resetStores} from "@/store";
 import {AuthManagement} from "@/store/services/auth-management";
+import {models} from "@feathersjs/vuex";
+const { User } = models.api;
 
 export default {
   name: 'VerifyEmail',
@@ -61,13 +56,12 @@ export default {
       result: {},
       isValid: false,
       verificationMsg: '',
-      loginMsg: '',
+      forgotPasswordMsg: 'reset password:',
       user: {
-        email: '',
+        email: 'ignore@ignore.com',
         password: ''
       },
       rules: {
-        isEmail: v => /.+@.+/.test(v) || 'Invalid Email address',
         isRequired: v => !!v || 'This field is required',
         minCharacter: v => (v && v.length >= 8) || 'Minimum 8 characters',
         confirmPassword: v => v === this.newPassword || 'Password must match',
