@@ -5,6 +5,7 @@ import {addUsernameCommand} from "./add-username.command.js";
 import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
 import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
+import {updateDirectoryFileSummariesCommand} from "./update-directory-file-summaries.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -37,6 +38,9 @@ async function runMigration() {
     case 'migrateObjectsForSharedWorkspace':
       await migrateObjectsForSharedWorkspaceCommand(app);
       break;
+    case 'updateDirectoryFileSummaries':
+      await updateDirectoryFileSummariesCommand(app);
+      break
     default:
       console.error('Please specify the migration command.')
       process.exit(1);

@@ -84,24 +84,27 @@ export const directory = (app) => {
       patch: [
         iff(
           isProvider('external'),
-          userWriteAccessDirectories,
+          userWriteAccessDirectories
+        ),
+        iff(
+          isProvider('external'),
           preventChanges(false, 'workspace', 'files', 'directories'),
-          iff(
-            context => context.data.shouldAddFilesToDirectory,
-            addFilesToDirectory
-          ),
-          iff(
-            context => context.data.shouldRemoveFilesFromDirectory,
-            removeFilesFromDirectory
-          ),
-          iff(
-            context => context.data.shouldAddDirectoriesToDirectory,
-            addDirectoriesToDirectory
-          ),
-          iff(
-            context => context.data.shouldRemoveDirectoriesFromDirectory,
-            removeDirectoriesFromDirectory,
-          ),
+        ),
+        iff(
+          context => context.data.shouldAddFilesToDirectory,
+          addFilesToDirectory
+        ),
+        iff(
+          context => context.data.shouldRemoveFilesFromDirectory,
+          removeFilesFromDirectory
+        ),
+        iff(
+          context => context.data.shouldAddDirectoriesToDirectory,
+          addDirectoriesToDirectory
+        ),
+        iff(
+          context => context.data.shouldRemoveDirectoriesFromDirectory,
+          removeDirectoriesFromDirectory,
         ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
