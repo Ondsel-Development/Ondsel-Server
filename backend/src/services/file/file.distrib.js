@@ -16,23 +16,27 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileVersionSchema} from "./file.schema.js";
 
 export function buildFileSummary(file) {
+  let cv = file.versions.find((ver) => ver._id.toString() === file.currentVersionId.toString());
+  if (cv === undefined) {
+    throw new Error(`unable to locate version ${file.currentVersionId} in file ${file._id}`)
+  }
   let summary = {
     _id: file._id,
     custFileName: file.custFileName,
     modelId: file.modelId,
     currentVersion: {
-      _id: file.currentVersion._id,
-      uniqueFileName: file.currentVersion.uniqueFileName,
-      userId: file.currentVersion.userId,
-      message: file.currentVersion.message,
-      createdAt: file.currentVersion.createdAt,
-      fileUpdatedAt: file.currentVersion.fileUpdatedAt,
+      _id: file.currentVersionId,
+      uniqueFileName: cv.uniqueFileName,
+      userId: cv.userId,
+      message: cv.message,
+      createdAt: cv.createdAt,
       additionalData: {},
     },
   };
-  if (file.thumbnailUrlCache) {
-    summary.thumbnailUrlCache = file.thumbnailUrlCache;
+  if (cv.fileUpdatedAt) { // Optional not Null; so only add if actually there
+    summary.currentVersion.fileUpdatedAt = cv.fileUpdatedAt;
   }
+  summary.thumbnailUrlCache = file.model?.thumbnailUrlCache || null;
   return summary;
 }
 
@@ -48,7 +52,7 @@ export async function distributeFileSummaries(context){
       // for now, we are assuming any change anywhere in file should trigger a summary distribution
       const fileSummary = buildFileSummary(file);
       // to directories
-      if (file.directory._id !== null) {
+      if (file.directory._id) {
         await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
       };
     };
