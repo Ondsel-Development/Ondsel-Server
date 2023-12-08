@@ -86,7 +86,10 @@ export const directory = (app) => {
           isProvider('external'),
           userWriteAccessDirectories
         ),
-        preventChanges(false, 'workspace', 'files', 'directories'),
+        iff(
+          isProvider('external'),
+          preventChanges(false, 'workspace', 'files', 'directories'),
+        ),
         iff(
           context => context.data.shouldAddFilesToDirectory,
           addFilesToDirectory

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
+import {buildFileSummary} from "../../file/file.distrib.js";
 
 export const addFilesToDirectory = async context => {
   const { data } = context;
@@ -14,9 +15,8 @@ export const addFilesToDirectory = async context => {
           `File (id: ${file._id.toString()} must belong to same directory workspace.`
         )
       }
-      files.push(
-        _.pick(file, ['_id', 'custFileName', 'modelId'])
-      )
+      files.push(buildFileSummary(file))
+      // TODO: investigate that this does not cause a loop
       await fileService.patch(file._id, { directory: _.pick(directory, ['_id', 'name'])})
     }
   }
