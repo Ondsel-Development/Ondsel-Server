@@ -5,6 +5,7 @@ import {addUsernameCommand} from "./add-username.command.js";
 import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
 import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
+import { migrateWorkspaceGroupsOrUsersCommand } from "./update-workspace-groupsOrUsers.js";
 import {updateDirectoryFileSummariesCommand} from "./update-directory-file-summaries.command.js";
 import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
@@ -42,6 +43,8 @@ async function runMigration() {
     case 'migrateObjectsForSharedWorkspace':
       await migrateObjectsForSharedWorkspaceCommand(app);
       break;
+    case 'migrateWorkspaceGroupsOrUsers':
+      await migrateWorkspaceGroupsOrUsersCommand(app);
     case 'updateDirectoryFileSummaries':
       await updateDirectoryFileSummariesCommand(app);
       break
