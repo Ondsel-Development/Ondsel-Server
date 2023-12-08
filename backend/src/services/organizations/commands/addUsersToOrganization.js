@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {upsertGroupSummaryToOrganization} from "../organizations.distrib.js";
+import {buildOrganizationSummary, upsertGroupSummaryToOrganization} from "../organizations.distrib.js";
 import {buildGroupSummary} from "../../groups/groups.distrib.js";
 import {buildUserSummary} from "../../users/users.distrib.js";
 
@@ -19,7 +19,7 @@ export const addUsersToOrganization = async (context) => {
         isAdmin: false
       });
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
-        userOrganizations.push(_.pick(organization, ['_id', 'name']));
+        userOrganizations.push(buildOrganizationSummary(organization));
         await userService.patch(user._id, { organizations: userOrganizations});
         await addUserToDefaultingGroups(context, organization, user);
       }

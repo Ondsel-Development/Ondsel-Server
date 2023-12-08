@@ -10,6 +10,7 @@ class Organization extends BaseModel {
   static instanceDefaults() {
     return {
       name: undefined,
+      refName: "",
     }
   }
 

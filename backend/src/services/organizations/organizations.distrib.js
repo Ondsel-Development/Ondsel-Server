@@ -16,6 +16,7 @@ export function buildOrganizationSummary(org) {
   let summary = {};
   summary._id = org._id;
   summary.name = org.name;
+  summary.refName = org.refName;
   return summary;
 }
 
