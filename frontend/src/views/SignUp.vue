@@ -158,7 +158,7 @@
 import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
-import {conformName} from "@/usernameFunctions";
+import {conformRefName} from "@/refNameFunctions";
 
 export default {
   name: 'SignUp',
@@ -248,7 +248,7 @@ export default {
       })
     },
     conformNameCheck(rawName) {
-      const conformedName = conformName(rawName);
+      const conformedName = conformRefName(rawName);
       this.user.username = conformedName;
       if (conformedName.length < 4) {
         return "requires at least 4 characters in derived username";

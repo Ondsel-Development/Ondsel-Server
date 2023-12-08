@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
+import {buildOrganizationSummary} from "./organizations.distrib.js";
 
 export const isUserMemberOfOrganization = async context => {
   const organization = await context.service.get(context.id);
@@ -36,7 +37,7 @@ export const assignOrganizationIdToUser = async context => {
   const userService = context.app.service('users');
   const user = await userService.get(context.params.user._id);
   const userOrganizations = user.organizations || [];
-  userOrganizations.push(_.pick(context.result, ['_id', 'name']));
+  userOrganizations.push(buildOrganizationSummary(context.result));
 
   await context.app.service('users').patch(context.result.createdBy, { organizations: userOrganizations });
   return context;

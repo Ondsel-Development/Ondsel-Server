@@ -30,6 +30,20 @@
             :rules="[rules.isRequired]"
             :disabled="isCreatePending"
           ></v-text-field>
+          <v-text-field
+            v-model="nameTemp"
+            label="reference name"
+            :rules="[rules.isRequired, rules.nameConforms]"
+            :disabled="isCreatePending"
+          ></v-text-field>
+          <v-card class="mx-auto" color="primary" variant="outlined">
+            <v-card-text v-if="workspace.refName">
+              <span class="font-weight-bold">{{workspace.refName}}</span>
+            </v-card-text>
+            <v-card-text v-else>
+              <span class="font-italic">no reference name yet</span>
+            </v-card-text>
+          </v-card>
         </v-card-text>
         <v-card-actions class="justify-center">
           <v-btn @click="dialog = false">Cancel</v-btn>
@@ -41,6 +55,12 @@
           >Create</v-btn>
         </v-card-actions>
       </v-form>
+      <v-snackbar
+        :timeout="2000"
+        v-model="showSnacker"
+      >
+        {{ snackerMsg }}
+      </v-snackbar>
     </v-card>
   </v-dialog>
 
@@ -49,7 +69,7 @@
 <script>
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
-import rules from '@/mixins/rules';
+import {conformRefName} from "@/refNameFunctions";
 
 const { Workspace } = models.api;
 
@@ -58,14 +78,25 @@ export default {
   props: {
     organization: Object,
   },
-  mixins: [rules],
-  data: () => ({
-    dialog: false,
-    workspace: {
-      name: '',
-      description: ''
-    },
-  }),
+  data() {
+    return {
+      dialog: false,
+      nameTemp: '',
+      lastBadRefName: '',
+      extraHintContent: '',
+      workspace: {
+        name: '',
+        description: '',
+        refName: '',
+      },
+      rules: {
+        isRequired: v => !!v || 'This field is required',
+        nameConforms: v => this.conformNameCheck(v),
+      },
+      snackerMsg: '',
+      showSnacker: false,
+    }
+  },
   computed: {
     ...mapState('workspaces', ['isCreatePending']),
   },
@@ -77,15 +108,43 @@ export default {
       }
       await Workspace.create({
         name: this.workspace.name,
+        refName: this.workspace.refName,
         description: this.workspace.description,
         organizationId: this.organization._id,
+      })
+      .then(async () => {
+        this.workspace = {
+          name: '',
+          refName: '',
+          description: ''
+        };
+        this.nameTemp = '';
+        this.dialog = false;
+      })
+      .catch((e) => {
+        if (e.message === 'Invalid: reference name already taken') {
+          this.extraHintContent = `reference name ${this.workspace.refName} already taken at this org`;
+          this.lastBadRefName = this.workspace.refName;
+        }
+        console.log(e.message);
+        this.snackerMsg = e.message;
+        this.showSnacker = true;
       });
-      this.dialog = false;
-      this.workspace = {
-        name: '',
-        description: ''
+    },
+    conformNameCheck(rawName) {
+      const conformedName = conformRefName(rawName);
+      this.workspace.refName = conformedName;
+      if (conformedName.length < 4) {
+        return "requires at least 4 characters in derived username";
       }
-    }
+      if (this.extraHintContent === '') {
+        return true;
+      }
+      if (this.lastBadRefName === conformedName) {
+        return this.extraHintContent;
+      }
+      return true;
+    },
   }
 }
 </script>

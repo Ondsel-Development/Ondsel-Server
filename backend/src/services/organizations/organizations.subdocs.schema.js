@@ -6,5 +6,6 @@ export const organizationSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     name: Type.String(),
+    refName: Type.String(),
   }
 )

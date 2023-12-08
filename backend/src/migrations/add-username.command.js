@@ -7,7 +7,7 @@ import {
   specificAgreementType
 } from "../services/agreements/agreements.schema.js";
 import {ObjectId} from "mongodb";
-import {conformName, usernameHasher} from "../usernameFunctions.js";
+import {conformRefName, refNameHasher} from "../refNameFunctions.js";
 
 export async function addUsernameCommand(app) {
   const userService = app.service('users');
@@ -23,8 +23,8 @@ export async function addUsernameCommand(app) {
   for (const userToChange of userList) {
     if (!userToChange.username) {
       let randomName = Math.random().toString(36).slice(2, 7);
-      let username = conformName(randomName);
-      let usernameHash = usernameHasher(username);
+      let username = conformRefName(randomName);
+      let usernameHash = refNameHasher(username);
       console.log(`>>> updating user "${userToChange.firstName} ${userToChange.lastName}" with username "${username}" and hash ${usernameHash}`);
       await userService.patch(
         userToChange._id,

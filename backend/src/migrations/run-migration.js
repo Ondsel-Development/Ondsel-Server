@@ -6,6 +6,10 @@ import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.comm
 import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
 import {updateDirectoryFileSummariesCommand} from "./update-directory-file-summaries.command.js";
+import {addInitialTosPp} from "./add-initial-tos-pp.js";
+import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
+import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
+
 
 async function runMigration() {
   console.log('Migration start');
@@ -20,12 +24,12 @@ async function runMigration() {
     // case 'updateTierNames':
     //   await updateTierNames(app);
     //   break;
-    // case 'addInitialTosPp':
-    //   await addInitialTosPp(app);
-    //   break;
-    // case 'updateTos2023Aug31':
-    //   await updateTos2023Aug31Command(app);
-    //   break;
+    case 'addInitialTosPp':
+      await addInitialTosPp(app);
+      break;
+    case 'updateTos2023Aug31':
+      await updateTos2023Aug31Command(app);
+      break;
     // case 'addUsername':
     //   await addUsernameCommand(app);
     //   break;
@@ -41,6 +45,9 @@ async function runMigration() {
     case 'updateDirectoryFileSummaries':
       await updateDirectoryFileSummariesCommand(app);
       break
+    case 'addMissingRefNames':
+      await addMissingRefNamesCommand(app)
+      break;
     default:
       console.error('Please specify the migration command.')
       process.exit(1);

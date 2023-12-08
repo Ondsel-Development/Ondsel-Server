@@ -1,6 +1,6 @@
 import _ from 'lodash';
+import {buildWorkspaceSummary} from "./workspaces.distrib.js";
 import {BadRequest} from "@feathersjs/errors";
-
 
 export const isUserBelongsToWorkspace = async context => {
   if (context.params.user) {
@@ -24,10 +24,7 @@ export const createAndAssignRootDirectory = async context => {
   const directory = await context.app.service('directories').create(
     {
       name: '/',
-      workspace: {
-        _id: context.result._id,
-        name: context.result.name,
-      }
+      workspace: buildWorkspaceSummary(context.result)
     }, { user: context.params.user }
   );
   context.result = await context.service.patch(
