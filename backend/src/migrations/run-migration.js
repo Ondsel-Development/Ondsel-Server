@@ -45,6 +45,7 @@ async function runMigration() {
       break;
     case 'migrateWorkspaceGroupsOrUsers':
       await migrateWorkspaceGroupsOrUsersCommand(app);
+      break;
     case 'updateDirectoryFileSummaries':
       await updateDirectoryFileSummariesCommand(app);
       break
