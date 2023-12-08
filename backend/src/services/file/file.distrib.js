@@ -5,41 +5,61 @@
 // sub-documents are "second-class" because they are not authoritative and might need update when
 // the reference collection is updated.
 
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection
 //
 
-// export const fileSummarySchema = Type.Object(
-//   {
-//     _id: ObjectIdSchema(),
-//   }
-// )
+import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
+import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
+import {forDirectoryUpdateFileSummary} from "../directories/helpers.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {fileVersionSchema} from "./file.schema.js";
 
-// export function buildFileSummary(file) {
-//   let summary = {};
-//   return summary;
-// }
-
-// export async function getFileSummary(app, fileId) {
-//   const files = await app.service('files').find({
-//     query: {
-//       _id: fileId
-//     }
-//   });
-//   if (files.total === 0) {
-//     return {}
-//   }
-//   return buildFileSummary(files[0]);
-// }
+export function buildFileSummary(file) {
+  let cv = file.versions.find((ver) => ver._id.toString() === file.currentVersionId.toString());
+  if (cv === undefined) {
+    throw new Error(`unable to locate version ${file.currentVersionId} in file ${file._id}`)
+  }
+  let summary = {
+    _id: file._id,
+    custFileName: file.custFileName,
+    modelId: file.modelId,
+    currentVersion: {
+      _id: file.currentVersionId,
+      uniqueFileName: cv.uniqueFileName,
+      userId: cv.userId,
+      message: cv.message,
+      createdAt: cv.createdAt,
+      additionalData: {},
+    },
+  };
+  if (cv.fileUpdatedAt) { // Optional not Null; so only add if actually there
+    summary.currentVersion.fileUpdatedAt = cv.fileUpdatedAt;
+  }
+  summary.thumbnailUrlCache = file.model?.thumbnailUrlCache || null;
+  return summary;
+}
 
 //
 // DISTRIBUTE AFTER (HOOK)
 //
 
-export async function distributeFileSummaries(context, file){
-  // file summaries are not distributed yet.
+export async function distributeFileSummaries(context){
+  try {
+    const fileId = context.id;
+    if (fileId !== undefined) {
+      const file = await context.app.service('file').get(fileId);
+      // for now, we are assuming any change anywhere in file should trigger a summary distribution
+      const fileSummary = buildFileSummary(file);
+      // to directories
+      if (file.directory._id) {
+        await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
+      };
+    };
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
 }
 
 //

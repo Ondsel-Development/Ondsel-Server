@@ -17,7 +17,7 @@ import {
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
-import {usernameHasher} from "../../usernameFunctions.js";
+import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 
 // Main data model schema
@@ -100,7 +100,7 @@ export const userDataResolver = resolve({
   updatedAt: async () => Date.now(),
   isTripe: async () => null,
   usernameHash: async (_value, message, _context) => {
-    return usernameHasher(message.username)
+    return refNameHasher(message.username)
   },
   tier: async () => SubscriptionTypeMap.unverified,
   constraint: async () => null, // DO NOT STORE constraints; they are to be derived
@@ -194,7 +194,7 @@ export const uniqueUserValidator = async (context) => {
     })
   }
   if (context.data.username) {
-    const hash = usernameHasher(context.data.username);
+    const hash = refNameHasher(context.data.username);
     const result = await userService.find({query: {usernameHash: hash }});
     if (result.total > 0) {
       throw new BadRequest('Invalid: Username already taken', {
@@ -218,7 +218,7 @@ export const uniqueUserPatchValidator = async (context) => {
     }
   }
   if (context.data.username) {
-    const hash = usernameHasher(context.data.username);
+    const hash = refNameHasher(context.data.username);
     const result = await userService.find({query: {usernameHash: hash }});
     if (result.total > 0) {
       throw new BadRequest('Invalid: Username already taken', {

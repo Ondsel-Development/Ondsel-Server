@@ -16,7 +16,7 @@ import {
   workspaceDataSchema,
   workspacePatchSchema,
   workspaceQuerySchema,
-  workspaceSchema,
+  workspaceSchema, uniqueWorkspaceValidator,
 } from './workspaces.schema.js'
 import { WorkspaceService, getOptions } from './workspaces.class.js'
 import { workspacePath, workspaceMethods } from './workspaces.shared.js'
@@ -73,7 +73,8 @@ export const workspace = (app) => {
       ],
       create: [
         schemaHooks.validateData(workspaceDataValidator),
-        schemaHooks.resolveData(workspaceDataResolver)
+        schemaHooks.resolveData(workspaceDataResolver),
+        uniqueWorkspaceValidator,
       ],
       patch: [
         preventChanges(false, 'groupsOrUsers'),

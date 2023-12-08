@@ -7,6 +7,8 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { groupSummary } from '../groups/groups.subdocs.schema.js';
 import { directorySummary } from '../directories/directories.subdocs.js';
+import {refNameHasher} from "../../refNameFunctions.js";
+import {BadRequest} from "@feathersjs/errors";
 
 const groupsOrUsers = Type.Object(
   {
@@ -21,6 +23,8 @@ export const workspaceSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     name: Type.String(),
+    refName: Type.String(),
+    refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
     description: Type.String(),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
@@ -37,7 +41,7 @@ export const workspaceResolver = resolve({})
 export const workspaceExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'description', 'organizationId'], {
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
 })
 export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
@@ -45,6 +49,9 @@ export const workspaceDataResolver = resolve({
   createdBy: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
+  },
+  refNameHash: async (_value, message, _context) => {
+    return refNameHasher(message.refName)
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
@@ -69,7 +76,7 @@ export const workspacePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'organizationId'])
+export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'refNameHash', 'organizationId'])
 export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),
@@ -80,3 +87,23 @@ export const workspaceQuerySchema = Type.Intersect(
 )
 export const workspaceQueryValidator = getValidator(workspaceQuerySchema, queryValidator)
 export const workspaceQueryResolver = resolve({})
+
+export const uniqueWorkspaceValidator = async (context) => {
+  const workspaceService = context.app.service('workspaces');
+  if (context.data.refName) {
+    const hash = refNameHasher(context.data.refName);
+    const result = await workspaceService.find({query: {
+      refNameHash: hash,
+      organizationId: context.data.organizationId,
+    }});
+    if (result.total > 0) {
+      throw new BadRequest('Invalid: reference name already taken', {
+        errors: { email: 'reference name already taken' }
+      })
+    }
+  } else {
+    throw new BadRequest('Invalid Parameters', { // do not trust the frontend for this
+      errors: { email: 'reference name required' }
+    })
+  }
+}

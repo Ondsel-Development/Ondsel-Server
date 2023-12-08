@@ -199,7 +199,7 @@ const sendVerify = () => {
 const createDefaultOrganization = async context => {
   const organizationService = context.app.service('organizations');
   const workspaceService = context.app.service('workspaces');
-  const organization = await organizationService.create({ name: 'Personal' }, { user: context.result });
+  const organization = await organizationService.create({ name: 'Personal', refName: context.result._id.toString() }, { user: context.result });
   const workspace = await workspaceService.create(
     { name: 'Default', description: 'Your workspace', organizationId: organization._id },
     { user: context.result }
