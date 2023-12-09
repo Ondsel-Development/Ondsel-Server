@@ -11,6 +11,7 @@ import {addInitialTosPp} from "./add-initial-tos-pp.js";
 import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
 import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
 import { updateDirectoryWorkspaceSubDocs } from './update-workspaceSubDocs-for-directory.js';
+import { addOwnerToOrganizationCommand } from './add-owner-to-organization.js';
 
 
 async function runMigration() {
@@ -55,6 +56,9 @@ async function runMigration() {
       break;
     case 'updateDirectoryWorkspaceSubDocs':
       await updateDirectoryWorkspaceSubDocs(app);
+      break;
+    case 'addOwnerToOrganization':
+      await addOwnerToOrganizationCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

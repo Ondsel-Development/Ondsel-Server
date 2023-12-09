@@ -9,6 +9,7 @@ import {groupSummary} from "../groups/groups.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {BadRequest} from "@feathersjs/errors";
 import {refNameHasher} from "../../refNameFunctions.js";
+import { buildUserSummary } from '../users/users.distrib.js';
 
 const userDataSchema = Type.Intersect(
   [
@@ -29,6 +30,7 @@ export const organizationSchema = Type.Object(
     updatedAt: Type.Number(),
     users: Type.Array(userDataSchema),
     groups: Type.Array(groupSummary),
+    owner: userSummarySchema,
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -63,6 +65,9 @@ export const organizationDataResolver = resolve({
       }
     ]
   },
+  owner: async (_value, message, _context) => {
+    return buildUserSummary(_context.params.user);
+  }
 })
 
 // Schema for updating existing entries
