@@ -70,7 +70,13 @@ export default {
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapState('auth', ['user']),
     ...mapState('organizations', ['isCreatePending'])
+  },
+  created() {
+    if (!this.user.constraint.canCreateOrganization) {
+      this.$router.push({ name: 'PageNotFound' });
+    }
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
