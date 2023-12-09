@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import {buildOrganizationSummary} from "./organizations.distrib.js";
+import { getConstraint } from "../users/users.subdocs.schema.js";
 
 export const isUserMemberOfOrganization = async context => {
   const organization = await context.service.get(context.id);
@@ -25,12 +26,11 @@ export const isUserOwnerOrAdminOfOrganization = async context => {
 }
 
 export const canUserCreateOrganization = async context => {
-  // TODO: No constraints for now
-  // const { user } = context.params;
-  // if (user.organizationId) {
-  //   throw new BadRequest(`You cannot create organization because you already a part of organization (id: ${user.organizationId.toString()})`);
-  // }
-  return context;
+  const { canCreateOrganization } = getConstraint(context.params.user);
+  if (canCreateOrganization) {
+    return context;
+  }
+  throw new BadRequest(`User doesn't have enough permissions to create a organization`);
 }
 
 export const assignOrganizationIdToUser = async context => {
