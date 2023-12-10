@@ -25,7 +25,10 @@ const servicePlugin = makeServicePlugin({
       getters: {
         isLoggedInUserAdmin: (state, getters, rootState, rootGetters) => (organization) => {
           const loggedInUser = rootGetters['auth/user'];
-          return organization.users.some(user => user.isAdmin && user._id === loggedInUser._id)
+          if (organization) {
+            return organization.users.some(user => user.isAdmin && user._id === loggedInUser._id)
+          }
+          return false;
         }
       }
     }

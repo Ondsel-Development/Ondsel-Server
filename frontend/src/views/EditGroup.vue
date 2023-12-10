@@ -9,6 +9,7 @@
           label="Take All New Users"
           v-model="group.takeAllNewUsers"
           hide-details
+          :disabled="!isLoggedInUserAdmin(organization)"
           @update:modelValue="group.save()"
         ></v-switch>
       </div>
@@ -20,18 +21,25 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import GroupUsersTable from '@/components/GroupUsersTable';
 
-const { Group } = models.api;
+const { Group, Organization } = models.api;
 
 export default {
   name: "EditGroup",
   components: { GroupUsersTable },
   async created() {
-    await Group.get(this.$route.params.id);
+    try {
+      await Group.get(this.$route.params.id);
+    } catch (e) {
+      this.$router.push({ name: 'PageNotFound' });
+    }
   },
   computed: {
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
+    organization: vm => Organization.getFromStore(vm.group.organizationId),
     group: vm => Group.getFromStore(vm.$route.params.id),
   },
   methods: {
