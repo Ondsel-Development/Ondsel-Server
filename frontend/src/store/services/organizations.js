@@ -19,7 +19,17 @@ const servicePath = 'organizations'
 const servicePlugin = makeServicePlugin({
   Model: Organization,
   service: feathersClient.service(servicePath),
-  servicePath
+  servicePath,
+  extend({ store, module }) {
+    return {
+      getters: {
+        isLoggedInUserAdmin: (state, getters, rootState, rootGetters) => (organization) => {
+          const loggedInUser = rootGetters['auth/user'];
+          return organization.users.some(user => user.isAdmin && user._id === loggedInUser._id)
+        }
+      }
+    }
+  }
 })
 
 // Setup the client-side Feathers hooks.

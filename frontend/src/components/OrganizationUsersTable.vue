@@ -19,11 +19,17 @@
         <v-btn
           dark
           class="mb-2"
+          :hidden="!isLoggedInUserAdmin(organization)"
           @click="$refs.inviteUserDialog.$data.dialog = true;"
         >
           Invite new user
         </v-btn>
       </v-toolbar>
+    </template>
+    <template #item.isAdmin="{ item }">
+      <div class="text-capitalize">
+        {{ item.value.isAdmin }}
+      </div>
     </template>
     <template v-slot:item.actions="{ item }">
       <v-icon
@@ -39,6 +45,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import InviteUserDialog from '@/components/InviteUserDialog.vue';
 import OrganizationUserDialog from '@/components/OrganizationUserDialog.vue';
 
@@ -62,6 +69,11 @@ export default {
         key: 'username'
       },
       {
+        title: 'Admin',
+        sortable: true,
+        key: 'isAdmin'
+      },
+      {
         title: 'Actions',
         align: 'end',
         key: 'actions',
@@ -70,6 +82,9 @@ export default {
     ],
     activeUser: undefined,
   }),
+  computed: {
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
+  },
   methods: {
     openEditUserDialog(userSubDocs) {
       this.activeUser = userSubDocs;
