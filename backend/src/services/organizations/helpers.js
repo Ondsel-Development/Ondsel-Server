@@ -17,7 +17,7 @@ export const isUserOwnerOrAdminOfOrganization = async context => {
 
   // Only Owner or Admins of Org allow to add users
   if (
-    context.params.user._id.equals(organization.createdBy)
+    context.params.user._id.equals(organization.owner._id)
     || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
     return context;
   }
