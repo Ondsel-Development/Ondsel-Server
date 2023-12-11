@@ -27,7 +27,7 @@
           </div>
         </v-alert>
         <div class="text-body-2" style="text-align: center">
-          version <span class="font-weight-bold">{{ user.name }}</span> in organization <span class="font-weight-bold">{{ organization.name }}</span>
+          user <span class="font-weight-bold">{{ user.name }}</span> in organization <span class="font-weight-bold">{{ organization.name }}</span>
         </div>
 
         <div class="text-body-1 mt-4" style="text-align: center">
