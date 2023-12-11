@@ -1,6 +1,6 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
 import _ from 'lodash';
-import { resolve } from '@feathersjs/schema'
+import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
@@ -36,7 +36,27 @@ export const workspaceSchema = Type.Object(
   { $id: 'Workspace', additionalProperties: false }
 )
 export const workspaceValidator = getValidator(workspaceSchema, dataValidator)
-export const workspaceResolver = resolve({})
+export const workspaceResolver = resolve({
+  haveWriteAccess: virtual(async (workspace, _context) => {
+    const { user } = _context.params;
+    if (!user) {
+      return false;
+    }
+    const workspaceUsers = workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'User' && groupOrUser.permission === 'write');
+    if (workspaceUsers.some(d => d.groupOrUser._id.equals(user._id))) {
+      return true;
+    }
+
+    const workspaceGroups = workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'Group' && groupOrUser.permission === 'write');
+    for (let e of workspaceGroups) {
+      let group = await _context.app.service('groups').get(e.groupOrUser._id);
+      if (group.users.some(u => u._id.equals(user._id))) {
+        return true;
+      }
+    }
+    return false;
+  })
+})
 
 export const workspaceExternalResolver = resolve({})
 
