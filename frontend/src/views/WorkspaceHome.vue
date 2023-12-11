@@ -61,21 +61,25 @@ export default {
     };
   },
   async created() {
-    await Workspace.get(this.$route.params.id);
+    try {
+      await Workspace.get(this.$route.params.id);
+    } catch (e) {
+      this.$router.push({ name: 'PageNotFound' });
+    }
     await Directory.get(this.workspace.rootDirectory._id);
-    if (this.workspace.organizationId !== this.currentOrganization._id) {
+    if (!this.organization) {
       await Organization.get(this.workspace.organizationId);
-      const organization = Organization.getFromStore(this.workspace.organizationId);
-      await this.setCurrentOrganization(organization);
+    }
+    if (this.workspace.organizationId !== this.currentOrganization._id) {
+      await this.setCurrentOrganization(this.organization);
     }
     this.activePath = this.directory.name;
   },
-  async mounted() {
-  },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    directory: (vm) => Directory.getFromStore(vm.workspace.rootDirectory._id),
-    workspace: (vm) => Workspace.getFromStore(vm.$route.params.id),
+    directory: vm => Directory.getFromStore(vm.workspace.rootDirectory._id),
+    workspace: vm => Workspace.getFromStore(vm.$route.params.id),
+    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
