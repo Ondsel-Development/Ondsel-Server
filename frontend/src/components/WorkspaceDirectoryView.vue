@@ -2,8 +2,8 @@
   <v-container v-if="directory" class="mt-4">
     <v-row>
       <v-spacer />
-      <v-btn flat  @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
-      <v-btn flat @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
+      <v-btn flat :hidden="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
+      <v-btn flat :hidden="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
@@ -60,6 +60,10 @@ export default {
   props: {
     directory: Object,
     directoryPath: String,
+    canUserWrite: {
+      type: Boolean,
+      default: false,
+    }
   },
   components: { CreateDirectoryDialog, UploadFileDialog },
   data: () => ({

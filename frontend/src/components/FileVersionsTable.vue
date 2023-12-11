@@ -41,6 +41,10 @@ export default {
   components: { FileInfoDialog },
   props: {
     file: Object,
+    canUserWrite: {
+      type: Boolean,
+      default: false,
+    }
   },
   data: () => ({
     isFileInfoDialogActive: false,

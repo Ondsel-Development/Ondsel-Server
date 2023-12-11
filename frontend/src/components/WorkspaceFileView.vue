@@ -20,6 +20,7 @@
       </v-btn>
       <v-btn
         flat
+        :hidden="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>
     </v-row>
@@ -58,6 +59,10 @@ export default {
   components: { FileVersionsTable, UploadNewVersionFileDialog },
   props: {
     file: Object,
+    canUserWrite: {
+      type: Boolean,
+      default: false,
+    }
   },
   mixins: [fileDownloadMixin],
   data: () => ({
