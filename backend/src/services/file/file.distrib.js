@@ -52,7 +52,7 @@ export async function distributeFileSummaries(context){
       // for now, we are assuming any change anywhere in file should trigger a summary distribution
       const fileSummary = buildFileSummary(file);
       // to directories
-      if (file.directory._id) {
+      if (file.directory?._id) {
         await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
       };
     };
