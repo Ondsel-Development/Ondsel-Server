@@ -90,7 +90,7 @@ export const organization = (app) => {
       ],
       create: [
         uniqueOrgValidator,
-        canUserCreateOrganization,
+        iff(isProvider('external'), canUserCreateOrganization),
         schemaHooks.validateData(organizationDataValidator),
         schemaHooks.resolveData(organizationDataResolver)
       ],

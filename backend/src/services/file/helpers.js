@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {BadRequest} from "@feathersjs/errors";
+import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
 
 export const feedWorkspaceAndDirectory = async context => {
   const { data, params } = context;
@@ -20,7 +21,7 @@ export const feedWorkspaceAndDirectory = async context => {
       defaultWorkspaceId = user.defaultWorkspaceId;
     }
     const workspace = await context.app.service('workspaces').get(defaultWorkspaceId);
-    data.workspace = _.pick(workspace, ['_id', 'name']);
+    data.workspace = buildWorkspaceSummary(workspace);
     data.directory = workspace.rootDirectory;
     context.data = data;
   }
