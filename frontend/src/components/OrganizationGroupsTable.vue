@@ -19,6 +19,7 @@
         <v-btn
           dark
           class="mb-2"
+          :hidden="!isLoggedInUserAdmin(organization)"
           @click="$refs.createGroupDialog.$data.dialog = true;"
         >
           Add Group
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import CreateGroupDialog from '@/components/CreateGroupDialog.vue';
 
 export default {
@@ -46,6 +48,9 @@ export default {
     organization: Object,
   },
   components: { CreateGroupDialog },
+  computed: {
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
+  },
   data: () => ({
     headers: [
       {

@@ -95,7 +95,7 @@ export const organization = (app) => {
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
-        preventChanges(false, 'admins', 'users'),
+        preventChanges(false, 'admins', 'users', 'owner'),
         iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(
           context => context.data.shouldAddUsersToOrganization,

@@ -63,7 +63,13 @@ export default {
   }),
   async created() {
     this.initPagination(this.orgId);
-    await Organization.get(this.orgId);
+    try {
+      await Organization.get(this.orgId);
+    } catch (e) {
+      if (e.data.type === 'PermissionError') {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+    }
     const org = await Organization.getFromStore(this.orgId);
     await this.setCurrentOrganization(org);
   },

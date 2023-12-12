@@ -27,11 +27,12 @@
         />
       </v-col>
       <v-col cols="9">
-        <WorkspaceFileView v-if="activeFile" :file="activeFile" />
+        <WorkspaceFileView v-if="activeFile" :file="activeFile" :can-user-write="workspace.haveWriteAccess" />
         <WorkspaceDirectoryView
           v-else
           :directory="activeDirectory || directory"
           :directoryPath="activePath === '/' ? '' : activePath"
+          :can-user-write="workspace.haveWriteAccess"
           @open-file="clickedFile"
           @open-directory="clickedDirectory"
         />
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import DirectoryListView from '@/components/DirectoryListView.vue';
@@ -61,21 +62,25 @@ export default {
     };
   },
   async created() {
-    await Workspace.get(this.$route.params.id);
+    try {
+      await Workspace.get(this.$route.params.id);
+    } catch (e) {
+      this.$router.push({ name: 'PageNotFound' });
+    }
     await Directory.get(this.workspace.rootDirectory._id);
-    if (this.workspace.organizationId !== this.currentOrganization._id) {
+    if (!this.organization) {
       await Organization.get(this.workspace.organizationId);
-      const organization = Organization.getFromStore(this.workspace.organizationId);
-      await this.setCurrentOrganization(organization);
+    }
+    if (this.workspace.organizationId !== this.currentOrganization._id) {
+      await this.setCurrentOrganization(this.organization);
     }
     this.activePath = this.directory.name;
   },
-  async mounted() {
-  },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    directory: (vm) => Directory.getFromStore(vm.workspace.rootDirectory._id),
-    workspace: (vm) => Workspace.getFromStore(vm.$route.params.id),
+    directory: vm => Directory.getFromStore(vm.workspace.rootDirectory._id),
+    workspace: vm => Workspace.getFromStore(vm.$route.params.id),
+    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),

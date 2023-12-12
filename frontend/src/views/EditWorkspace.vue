@@ -17,17 +17,34 @@
 import { models } from '@feathersjs/vuex';
 import ManageWorkspaceUsersTable from '@/components/ManageWorkspaceUsersTable.vue';
 import ManageWorkspaceGroupsTable from '@/components/ManageWorkspaceGroupsTable.vue';
+import {mapActions, mapGetters} from 'vuex';
 
-const { Workspace } = models.api;
+const { Workspace, Organization } = models.api;
 
 export default {
   name: "EditWorkspace",
-  components: {ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
+  components: { ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
   async created() {
-    await Workspace.get(this.$route.params.id);
+    try {
+      await Workspace.get(this.$route.params.id);
+    } catch (e) {
+      this.$router.push({ name: 'PageNotFound' });
+    }
+    if (!this.organization) {
+      await Organization.get(this.workspace.organizationId);
+    }
+    if (this.workspace.organizationId !== this.currentOrganization._id) {
+      const organization = Organization.getFromStore(this.workspace.organizationId);
+      await this.setCurrentOrganization(organization);
+    }
   },
   computed: {
+    ...mapGetters('app', ['currentOrganization']),
     workspace: vm => Workspace.getFromStore(vm.$route.params.id),
+    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
+  },
+  methods: {
+    ...mapActions('app', ['setCurrentOrganization']),
   }
 }
 </script>

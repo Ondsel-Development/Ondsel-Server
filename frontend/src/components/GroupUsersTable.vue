@@ -19,6 +19,7 @@
         <v-btn
           dark
           class="mb-2"
+          :hidden="!isLoggedInUserAdmin(organization)"
           @click="openAddUsersToGroupDialog"
         >
           Add / Remove User
@@ -37,6 +38,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import AddUsersToGroupDialog from '@/components/AddUsersToGroupDialog.vue';
 
@@ -61,15 +63,10 @@ export default {
         sortable: true,
         key: 'username'
       },
-      {
-        title: 'Actions',
-        align: 'end',
-        key: 'actions',
-        sortable: false
-      },
     ],
   }),
   computed: {
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
     organization: vm => Organization.getFromStore(vm.group.organizationId),
   },
   methods: {

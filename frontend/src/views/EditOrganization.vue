@@ -28,7 +28,13 @@ export default {
   data: () => ({
   }),
   async created() {
-    await Organization.get(this.$route.params.id);
+    try {
+      await Organization.get(this.$route.params.id);
+    } catch (e) {
+      if (e.data.type === 'PermissionError') {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+    }
 
   },
   computed: {

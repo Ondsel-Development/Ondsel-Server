@@ -35,6 +35,10 @@ export const removeUsersFromOrganization = async (context) => {
   for (let userId of data.userIds) {
     const user = await userService.get(userId);
 
+    if (organization.owner._id.equals(user._id)) {
+      throw new BadRequest({ type: 'PermissionError', msg: 'You cannot remove the owner from organization'});
+    }
+
     const isUserMemberOfGroups = await isUserMemberofAnyOrganizationGroups(context, organization, user);
     const isUserMemberOfWorkspaces = await isUserMemberofAnyOrganizationWorkspaces(context, organization, user);
 

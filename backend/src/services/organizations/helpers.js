@@ -1,15 +1,15 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import {buildOrganizationSummary} from "./organizations.distrib.js";
+import { getConstraint } from "../users/users.subdocs.schema.js";
 
 export const isUserMemberOfOrganization = async context => {
   const organization = await context.service.get(context.id);
 
-  // Only Owner or Admins of Org allow to add users
   if (organization.users.some(user => user._id.equals(context.params.user._id.toString()))) {
     return context;
   }
-  throw new BadRequest('You are not a member of organization');
+  throw new BadRequest({ type: 'PermissionError', msg: 'You are not a member of organization' });
 }
 
 export const isUserOwnerOrAdminOfOrganization = async context => {
@@ -17,7 +17,7 @@ export const isUserOwnerOrAdminOfOrganization = async context => {
 
   // Only Owner or Admins of Org allow to add users
   if (
-    context.params.user._id.equals(organization.createdBy)
+    context.params.user._id.equals(organization.owner._id)
     || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
     return context;
   }
@@ -25,12 +25,11 @@ export const isUserOwnerOrAdminOfOrganization = async context => {
 }
 
 export const canUserCreateOrganization = async context => {
-  // TODO: No constraints for now
-  // const { user } = context.params;
-  // if (user.organizationId) {
-  //   throw new BadRequest(`You cannot create organization because you already a part of organization (id: ${user.organizationId.toString()})`);
-  // }
-  return context;
+  const { canCreateOrganization } = getConstraint(context.params.user);
+  if (canCreateOrganization) {
+    return context;
+  }
+  throw new BadRequest(`User doesn't have enough permissions to create a organization`);
 }
 
 export const assignOrganizationIdToUser = async context => {

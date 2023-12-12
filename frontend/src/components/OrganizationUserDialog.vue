@@ -27,7 +27,7 @@
           </div>
         </v-alert>
         <div class="text-body-2" style="text-align: center">
-          version <span class="font-weight-bold">{{ user.name }}</span> in organization <span class="font-weight-bold">{{ organization.name }}</span>
+          user <span class="font-weight-bold">{{ user.name }}</span> in organization <span class="font-weight-bold">{{ organization.name }}</span>
         </div>
 
         <div class="text-body-1 mt-4" style="text-align: center">
@@ -39,13 +39,31 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn :disabled="isPatchPending" @click="dialog = false">Close</v-btn>
-        <v-btn
-          color="error"
-          variant="outlined"
-          :disabled="isPatchPending"
-          :loading="isPatchPending"
-          @click="confirmationDialog = true;"
-        >Remove from Organization</v-btn>
+        <template v-if="!isUserOwner && isLoggedInUserAdmin(organization)">
+          <v-btn
+            v-if="!user.isAdmin"
+            color="error"
+            variant="outlined"
+            :disabled="isPatchPending"
+            :loading="isPatchPending"
+            @click="makeOrganizationAdmin"
+          >Make Admin</v-btn>
+          <v-btn
+            v-else
+            color="error"
+            variant="outlined"
+            :disabled="isPatchPending"
+            :loading="isPatchPending"
+            @click="revokeOrganizationAdmin"
+          >Revoke Admin Access</v-btn>
+          <v-btn
+            color="error"
+            variant="outlined"
+            :disabled="isPatchPending"
+            :loading="isPatchPending"
+            @click="confirmationDialog = true;"
+          >Remove from Organization</v-btn>
+        </template>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -75,7 +93,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 
 export default {
   name: "OrganizationUserDialog",
@@ -90,6 +108,8 @@ export default {
   }),
   computed: {
     ...mapState('organizations', ['isPatchPending']),
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
+    isUserOwner: vm => vm.organization.owner._id === vm.user._id,
   },
   methods: {
     async removeUserFromOrganization() {
@@ -111,6 +131,36 @@ export default {
     openDialog() {
       this.error = undefined;
       this.dialog = true;
+    },
+    async makeOrganizationAdmin() {
+      try {
+        await this.organization.patch({
+          data: {
+            shouldGiveAdminAccessToUsersOfOrganization: true,
+            userIds: [this.user._id.toString()],
+          }
+        });
+        this.dialog = false;
+      } catch (e) {
+        if (e.data.type === 'ValidationError') {
+          this.error = e.data;
+        }
+      }
+    },
+    async revokeOrganizationAdmin() {
+      try {
+        await this.organization.patch({
+          data: {
+            shouldRevokeAdminAccessFromUsersOfOrganization: true,
+            userIds: [this.user._id.toString()],
+          }
+        });
+        this.dialog = false;
+      } catch (e) {
+        if (e.data.type === 'ValidationError') {
+          this.error = e.data;
+        }
+      }
     }
   }
 }
