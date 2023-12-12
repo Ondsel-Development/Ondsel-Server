@@ -18,6 +18,7 @@
         <v-btn
           dark
           class="mb-2"
+          :hidden="!isLoggedInUserAdmin(organization)"
           @click="openManageWorkspaceUsersDialog"
         >
           Add/Remove Users
@@ -37,6 +38,7 @@
         :items="['read', 'write']"
         variant="plain"
         append-icon="mdi-check"
+        :disabled="!isLoggedInUserAdmin(organization)"
         @click:append="updatePermission(item.value)"
       />
     </template>
@@ -45,7 +47,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import ManageWorkspaceUsersDialog from '@/components/ManageWorkspaceUsersDialog.vue';
 
@@ -81,6 +83,7 @@ export default {
   }),
   computed: {
     ...mapState('workspaces', ['isPatchPending']),
+    ...mapGetters('organizations', ['isLoggedInUserAdmin']),
     workspaceUsers: vm => vm.workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'User'),
     organization: vm => Organization.getFromStore(vm.workspace.organizationId),
   },

@@ -34,6 +34,7 @@
         >Download Copy</v-btn>
         <v-btn
           color="primary"
+          :hidden="!canUserWrite"
           :loading="isPatchPending"
           @click="checkoutToVersion"
         >Set as Active</v-btn>
@@ -52,6 +53,10 @@ export default {
   props: {
     file: Object,
     selectedFileVersion: Object,
+    canUserWrite: {
+      type: Boolean,
+      default: false,
+    }
   },
   mixins: [fileDownloadMixin],
   data: () => ({
