@@ -81,6 +81,7 @@ export default {
           organization: {
             _id: this.organization._id,
             name: this.organization.name,
+            refName: this.organization.refName,
           }
         });
         this.label = {
