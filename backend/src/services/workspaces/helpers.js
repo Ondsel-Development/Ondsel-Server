@@ -9,7 +9,7 @@ export const isUserBelongsToWorkspace = async context => {
     if (context.method === 'get') {
       const workspace = await context.service.get(context.id);
       const workspaceOrg = await context.app.service('organizations').get(workspace.organizationId);
-      if (workspaceOrg.owner._id.equals(context.params.user._id)) {
+      if (workspaceOrg.users.some(user => user._id.equals(context.params.user._id) && user.isAdmin )) {
         return context
       }
     }
@@ -22,7 +22,7 @@ export const isUserBelongsToWorkspace = async context => {
       }
       // if user is the owner of org, then return all organization workspaces
       const org = await context.app.service('organizations').get(context.params.query.organizationId);
-      if (org.owner._id.equals(context.params.user._id)) {
+      if (org.users.some(user => user._id.equals(context.params.user._id) && user.isAdmin )) {
         return context;
       }
       orgArgs = { organizationId: context.params.query.organizationId };
