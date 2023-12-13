@@ -57,7 +57,7 @@ export const groupPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const groupQueryProperties = Type.Pick(groupSchema, ['_id', 'name', 'organizationId'])
+export const groupQueryProperties = Type.Pick(groupSchema, ['_id', 'name', 'organizationId', 'users'])
 export const groupQuerySchema = Type.Intersect(
   [
     querySyntax(groupQueryProperties),

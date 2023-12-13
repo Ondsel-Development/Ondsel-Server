@@ -82,7 +82,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),

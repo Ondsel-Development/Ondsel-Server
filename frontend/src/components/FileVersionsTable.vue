@@ -29,7 +29,7 @@
       </v-icon>
     </template>
   </v-data-table-virtual>
-  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" />
+  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" />
 </template>
 
 <script>
