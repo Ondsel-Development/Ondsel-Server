@@ -130,7 +130,7 @@ export default {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
     gotoAccountSettings() {
-      this.$router.push({name: 'AccountSettings'});
+      this.$router.push({name: 'AccountSettings', params: {username: this.user.username}});
     },
     extractOrganizationId(path) {
       const regex = /\/org\/([^\/]+)/;

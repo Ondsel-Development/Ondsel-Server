@@ -33,9 +33,17 @@ export const distributeOrganizationSummaries = async (context) => {
       const summaryChangeSeen = context.data.name !== undefined; // this is the only field that will trigger right now
       if (summaryChangeSeen) {
         const orgSummary = buildOrganizationSummary(org);
+        //
         // the users have a summary of the org
+        //
         for (const userSummary of org.users) {
           await upsertOrganizationSummaryToUser(context, userSummary._id, orgSummary);
+        }
+        //
+        // the workspaces have a summary of the org
+        //
+        for (const wsSummary of org.workspaces) {
+          await upsertOrganizationSummaryToWorkspace(context, wsSummary._id, orgSummary);
         }
       }
     }
@@ -70,3 +78,43 @@ export async function upsertGroupSummaryToOrganization(context, orgId, groupSumm
     }
   );
 }
+
+// export async function upsertWorkspaceSummaryToOrganization(context, orgId, wsSummary) {
+//   const orgService = context.app.service('organizations');
+//   const org = await orgService.get(orgId);
+//   let wsList = org.workspaces || [];
+//   const index = wsList.findIndex(ws => ws._id.equals(wsSummary._id));
+//   if (index === -1) {
+//     wsList.push(wsSummary);
+//   } else {
+//     wsList[index] = wsSummary;
+//   }
+//   await orgService.patch(
+//     orgId,
+//     {
+//       groups: wsList,
+//     },
+//     {
+//       authentication: context.params.authentication,
+//     }
+//   );
+// }
+// export async function removeWorkspaceSummaryFromOrganization(context, orgId, wsSummary) {
+//   const orgService = context.app.service('organizations');
+//   const org = await orgService.get(orgId);
+//   let wsList = org.workspaces || [];
+//   const index = wsList.findIndex(ws => ws._id.equals(wsSummary._id));
+//   if (index === -1) {
+//     return;
+//   }
+//   wsList.splice(index, 1);
+//   await orgService.patch(
+//     orgId,
+//     {
+//       groups: wsList,
+//     },
+//     {
+//       authentication: context.params.authentication,
+//     }
+//   );
+// }

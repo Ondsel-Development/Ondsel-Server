@@ -51,9 +51,15 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:id',
+    path: '/org/:orgName/workspaces',
     component: OrganizationHome,
-    name: 'OrganizationHome',
+    name: 'OrganizationWorkspaces',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:username/workspaces',
+    component: OrganizationHome,
+    name: 'PersonalWorkspaces',
     meta: { requiresAuth: true },
   },
   {
@@ -103,13 +109,13 @@ const routes = [
     name: 'LegalDoc',
   },
   {
-    path: '/account-settings',
+    path: '/user/:username/settings',
     component: AccountSettings,
     name: 'AccountSettings',
     meta: { requiresAuth: true },
   },
   {
-    path: '/account-history',
+    path: '/user/:username/account-history',
     component: AccountHistory,
     name: 'AccountHistory',
     meta: { requiresAuth: true },

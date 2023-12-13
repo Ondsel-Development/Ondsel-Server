@@ -47,3 +47,13 @@ export async function upsertGroupSummarytoWorkspaces(context, workspaceId, group
     );
   }
 }
+
+export async function upsertOrganizationSummaryToWorkspace(context, workspaceId, orgSummary) {
+  const workspaceService = context.app.service('workspaces');
+  await workspaceService.patch(
+    workspaceId,
+    {
+      organization: orgSummary,
+    }
+  );
+}
