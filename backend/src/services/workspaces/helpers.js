@@ -23,9 +23,6 @@ export const isUserBelongsToWorkspace = async context => {
       // if user is the owner of org, then return all organization workspaces
       const org = await context.app.service('organizations').get(context.params.query.organizationId);
       if (org.owner._id.equals(context.params.user._id)) {
-        context.params.query.organizationId = {
-          $in: userOrganizations.map(org => org._id)
-        }
         return context;
       }
       orgArgs = { organizationId: context.params.query.organizationId };
