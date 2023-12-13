@@ -6,7 +6,7 @@
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Add / Remove Users</div>
+        <div class="text-center">Update Users</div>
       </template>
       <v-progress-linear
         :active="isPatchPending"

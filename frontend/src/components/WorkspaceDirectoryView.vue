@@ -2,8 +2,8 @@
   <v-container v-if="directory" class="mt-4">
     <v-row>
       <v-spacer />
-      <v-btn flat :hidden="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
-      <v-btn flat :hidden="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
+      <v-btn flat :disabled="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
+      <v-btn flat class="ml-1" :disabled="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
