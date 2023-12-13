@@ -34,7 +34,7 @@
         >Download Copy</v-btn>
         <v-btn
           color="primary"
-          :hidden="!canUserWrite"
+          :disabled="!canUserWrite"
           :loading="isPatchPending"
           @click="checkoutToVersion"
         >Set as Active</v-btn>

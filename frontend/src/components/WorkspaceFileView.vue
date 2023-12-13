@@ -20,7 +20,7 @@
       </v-btn>
       <v-btn
         flat
-        :hidden="!canUserWrite"
+        :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>
     </v-row>
@@ -42,7 +42,7 @@
       </v-sheet>
     </v-row>
     <v-row>
-      <file-versions-table :file="file" />
+      <file-versions-table :file="file" :can-user-write="canUserWrite" />
     </v-row>
     <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
   </v-container>
