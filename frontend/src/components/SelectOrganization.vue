@@ -75,26 +75,27 @@ export default {
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
     async goToOrganization(organization) {
+      const { Organization } = models.api;
+      await Organization.get(organization._id);
+      await this.setCurrentOrganization(Organization.getFromStore(organization._id));
       if (organization.refName.length > 20) { // TODO: later convert this check to use to organization.nature
         this.$router.push({name: 'PersonalWorkspaces', params: {username: this.user.username}});
         this.dialog = false;
         return;
       }
-      const { Organization } = models.api;
-      await Organization.get(organization._id);
-      await this.setCurrentOrganization(Organization.getFromStore(organization._id));
-      this.$router.push({ name: 'OrganizationHome', params: { id: organization._id } });
+      this.$router.push({ name: 'OrganizationWorkspaces', params: { orgName: organization.refName } });
       this.dialog = false;
     },
     async goToOrganizationEdit(organization) {
+      const { Organization } = models.api;
+      await Organization.get(organization._id);
+      await this.setCurrentOrganization(Organization.getFromStore(organization._id));
       if (organization.refName.length > 20) { // TODO: later convert this check to use to organization.nature
         this.$router.push({name: 'AccountSettings', params: {username: this.user.username}});
         this.dialog = false;
         return;
       }
-      const { Organization } = models.api;
-      await Organization.get(organization._id);
-      this.$router.push({ name: 'EditOrganization', params: { id: organization._id } });
+      this.$router.push({ name: 'EditOrganization', params: { orgName: organization.refName } });
       this.dialog = false;
     }
   }

@@ -115,11 +115,12 @@ export default {
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization() {
-      const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
-      if (currentOrganizationId) {
-        const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
-        return organization;
-      }
+      // NOTE: the following code was removed because you can be looking at OTHER /org/<refName> orgs while you are logged in
+      // const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
+      // if (currentOrganizationId) {
+      //   const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
+      //   return organization;
+      // }
       return this.userCurrentOrganization;
     },
   },
@@ -132,15 +133,15 @@ export default {
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings', params: {username: this.user.username}});
     },
-    extractOrganizationId(path) {
-      const regex = /\/org\/([^\/]+)/;
-      const match = path.match(regex);
-      if (match && match[1]) {
-        return match[1];
-      } else {
-        return null;
-      }
-    }
+    // extractOrganizationRefName(path) {
+    //   const regex = /\/org\/([^\/]+)/;
+    //   const match = path.match(regex);
+    //   if (match && match[1]) {
+    //     return match[1];
+    //   } else {
+    //     return null;
+    //   }
+    // }
   },
 }
 </script>

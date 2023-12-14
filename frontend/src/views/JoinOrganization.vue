@@ -69,7 +69,7 @@ export default {
           }
         }
       )
-      this.$router.push({ name: 'OrganizationHome', params: { id: this.orgInvite.organization._id } });
+      this.$router.push({ name: 'OrganizationWorkspaces', params: { orgName: this.orgInvite.organization.name } });
     },
     async rejectInvite() {
       await OrgInvite.patch(

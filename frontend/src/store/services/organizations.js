@@ -1,4 +1,5 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
+import {models} from "@feathersjs/vuex";
 
 class Organization extends BaseModel {
   constructor(data, options) {
@@ -25,11 +26,11 @@ const servicePlugin = makeServicePlugin({
       getters: {
         isLoggedInUserAdmin: (state, getters, rootState, rootGetters) => (organization) => {
           const loggedInUser = rootGetters['auth/user'];
-          if (organization) {
+          if (organization && organization._id) {
             return organization.users.some(user => user.isAdmin && user._id === loggedInUser._id)
           }
           return false;
-        }
+        },
       }
     }
   }

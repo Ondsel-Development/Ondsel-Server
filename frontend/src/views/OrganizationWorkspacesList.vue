@@ -56,7 +56,7 @@ import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 const { Organization, Workspace, User } = models.api;
 
 export default {
-  name: 'OrganizationHome',
+  name: 'OrganizationWorkspacesList',
   components: { CreateWorkspaceDialog },
   data: () => ({
     paginationData: {},
@@ -66,15 +66,13 @@ export default {
     userName: undefined, // username of the Personal org (if applies), not the username of web page visitor
     foundUser: {},
     workspaces: {data: []},
-    // orgWorkspaceLabel: "pending...",
   }),
   async created() {
-    // //const org = await Organization.getFromStore(this.orgId);
-    // await this.setCurrentOrganization(this.organization);
   },
   async mounted() {
     // await this.fetchWorkspaces();
     await this.fetchOrganization();
+    await this.setCurrentOrganization(this.organization);
     this.initPagination(this.orgId);
     try {
       await Organization.get(this.orgId);
@@ -157,8 +155,11 @@ export default {
   },
   watch: {
     async '$route'(to, from) {
-      if (to.name === 'OrganizationHome') {
-        // this.fetchWorkspaces();
+      if (to.name === 'OrganizationWorkspaces') {
+        this.fetchWorkspaces();
+      }
+      if (to.name === 'PersonalWorkspaces') {
+        this.fetchWorkspaces();
       }
     }
   }

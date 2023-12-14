@@ -19,7 +19,7 @@ import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
-import OrganizationHome from '@/views/OrganizationHome';
+import OrganizationHome from '@/views/OrganizationWorkspacesList.vue';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
@@ -171,7 +171,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:id/edit',
+    path: '/org/:orgName/settings',
     component: EditOrganization,
     name: 'EditOrganization',
     meta: { requiresAuth: true },

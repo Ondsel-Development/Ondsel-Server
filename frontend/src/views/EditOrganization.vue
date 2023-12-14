@@ -15,36 +15,44 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
-import { models } from '@feathersjs/vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
-
-const { Organization } = models.api;
+import {models} from "@feathersjs/vuex";
 
 export default {
   name: 'EditOrganization',
   components: { OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
+    organizationDetail: undefined,
   }),
-  async created() {
-    try {
-      await Organization.get(this.$route.params.id);
-    } catch (e) {
-      if (e.data.type === 'PermissionError') {
-        this.$router.push({ name: 'PageNotFound' });
-      }
+  async mounted() {
+    this.organizationDetail = await this.getOrganizationByName(this.$route.params.orgName);
+    if (!this.organization) {
+      this.$router.push({ name: 'PageNotFound' });
     }
-
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
-    organization: vm => Organization.getFromStore(vm.$route.params.id),
+    organization: vm => vm.organizationDetail,
   },
   watch: {
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
+    getOrganizationByName: async (name) => {
+      let result = undefined;
+      const orgResult = await models.api.Organization.find({
+        query: {
+          refName: name,
+        }
+      });
+      if (orgResult.total !== 0) {
+        let orgId = orgResult.data[0]._id;
+        result = await models.api.Organization.get(orgId);
+      }
+      return result;
+    },
   }
 }
 </script>

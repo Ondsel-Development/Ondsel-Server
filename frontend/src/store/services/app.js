@@ -19,7 +19,7 @@ export default {
         return organization;
       }
       return null;
-    }
+    },
   },
   mutations: {
     SET_CURRENT_ORGANIZATION: (stateIn, organization) => {
@@ -32,6 +32,6 @@ export default {
 
       // Save to DB
       models.api.User.patch(context.rootState.auth.user._id, { currentOrganizationId: organization._id });
-    }
+    },
   }
 }
