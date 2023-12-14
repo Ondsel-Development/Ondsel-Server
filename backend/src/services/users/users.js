@@ -2,7 +2,7 @@
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 import axios from 'axios';
-import {iff, preventChanges} from 'feathers-hooks-common'
+import {iff, isProvider, keep, keepQuery, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   userDataValidator,
@@ -23,6 +23,8 @@ import { userPath, userMethods } from './users.shared.js'
 import {addVerification, removeVerification} from "feathers-authentication-management";
 import {notifier} from "../auth-management/notifier.js";
 import { isEndUser } from "../../hooks/is-user.js";
+import _ from "lodash";
+import {keepOnlyLimitedFields} from "../hooks/misc.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -52,7 +54,7 @@ export const user = (app) => {
   app.service(userPath).hooks({
     around: {
       all: [schemaHooks.resolveExternal(userExternalResolver), schemaHooks.resolveResult(userResolver)],
-      find: [authenticate('jwt')],
+      find: [], // the public can do a find, but very limited fields return. See "after"
       get: [authenticate('jwt')],
       create: [],
       update: [authenticate('jwt')],
@@ -61,7 +63,7 @@ export const user = (app) => {
     },
     before: {
       all: [schemaHooks.validateQuery(userQueryValidator), schemaHooks.resolveQuery(userQueryResolver)],
-      find: [],
+      find: [iff(isProvider('external'), keepQuery('_id', 'name', 'username'))],
       get: [],
       create: [
         schemaHooks.validateData(userDataValidator),
@@ -100,6 +102,9 @@ export const user = (app) => {
     },
     after: {
       all: [],
+      find: [
+        iff(isProvider('external'), keepOnlyLimitedFields(['_id', 'name', 'username'])) // for the public, all the rest is confidential
+      ],
       create: [
         sendVerify(),
         removeVerification(),

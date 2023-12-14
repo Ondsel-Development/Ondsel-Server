@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {disallow, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
+import {disallow, iff, isProvider, keep, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -33,6 +33,9 @@ import { revokeAdminAccessFromUsersOfOrganization } from './commands/revokeAdmin
 import { createDefaultEveryoneGroup } from '../groups/commands/createDefaultEveryoneGroup.js';
 import { distributeOrganizationSummaries } from './organizations.distrib.js';
 import { addGroupsToOrganization } from './commands/addGroupsToOrganization.js';
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {groupSummary} from "../groups/groups.subdocs.schema.js";
+import {userSummarySchema} from "../users/users.subdocs.schema.js";
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -82,9 +85,7 @@ export const organization = (app) => {
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
-      find: [
-        iff(isProvider('external'), disallow())
-      ],
+      find: [],
       get: [
         iff(isProvider('external'), isUserMemberOfOrganization)
       ],
@@ -124,6 +125,9 @@ export const organization = (app) => {
     },
     after: {
       all: [
+      ],
+      find: [
+        iff(isProvider('external'), keep('_id', 'name', 'refName', 'createdAt', 'owner', 'deleted'))
       ],
       create: [
         assignOrganizationIdToUser,

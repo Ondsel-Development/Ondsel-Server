@@ -38,54 +38,9 @@ const isWindowLoadedInIframe = () => {
 
 
 const routes = [
-  {
-    path: '/model/:id?',
-    component: Home,
-    name: 'Home',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/create_organization',
-    component: CreateOrganization,
-    name: 'CreateOrganization',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/org/:orgName/workspaces',
-    component: OrganizationHome,
-    name: 'OrganizationWorkspaces',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/user/:username/workspaces',
-    component: OrganizationHome,
-    name: 'PersonalWorkspaces',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/org/:id/edit',
-    component: EditOrganization,
-    name: 'EditOrganization',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/group/:id/edit',
-    component: EditGroup,
-    name: 'EditGroup',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/workspace/:id',
-    component: WorkspaceHome,
-    name: 'WorkspaceHome',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/workspace/:id/edit',
-    component: EditWorkspace,
-    name: 'EditWorkspace',
-    meta: { requiresAuth: true },
-  },
+  //
+  // generic pages
+  //
   {
     path: '/',
     component: Models,
@@ -107,18 +62,6 @@ const routes = [
     path: '/legal-document/:doc_name',
     component: LegalDoc,
     name: 'LegalDoc',
-  },
-  {
-    path: '/user/:username/settings',
-    component: AccountSettings,
-    name: 'AccountSettings',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/user/:username/account-history',
-    component: AccountHistory,
-    name: 'AccountHistory',
-    meta: { requiresAuth: true },
   },
   {
     path: '/choose-tier',
@@ -183,6 +126,72 @@ const routes = [
     path: '/join-org/:token/:id',
     component: JoinOrganization,
     name: 'JoinOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/model/:id?',
+    component: Home,
+    name: 'Home',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/create_organization',
+    component: CreateOrganization,
+    name: 'CreateOrganization',
+    meta: { requiresAuth: true },
+  },
+  //
+  // user pages
+  //
+  {
+    path: '/user/:username/workspaces',
+    component: OrganizationHome,
+    name: 'PersonalWorkspaces',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:username/settings',
+    component: AccountSettings,
+    name: 'AccountSettings',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:username/account-history',
+    component: AccountHistory,
+    name: 'AccountHistory',
+    meta: { requiresAuth: true },
+  },
+  //
+  // org pages
+  //
+  {
+    path: '/org/:orgName/workspaces',
+    component: OrganizationHome,
+    name: 'OrganizationWorkspaces',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:id/edit',
+    component: EditOrganization,
+    name: 'EditOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:orgName/group/:id/edit',
+    component: EditGroup,
+    name: 'EditGroup',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:orgName/workspace/:id',
+    component: WorkspaceHome,
+    name: 'WorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:orgName/workspace/:id/edit',
+    component: EditWorkspace,
+    name: 'EditWorkspace',
     meta: { requiresAuth: true },
   },
 ]

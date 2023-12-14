@@ -82,14 +82,14 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted', 'owner'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),
     // Add additional query properties here
     Type.Object({}, { additionalProperties: false })
   ],
-  { additionalProperties: false }
+  { additionalProperties: true }
 )
 export const organizationQueryValidator = getValidator(organizationQuerySchema, queryValidator)
 export const organizationQueryResolver = resolve({})
