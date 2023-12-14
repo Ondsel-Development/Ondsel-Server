@@ -5,10 +5,12 @@
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
     </v-row>
     <v-row class="mt-12">
-      <manage-workspace-users-table :workspace="workspace" />
+      <manage-workspace-users-table v-if="isOrgWorkspace" :workspace="workspace" />
+      <div v-else><i>personal workspaces limited to self</i></div>
     </v-row>
     <v-row class="mt-12">
-      <manage-workspace-groups-table :workspace="workspace" />
+      <manage-workspace-groups-table v-if="isOrgWorkspace" :workspace="workspace" />
+      <div v-else><i>personal workspaces do not support groups</i></div>
     </v-row>
   </v-container>
 </template>
@@ -42,6 +44,7 @@ export default {
     ...mapGetters('app', ['currentOrganization']),
     workspace: vm => Workspace.getFromStore(vm.$route.params.id),
     organization: vm => Organization.getFromStore(vm.workspace.organizationId),
+    isOrgWorkspace: vm => vm.$route.params.orgName !== undefined,
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),

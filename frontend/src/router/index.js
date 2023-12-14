@@ -134,12 +134,6 @@ const routes = [
     name: 'Home',
     meta: { requiresAuth: true },
   },
-  {
-    path: '/create_organization',
-    component: CreateOrganization,
-    name: 'CreateOrganization',
-    meta: { requiresAuth: true },
-  },
   //
   // user pages
   //
@@ -161,9 +155,27 @@ const routes = [
     name: 'AccountHistory',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/user/:username/workspace/:id',
+    component: WorkspaceHome,
+    name: 'UserWorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:username/workspace/:id/edit',
+    component: EditWorkspace,
+    name: 'EditUserWorkspace',
+    meta: { requiresAuth: true },
+  },
   //
   // org pages
   //
+  {
+    path: '/create_organization',
+    component: CreateOrganization,
+    name: 'CreateOrganization',
+    meta: { requiresAuth: true },
+  },
   {
     path: '/org/:orgName/workspaces',
     component: OrganizationHome,
@@ -177,7 +189,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:orgName/group/:id/edit',
+    path: '/org/:orgName/group/:id',
     component: EditGroup,
     name: 'EditGroup',
     meta: { requiresAuth: true },

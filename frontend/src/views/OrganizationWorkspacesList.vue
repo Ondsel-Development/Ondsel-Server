@@ -126,10 +126,18 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'WorkspaceHome', params: { id: workspace._id } });
+      if (this.userName) {
+        this.$router.push({ name: 'UserWorkspaceHome', params: { username: this.userName, id: workspace._id } });
+      } else {
+        this.$router.push({ name: 'WorkspaceHome', params: { orgName: this.orgName, id: workspace._id } });
+      }
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'EditWorkspace', params: { id: workspace._id } });
+      if (this.userName) {
+        this.$router.push({name: 'EditUserWorkspace', params: { username: this.userName, id: workspace._id }});
+      } else {
+        this.$router.push({name: 'EditWorkspace', params: { orgName: this.orgName, id: workspace._id }});
+      }
     },
     async fetchOrganization() {
       this.userName = this.$route.params.username;
