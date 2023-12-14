@@ -73,7 +73,7 @@ export default {
     ...mapState('auth', ['user']),
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
     async goToOrganization(organization) {
       const { Organization } = models.api;
       await Organization.get(organization._id);

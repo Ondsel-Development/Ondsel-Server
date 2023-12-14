@@ -60,19 +60,19 @@ export default {
   components: { CreateWorkspaceDialog },
   data: () => ({
     paginationData: {},
-    organization: undefined,
+    organizationDetail: undefined,
     orgId: undefined,
     orgName: undefined,
     userName: undefined, // username of the Personal org (if applies), not the username of web page visitor
     foundUser: {},
-    workspaces: {data: []},
+    workspacesDetail: {data: []},
   }),
   async created() {
   },
   async mounted() {
     // await this.fetchWorkspaces();
     await this.fetchOrganization();
-    await this.setCurrentOrganization(this.organization);
+    // await this.setCurrentOrganization(this.organization);
     this.initPagination(this.orgId);
     try {
       await Organization.get(this.orgId);
@@ -91,9 +91,11 @@ export default {
     ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     orgWorkspaceLabel: vm => vm.userName ? `Personal Workspaces for ${vm.foundUser?.name}` : `Workspaces for ${vm.organization.name}`,
+    organization: vm => vm.organizationDetail,
+    workspaces: vm => vm.workspacesDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
     initPagination(id) {
       if (!(id in this.paginationData)) {
         this.paginationData[id] = {
@@ -111,7 +113,7 @@ export default {
         return;
       }
       this.initPagination(this.orgId);
-      if (this.workspaces.data.length !== this.paginationData[this.orgId].total) {
+      if (this.workspacesDetail.data.length !== this.paginationData[this.orgId].total) {
         const wsList = await Workspace.find({
           query: {
             $limit: this.paginationData[this.orgId].limit,
@@ -143,23 +145,18 @@ export default {
         this.foundUser = targetUser.data[0];
         this.orgName = this.foundUser._id.toString();
       }
-      const orgResult = await Organization.find({
-        query: {
-          refName: this.orgName,
-        }
-      });
-      this.organization = orgResult.data[0];
-      this.orgId = this.organization._id.toString();
-      this.workspaces = await Workspace.find({ organizationId: this.orgId });
+      this.organizationDetail = await this.getOrganizationByName(this.orgName);
+      this.orgId = this.organizationDetail._id.toString();
+      this.workspacesDetail = await Workspace.find({ query: {organizationId: this.orgId} });
     },
   },
   watch: {
     async '$route'(to, from) {
       if (to.name === 'OrganizationWorkspaces') {
-        this.fetchWorkspaces();
+        await this.fetchOrganization();
       }
       if (to.name === 'PersonalWorkspaces') {
-        this.fetchWorkspaces();
+        await this.fetchOrganization();
       }
     }
   }

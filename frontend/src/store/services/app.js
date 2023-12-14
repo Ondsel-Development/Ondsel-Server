@@ -33,5 +33,18 @@ export default {
       // Save to DB
       models.api.User.patch(context.rootState.auth.user._id, { currentOrganizationId: organization._id });
     },
+    getOrganizationByName: async (context, name) => {
+      let result = undefined;
+      const orgResult = await models.api.Organization.find({
+        query: {
+          refName: name,
+        }
+      });
+      if (orgResult.total !== 0) {
+        let orgId = orgResult.data[0]._id;
+        result = await models.api.Organization.get(orgId);
+      }
+      return result;
+    },
   }
 }

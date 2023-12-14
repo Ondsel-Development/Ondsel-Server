@@ -15,10 +15,9 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
-import {models} from "@feathersjs/vuex";
 
 export default {
   name: 'EditOrganization',
@@ -37,22 +36,14 @@ export default {
     organization: vm => vm.organizationDetail,
   },
   watch: {
+    async '$route'(to, from) {
+      if (to.name === 'EditOrganization') {
+        this.organizationDetail = await this.getOrganizationByName(this.$route.params.orgName);
+      }
+    }
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
-    getOrganizationByName: async (name) => {
-      let result = undefined;
-      const orgResult = await models.api.Organization.find({
-        query: {
-          refName: name,
-        }
-      });
-      if (orgResult.total !== 0) {
-        let orgId = orgResult.data[0]._id;
-        result = await models.api.Organization.get(orgId);
-      }
-      return result;
-    },
+    ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
   }
 }
 </script>
