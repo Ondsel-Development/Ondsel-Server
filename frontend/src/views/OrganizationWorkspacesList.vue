@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 
@@ -70,9 +70,12 @@ export default {
   async created() {
   },
   async mounted() {
-    // await this.fetchWorkspaces();
     await this.fetchOrganization();
-    // await this.setCurrentOrganization(this.organization);
+    if ((this.userCurrentOrganization === null) || (this.organization?.refName !== this.userCurrentOrganization.refName)) {
+      console.log(`note: you are acting on behalf of '${this.userCurrentOrganization?.refName}' and tried to look at ${this.orgName}'s workspaces; that is not appropriate.`);
+      console.log(`redirecting to ${this.orgName}'s public summary page.`);
+      this.$router.push({ name: 'OrganizationHomePage', params: { orgName: this.orgName } });
+    };
     this.initPagination(this.orgId);
     try {
       await Organization.get(this.orgId);
@@ -90,12 +93,13 @@ export default {
   computed: {
     ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     orgWorkspaceLabel: vm => vm.userName ? `Personal Workspaces for ${vm.foundUser?.name}` : `Workspaces for ${vm.organization.name}`,
     organization: vm => vm.organizationDetail,
     workspaces: vm => vm.workspacesDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
+    ...mapActions('app', ['getOrganizationByName']),
     initPagination(id) {
       if (!(id in this.paginationData)) {
         this.paginationData[id] = {

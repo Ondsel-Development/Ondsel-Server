@@ -28,7 +28,6 @@ export default {
   }),
   async created() {
     this.targetOrgDetail = await this.getOrganizationByNamePublic(this.targetOrgName);
-    console.log(JSON.stringify(this.userCurrentOrganization));
   },
   async mounted() {
   },
