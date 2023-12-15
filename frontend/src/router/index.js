@@ -26,6 +26,8 @@ import EditGroup from '@/views/EditGroup';
 import JoinOrganization from '@/views/JoinOrganization';
 import WorkspaceHome from '@/views/WorkspaceHome.vue';
 import EditWorkspace from '@/views/EditWorkspace.vue';
+import LensHomePage from "@/views/LensHomePage.vue";
+import UserHomePage from "@/views/UserHomePage.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -41,18 +43,6 @@ const routes = [
   //
   // generic pages
   //
-  {
-    path: '/',
-    component: Models,
-    name: 'Models',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/public-models',
-    component: PublicModels,
-    name: 'PublicModels',
-    meta: { requiresAuth: true },
-  },
   {
     path: '/signup',
     component: SignUp,
@@ -135,8 +125,33 @@ const routes = [
     meta: { requiresAuth: true },
   },
   //
+  // Ondsel pages
+  //
+  {
+    path: '/',
+    component: LensHomePage,
+    name: 'LensHomePage',
+  },
+  {
+    path: '/public-models',
+    component: PublicModels,
+    name: 'PublicModels',
+  },
+  //
   // user pages
   //
+  {
+    path: '/user/:username',
+    component: UserHomePage,
+    name: 'UserHomePage',
+    meta: { tryAuth: true },
+  },
+  {
+    path: '/user/:username/just_model_files',
+    component: Models,
+    name: 'Models',
+    // meta: { requiresAuth: true },
+  },
   {
     path: '/user/:username/workspaces',
     component: OrganizationHome,

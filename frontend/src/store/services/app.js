@@ -46,5 +46,16 @@ export default {
       }
       return result;
     },
+    getUserByName: async (context, name) => {
+      // note: this function only gets the data available to the public; email etc. is missing
+      let result = undefined;
+      const targetUser = await models.api.User.find({
+        query: {username: name }
+      })
+      if (targetUser.total !== 0) {
+        result = targetUser.data[0];
+      }
+      return result;
+    }
   }
 }

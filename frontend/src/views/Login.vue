@@ -85,6 +85,7 @@ export default {
   computed: {
     User: () => models.api.User,
     ...mapState('auth', ['isAuthenticatePending']),
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
   mounted() {
     resetStores();
@@ -97,7 +98,7 @@ export default {
           strategy: 'local',
           ...this.user,
         }).then(() => {
-          this.$router.push({ name: 'Models' })
+          this.$router.push({ name: 'UserHomePage', params: {username: this.loggedInUser.user.username} })
         }).catch((e) => {
           this.showSnacker = true;
           this.snackerMsg = `Invalid login`

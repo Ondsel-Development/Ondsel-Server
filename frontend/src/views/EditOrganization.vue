@@ -26,10 +26,7 @@ export default {
     organizationDetail: undefined,
   }),
   async mounted() {
-    this.organizationDetail = await this.getOrganizationByName(this.$route.params.orgName);
-    if (!this.organization) {
-      this.$router.push({ name: 'PageNotFound' });
-    }
+    await this.refreshOrg();
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
@@ -38,12 +35,21 @@ export default {
   watch: {
     async '$route'(to, from) {
       if (to.name === 'EditOrganization') {
-        this.organizationDetail = await this.getOrganizationByName(this.$route.params.orgName);
+        await this.refreshOrg();
       }
     }
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
+    async refreshOrg() {
+      if (this.$route.params.orgName.length > 20) {
+        this.$router.push({ name: 'PageNotFound' }) // personal orgs don't have settings, how did the user get here?
+      }
+      this.organizationDetail = await this.getOrganizationByName(this.$route.params.orgName);
+      if (!this.organization) {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+    },
   }
 }
 </script>
