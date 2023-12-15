@@ -19,7 +19,7 @@ import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
-import OrganizationHome from '@/views/OrganizationWorkspacesList.vue';
+import OrganizationWorkspaceList from '@/views/OrganizationWorkspacesList.vue';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
@@ -28,6 +28,7 @@ import WorkspaceHome from '@/views/WorkspaceHome.vue';
 import EditWorkspace from '@/views/EditWorkspace.vue';
 import LensHomePage from "@/views/LensHomePage.vue";
 import UserHomePage from "@/views/UserHomePage.vue";
+import OrganizationHomePage from "@/views/OrganizationHomePage.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -52,6 +53,7 @@ const routes = [
     path: '/legal-document/:doc_name',
     component: LegalDoc,
     name: 'LegalDoc',
+    meta: { tryAuth: true },
   },
   {
     path: '/choose-tier',
@@ -131,11 +133,13 @@ const routes = [
     path: '/',
     component: LensHomePage,
     name: 'LensHomePage',
+    meta: { tryAuth: true },
   },
   {
     path: '/public-models',
     component: PublicModels,
     name: 'PublicModels',
+    meta: { tryAuth: true },
   },
   //
   // user pages
@@ -150,11 +154,11 @@ const routes = [
     path: '/user/:username/just_model_files',
     component: Models,
     name: 'Models',
-    // meta: { requiresAuth: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/user/:username/workspaces',
-    component: OrganizationHome,
+    component: OrganizationWorkspaceList,
     name: 'PersonalWorkspaces',
     meta: { requiresAuth: true },
   },
@@ -192,8 +196,14 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/org/:orgName',
+    component: OrganizationHomePage,
+    name: 'OrganizationHomePage',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/org/:orgName/workspaces',
-    component: OrganizationHome,
+    component: OrganizationWorkspaceList,
     name: 'OrganizationWorkspaces',
     meta: { requiresAuth: true },
   },
@@ -244,8 +254,7 @@ router.beforeEach(async (to, from, next) => {
       await store.dispatch('auth/authenticate');
       next({ name: 'Models' });
       return;
-    } catch (err) {
-    }
+    } catch (err) { /* empty */ }
   }
   else if (to.meta && to.meta.requiresAuth) {
     try {
@@ -258,8 +267,7 @@ router.beforeEach(async (to, from, next) => {
   else if (to.meta && to.meta.tryAuth) {
     try {
       await store.dispatch('auth/authenticate');
-    } catch (err) {
-    }
+    } catch (err) { /* empty */ }
   }
   next();
 });

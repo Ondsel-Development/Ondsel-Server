@@ -46,6 +46,19 @@ export default {
       }
       return result;
     },
+    getOrganizationByNamePublic: async (context, name) => {
+      // note: this function only gets the data available to the public
+      let result = undefined;
+      const orgResult = await models.api.Organization.find({
+        query: {
+          refName: name,
+        }
+      });
+      if (orgResult.total !== 0) {
+        result = orgResult.data[0];
+      }
+      return result;
+    },
     getUserByName: async (context, name) => {
       // note: this function only gets the data available to the public; email etc. is missing
       let result = undefined;

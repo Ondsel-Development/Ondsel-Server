@@ -66,9 +66,24 @@ export const organization = (app) => {
   app.service(organizationPath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
         schemaHooks.resolveExternal(organizationExternalResolver),
+      ],
+      find: [
+      ],
+      get: [
+        authenticate('jwt'),
         schemaHooks.resolveResult(organizationResolver)
+      ],
+      create: [
+        authenticate('jwt'),
+        schemaHooks.resolveResult(organizationResolver)
+      ],
+      patch: [
+        authenticate('jwt'),
+        schemaHooks.resolveResult(organizationResolver)
+      ],
+      remove: [
+        authenticate('jwt'),
       ]
     },
     before: {
@@ -85,7 +100,8 @@ export const organization = (app) => {
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
-      find: [],
+      find: [
+      ],
       get: [
         iff(isProvider('external'), isUserMemberOfOrganization)
       ],
