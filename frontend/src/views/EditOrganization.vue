@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import {mapActions, mapState} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
 
@@ -27,9 +27,15 @@ export default {
   }),
   async mounted() {
     await this.refreshOrg();
+    if ((this.userCurrentOrganization === null) || (this.organization?.refName !== this.userCurrentOrganization.refName)) {
+      console.log(`note: you are acting on behalf of '${this.userCurrentOrganization?.refName}' and tried to edit ${this.organization?.refName}; that is not appropriate.`);
+      console.log(`redirecting to ${this.organization?.refName}'s public summary page.`);
+      this.$router.push({ name: 'OrganizationHomePage', params: { orgName: this.organization?.refName } });
+    };
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     organization: vm => vm.organizationDetail,
   },
   watch: {
@@ -40,7 +46,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization', 'getOrganizationByName']),
+    ...mapActions('app', ['getOrganizationByName']),
     async refreshOrg() {
       if (this.$route.params.orgName.length > 20) {
         this.$router.push({ name: 'PageNotFound' }) // personal orgs don't have settings, how did the user get here?
