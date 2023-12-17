@@ -55,7 +55,10 @@ export const group = (app) => {
       ]
     },
     before: {
-      all: [schemaHooks.validateQuery(groupQueryValidator), schemaHooks.resolveQuery(groupQueryResolver)],
+      all: [
+        schemaHooks.validateQuery(groupQueryValidator),
+        schemaHooks.resolveQuery(groupQueryResolver)
+      ],
       find: [userBelongingGroups],
       get: [userBelongingGroups],
       create: [
