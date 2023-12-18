@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import axios from 'axios';
 import swagger from 'feathers-swagger';
@@ -26,6 +26,7 @@ import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {distributeModelSummaries} from "./models.distrib.js";
+import { canUserAccessModelGetMethod, userBelongingModels, canUserAccessModelPatchMethod } from './helpers.js';
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -49,6 +50,11 @@ export const model = (app) => {
   })
 
   app.service(modelPath).publish((data, context) => {
+    const workspaceId = _.get(data, 'file.workspace._id', undefined);
+    if (workspaceId) {
+      return app.channel(`workspace/${workspaceId.toString()}`)
+    }
+    // workspace not exists for shared-model object, so use userId
     return app.channel(context.result.userId.toString())
   })
 
@@ -82,8 +88,18 @@ export const model = (app) => {
         schemaHooks.validateQuery(modelQueryValidator),
         schemaHooks.resolveQuery(modelQueryResolver)
       ],
-      find: [],
-      get: [],
+      find: [
+        iff(
+          isProvider('external'),
+          userBelongingModels
+        )
+      ],
+      get: [
+        iff(
+          isProvider('external'),
+          canUserAccessModelGetMethod
+        )
+      ],
       create: [
         canUserCreateModel,
         verifyToCreateSystemGeneratedShareLink,
@@ -92,6 +108,10 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
+        iff(
+          isProvider('external'),
+          canUserAccessModelPatchMethod
+        ),
         preventChanges(false, 'isSharedModel', 'custFileName'),
         iff(
           context => context.data.shouldCommitNewVersion,

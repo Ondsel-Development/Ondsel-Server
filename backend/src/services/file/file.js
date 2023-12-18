@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
@@ -25,6 +25,11 @@ import {
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
 import {distributeFileSummaries} from "./file.distrib.js";
+import {
+  canUserAccessDirectoryOrFileGetMethod,
+  canUserAccessDirectoryOrFilePatchMethod,
+  userBelongingDirectoriesOrFiles
+} from '../directories/helpers.js';
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -48,7 +53,9 @@ export const file = (app) => {
   })
 
   app.service(filePath).publish((data, context) => {
-    return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+    if (context.result.workspace) {
+      return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+    }
   })
 
   // Initialize hooks
@@ -88,8 +95,17 @@ export const file = (app) => {
       ],
       find: [
         schemaHooks.validateQuery(fileQueryValidator),  // if not validate then $exists operator raise exception
+        iff(
+          isProvider('external'),
+          userBelongingDirectoriesOrFiles
+        ),
       ],
-      get: [],
+      get: [
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFileGetMethod,
+        )
+      ],
       create: [
         feedWorkspaceAndDirectory,
         iff(
@@ -100,6 +116,10 @@ export const file = (app) => {
         schemaHooks.resolveData(fileDataResolver)
       ],
       patch: [
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFilePatchMethod
+        ),
         preventChanges(false, 'versions', 'currentVersionId'),
         iff(
           context => context.data.shouldCommitNewVersion,

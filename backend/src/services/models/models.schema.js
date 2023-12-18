@@ -190,11 +190,4 @@ export const modelQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const modelQueryValidator = getValidator(modelQuerySchema, queryValidator)
-export const modelQueryResolver = resolve({
-  userId: async (value, user, context) => {
-    if (!context.params.query.isSharedModel && context.params.user) {
-      return context.params.user._id
-    }
-    return value
-  },
-})
+export const modelQueryResolver = resolve({})
