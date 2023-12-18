@@ -1,8 +1,16 @@
 <template>
   <v-container v-if="workspace">
-    <v-row>
+    <v-row align="center">
       <div class="text-body-1">Workspace&nbsp;</div>
-      <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
+      <v-btn
+        flat
+        variant="plain"
+        class="text-body-1 font-weight-bold pa-0"
+        style="text-decoration: none;"
+        @click="$router.push({ name: 'WorkspaceHome', params: { id: workspace._id } })"
+      >
+        {{ workspace.name }}
+      </v-btn>
     </v-row>
     <v-row class="mt-12">
       <manage-workspace-users-table v-if="isOrgWorkspace" :workspace="workspace" />

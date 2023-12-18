@@ -11,6 +11,7 @@ import {BadRequest} from "@feathersjs/errors";
 import {refNameHasher} from "../../refNameFunctions.js";
 import { buildUserSummary } from '../users/users.distrib.js';
 import {workspaceSummary} from "../workspaces/workspaces.subdocs.schema.js";
+import {OrganizationType, OrganizationTypeMap} from './organizations.subdocs.schema.js';
 
 const userDataSchema = Type.Intersect(
   [
@@ -31,8 +32,8 @@ export const organizationSchema = Type.Object(
     updatedAt: Type.Number(),
     users: Type.Array(userDataSchema),
     groups: Type.Array(groupSummary),
-    // workspaces: Type.Array(workspaceSummary),
     owner: userSummarySchema,
+    type: Type.Optional(OrganizationType),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -44,7 +45,7 @@ export const organizationResolver = resolve({})
 export const organizationExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName'], {
+export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type'], {
   $id: 'OrganizationData'
 })
 export const organizationDataValidator = getValidator(organizationDataSchema, dataValidator)
@@ -69,6 +70,9 @@ export const organizationDataResolver = resolve({
   },
   owner: async (_value, message, _context) => {
     return buildUserSummary(_context.params.user);
+  },
+  type: async (_value, message, _context) => {
+    return message.type || OrganizationTypeMap.private;
   }
 })
 
@@ -82,7 +86,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted', 'owner'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),

@@ -1,6 +1,12 @@
 <template>
   <v-container v-if="workspace">
     <v-row class="align-center">
+      <v-btn
+        flat
+        size="small"
+        icon="mdi-arrow-left"
+        @click="$router.push({ name: 'OrganizationHome', params: { id: workspace.organizationId } })"
+      />
       <div class="text-body-1">Workspace&nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
 <!--      <v-spacer />-->

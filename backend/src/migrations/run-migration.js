@@ -13,6 +13,7 @@ import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
 import { updateDirectoryWorkspaceSubDocs } from './update-workspaceSubDocs-for-directory.js';
 import { addOwnerToOrganizationCommand } from './add-owner-to-organization.js';
 import {updateWorkspaceAndUserOrganizationInfoCommand} from "./update-workspace-and-user-organization-info.command.js";
+import { addPersonalOrgToUserCommand } from './add-personal-org-to-user.js';
 
 
 async function runMigration() {
@@ -63,6 +64,9 @@ async function runMigration() {
       break;
     case 'updateWorkspaceAndUserOrganizationInfo':
       await updateWorkspaceAndUserOrganizationInfoCommand(app);
+      break;
+    case 'addPersonalOrganizationToUser':
+      await addPersonalOrgToUserCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
