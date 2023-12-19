@@ -89,7 +89,7 @@ export const workspaceDataResolver = resolve({
   },
   organization: async (_value, message, context) => {
     const orgService = context.app.service('organizations');
-    const orgId = message._id;
+    const orgId = message.organizationId;
     const org = await orgService.get(orgId);
     return buildOrganizationSummary(org);
   }
