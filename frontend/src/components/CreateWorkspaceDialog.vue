@@ -106,6 +106,12 @@ export default {
       if (!valid) {
         return;
       }
+      console.log("X:"+JSON.stringify({
+        name: this.workspace.name,
+        refName: this.workspace.refName,
+        description: this.workspace.description,
+        organizationId: this.organization._id,
+      }));
       await Workspace.create({
         name: this.workspace.name,
         refName: this.workspace.refName,
