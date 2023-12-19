@@ -12,6 +12,7 @@ import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
 import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
 import { updateDirectoryWorkspaceSubDocs } from './update-workspaceSubDocs-for-directory.js';
 import { addOwnerToOrganizationCommand } from './add-owner-to-organization.js';
+import { addPersonalOrgToUserCommand } from './add-personal-org-to-user.js';
 
 
 async function runMigration() {
@@ -59,6 +60,9 @@ async function runMigration() {
       break;
     case 'addOwnerToOrganization':
       await addOwnerToOrganizationCommand(app);
+      break;
+    case 'addPersonalOrganizationToUser':
+      await addPersonalOrgToUserCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
