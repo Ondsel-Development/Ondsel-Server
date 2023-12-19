@@ -23,6 +23,8 @@ import { userPath, userMethods } from './users.shared.js'
 import {addVerification, removeVerification} from "feathers-authentication-management";
 import {notifier} from "../auth-management/notifier.js";
 import { isEndUser } from "../../hooks/is-user.js";
+import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
+import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -199,12 +201,18 @@ const sendVerify = () => {
 const createDefaultOrganization = async context => {
   const organizationService = context.app.service('organizations');
   const workspaceService = context.app.service('workspaces');
-  const organization = await organizationService.create({ name: 'Personal', refName: context.result._id.toString() }, { user: context.result });
+  const organization = await organizationService.create(
+    { name: 'Personal', refName: context.result._id.toString(), type: OrganizationTypeMap.personal },
+    { user: context.result }
+  );
   const workspace = await workspaceService.create(
     { name: 'Default', description: 'Your workspace', organizationId: organization._id, refName: context.result._id.toString() },
     { user: context.result }
   )
-  await context.service.patch(context.result._id, { defaultWorkspaceId: workspace._id });
+  await context.service.patch(
+    context.result._id,
+    { defaultWorkspaceId: workspace._id, personalOrganization: buildOrganizationSummary(organization) }
+  );
   return context;
 }
 

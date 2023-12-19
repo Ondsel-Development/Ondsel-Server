@@ -1,9 +1,16 @@
 <template>
   <v-container v-if="organization">
-    <!--      {{ organization }}-->
-    <v-row>
+    <v-row align="center">
       <div class="text-body-1">Organization&nbsp;</div>
-      <div class="text-body-1 font-weight-bold">{{ organization.name }}</div>
+      <v-btn
+        flat
+        variant="plain"
+        class="text-body-1 font-weight-bold pa-0"
+        style="text-decoration: none;"
+        @click="$router.push({ name: 'OrganizationHome', params: { id: organization._id } })"
+      >
+        {{ organization.name }}
+      </v-btn>
     </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
