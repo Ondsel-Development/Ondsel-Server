@@ -94,11 +94,4 @@ export const fileQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const fileQueryValidator = getValidator(fileQuerySchema, queryValidator)
-export const fileQueryResolver = resolve({
-  userId: async (value, user, context) => {
-    if (context.method === 'find' || context.method === 'remove') {
-      return context.params.user._id;
-    }
-    return value
-  },
-})
+export const fileQueryResolver = resolve({})

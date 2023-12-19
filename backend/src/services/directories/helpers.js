@@ -1,48 +1,52 @@
-export const userReadAccessDirectories = async context => {
-  const userOrganizations = context.params.user.organizations || [];
-  const workspaces = await context.app.service('workspaces').find({
-    organizationId: { '$in': userOrganizations.map(org => org._id) },
-    paginate: false
-  });
-  context.params.query['workspace._id'] = {
-    '$in': workspaces.map(workspace => workspace._id)
-  };
+import { BadRequest } from '@feathersjs/errors';
+
+export const canUserAccessDirectoryOrFileGetMethod = async context => {
+  const directoryOrFile = await context.service.get(context.id);
+  try {
+    await context.app.service('workspaces').get(
+      directoryOrFile.workspace._id,
+      {
+        user: context.params.user
+      }
+    )
+  } catch (error) {
+    throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this directory or file'});
+  }
   return context;
 }
 
-const haveUserWriteAccess = async (context, workspace, userId) => {
-  for (let groupOrUser of workspace.groupsOrUsers) {
-    if (groupOrUser.type === 'User') {
-      if (groupOrUser.permission === 'write' && groupOrUser.groupOrUser._id.equals(userId)) {
-        return true;
-      }
-    } else {
-      if (groupOrUser.permission === 'write') {
-        const group = await context.app.service('groups').get(groupOrUser._id);
-        return group.users.some(user => user._id.equals(userId));
-      }
-    }
-  }
-  return false;
-}
 
-export const userWriteAccessDirectories = async context => {
-  const userOrganizations = context.params.user.organizations || [];
+export const userBelongingDirectoriesOrFiles = async context => {
+  // Get all user belonging workspaces
   const workspaces = await context.app.service('workspaces').find({
-    organizationId: { '$in': userOrganizations.map(org => org._id) },
+    query: { $select: ['_id'] },
+    user: context.params.user,
     paginate: false
   });
-  const workspacesUpdateAccess = [];
-  for (let workspace of workspaces){
-    const haveAccess = await haveUserWriteAccess(context, workspace, context.params.user._id);
-    if (haveAccess) {
-      workspacesUpdateAccess.push(workspace._id);
-    }
-  }
+
   context.params.query['workspace._id'] = {
-    '$in': workspacesUpdateAccess
+    $in: workspaces.map(f => f._id)
   }
   return context;
+}
+
+
+export const canUserAccessDirectoryOrFilePatchMethod = async context => {
+  const directory = await context.service.get(context.id);
+  try {
+    const workspace = await context.app.service('workspaces').get(
+      directory.workspace._id,
+      {
+        user: context.params.user
+      }
+    )
+    if (workspace.haveWriteAccess) {
+      return context;
+    }
+  } catch (error) {
+    throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this directory or file'});
+  }
+  throw new BadRequest({ type: 'PermissionError', msg: 'You dont have write access to this directory or file'});
 }
 
 

@@ -8,7 +8,6 @@ import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
 import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
-import { userReadAccessDirectories, userWriteAccessDirectories } from './helpers.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -25,6 +24,11 @@ import {
 } from './directories.schema.js'
 import { DirectoryService, getOptions } from './directories.class.js'
 import { directoryPath, directoryMethods } from './directories.shared.js'
+import {
+  canUserAccessDirectoryOrFileGetMethod,
+  userBelongingDirectoriesOrFiles,
+  canUserAccessDirectoryOrFilePatchMethod
+} from './helpers.js';
 
 export * from './directories.class.js'
 export * from './directories.schema.js'
@@ -68,13 +72,13 @@ export const directory = (app) => {
       find: [
         iff(
           isProvider('external'),
-          userReadAccessDirectories
+          userBelongingDirectoriesOrFiles
         )
       ],
       get: [
         iff(
           isProvider('external'),
-          userReadAccessDirectories
+          canUserAccessDirectoryOrFileGetMethod,
         )
       ],
       create: [
@@ -84,7 +88,7 @@ export const directory = (app) => {
       patch: [
         iff(
           isProvider('external'),
-          userWriteAccessDirectories
+          canUserAccessDirectoryOrFilePatchMethod
         ),
         iff(
           isProvider('external'),

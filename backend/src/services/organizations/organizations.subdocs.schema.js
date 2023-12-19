@@ -1,4 +1,4 @@
-import { Type } from '@feathersjs/typebox'
+import {StringEnum, Type} from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 
 // Main data model schema
@@ -9,3 +9,13 @@ export const organizationSummarySchema = Type.Object(
     refName: Type.String(),
   }
 )
+
+export const OrganizationTypeMap = {
+  personal: 'Personal',
+  private: 'Private',
+}
+
+export const OrganizationType = StringEnum([
+  OrganizationTypeMap.personal,
+  OrganizationTypeMap.private
+])
