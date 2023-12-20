@@ -52,15 +52,3 @@ export const authenticateJwtWhenPrivate = () => {
     return context;
   }
 }
-
-export const detectSlugWhenPublic = (slugName) => {
-  return async (context) => {
-    const getId = context.id.toString();
-    if (getId.length === 24) {
-      console.log("OID detected, nothing to change");
-    } else {
-      console.log("CHANGE FOR " + getId);
-    }
-    return context;
-  };
-}

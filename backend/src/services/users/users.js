@@ -26,10 +26,8 @@ import { isEndUser } from "../../hooks/is-user.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import {
-  authenticateJwtWhenPrivate, detectSlugWhenPublic,
+  authenticateJwtWhenPrivate,
   handlePublicOnlyQuery,
-  isNotPublicOnly,
-  isPublicOnly,
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
 
@@ -58,12 +56,60 @@ export const user = (app) => {
                 "description": "ObjectID or username of User to return",
                 "in": "path",
                 "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
                 "required": true,
               },
               {
-                "description": "If provided and set to true, then only return public data",
+                "description": "If provided and set to \"true\", then only return public data",
                 "in": "query",
                 "name": "publicInfo",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          },
+          find: {
+            "parameters": [
+              {
+                "description": "Number of results to return",
+                "in": "query",
+                "name": "$limit",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": false,
+              },
+              {
+                "description": "Number of results to skip",
+                "in": "query",
+                "name": "$skip",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": false,
+              },
+              {
+                "description": "Query parameters",
+                "in": "query",
+                "name": "filter",
+                "style": "form",
+                "explode": true,
+                "schema": {
+                  "$ref": "#/components/schemas/UserQuery"
+                },
+                "required": false,
+              },
+              {
+                "description": "If provided and set to \"true\", then only return public data",
+                "in": "query",
+                "name": "publicInfo",
+                "schema": {
+                  "type": "string"
+                },
                 "required": false,
               },
             ],
@@ -96,7 +142,7 @@ export const user = (app) => {
         schemaHooks.resolveQuery(userQueryResolver)
       ],
       find: [],
-      get: [],
+      get: [detectUsernameInId],
       create: [
         schemaHooks.validateData(userDataValidator),
         schemaHooks.resolveData(userDataResolver),
@@ -262,6 +308,30 @@ const sendNotificationToSlack = async context => {
         text: `🎉 New User Alert! 🎉\n\nName: *${context.result.name}*\nEmail: *${context.result.email}*`
       }
     });
+  }
+  return context;
+}
+
+export const detectUsernameInId = async context => {
+  const id = context.id.toString();
+  if (id.length < 24) { // a 24 character id is an OID not a username, so only look at username if shorter
+    let userList = {};
+    if (context.publicDataOnly) {
+      userList = await context.service.find({
+        query: {
+          publicInfo: "true",
+          username: id,
+          $select: userPublicFields,
+        }
+      });
+    } else {
+      userList = await context.service.find(
+        {query: { username: id } }
+      );
+    }
+    if (userList.total === 1) {
+      context.result = userList.data[0];
+    }
   }
   return context;
 }
