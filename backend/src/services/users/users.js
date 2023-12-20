@@ -16,7 +16,7 @@ import {
   userSchema,
   userDataSchema,
   userQuerySchema,
-  uniqueUserValidator, uniqueUserPatchValidator
+  uniqueUserValidator, uniqueUserPatchValidator, userPublicFields
 } from './users.schema.js'
 import { UserService, getOptions } from './users.class.js'
 import { userPath, userMethods } from './users.shared.js'
@@ -25,6 +25,13 @@ import {notifier} from "../auth-management/notifier.js";
 import { isEndUser } from "../../hooks/is-user.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
+import {
+  authenticateJwtWhenPrivate,
+  handlePublicOnlyQuery,
+  isNotPublicOnly,
+  isPublicOnly,
+  resolvePrivateResults
+} from "../../hooks/handle-public-info-query.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -44,6 +51,24 @@ export const user = (app) => {
         description: 'A User model service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ObjectID or username of User to return",
+                "in": "path",
+                "name": "_id",
+                "required": true,
+              },
+              {
+                "description": "If provided and set to true, then only return public data",
+                "in": "query",
+                "name": "publicInfo",
+                "required": false,
+              },
+            ],
+          },
+        },
       }
     })
   })
@@ -53,16 +78,23 @@ export const user = (app) => {
   // Initialize hooks
   app.service(userPath).hooks({
     around: {
-      all: [schemaHooks.resolveExternal(userExternalResolver), schemaHooks.resolveResult(userResolver)],
-      find: [authenticate('jwt')],
-      get: [authenticate('jwt')],
+      all: [
+        schemaHooks.resolveExternal(userExternalResolver),
+        handlePublicOnlyQuery(userPublicFields),
+        resolvePrivateResults(userResolver)
+      ],
+      find: [authenticateJwtWhenPrivate()],
+      get: [authenticateJwtWhenPrivate()],
       create: [],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],
       remove: [authenticate('jwt')]
     },
     before: {
-      all: [schemaHooks.validateQuery(userQueryValidator), schemaHooks.resolveQuery(userQueryResolver)],
+      all: [
+        schemaHooks.validateQuery(userQueryValidator),
+        schemaHooks.resolveQuery(userQueryResolver)
+      ],
       find: [],
       get: [],
       create: [
