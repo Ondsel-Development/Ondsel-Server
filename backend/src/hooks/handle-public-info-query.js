@@ -1,5 +1,7 @@
 import {resolveResult} from "@feathersjs/schema";
 import {authenticate} from "@feathersjs/authentication";
+import axios from "axios";
+import {notifier} from "../services/auth-management/notifier.js";
 
 export const handlePublicOnlyQuery = (publicFields) => {
   return async (context, next) => {
@@ -40,6 +42,7 @@ export const resolvePrivateResults = (resolver) => {
 }
 
 export const authenticateJwtWhenPrivate = () => {
+  // this is an "around" hook
   return async (context, next) => {
     if (context.publicDataOnly === true) {
       await next()
@@ -48,4 +51,16 @@ export const authenticateJwtWhenPrivate = () => {
     }
     return context;
   }
+}
+
+export const detectSlugWhenPublic = (slugName) => {
+  return async (context) => {
+    const getId = context.id.toString();
+    if (getId.length === 24) {
+      console.log("OID detected, nothing to change");
+    } else {
+      console.log("CHANGE FOR " + getId);
+    }
+    return context;
+  };
 }

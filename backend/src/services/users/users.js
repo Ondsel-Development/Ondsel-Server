@@ -26,7 +26,7 @@ import { isEndUser } from "../../hooks/is-user.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import {
-  authenticateJwtWhenPrivate,
+  authenticateJwtWhenPrivate, detectSlugWhenPublic,
   handlePublicOnlyQuery,
   isNotPublicOnly,
   isPublicOnly,
