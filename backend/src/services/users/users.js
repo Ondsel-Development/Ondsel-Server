@@ -312,7 +312,7 @@ const sendNotificationToSlack = async context => {
   return context;
 }
 
-export const detectUsernameInId = async context => {
+const detectUsernameInId = async context => {
   const id = context.id.toString();
   if (id.length < 24) { // a 24 character id is an OID not a username, so only look at username if shorter
     let userList = {};
@@ -329,7 +329,7 @@ export const detectUsernameInId = async context => {
         {query: { username: id } }
       );
     }
-    if (userList.total === 1) {
+    if (userList?.total === 1) {
       context.result = userList.data[0];
     }
   }

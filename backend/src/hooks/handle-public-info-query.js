@@ -9,7 +9,7 @@ export const handlePublicOnlyQuery = (publicFields) => {
     // looks for the "publicInfo" query parameter. If found at all and set to "true", then
     // context.publicDataOnly is set to true else it is set to false.
     // the 'publicInfo' entry is then removed from query to prevent the parameter from being seen elsewhere.
-    if (context.params.query.publicInfo === "true") {
+    if (context.params?.query?.publicInfo === "true") {
       delete context.params.query.publicInfo;
       context.publicDataOnly = true
       context.params.query.$select = publicFields;

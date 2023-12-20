@@ -6,6 +6,7 @@
 // the reference collection is updated.
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {buildOrganizationSummary, upsertUserSummaryToOrganization} from "../organizations/organizations.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
@@ -15,7 +16,6 @@ export function buildUserSummary(user) {
   let summary = {
     _id: user._id,
     username: user.username,
-    email: user.email,
     name: user.name,
   };
   return summary;
@@ -25,7 +25,26 @@ export function buildUserSummary(user) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
-// nothing
+export async function distributeUserSummaries(context, user){
+  // not a hook; but a hook could certainly call it
+  // this does NOT verify that a change has been detected in the user summary; it blindly sends the summary.
+  // if this function where to be added to a `patch` hook later, then that hook would need to detect change to prevent
+  // distributed update loops.
+
+  const userSummary = buildUserSummary(user);
+  let log = {}
+  //
+  // distribute to each organization's user list
+  //
+  for (const org of user.organizations) {
+    await upsertUserSummaryToOrganization(context, org._id, userSummary);
+  }
+  log["organizations"] = user.organizations.length;
+
+  // TODO: distribute to related group's users list.
+  // TODO: distribute to related workspace's groupOrUserList.
+  return log;
+}
 
 //
 // UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops

@@ -70,3 +70,28 @@ export async function upsertGroupSummaryToOrganization(context, orgId, groupSumm
     }
   );
 }
+
+export async function upsertUserSummaryToOrganization(orgService, orgId, userSummary) {
+  const org = await orgService.get(orgId);
+  let userList = org.users || [];
+  const index = userList.findIndex(user => user._id.equals(userSummary._id));
+  let userData = {...userSummary}; // make a field copy
+  if (index === -1) {
+    userData.isAdmin = false; // in this scenario, presume false as this is a cleanup algo
+    userList.push(userData);
+  } else {
+    userData.isAdmin = userList[index].isAdmin;
+    userList[index] = userData;
+  }
+  let patchContent = {
+    users: userList,
+  }
+  if (org.owner._id.toString() === userSummary._id.toString()) {
+    patchContent.owner = userSummary;
+  }
+  await orgService.patch(
+    orgId.toString(),
+    patchContent,
+  );
+}
+

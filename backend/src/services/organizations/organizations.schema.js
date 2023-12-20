@@ -75,6 +75,8 @@ export const organizationDataResolver = resolve({
   }
 })
 
+export const organizationPublicFields = ['_id', 'name', 'refName', 'type', 'createdAt', 'owner'];
+
 // Schema for updating existing entries
 export const organizationPatchSchema = Type.Partial(organizationSchema, {
   $id: 'OrganizationPatch'
@@ -85,7 +87,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'refNameHash', 'createdBy', 'owner', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'deleted'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),
