@@ -35,7 +35,7 @@ import { distributeOrganizationSummaries } from './organizations.distrib.js';
 import { addGroupsToOrganization } from './commands/addGroupsToOrganization.js';
 import {
   authenticateJwtWhenPrivate,
-  handlePublicOnlyQuery,
+  handlePublicOnlyQuery, ThrowBadRequestIfNotForPublicInfo,
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
 import {userPublicFields, userResolver} from "../users/users.schema.js";
@@ -81,6 +81,7 @@ export const organization = (app) => {
             ],
           },
           find: {
+            "description": "Retrieves a list organizations.<ul><li>If publicInfo = true, then multiple orgs may be located but the information is limited to public info.</li><li>If logged in as Ondsel admin or an internal query, then everything is returned.</li><li>Otherwise, the query is not allowed.</li></ul>",
             "parameters": [
               {
                 "description": "Number of results to return",
@@ -121,6 +122,9 @@ export const organization = (app) => {
                 "required": false,
               },
             ],
+          },
+          patch: {
+            "description": "Updates organization identified by id using supplied data.<p>Additionally various 'virtual' fields can perform functions such as <code>shouldAddUsersToOrganization</code>. Visit <a href='https://docs.google.com/document/d/1vC2wW-Gq98ZkinM2OM3YKlMhFkSrmAZjQZPZ_yztZKA/edit?usp=sharing'>API document</a> for details."
           }
         }
       }
@@ -161,10 +165,10 @@ export const organization = (app) => {
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
       find: [
-        // iff(isProvider('external'), disallow())
+        iff(isProvider('external'), ThrowBadRequestIfNotForPublicInfo)
       ],
       get: [
-        // iff(isProvider('external'), isUserMemberOfOrganization)
+        // member check has been moved to "after"
         detectOrgRefNameInId
       ],
       create: [
@@ -204,6 +208,7 @@ export const organization = (app) => {
     after: {
       all: [
       ],
+      get: [iff(isProvider('external'), isUserMemberOfOrganization)],
       create: [
         assignOrganizationIdToUser,
         createDefaultEveryoneGroup,

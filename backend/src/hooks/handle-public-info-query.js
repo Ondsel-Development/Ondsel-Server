@@ -2,6 +2,7 @@ import {resolveResult} from "@feathersjs/schema";
 import {authenticate} from "@feathersjs/authentication";
 import axios from "axios";
 import {notifier} from "../services/auth-management/notifier.js";
+import {BadRequest} from "@feathersjs/errors";
 
 export const handlePublicOnlyQuery = (publicFields) => {
   return async (context, next) => {
@@ -51,4 +52,12 @@ export const authenticateJwtWhenPrivate = () => {
     }
     return context;
   }
+}
+
+
+export const ThrowBadRequestIfNotForPublicInfo = async (context) => {
+  if (context.publicDataOnly === false) {
+    throw new BadRequest('Only public information queries allowed.');
+  }
+  return context;
 }

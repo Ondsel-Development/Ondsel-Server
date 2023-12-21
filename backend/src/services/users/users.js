@@ -73,7 +73,7 @@ export const user = (app) => {
             ],
           },
           find: {
-            "description": "Retrieves a list of all resources from the service.<ul><li>If publicInfo = true, then multiple users may be located but the information is limited to public info.</li><li>If logged in as Ondsel admin or an internal query, then everything is returned.</li><li>Otherwise, you must be logged in and will only see your own entry.</li></ul>",
+            "description": "Retrieves a list users.<ul><li>If publicInfo = true, then multiple users may be located but the information is limited to public info.</li><li>If logged in as Ondsel admin or an internal query, then everything is returned.</li><li>Otherwise, you must be logged in and will only see your own entry.</li></ul>",
             "parameters": [
               {
                 "description": "Number of results to return",
