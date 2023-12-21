@@ -75,10 +75,11 @@ export default {
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
     async goToOrganization(organization) {
+      console.log(organization.type);
       const { Organization } = models.api;
       await Organization.get(organization._id);
       await this.setCurrentOrganization(Organization.getFromStore(organization._id));
-      this.$router.push({ name: 'OrganizationHome', params: { id: organization._id } });
+      this.$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } });
       this.dialog = false;
     },
     async goToOrganizationEdit(organization) {

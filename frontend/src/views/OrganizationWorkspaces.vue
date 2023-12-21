@@ -56,22 +56,32 @@ import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 const { Organization, Workspace } = models.api;
 
 export default {
-  name: 'OrganizationHome',
+  name: 'OrganizationWorkspaces',
   components: { CreateWorkspaceDialog },
   data: () => ({
     paginationData: {},
   }),
   async created() {
-    this.initPagination(this.orgId);
+    this.initPagination(this.orgName);
     try {
-      await Organization.get(this.orgId);
+      await Organization.get(this.orgName);
     } catch (e) {
-      if (e.data.type === 'PermissionError') {
+      if (e.data?.type === 'PermissionError') {
+        console.log(this.orgName);
+        console.log("PE");
         this.$router.push({ name: 'PageNotFound' });
+      } else if (e.toString().startsWith('NotFound')) {
+        console.log(this.orgName);
+        console.log("NF");
+        this.$router.push({ name: 'PageNotFound' });
+      } else {
+        console.log(e.data);
+        console.log(e);
       }
     }
-    const org = await Organization.getFromStore(this.orgId);
-    await this.setCurrentOrganization(org);
+    // const org = await Organization.getFromStore(this.orgId);
+    // console.log(org);
+    // await this.setCurrentOrganization(org);
   },
   async mounted() {
     await this.fetchWorkspaces();
@@ -84,9 +94,9 @@ export default {
   computed: {
     ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    orgId: vm => vm.$route.params.id,
-    organization: vm => Organization.getFromStore(vm.orgId),
-    workspaces: vm => Workspace.findInStore({ query: { organizationId: vm.orgId } })
+    orgName: vm => vm.$route.params.id,
+    organization: vm => Organization.getFromStore(vm.orgName),
+    workspaces: vm => Workspace.findInStore({ query: { "organization.refName": vm.orgName } })
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
@@ -103,17 +113,17 @@ export default {
       if (this.isFindPending) {
         return;
       }
-      this.initPagination(this.orgId);
-      if (this.workspaces.data.length !== this.paginationData[this.orgId].total) {
-        const workspaces = await Workspace.find({
+      this.initPagination(this.orgName);
+      if (this.workspaces.data.length !== this.paginationData[this.orgName].total) {
+        const wsList = await Workspace.find({
           query: {
-            $limit: this.paginationData[this.orgId].limit,
-            $skip: this.paginationData[this.orgId].skip,
-            organizationId: this.orgId,
+            $limit: this.paginationData[this.orgName].limit,
+            $skip: this.paginationData[this.orgName].skip,
+            "organization.refName": this.orgName,
           }
         });
-        this.paginationData[this.orgId].skip = workspaces.skip + this.paginationData[this.orgId].limit;
-        this.paginationData[this.orgId].total = workspaces.total;
+        this.paginationData[this.orgName].skip = wsList.skip + this.paginationData[this.orgName].limit;
+        this.paginationData[this.orgName].total = wsList.total;
       }
     },
     async goToWorkspaceHome(workspace) {
@@ -125,7 +135,7 @@ export default {
   },
   watch: {
     async '$route'(to, from) {
-      if (to.name === 'OrganizationHome') {
+      if (to.name === 'OrganizationWorkspaces') {
         this.fetchWorkspaces();
       }
     }

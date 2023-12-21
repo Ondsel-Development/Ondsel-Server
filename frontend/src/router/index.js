@@ -19,13 +19,13 @@ import AccountHistory from "@/views/AccountHistory.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import PendingVerification from "@/views/PendingVerification.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
-import OrganizationHome from '@/views/OrganizationHome';
 import CreateOrganization from '@/views/CreateOrganization';
 import EditOrganization from '@/views/EditOrganization';
 import EditGroup from '@/views/EditGroup';
 import JoinOrganization from '@/views/JoinOrganization';
 import WorkspaceHome from '@/views/WorkspaceHome.vue';
 import EditWorkspace from '@/views/EditWorkspace.vue';
+import OrganizationWorkspaces from "@/views/OrganizationWorkspaces.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -48,18 +48,6 @@ const routes = [
     path: '/create_organization',
     component: CreateOrganization,
     name: 'CreateOrganization',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/org/:id',
-    component: OrganizationHome,
-    name: 'OrganizationHome',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/org/:id/edit',
-    component: EditOrganization,
-    name: 'EditOrganization',
     meta: { requiresAuth: true },
   },
   {
@@ -177,6 +165,27 @@ const routes = [
     path: '/join-org/:token/:id',
     component: JoinOrganization,
     name: 'JoinOrganization',
+    meta: { requiresAuth: true },
+  },
+  //
+  // ONDSEL pages
+  //
+  //
+  // USER pages
+  //
+  //
+  // ORG pages
+  //
+  {
+    path: '/org/:id/workspaces',
+    component: OrganizationWorkspaces,
+    name: 'OrganizationWorkspaces',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:id/edit',
+    component: EditOrganization,
+    name: 'EditOrganization',
     meta: { requiresAuth: true },
   },
 ]

@@ -115,32 +115,32 @@ export default {
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization() {
-      const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
-      if (currentOrganizationId) {
-        const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
-        return organization;
-      }
+      // const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
+      // if (currentOrganizationId) {
+      //   const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
+      //   return organization;
+      // }
       return this.userCurrentOrganization;
     },
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
-    ...mapActions('app', ['setCurrentOrganization']),
+    // ...mapActions('app', ['setCurrentOrganization']),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings'});
     },
-    extractOrganizationId(path) {
-      const regex = /\/org\/([^\/]+)/;
-      const match = path.match(regex);
-      if (match && match[1]) {
-        return match[1];
-      } else {
-        return null;
-      }
-    }
+    // extractOrganizationId(path) {
+    //   const regex = /\/org\/([^\/]+)/;
+    //   const match = path.match(regex);
+    //   if (match && match[1]) {
+    //     return match[1];
+    //   } else {
+    //     return null;
+    //   }
+    // }
   },
 }
 </script>

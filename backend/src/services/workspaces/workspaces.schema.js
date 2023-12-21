@@ -9,6 +9,8 @@ import { groupSummary } from '../groups/groups.subdocs.schema.js';
 import { directorySummary } from '../directories/directories.subdocs.js';
 import {refNameHasher} from "../../refNameFunctions.js";
 import {BadRequest} from "@feathersjs/errors";
+import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
+import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -30,6 +32,7 @@ export const workspaceSchema = Type.Object(
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
     organizationId: ObjectIdSchema(),
+    organization: organizationSummarySchema,
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
   },
@@ -83,6 +86,12 @@ export const workspaceDataResolver = resolve({
         groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'name']),
       }
     ]
+  },
+  organization: async (_value, message, context) => {
+    const orgService = context.app.service('organizations');
+    const orgId = message.organizationId;
+    const org = await orgService.get(orgId);
+    return buildOrganizationSummary(org);
   }
 })
 
@@ -101,7 +110,10 @@ export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      "organization._id": Type.Optional(ObjectIdSchema()),
+      "organization.refName": Type.Optional(Type.String()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )

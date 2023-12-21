@@ -7,7 +7,7 @@
         variant="plain"
         class="text-body-1 font-weight-bold pa-0"
         style="text-decoration: none;"
-        @click="$router.push({ name: 'OrganizationHome', params: { id: organization._id } })"
+        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization._id } })"
       >
         {{ organization.name }}
       </v-btn>

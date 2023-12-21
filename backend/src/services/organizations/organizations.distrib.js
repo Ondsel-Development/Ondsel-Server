@@ -17,6 +17,7 @@ export function buildOrganizationSummary(org) {
   summary._id = org._id;
   summary.name = org.name;
   summary.refName = org.refName;
+  summary.type = org.type;
   return summary;
 }
 
