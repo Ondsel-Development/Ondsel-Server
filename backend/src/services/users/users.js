@@ -22,7 +22,7 @@ import { UserService, getOptions } from './users.class.js'
 import { userPath, userMethods } from './users.shared.js'
 import {addVerification, removeVerification} from "feathers-authentication-management";
 import {notifier} from "../auth-management/notifier.js";
-import { isEndUser } from "../../hooks/is-user.js";
+import {isAdminUser, isEndUser} from "../../hooks/is-user.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import {
@@ -73,6 +73,7 @@ export const user = (app) => {
             ],
           },
           find: {
+            "description": "Retrieves a list of all resources from the service.<ul><li>If publicInfo = true, then multiple users may be located but the information is limited to public info.</li><li>If logged in as Ondsel admin or an internal query, then everything is returned.</li><li>Otherwise, you must be logged in and will only see your own entry.</li></ul>",
             "parameters": [
               {
                 "description": "Number of results to return",
@@ -142,7 +143,9 @@ export const user = (app) => {
         schemaHooks.resolveQuery(userQueryResolver)
       ],
       find: [],
-      get: [detectUsernameInId],
+      get: [
+        detectUsernameInId
+      ],
       create: [
         schemaHooks.validateData(userDataValidator),
         schemaHooks.resolveData(userDataResolver),
@@ -315,6 +318,11 @@ const sendNotificationToSlack = async context => {
 const detectUsernameInId = async context => {
   const id = context.id.toString();
   if (id.length < 24) { // a 24 character id is an OID not a username, so only look at username if shorter
+    if (context.params?.user?.username !== context.id) {
+      if (!isAdminUser(context.params.user)) {
+        context.publicDataOnly = true;
+      }
+    }
     let userList = {};
     if (context.publicDataOnly) {
       userList = await context.service.find({
