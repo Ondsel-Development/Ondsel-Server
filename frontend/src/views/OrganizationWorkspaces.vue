@@ -33,13 +33,13 @@
     <create-workspace-dialog ref="createWorkspace" :organization="organization" />
   </v-container>
   <v-row dense class="justify-center">
-    <template v-if="workspaces.data.length && isFindPending">
+    <template v-if="isFindPending">
       <v-progress-circular indeterminate></v-progress-circular>
     </template>
-    <template v-else-if="workspaces.data.length === 0">
+    <template v-else-if="workspaces.data?.length === 0">
       <div class="text-grey-darken-1">No workspace exist!</div>
     </template>
-    <template v-else-if="workspaces.data.length === paginationData[orgId].total">
+    <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
       <div class="text-grey-darken-1">You reached the end!</div>
     </template>
     <template v-else>
@@ -67,20 +67,16 @@ export default {
       await Organization.get(this.orgName);
     } catch (e) {
       if (e.data?.type === 'PermissionError') {
-        console.log(this.orgName);
-        console.log("PE");
         this.$router.push({ name: 'PageNotFound' });
       } else if (e.toString().startsWith('NotFound')) {
-        console.log(this.orgName);
-        console.log("NF");
         this.$router.push({ name: 'PageNotFound' });
       } else {
         console.log(e.data);
         console.log(e);
       }
     }
-    // const org = await Organization.getFromStore(this.orgId);
-    // console.log(org);
+    // await Organization.getFromStore(this.orgName);
+    console.log(this.orgName);
     // await this.setCurrentOrganization(org);
   },
   async mounted() {
@@ -92,11 +88,12 @@ export default {
     });
   },
   computed: {
-    ...mapState('workspaces', ['isFindPending']),
+    // ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     orgName: vm => vm.$route.params.id,
-    organization: vm => Organization.getFromStore(vm.orgName),
-    workspaces: vm => Workspace.findInStore({ query: { "organization.refName": vm.orgName } })
+    organization: async vm => await Organization.getFromStore(vm.$route.params.id),
+    workspaces: vm => Workspace.findInStore({ query: { $limit: 20, "organization.refName": vm.$route.params.id } }),
+    isFindPending: vm => vm.workspaces.data === undefined,
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
@@ -115,15 +112,15 @@ export default {
       }
       this.initPagination(this.orgName);
       if (this.workspaces.data.length !== this.paginationData[this.orgName].total) {
-        const wsList = await Workspace.find({
+        const workspaces = await Workspace.find({
           query: {
             $limit: this.paginationData[this.orgName].limit,
             $skip: this.paginationData[this.orgName].skip,
             "organization.refName": this.orgName,
           }
         });
-        this.paginationData[this.orgName].skip = wsList.skip + this.paginationData[this.orgName].limit;
-        this.paginationData[this.orgName].total = wsList.total;
+        this.paginationData[this.orgName].skip = workspaces.skip + this.paginationData[this.orgName].limit;
+        this.paginationData[this.orgName].total = workspaces.total;
       }
     },
     async goToWorkspaceHome(workspace) {
