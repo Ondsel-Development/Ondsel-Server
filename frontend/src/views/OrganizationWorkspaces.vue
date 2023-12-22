@@ -60,8 +60,10 @@ export default {
   components: { CreateWorkspaceDialog },
   data: () => ({
     paginationData: {},
+    orgSrc: null,
   }),
   async created() {
+    this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
     try {
       await Organization.get(this.orgName);
@@ -75,9 +77,6 @@ export default {
         console.log(e);
       }
     }
-    // await Organization.getFromStore(this.orgName);
-    console.log(this.orgName);
-    // await this.setCurrentOrganization(org);
   },
   async mounted() {
     await this.fetchWorkspaces();
@@ -88,15 +87,14 @@ export default {
     });
   },
   computed: {
-    // ...mapState('workspaces', ['isFindPending']),
+    ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     orgName: vm => vm.$route.params.id,
-    organization: async vm => await Organization.getFromStore(vm.$route.params.id),
     workspaces: vm => Workspace.findInStore({ query: { $limit: 20, "organization.refName": vm.$route.params.id } }),
-    isFindPending: vm => vm.workspaces.data === undefined,
+    organization: vm => vm.orgSrc,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getOrgByIdOrNamePublic']),
     initPagination(id) {
       if (!(id in this.paginationData)) {
         this.paginationData[id] = {
@@ -110,6 +108,7 @@ export default {
       if (this.isFindPending) {
         return;
       }
+      this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
       this.initPagination(this.orgName);
       if (this.workspaces.data.length !== this.paginationData[this.orgName].total) {
         const workspaces = await Workspace.find({
@@ -133,7 +132,7 @@ export default {
   watch: {
     async '$route'(to, from) {
       if (to.name === 'OrganizationWorkspaces') {
-        this.fetchWorkspaces();
+        await this.fetchWorkspaces();
       }
     }
   }

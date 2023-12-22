@@ -32,6 +32,33 @@ export default {
 
       // Save to DB
       models.api.User.patch(context.rootState.auth.user._id, { currentOrganizationId: organization._id });
+    },
+    getOrgByIdOrNamePublic: async (context, name) => {
+      // get the public details of any organization using _id or name
+      let result = undefined;
+      let orgResult;
+      if (name.length === 24) {
+        orgResult = await models.api.Organization.find({
+          query: {
+            publicInfo: "true",
+            $or: [
+              {_id: name},
+              {refName: name},
+            ]
+          }
+        });
+      } else {
+        orgResult = await models.api.Organization.find({
+          query: {
+            publicInfo: "true",
+            refName: name,
+          }
+        });
+      }
+      if (orgResult.total === 1) {
+        result = orgResult.data[0];
+      }
+      return result;
     }
   }
 }

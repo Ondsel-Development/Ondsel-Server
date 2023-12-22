@@ -6,7 +6,7 @@
   >
     <v-card width="500" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Create a Workspace for {{organization.name}}</div>
+        <div class="text-center">Create a Workspace</div>
       </template>
       <v-progress-linear
         :active="isCreatePending"
@@ -106,12 +106,6 @@ export default {
       if (!valid) {
         return;
       }
-      console.log({
-        name: this.workspace.name,
-        refName: this.workspace.refName,
-        description: this.workspace.description,
-        organizationId: this.organization,
-      });
       await Workspace.create({
         name: this.workspace.name,
         refName: this.workspace.refName,
