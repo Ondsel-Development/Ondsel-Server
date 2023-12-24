@@ -186,7 +186,7 @@ export default {
       this.$router.push({name: 'ChooseTier'});
     },
     gotoAccountHistory() {
-      this.$router.push({name: 'AccountHistory'});
+      this.$router.push({name: 'AccountHistory', params: {slug: this.user.username}});
     },
     async getRemainingFiles() {
       const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})

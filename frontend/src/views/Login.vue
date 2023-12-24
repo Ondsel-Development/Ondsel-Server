@@ -97,10 +97,11 @@ export default {
           strategy: 'local',
           ...this.user,
         }).then(() => {
-          this.$router.push({ name: 'Models' })
+          this.$router.push({ name: 'LensHome' });
         }).catch((e) => {
           this.showSnacker = true;
-          this.snackerMsg = `Invalid login`
+          this.snackerMsg = `Invalid login`;
+          console.log(e);
         })
       }
     },

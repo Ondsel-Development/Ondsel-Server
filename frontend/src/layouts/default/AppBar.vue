@@ -87,8 +87,8 @@
       location="left"
       temporary
     >
-      <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models'}"></v-list-item>
+      <v-list density="compact" nav v-if="user">
+        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models', params: {slug: user?.username}}"></v-list-item>
       </v-list>
       <v-list density="compact" nav>
         <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
@@ -130,7 +130,7 @@ export default {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
     gotoAccountSettings() {
-      this.$router.push({name: 'AccountSettings'});
+      this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
     },
     // extractOrganizationId(path) {
     //   const regex = /\/org\/([^\/]+)/;

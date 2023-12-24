@@ -1,7 +1,7 @@
 <template>
   <v-container v-if="organization">
     <v-row class="align-center">
-      <div class="text-h6">Workspaces</div>
+      <div class="text-h6">Personal Workspaces</div>
       <v-spacer />
       <div class="align-end">
         <v-btn flat @click="$refs.createWorkspace.$data.dialog = true;">Create new Workspace</v-btn>
@@ -56,13 +56,19 @@ import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 const { Organization, Workspace } = models.api;
 
 export default {
-  name: 'OrganizationWorkspaces',
+  name: 'UserWorkspaces',
   components: { CreateWorkspaceDialog },
   data: () => ({
     paginationData: {},
     orgSrc: null,
+    orgName: "",
   }),
   async created() {
+    this.orgName = this.user._id.toString();
+    if (this.username !== this.user.username) { // this page should only be seen by the actual user
+      console.log(`err: route ${this.username} / username ${this.user.username} mismatch`);
+      this.$router.push({ name: 'PageNotFound' });
+    }
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
     try {
@@ -89,8 +95,9 @@ export default {
   computed: {
     ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    orgName: vm => vm.$route.params.id,
-    workspaces: vm => Workspace.findInStore({ query: { $limit: 20, "organization.refName": vm.$route.params.id } }),
+    ...mapState('auth', ['user']),
+    username: vm => vm.$route.params.id,
+    workspaces: vm => Workspace.findInStore({ query: { $limit: 20, "organization.refName": vm.user._id.toString() } }),
     organization: vm => vm.orgSrc,
   },
   methods: {
@@ -131,7 +138,7 @@ export default {
   },
   watch: {
     async '$route'(to, from) {
-      if (to.name === 'OrganizationWorkspaces') {
+      if (to.name === 'UserWorkspaces') {
         await this.fetchWorkspaces();
       }
     }

@@ -26,6 +26,8 @@ import JoinOrganization from '@/views/JoinOrganization';
 import WorkspaceHome from '@/views/WorkspaceHome.vue';
 import EditWorkspace from '@/views/EditWorkspace.vue';
 import OrganizationWorkspaces from "@/views/OrganizationWorkspaces.vue";
+import UserWorkspaces from "@/views/UserWorkspaces.vue";
+import LensHome from "@/views/LensHome.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -51,36 +53,6 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/group/:id/edit',
-    component: EditGroup,
-    name: 'EditGroup',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/workspace/:id',
-    component: WorkspaceHome,
-    name: 'WorkspaceHome',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/workspace/:id/edit',
-    component: EditWorkspace,
-    name: 'EditWorkspace',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/',
-    component: Models,
-    name: 'Models',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/public-models',
-    component: PublicModels,
-    name: 'PublicModels',
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/signup',
     component: SignUp,
     name: 'SignUp',
@@ -89,18 +61,6 @@ const routes = [
     path: '/legal-document/:doc_name',
     component: LegalDoc,
     name: 'LegalDoc',
-  },
-  {
-    path: '/account-settings',
-    component: AccountSettings,
-    name: 'AccountSettings',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/account-history',
-    component: AccountHistory,
-    name: 'AccountHistory',
-    meta: { requiresAuth: true },
   },
   {
     path: '/choose-tier',
@@ -170,9 +130,45 @@ const routes = [
   //
   // ONDSEL pages
   //
+  {
+    path: '/',
+    component: LensHome,
+    name: 'LensHome',
+    meta: { tryAuth: true },
+  },
+  {
+    path: '/public-models',
+    component: PublicModels,
+    name: 'PublicModels',
+    meta: { requiresAuth: true },
+  },
   //
   // USER pages
   //
+  {
+    path: '/user/:id/workspaces',
+    component: UserWorkspaces,
+    name: 'UserWorkspaces',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/just-models',
+    component: Models,
+    name: 'Models',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/settings',
+    component: AccountSettings,
+    name: 'AccountSettings',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/account-history',
+    component: AccountHistory,
+    name: 'AccountHistory',
+    meta: { requiresAuth: true },
+  },
   //
   // ORG pages
   //
@@ -186,6 +182,24 @@ const routes = [
     path: '/org/:id/edit',
     component: EditOrganization,
     name: 'EditOrganization',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:stub/group/:id/edit',
+    component: EditGroup,
+    name: 'EditGroup',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:stub/workspace/:id',
+    component: WorkspaceHome,
+    name: 'WorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/org/:stub/workspace/:id/edit',
+    component: EditWorkspace,
+    name: 'EditWorkspace',
     meta: { requiresAuth: true },
   },
 ]
@@ -209,7 +223,7 @@ router.beforeEach(async (to, from, next) => {
   if (link.name === 'Login' || link.name === 'SignUp') {
     try {
       await store.dispatch('auth/authenticate');
-      next({ name: 'Models' });
+      next({ name: 'LensHome' });
       return;
     } catch (err) {
     }
