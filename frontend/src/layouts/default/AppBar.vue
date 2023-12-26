@@ -87,6 +87,12 @@
       location="left"
       temporary
     >
+      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type !== 'Personal'">
+        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'OrganizationHome', params: {slug: currentOrganization.refName}}">Public view of {{ currentOrganization.name }}</v-list-item>
+      </v-list>
+      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type === 'Personal'">
+        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'UserHome', params: {slug: user.username}}">Public View of Me</v-list-item>
+      </v-list>
       <v-list density="compact" nav v-if="user">
         <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models', params: {slug: user?.username}}"></v-list-item>
       </v-list>

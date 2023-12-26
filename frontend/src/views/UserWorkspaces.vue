@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 
@@ -66,8 +66,10 @@ export default {
   async created() {
     this.orgName = this.user._id.toString();
     if (this.username !== this.user.username) { // this page should only be seen by the actual user
-      console.log(`err: route ${this.username} / username ${this.user.username} mismatch`);
-      this.$router.push({ name: 'PageNotFound' });
+      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
+    }
+    if (this.userCurrentOrganization.refName !== this.user._id.toString()) { // this page should only be seen by the actual user
+      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
     }
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
@@ -96,12 +98,13 @@ export default {
     ...mapState('workspaces', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     username: vm => vm.$route.params.id,
     workspaces: vm => Workspace.findInStore({ query: { $limit: 20, "organization.refName": vm.user._id.toString() } }),
     organization: vm => vm.orgSrc,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization', 'getOrgByIdOrNamePublic']),
+    ...mapActions('app', ['getOrgByIdOrNamePublic']),
     initPagination(id) {
       if (!(id in this.paginationData)) {
         this.paginationData[id] = {
@@ -130,10 +133,10 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'WorkspaceHome', params: { stub: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'WorkspaceHome', params: { slug: workspace.organization.refName, id: workspace._id } });
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'EditWorkspace', params: { stub: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'EditWorkspace', params: { slug: workspace.organization.refName, id: workspace._id } });
     }
   },
   watch: {

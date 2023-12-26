@@ -28,6 +28,9 @@ import EditWorkspace from '@/views/EditWorkspace.vue';
 import OrganizationWorkspaces from "@/views/OrganizationWorkspaces.vue";
 import UserWorkspaces from "@/views/UserWorkspaces.vue";
 import LensHome from "@/views/LensHome.vue";
+import OrganizationHome from "@/views/OrganizationHome.vue";
+import OrganizationPermissionError from "@/views/OrganizationPermissionError.vue";
+import UserHome from "@/views/UserHome.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -146,6 +149,12 @@ const routes = [
   // USER pages
   //
   {
+    path: '/user/:slug',
+    component: UserHome,
+    name: 'UserHome',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/user/:id/workspaces',
     component: UserWorkspaces,
     name: 'UserWorkspaces',
@@ -173,6 +182,12 @@ const routes = [
   // ORG pages
   //
   {
+    path: '/org/:slug',
+    component: OrganizationHome,
+    name: 'OrganizationHome',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/org/:id/workspaces',
     component: OrganizationWorkspaces,
     name: 'OrganizationWorkspaces',
@@ -185,23 +200,29 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:stub/group/:id/edit',
+    path: '/org/:slug/group/:id/edit',
     component: EditGroup,
     name: 'EditGroup',
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:stub/workspace/:id',
+    path: '/org/:slug/workspace/:id',
     component: WorkspaceHome,
     name: 'WorkspaceHome',
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:stub/workspace/:id/edit',
+    path: '/org/:slug/workspace/:id/edit',
     component: EditWorkspace,
     name: 'EditWorkspace',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/org/:slug/504/:urlCode',
+    component: OrganizationPermissionError,
+    name: 'OrganizationPermissionError',
+    meta: { requiresAuth: true },
+  }
 ]
 
 const router = createRouter({
