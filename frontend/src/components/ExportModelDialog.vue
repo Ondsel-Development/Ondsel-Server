@@ -20,7 +20,7 @@
           type="warning"
           border="top"
           class="text-left"
-          v-if="user && !user.constraint.canExportModel"
+          v-if="user && !constraints.canExportModel"
         >
           Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
         </v-alert>
@@ -50,7 +50,7 @@
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !user.constraint.canExportModel && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !constraints.canExportModel && !(format === 'Default model'))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>
@@ -73,7 +73,11 @@ export default {
     isActive: Boolean,
     model: Object,
     sharedModel: Object,
-    sharedModelSubModel: Object  // refs: sharedModel.model
+    sharedModelSubModel: Object,  // refs: sharedModel.model
+    organizationConstraints: {
+      type: Object,
+      default: null
+    }
   },
   data: () => ({
     dialog: false,
@@ -84,6 +88,7 @@ export default {
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
     ...mapGetters('auth', ['isAuthenticated']),
+    constraints: vm => vm.organizationConstraints || vm.user.constraint,
     mainModel: (vm) => {
       if (vm.sharedModel) {
         return vm.sharedModelSubModel;

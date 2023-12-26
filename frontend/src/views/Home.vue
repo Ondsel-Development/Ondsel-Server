@@ -143,11 +143,13 @@
       </div>
     </v-dialog>
     <AttributeViewer
-      v-if="model"
+      v-if="model && organization"
       :is-active="isAttributeViewerActive"
       :attributes="model.attributes"
       :is-obj-generated="model.isObjGenerated"
       :is-model-loaded="isModelLoaded"
+      :can-have-write-access-to-workspace="canHaveWriteAccess"
+      :organization-constraints="organization.constraint"
       ref="attributeViewer"
       @update-model="updateModel"
     />
@@ -155,6 +157,7 @@
       v-if="model"
       :is-active="isExportModelDialogActive"
       :model="model"
+      :organization-constraints="organization.constraint"
       ref="exportModelDialog"
     />
     <v-navigation-drawer
@@ -179,7 +182,7 @@ import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import MangeSharedModels from '@/components/MangeSharedModels';
 
-const { Model, SharedModel } = models.api;
+const { Model, SharedModel, Workspace, Organization } = models.api;
 
 export default {
   name: 'HomeView',
@@ -205,6 +208,8 @@ export default {
     if (modelId) {
       try {
         this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
+        await Workspace.get(this.model.file.workspace._id);
+        await Organization.get(this.workspace.organizationId);
       } catch (error) {
         this.error = 'NotFound';
       }
@@ -220,6 +225,9 @@ export default {
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
+    canHaveWriteAccess: vm => vm.workspace ? vm.workspace.haveWriteAccess : false,
+    workspace: vm => vm.model && vm.model.file && Workspace.getFromStore(vm.model.file.workspace._id),
+    organization: vm => vm.workspace && Organization.getFromStore(vm.workspace.organizationId),
     dropzoneOptions() {
       const h = import.meta.env.VITE_APP_API_URL;
       const vm = this;
@@ -257,6 +265,8 @@ export default {
                   uniqueFileName: vm.uniqueFileName,
                 }
               })
+              await Workspace.get(vm.model.file.workspace._id);
+              await Organization.get(vm.workspace.organizationId);
               vm.uploadInProgress = false;
             } catch (e) {
               vm.error = 'UpgradeTier';

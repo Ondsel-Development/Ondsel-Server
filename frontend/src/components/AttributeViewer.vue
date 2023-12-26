@@ -23,7 +23,16 @@
         >
         <div v-if="!Object.keys(attributes).length">No attributes exist.</div>
         <v-alert
-          v-if="user && !user.constraint.canUpdateModelParameters"
+          v-if="!canHaveWriteAccessToWorkspace"
+          variant="outlined"
+          type="warning"
+          border="top"
+          class="text-left"
+        >
+          Ask organization admin to give write access.
+        </v-alert>
+        <v-alert
+          v-if="user && !constraints.canUpdateModelParameters"
           variant="outlined"
           type="warning"
           border="top"
@@ -32,7 +41,7 @@
           Please upgrade your plan in order to update model parameters.
         </v-alert>
         <v-alert
-          v-if="canUpdateModel && !isAuthenticated"
+          v-if="canUpdate && !isAuthenticated"
           variant="outlined"
           type="warning"
           border="top"
@@ -49,7 +58,7 @@
             :suffix="item.unit"
             :disabled="!isObjGenerated"
             v-if="item.type === 'string'"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
           ></v-text-field>
           <v-text-field
             v-model="item.value"
@@ -57,7 +66,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'angle'"
           ></v-text-field>
           <v-text-field
@@ -66,7 +75,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'number'"
           ></v-text-field>
           <v-text-field
@@ -75,7 +84,7 @@
             type="number"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'float'"
           ></v-text-field>
           <v-text-field
@@ -85,7 +94,7 @@
             min="0"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'length'"
           ></v-text-field>
           <v-text-field
@@ -95,7 +104,7 @@
             min="0"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'percent'"
           ></v-text-field>
           <v-select
@@ -104,7 +113,7 @@
             :items="['true', 'false']"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'bool'"
           ></v-select>
           <v-select
@@ -113,7 +122,7 @@
             :items="item.items"
             :suffix="item.unit"
             :disabled="!isObjGenerated"
-            :readonly="!canUpdateModel"
+            :readonly="!canUpdate"
             v-if="item.type === 'select'"
           ></v-select>
         </template>
@@ -123,8 +132,8 @@
         <v-btn @click="dialog = false" :disabled="!isObjGenerated">Cancel</v-btn>
         <v-btn
           color="primary"
-          v-if="canUpdateModel && Object.keys(attributes).length"
-          :disabled="(user && !user.constraint.canUpdateModelParameters) || !isObjGenerated || !isAuthenticated"
+          v-if="canUpdate && Object.keys(attributes).length"
+          :disabled="(user && !constraints.canUpdateModelParameters) || !isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"
         >Update</v-btn>
       </v-card-actions>
@@ -150,6 +159,14 @@ export default {
     canUpdateModel: {
       type: Boolean,
       default: true,
+    },
+    canHaveWriteAccessToWorkspace: {
+      type: Boolean,
+      default: true,
+    },
+    organizationConstraints: {
+      type: Object,
+      default: null
     }
   },
   data: (vm) => ({
@@ -160,6 +177,8 @@ export default {
   computed: {
     ...mapGetters('auth', ['isAuthenticated']),
     ...(mapState('auth', ['user'])),
+    canUpdate: vm => vm.canHaveWriteAccessToWorkspace && vm.canUpdateModel,
+    constraints: vm => vm.organizationConstraints || vm.user.constraint,
   },
 }
 </script>
