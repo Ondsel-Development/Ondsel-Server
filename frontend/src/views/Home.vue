@@ -154,7 +154,7 @@
       @update-model="updateModel"
     />
     <ExportModelDialog
-      v-if="model"
+      v-if="model && organization"
       :is-active="isExportModelDialogActive"
       :model="model"
       :organization-constraints="organization.constraint"
