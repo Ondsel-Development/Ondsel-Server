@@ -18,6 +18,7 @@ class Organization extends BaseModel {
 const servicePath = 'organizations'
 const servicePlugin = makeServicePlugin({
   Model: Organization,
+  paramsForServer: ['publicInfo'],
   service: feathersClient.service(servicePath),
   servicePath,
   extend({ store, module }) {

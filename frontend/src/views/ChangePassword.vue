@@ -99,7 +99,7 @@ export default {
       }).then(() => {
         this.verificationMsg = 'Password Changed!';
         if (this.loggedInUser) {
-          this.$router.push({name: 'Models'});
+          this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}});
         } else {
           this.$router.push({name: 'Login'});
         }

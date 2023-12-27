@@ -7,7 +7,7 @@
         variant="plain"
         class="text-body-1 font-weight-bold pa-0"
         style="text-decoration: none;"
-        @click="$router.push({ name: 'WorkspaceHome', params: { id: workspace._id } })"
+        @click="$router.push({ name: 'WorkspaceHome', params: { stub: workspace.organization.refName, id: workspace._id } })"
       >
         {{ workspace.name }}
       </v-btn>

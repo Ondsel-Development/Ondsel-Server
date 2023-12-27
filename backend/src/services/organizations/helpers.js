@@ -4,12 +4,19 @@ import {buildOrganizationSummary} from "./organizations.distrib.js";
 import { getConstraint } from "../users/users.subdocs.schema.js";
 
 export const isUserMemberOfOrganization = async context => {
-  const organization = await context.service.get(context.id);
-
-  if (organization.users.some(user => user._id.equals(context.params.user._id.toString()))) {
+  // this is called from after/get; so result has the org (if found)
+  if (context.publicDataOnly) {
+    return context; // not private, all is good
+  }
+  let organization = context.result;
+  if (!organization) {
+    return context; // no result, all is good
+  }
+  const userList = organization.users || [];
+  if (userList.some(user => user._id.equals(context.params.user._id.toString()))) {
     return context;
   }
-  throw new BadRequest({ type: 'PermissionError', msg: 'You are not a member of organization' });
+  throw new BadRequest({ type: 'PermissionError', msg: 'You must be a member of organization to get private information' });
 }
 
 export const isUserOwnerOrAdminOfOrganization = async context => {

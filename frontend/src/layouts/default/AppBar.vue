@@ -87,8 +87,14 @@
       location="left"
       temporary
     >
-      <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models'}"></v-list-item>
+      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type !== 'Personal'">
+        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'OrganizationHome', params: {slug: currentOrganization.refName}}">Public view of {{ currentOrganization.name }}</v-list-item>
+      </v-list>
+      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type === 'Personal'">
+        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'UserHome', params: {slug: user.username}}">Public View of Me</v-list-item>
+      </v-list>
+      <v-list density="compact" nav v-if="user">
+        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models', params: {slug: user?.username}}"></v-list-item>
       </v-list>
       <v-list density="compact" nav>
         <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
@@ -115,32 +121,32 @@ export default {
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization() {
-      const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
-      if (currentOrganizationId) {
-        const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
-        return organization;
-      }
+      // const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
+      // if (currentOrganizationId) {
+      //   const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
+      //   return organization;
+      // }
       return this.userCurrentOrganization;
     },
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
-    ...mapActions('app', ['setCurrentOrganization']),
+    // ...mapActions('app', ['setCurrentOrganization']),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
     },
     gotoAccountSettings() {
-      this.$router.push({name: 'AccountSettings'});
+      this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
     },
-    extractOrganizationId(path) {
-      const regex = /\/org\/([^\/]+)/;
-      const match = path.match(regex);
-      if (match && match[1]) {
-        return match[1];
-      } else {
-        return null;
-      }
-    }
+    // extractOrganizationId(path) {
+    //   const regex = /\/org\/([^\/]+)/;
+    //   const match = path.match(regex);
+    //   if (match && match[1]) {
+    //     return match[1];
+    //   } else {
+    //     return null;
+    //   }
+    // }
   },
 }
 </script>

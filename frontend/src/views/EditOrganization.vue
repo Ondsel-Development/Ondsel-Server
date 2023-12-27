@@ -7,7 +7,7 @@
         variant="plain"
         class="text-body-1 font-weight-bold pa-0"
         style="text-decoration: none;"
-        @click="$router.push({ name: 'OrganizationHome', params: { id: organization._id } })"
+        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization._id } })"
       >
         {{ organization.name }}
       </v-btn>
@@ -33,26 +33,42 @@ export default {
   name: 'EditOrganization',
   components: { OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
+    orgSrc: null,
+    orgDetail: null,
   }),
   async created() {
     try {
-      await Organization.get(this.$route.params.id);
+      await this.updateOrg();
     } catch (e) {
-      if (e.data.type === 'PermissionError') {
+      if (e.data?.type === 'PermissionError') {
         this.$router.push({ name: 'PageNotFound' });
+      } else if (e.toString().startsWith('NotFound')) {
+        this.$router.push({ name: 'PageNotFound' });
+      } else {
+        console.log(e.data);
+        console.log(e);
       }
     }
 
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
-    organization: vm => Organization.getFromStore(vm.$route.params.id),
-  },
-  watch: {
+    organization: vm => vm.orgDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
-  }
+    ...mapActions('app', ['getOrgByIdOrNamePublic']),
+    async updateOrg() {
+      this.orgSrc = await this.getOrgByIdOrNamePublic(this.$route.params.id);
+      this.orgDetail = await Organization.get(this.orgSrc._id);
+    }
+  },
+  watch: {
+    async '$route'(to, from) {
+      if (to.name === 'EditOrganization') {
+        await this.updateOrg();
+      }
+    }
+  },
 }
 </script>
 

@@ -135,7 +135,7 @@
             <v-btn v-if="model && !error" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
-            <v-btn v-else icon flat :to="{ name: 'Models' }">
+            <v-btn v-else icon flat :to="{ name: 'LensHome' }">
               <v-icon icon="mdi-arrow-left" size="x-large"></v-icon>
             </v-btn>
           </v-card-actions>

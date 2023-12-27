@@ -146,7 +146,7 @@ export default {
   },
   methods: {
     async goHome() {
-      this.$router.push({name: 'Models'})
+      this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}})
     },
     async downgradeToSolo() {
       this.$router.push({name: 'DowngradeToSolo'})
