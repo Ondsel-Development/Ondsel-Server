@@ -5,7 +5,7 @@
         flat
         size="small"
         icon="mdi-arrow-left"
-        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: workspace.organizationId } })"
+        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: workspace.organization.refName } })"
       />
       <div class="text-body-1">Workspace &nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
@@ -55,7 +55,7 @@ import DirectoryListView from '@/components/DirectoryListView.vue';
 import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 
-const { Directory, Workspace, File, Organization } = models.api;
+const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
@@ -65,31 +65,36 @@ export default {
       activeFile: null,
       activeDirectory: null,
       activePath: '',
+      workspaceDetail: {},
+      directoryDetail: {},
+      organizationDetail: undefined,
     };
   },
   async created() {
-    try {
-      await Workspace.get(this.$route.params.id);
-    } catch (e) {
+    this.workspaceDetail = await this.getWorkspaceByNamePrivate(this.$route.params.wsname, this.$route.params.slug);
+    if (!this.workspaceDetail) {
       this.$router.push({ name: 'PageNotFound' });
     }
-    await Directory.get(this.workspace.rootDirectory._id);
+    this.directoryDetail = await Directory.get(this.workspace?.rootDirectory?._id);
     if (!this.organization) {
-      await Organization.get(this.workspace.organizationId);
+      this.organizationDetail = await Organization.get(this.workspace.organizationId);
     }
     if (this.workspace.organizationId !== this.currentOrganization._id) {
-      await this.setCurrentOrganization(this.organization);
+      if (this.currentOrganization.type !== 'Open') {
+        this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.organization?.refName, urlCode: `/org/${this.organization?.refName}/workspace/${this.workspaceRefName}`}})
+      }
     }
     this.activePath = this.directory.name;
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    directory: vm => Directory.getFromStore(vm.workspace.rootDirectory._id),
-    workspace: vm => Workspace.getFromStore(vm.$route.params.id),
-    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
+    directory: vm => vm.directoryDetail,
+    workspaceRefName: vm => vm.$route.params.wsname,
+    workspace: vm => vm.workspaceDetail,
+    organization: vm => vm.organizationDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate']),
     async clickedFile(fileSubDocs, filePath) {
       let file = File.getFromStore(fileSubDocs._id);
       if (!file) {

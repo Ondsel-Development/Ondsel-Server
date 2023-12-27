@@ -87,12 +87,14 @@ export default {
       }
       return result;
     },
-    getWorkspaceByNamePrivate: async (context, name) => {
+    getWorkspaceByNamePrivate: async (context, wsName, orgName) => {
       // get the private details of workspace via refName "slug"
+      // throws error if not found
       let result = undefined;
       let userResult = await models.api.Workspace.find({
         query: {
-          refName: name,
+          refName: wsName,
+          "organization.name": orgName,
         }
       });
       if (userResult.total === 1) {

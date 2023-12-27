@@ -206,13 +206,13 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/workspace/:id',
+    path: '/org/:slug/workspace/:wsname',
     component: WorkspaceHome,
     name: 'WorkspaceHome',
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/workspace/:id/edit',
+    path: '/org/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
     name: 'EditWorkspace',
     meta: { requiresAuth: true },

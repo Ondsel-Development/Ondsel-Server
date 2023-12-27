@@ -129,10 +129,10 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'WorkspaceHome', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'WorkspaceHome', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'EditWorkspace', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'EditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
     }
   },
   watch: {
