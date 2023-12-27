@@ -5,7 +5,7 @@
         flat
         size="small"
         icon="mdi-arrow-left"
-        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: workspace.organization.refName } })"
+        @click="goHome()"
       />
       <div class="text-body-1">Workspace &nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
@@ -68,20 +68,37 @@ export default {
       workspaceDetail: {},
       directoryDetail: {},
       organizationDetail: undefined,
+      slug: '',
     };
   },
   async created() {
-    this.workspaceDetail = await this.getWorkspaceByNamePrivate(this.$route.params.wsname, this.$route.params.slug);
-    if (!this.workspaceDetail) {
+    this.slug = this.$route.params.slug;
+    if (this.userRouteFlag) {
+      console.log(this.slug);
+      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
+      if (!userDetail) {
+        this.$router.push({ name: 'PageNotFound' });
+        return;
+      }
+      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: userDetail._id.toString()} );
+    } else {
+      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: this.slug} );
+    }
+    if (!this.workspaceDetail._id) {
       this.$router.push({ name: 'PageNotFound' });
+      return;
     }
     this.directoryDetail = await Directory.get(this.workspace?.rootDirectory?._id);
     if (!this.organization) {
       this.organizationDetail = await Organization.get(this.workspace.organizationId);
     }
     if (this.workspace.organizationId !== this.currentOrganization._id) {
-      if (this.currentOrganization.type !== 'Open') {
-        this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.organization?.refName, urlCode: `/org/${this.organization?.refName}/workspace/${this.workspaceRefName}`}})
+      if (this.workspace.organization.type !== 'Open') {
+        if (this.userRouteFlag) {
+          this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+        } else {
+          this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+        }
       }
     }
     this.activePath = this.directory.name;
@@ -92,9 +109,10 @@ export default {
     workspaceRefName: vm => vm.$route.params.wsname,
     workspace: vm => vm.workspaceDetail,
     organization: vm => vm.organizationDetail,
+    userRouteFlag: vm => vm.$route.path.startsWith("/user"),
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate']),
+    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate', 'getUserByIdOrNamePublic']),
     async clickedFile(fileSubDocs, filePath) {
       let file = File.getFromStore(fileSubDocs._id);
       if (!file) {
@@ -114,7 +132,14 @@ export default {
       this.activeFile = null;
       this.activeDirectory = directory;
       this.activePath = dirPath;
-    }
+    },
+    async goHome() {
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserWorkspaces', params: { id: this.slug } });
+      } else {
+        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.slug } });
+      }
+    },
   },
 };
 </script>

@@ -27,32 +27,37 @@ import ManageWorkspaceUsersTable from '@/components/ManageWorkspaceUsersTable.vu
 import ManageWorkspaceGroupsTable from '@/components/ManageWorkspaceGroupsTable.vue';
 import {mapActions, mapGetters} from 'vuex';
 
-const { Workspace, Organization } = models.api;
+const { Organization } = models.api;
 
 export default {
   name: "EditWorkspace",
   components: { ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
+  data: () => ({
+    workspaceDetail: {groupsOrUsers:[]},
+    organizationDetail: undefined,
+  }),
   async created() {
-    try {
-      await Workspace.get(this.$route.params.id);
-    } catch (e) {
+    this.workspaceDetail = await this.getWorkspaceByNamePrivate(this.$route.params.wsname, this.$route.params.slug);
+    if (!this.workspaceDetail) {
       this.$router.push({ name: 'PageNotFound' });
     }
-    if (!this.organization) {
-      await Organization.get(this.workspace.organizationId);
-    }
     if (this.workspace.organizationId !== this.currentOrganization._id) {
-      const organization = Organization.getFromStore(this.workspace.organizationId);
-      await this.setCurrentOrganization(organization);
+      if (this.currentOrganization.type !== 'Open') {
+        this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.organization?.refName, urlCode: `/org/${this.organization?.refName}/workspace/${this.workspaceRefName}/edit`}})
+      }
+    }
+    if (!this.organization) {
+      this.organizationDetail = await Organization.get(this.workspace.organizationId);
     }
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    workspace: vm => Workspace.getFromStore(vm.$route.params.id),
-    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
+    workspaceRefName: vm => vm.$route.params.wsname,
+    workspace: vm => vm.workspaceDetail,
+    organization: vm => vm.organizationDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate']),
   }
 }
 </script>

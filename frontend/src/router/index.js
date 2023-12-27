@@ -178,6 +178,18 @@ const routes = [
     name: 'AccountHistory',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/user/:slug/workspace/:wsname',
+    component: WorkspaceHome,
+    name: 'UserWorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/workspace/:wsname/edit',
+    component: EditWorkspace,
+    name: 'UserEditWorkspace',
+    meta: { requiresAuth: true },
+  },
   //
   // ORG pages
   //
@@ -208,13 +220,13 @@ const routes = [
   {
     path: '/org/:slug/workspace/:wsname',
     component: WorkspaceHome,
-    name: 'WorkspaceHome',
+    name: 'OrgWorkspaceHome',
     meta: { requiresAuth: true },
   },
   {
     path: '/org/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
-    name: 'EditWorkspace',
+    name: 'OrgEditWorkspace',
     meta: { requiresAuth: true },
   },
   {

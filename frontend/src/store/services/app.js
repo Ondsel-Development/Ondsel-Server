@@ -1,4 +1,5 @@
 import { models } from '@feathersjs/vuex';
+import {marked} from "marked";
 
 
 const state = {
@@ -75,6 +76,7 @@ export default {
           }
         });
       } else {
+        console.log("ping");
         userResult = await models.api.User.find({
           query: {
             publicInfo: "true",
@@ -82,23 +84,32 @@ export default {
           }
         });
       }
+      console.log(userResult);
       if (userResult.total === 1) {
         result = userResult.data[0];
       }
       return result;
     },
-    getWorkspaceByNamePrivate: async (context, wsName, orgName) => {
+    getWorkspaceByNamePrivate: async (context, detail) => {
       // get the private details of workspace via refName "slug"
       // throws error if not found
+
+      console.log("orgName", detail);
       let result = undefined;
-      let userResult = await models.api.Workspace.find({
-        query: {
-          refName: wsName,
-          "organization.name": orgName,
-        }
-      });
-      if (userResult.total === 1) {
-        result = userResult.data[0];
+      let wsResult
+      try {
+        wsResult = await models.api.Workspace.find({
+          query: {
+            refName: detail.wsName,
+            "organization.refName": detail.orgName
+          }
+        })
+      } catch (e) {
+        console.log(`  >>> ERROR ${e}`);
+        console.log(e);
+      }
+      if (wsResult?.total === 1) {
+        result = wsResult.data[0];
       }
       return result;
     },
