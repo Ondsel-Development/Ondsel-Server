@@ -80,7 +80,7 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'deleted'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'deleted'])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {
@@ -89,7 +89,14 @@ export const fileQuerySchema = Type.Intersect(
       },
     }),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      'workspace._id': Type.Optional(Type.Union([
+        ObjectIdSchema(),
+        Type.Object({
+          '$in': Type.Array(ObjectIdSchema())
+        }),
+      ])),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )

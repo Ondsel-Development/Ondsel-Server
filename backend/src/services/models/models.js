@@ -101,7 +101,10 @@ export const model = (app) => {
         )
       ],
       create: [
-        canUserCreateModel,
+        iff(
+          isProvider('external'),
+          canUserCreateModel,
+        ),
         verifyToCreateSystemGeneratedShareLink,
         createFileVersionControlObject,
         schemaHooks.validateData(modelDataValidator),
@@ -448,7 +451,12 @@ const feedSystemGeneratedSharedModel = async (context) => {
 
 const verifyToCreateSystemGeneratedShareLink = context => {
   const { data } = context;
-  const tierConfig = getConstraint(context.params.user);
+  let tierConfig;
+  if (context.$organization) {
+    tierConfig = context.$organization.constraint;
+  } else {
+    tierConfig = getConstraint(context.params.user);
+  }
   let createShareLink = tierConfig.defaultValueOfPublicLinkGeneration;
   if ('createSystemGeneratedShareLink' in data && tierConfig.canDisableAutomaticGenerationOfPublicLink) {
     createShareLink = data.createSystemGeneratedShareLink;
