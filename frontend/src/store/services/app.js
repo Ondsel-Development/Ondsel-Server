@@ -86,6 +86,19 @@ export default {
         result = userResult.data[0];
       }
       return result;
-    }
+    },
+    getWorkspaceByNamePrivate: async (context, name) => {
+      // get the private details of workspace via refName "slug"
+      let result = undefined;
+      let userResult = await models.api.Workspace.find({
+        query: {
+          refName: name,
+        }
+      });
+      if (userResult.total === 1) {
+        result = userResult.data[0];
+      }
+      return result;
+    },
   }
 }
