@@ -16,26 +16,12 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileVersionSchema} from "./file.schema.js";
 
 export function buildFileSummary(file) {
-  let cv = file.versions.find((ver) => ver._id.toString() === file.currentVersionId.toString());
-  if (cv === undefined) {
-    throw new Error(`unable to locate version ${file.currentVersionId} in file ${file._id}`)
-  }
   let summary = {
     _id: file._id,
     custFileName: file.custFileName,
     modelId: file.modelId,
-    currentVersion: {
-      _id: file.currentVersionId,
-      uniqueFileName: cv.uniqueFileName,
-      userId: cv.userId,
-      message: cv.message,
-      createdAt: cv.createdAt,
-      additionalData: {},
-    },
+    currentVersion: file.currentVersion,
   };
-  if (cv.fileUpdatedAt) { // Optional not Null; so only add if actually there
-    summary.currentVersion.fileUpdatedAt = cv.fileUpdatedAt;
-  }
   summary.thumbnailUrlCache = file.model?.thumbnailUrlCache || null;
   return summary;
 }

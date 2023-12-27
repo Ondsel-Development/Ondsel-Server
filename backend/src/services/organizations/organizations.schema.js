@@ -1,10 +1,10 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
 import _ from 'lodash';
-import { resolve } from '@feathersjs/schema'
+import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import {getConstraint, userSummarySchema} from '../users/users.subdocs.schema.js';
 import {groupSummary} from "../groups/groups.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {BadRequest} from "@feathersjs/errors";
@@ -39,7 +39,14 @@ export const organizationSchema = Type.Object(
   { $id: 'Organization', additionalProperties: false }
 )
 export const organizationValidator = getValidator(organizationSchema, dataValidator)
-export const organizationResolver = resolve({})
+export const organizationResolver = resolve({
+  constraint: virtual(async (message, _context) => {
+    const user = await _context.app.service('users').get(
+      message.owner._id,
+    );
+    return getConstraint(user);
+  })
+})
 
 export const organizationExternalResolver = resolve({})
 
@@ -72,7 +79,7 @@ export const organizationDataResolver = resolve({
   },
   type: async (_value, message, _context) => {
     return message.type || OrganizationTypeMap.private;
-  }
+  },
 })
 
 export const organizationPublicFields = ['_id', 'name', 'refName', 'type', 'createdAt', 'owner'];
@@ -92,7 +99,9 @@ export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      'owner._id': Type.Optional(ObjectIdSchema()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )
