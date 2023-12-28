@@ -8,6 +8,7 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {buildOrganizationSummary, upsertUserSummaryToOrganization} from "../organizations/organizations.distrib.js";
 import {upsertUserSummaryToGroup} from "../groups/groups.distrib.js";
+import {updateUserSummaryToWorkspace} from "../workspaces/workspaces.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
@@ -83,8 +84,27 @@ export async function distributeUserSummaries(app, user){
   for (const group of relatedGroups) {
     await upsertUserSummaryToGroup(app, group._id.toString(), userSummary)
   }
+  log["groups"] = relatedGroups.length;
 
-  // TODO: distribute to related workspace's groupOrUserList.
+  //
+  // distribute to workspaces containing this user in groupOrUserList.
+  //
+  const workspaceService = app.service('workspaces');
+  const relatedWorkspaces = await workspaceService.find({
+    paginate: false,
+    query: {
+      groupsOrUsers: {
+        $elemMatch: {
+          "groupOrUser.username": user.username
+        }
+      }
+    }
+  });
+  for (const ws of relatedWorkspaces) {
+    await updateUserSummaryToWorkspace(app, ws._id.toString(), userSummary)
+  }
+  log["workspaces"] = relatedWorkspaces.length;
+
   return log;
 }
 
