@@ -6,6 +6,7 @@ export class GroupService extends MongoDBService {}
 export const getOptions = (app) => {
   return {
     paginate: app.get('paginate'),
-    Model: app.get('mongodbClient').then((db) => db.collection('groups'))
+    Model: app.get('mongodbClient').then((db) => db.collection('groups')),
+    operators: ['$elemMatch'],
   }
 }

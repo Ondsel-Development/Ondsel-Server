@@ -7,6 +7,7 @@
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {buildOrganizationSummary, upsertUserSummaryToOrganization} from "../organizations/organizations.distrib.js";
+import {upsertUserSummaryToGroup} from "../groups/groups.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
@@ -50,13 +51,14 @@ export const distributeUserSummariesHook = async (context) => {
 }
 
 export async function distributeUserSummaries(app, user){
-  // not a hook; but it is called by one
+  // not a hook; but it is called by one (see above)
   // this does NOT verify that a change has been detected in the user summary; it blindly sends the summary.
+  // returned log object is for use by migration commands
 
   const userSummary = buildUserSummary(user);
   let log = {}
   //
-  // distribute to each organization's user list
+  // distribute to each organization's user list and the subtending groups
   //
   const orgService = app.service('organizations');
   for (const org of user.organizations) {
@@ -64,7 +66,24 @@ export async function distributeUserSummaries(app, user){
   }
   log["organizations"] = user.organizations.length;
 
-  // TODO: distribute to related group's users list.
+  //
+  // distribute to groups containing this user
+  //
+  const groupService = app.service('groups');
+  const relatedGroups = await groupService.find({
+    paginate: false,
+    query: {
+      users: {
+        $elemMatch: {
+          username: user.username
+        }
+      }
+    }
+  });
+  for (const group of relatedGroups) {
+    await upsertUserSummaryToGroup(app, group._id.toString(), userSummary)
+  }
+
   // TODO: distribute to related workspace's groupOrUserList.
   return log;
 }
