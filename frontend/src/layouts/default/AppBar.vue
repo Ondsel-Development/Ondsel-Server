@@ -20,7 +20,7 @@
     </v-btn>
     <v-spacer></v-spacer>
 
-    <v-btn flat v-if="!loggedInUser && currentRouteName !== 'SignUp'" :to="{ name: 'SignUp' }">
+    <v-btn flat v-if="!loggedInUser && currentRouteName !== 'SignUp'" :to="{ name: 'SignUp' }" id="Sign_Up_Button">
       SignUp
     </v-btn>
 

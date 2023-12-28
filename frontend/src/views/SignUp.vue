@@ -8,7 +8,7 @@
           indeterminate
         ></v-progress-linear>
       </template>
-      <v-form v-model="isValid" ref="form" @submit.prevent="signUp">
+      <v-form v-model="isValid" ref="form" @submit.prevent="signUp" id="Sign_Up_Form">
         <v-text-field
           v-model="user.email"
           label="Email"
