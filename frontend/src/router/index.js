@@ -29,7 +29,7 @@ import OrganizationWorkspaces from "@/views/OrganizationWorkspaces.vue";
 import UserWorkspaces from "@/views/UserWorkspaces.vue";
 import LensHome from "@/views/LensHome.vue";
 import OrganizationHome from "@/views/OrganizationHome.vue";
-import OrganizationPermissionError from "@/views/OrganizationPermissionError.vue";
+import PermissionError from "@/views/PermissionError.vue";
 import UserHome from "@/views/UserHome.vue";
 
 
@@ -231,8 +231,8 @@ const routes = [
   },
   {
     path: '/org/:slug/504/:urlCode',
-    component: OrganizationPermissionError,
-    name: 'OrganizationPermissionError',
+    component: PermissionError,
+    name: 'PermissionError',
     meta: { requiresAuth: true },
   }
 ]

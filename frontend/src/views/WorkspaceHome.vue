@@ -74,7 +74,6 @@ export default {
   async created() {
     this.slug = this.$route.params.slug;
     if (this.userRouteFlag) {
-      console.log(this.slug);
       const userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
         this.$router.push({ name: 'PageNotFound' });
@@ -84,7 +83,8 @@ export default {
     } else {
       this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: this.slug} );
     }
-    if (!this.workspaceDetail._id) {
+    if (!this.workspaceDetail) {
+      console.log(`Not found: ${this.slug} ${this.$route.params.wsname} combo not found in workspaces.`);
       this.$router.push({ name: 'PageNotFound' });
       return;
     }
@@ -95,9 +95,9 @@ export default {
     if (this.workspace.organizationId !== this.currentOrganization._id) {
       if (this.workspace.organization.type !== 'Open') {
         if (this.userRouteFlag) {
-          this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
         } else {
-          this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
         }
       }
     }

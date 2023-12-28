@@ -79,7 +79,7 @@ export default {
     }
     if (this.orgSrc !== "Open") {
       if (this.userCurrentOrganization.refName !== this.orgSrc.refName) {
-        this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.orgSrc.refName, urlCode: `/org/${this.orgSrc.refName}/workspaces`}})
+        this.$router.push({ name: 'PermissionError', params: {slug: this.orgSrc.refName, urlCode: `/org/${this.orgSrc.refName}/workspaces`}})
       }
     }
   },

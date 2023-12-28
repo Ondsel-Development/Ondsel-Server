@@ -66,10 +66,10 @@ export default {
   async created() {
     this.orgName = this.user._id.toString();
     if (this.username !== this.user.username) { // this page should only be seen by the actual user
-      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
+      this.$router.push({ name: 'PermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
     }
     if (this.userCurrentOrganization.refName !== this.user._id.toString()) { // this page should only be seen by the actual user
-      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
+      this.$router.push({ name: 'PermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
     }
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);

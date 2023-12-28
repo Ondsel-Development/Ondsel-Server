@@ -1,5 +1,6 @@
 import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
+import axios from "axios";
 
 
 const state = {
@@ -63,38 +64,43 @@ export default {
     },
     getUserByIdOrNamePublic: async (context, name) => {
       // get the public details of any user using _id or username
-      let result = undefined;
-      let userResult;
+
+      // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
+      // not even non-$or queries work
+      //
+      // let userResult;
+      // userResult = await models.api.User.find({
+      //   query: {
+      //     publicInfo: "true",
+      //     "$or": [
+      //       {_id: id},
+      //       {username: name},
+      //     ]
+      //   }
+      // });
+      let base = import.meta.env.VITE_APP_API_URL;
+      let query = `${base}users?username=${name}&publicInfo=true`;
+      let response = await axios.get(query);
+      if (response.data) {
+        if (response.data.total === 1) {
+          return response.data.data[0];
+        }
+      }
       if (name.length === 24) {
-        userResult = await models.api.User.find({
-          query: {
-            publicInfo: "true",
-            $or: [
-              {_id: name},
-              {username: name},
-            ]
+        query = `${base}users?_id=${name}&publicInfo=true`;
+        response = await axios.get(query);
+        if (response.data) {
+          if (response.data.total === 1) {
+            return response.data.data[0];
           }
-        });
-      } else {
-        console.log("ping");
-        userResult = await models.api.User.find({
-          query: {
-            publicInfo: "true",
-            username: name,
-          }
-        });
+        }
       }
-      console.log(userResult);
-      if (userResult.total === 1) {
-        result = userResult.data[0];
-      }
-      return result;
+      return undefined;
     },
     getWorkspaceByNamePrivate: async (context, detail) => {
       // get the private details of workspace via refName "slug"
       // throws error if not found
 
-      console.log("orgName", detail);
       let result = undefined;
       let wsResult
       try {
