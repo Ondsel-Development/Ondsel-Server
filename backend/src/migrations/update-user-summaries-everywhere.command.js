@@ -13,7 +13,7 @@ export async function updateUserSummariesEverywhereCommand(app) {
   for (let user of userList){
     console.log(`>>> Distribute user summary for (${user._id.toString()})`);
     try {
-      const log = await distributeUserSummaries(orgService, user);
+      const log = await distributeUserSummaries(app, user);
       const logMsg = JSON.stringify(log);
       console.log(`>>>   result: ${logMsg}`);
     } catch (e) {

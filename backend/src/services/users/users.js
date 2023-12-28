@@ -30,6 +30,7 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
+import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -153,6 +154,7 @@ export const user = (app) => {
         addVerification("auth-management"),
       ],
       patch: [
+        copyUserBeforePatch,
         preventChanges(
           false,
           'isTripe',
@@ -189,6 +191,9 @@ export const user = (app) => {
         createDefaultOrganization,
         createSampleModels,
         sendNotificationToSlack,
+      ],
+      patch: [
+        distributeUserSummariesHook
       ],
     },
     error: {

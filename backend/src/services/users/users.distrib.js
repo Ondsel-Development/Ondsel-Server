@@ -17,6 +17,7 @@ export function buildUserSummary(user) {
     _id: user._id,
     username: user.username,
     name: user.name,
+    tier: user.tier,
   };
   return summary;
 }
@@ -25,19 +26,41 @@ export function buildUserSummary(user) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
-export async function distributeUserSummaries(context, user){
-  // not a hook; but a hook could certainly call it
+export const copyUserBeforePatch = async (context) => {
+  // store a copy of the User in `context.beforePatchCopy` to help detect true changes
+  const userService = context.app.service('users');
+  const userId = context.id;
+  context.beforePatchCopy = await userService.get(userId);
+  return context;
+}
+
+export const distributeUserSummariesHook = async (context) => {
+  let summaryChangeDetected = false;
+  // _id and username cannot change. Ever. So just look at the other summary fields.
+  if (context.beforePatchCopy.name !== context.result.name) {
+    summaryChangeDetected = true;
+  }
+  if (context.beforePatchCopy.tier !== context.result.tier) {
+    summaryChangeDetected = true;
+  }
+  if (summaryChangeDetected) {
+    await distributeUserSummaries(context.app, context.result);
+  }
+  return context;
+}
+
+export async function distributeUserSummaries(app, user){
+  // not a hook; but it is called by one
   // this does NOT verify that a change has been detected in the user summary; it blindly sends the summary.
-  // if this function where to be added to a `patch` hook later, then that hook would need to detect change to prevent
-  // distributed update loops.
 
   const userSummary = buildUserSummary(user);
   let log = {}
   //
   // distribute to each organization's user list
   //
+  const orgService = app.service('organizations');
   for (const org of user.organizations) {
-    await upsertUserSummaryToOrganization(context, org._id, userSummary);
+    await upsertUserSummaryToOrganization(orgService, org._id, userSummary);
   }
   log["organizations"] = user.organizations.length;
 
