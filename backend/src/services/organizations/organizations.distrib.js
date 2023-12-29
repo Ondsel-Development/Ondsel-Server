@@ -11,6 +11,7 @@
 //
 
 import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
+import {updateOrganizationSummaryToMatchingWorkspaces} from "../workspaces/workspaces.distrib.js";
 
 export function buildOrganizationSummary(org) {
   let summary = {};
@@ -25,19 +26,39 @@ export function buildOrganizationSummary(org) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
+export const copyOrgBeforePatch = async (context) => {
+  // store a copy of the Org in `context.beforePatchCopy` to help detect true changes
+  const organizationService = context.app.service('organizations');
+  const orgId = context.id;
+  context.beforePatchCopy = await organizationService.get(orgId);
+  return context;
+}
+
 export const distributeOrganizationSummaries = async (context) => {
   // this function is for distributing changes from a PATCH
   try {
     const orgId = context.id;
     if (orgId !== undefined) {
-      const org = await context.app.service('organizations').get(orgId);
-      const summaryChangeSeen = context.data.name !== undefined; // this is the only field that will trigger right now
+      let summaryChangeSeen = false;
+      // `_id`, `refName`, and `type` cannot change. Ever. So just look at the other summary fields.
+      if (context.beforePatchCopy.name !== context.result.name) {
+        summaryChangeSeen = true;
+      }
       if (summaryChangeSeen) {
-        const orgSummary = buildOrganizationSummary(org);
-        // the users have a summary of the org
-        for (const userSummary of org.users) {
+        const orgSummary = buildOrganizationSummary(context.result);
+        //
+        // update Users
+        //
+        for (const userSummary of context.result.users) {
           await upsertOrganizationSummaryToUser(context, userSummary._id, orgSummary);
         }
+        //
+        // update Workspaces
+        //
+        await updateOrganizationSummaryToMatchingWorkspaces(context, orgSummary);
+        //
+        // don't update OrgInvites. The org summary is a historical record of the invite and should not be updated
+        //
       }
     }
   } catch (error) {

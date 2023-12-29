@@ -9,6 +9,8 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
+import {workspace} from "./workspaces.js";
+
 export function buildWorkspaceSummary(workspace) {
   return {
     _id: workspace._id,
@@ -48,7 +50,19 @@ export async function upsertGroupSummarytoWorkspaces(context, workspaceId, group
   }
 }
 
-export async function upsertOrganizationSummaryToWorkspace(context, workspaceId, orgSummary) {
+export async function updateOrganizationSummaryToMatchingWorkspaces(context, orgSummary) {
+  const workspaceService = context.app.service('workspaces');
+  const matchingWorkspaces = await workspaceService.find({
+    query: {
+      organizationId: orgSummary._id,
+    }
+  });
+  for (const ws of matchingWorkspaces.data) {
+    await updateOrganizationSummaryToWorkspace(context, ws._id, orgSummary);
+  }
+}
+
+export async function updateOrganizationSummaryToWorkspace(context, workspaceId, orgSummary) {
   const workspaceService = context.app.service('workspaces');
   await workspaceService.patch(
     workspaceId,
