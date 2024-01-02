@@ -12,6 +12,21 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
+    <v-row class="mt-12" v-if="userIsOwner">
+      <v-btn
+        variant="outlined"
+        size="small"
+        @click.stop="openDeleteOrgDialog()"
+      >
+        Delete Organization
+      </v-btn>
+      <v-spacer></v-spacer>
+      <DeleteOrgDialog
+        :is-active="isDeleteOrgDialogActive"
+        :org="organization"
+        ref="deleteOrgDialog"
+      />
+    </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
     </v-row>
@@ -26,15 +41,18 @@ import { mapActions, mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
+import DeleteOrgDialog from "@/components/DeleteOrgDialog.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
-  components: { OrganizationUsersTable, OrganizationGroupsTable },
+  components: {DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,
     orgDetail: null,
+    isDeleteOrgDialogActive: false,
+    userIsOwner: false,
   }),
   async created() {
     try {
@@ -60,7 +78,12 @@ export default {
     async updateOrg() {
       this.orgSrc = await this.getOrgByIdOrNamePublic(this.$route.params.id);
       this.orgDetail = await Organization.get(this.orgSrc._id);
-    }
+      this.userIsOwner = this.orgDetail.owner._id === this.loggedInUser.user._id;
+    },
+    async openDeleteOrgDialog() {
+      this.isDeleteOrgDialogActive = true;
+      this.$refs.deleteOrgDialog.$data.dialog = true;
+    },
   },
   watch: {
     async '$route'(to, from) {

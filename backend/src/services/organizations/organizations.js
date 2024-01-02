@@ -294,5 +294,14 @@ const doSoftDeleteInstead = async context => {
     }
   )
   context.result = updatedResult; // setting this prevents the true DELETE (removal from db) from happening
+  const userId = context.result.users[0]._id;
+  const user = await context.app.service('users').get(userId);
+  let reducedOrgList = user.organizations.filter((org) => org._id.toString() !== context.id.toString());
+  await context.app.service('users').patch(
+    userId,
+    {
+      organizations: reducedOrgList
+    }
+  )
   return context;
 }
