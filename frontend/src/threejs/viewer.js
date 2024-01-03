@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+// import * as occtimportjs from 'occt-import-js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -7,6 +8,11 @@ import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
 const OBJ_COLOR = 0xcccccc;
 const OBJ_HIGHLIGHTED_COLOR = 0x76ff90;
 const EDGE_COLOR = 0x000000;
+
+const ViewerConfig = {
+  showEdges: false,
+  showAxisHelper: true,
+}
 
 export class Viewer {
 
@@ -100,48 +106,61 @@ export class Viewer {
     }
     this.lineSegments = new THREE.Group()
 
-    this.objLoader.load(
-      this.url,
-      // called when resource is loaded
-      (object) => {
-        this.obj = object
-        object.traverse((child) => {
-          if ( child instanceof THREE.Mesh ) {
-            child.material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
-            if (child.geometry !== undefined) {
-              const edges = new THREE.EdgesGeometry(child.geometry);
-              const line = new THREE.LineSegments(
-                edges,
-                new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-              );
-              this.lineSegments.add(line);
-            }
-          } else if ( child instanceof THREE.LineSegments ) {
-            const line = new THREE.LineSegments(
-              child.geometry.clone(),
-              new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-            );
-            this.lineSegments.add(line);
-          }
-        })
-        this.scene.add(object);
-        this.scene.add(this.lineSegments);
+    let fileUrl = 'http://localhost:3000/dist/cube_gui.brep';
 
-        if (!this.axisHelper) {
-          this.addAxesHelper();
-          fitCameraToSelection(this.camera, this.controls, this.obj);
+    let worker = new Worker('/dist/occt-import-js/dist/occt-import-js-worker.js');
+
+    worker.addEventListener ('message', (ev) => {
+      let mainObject = new THREE.Object3D();
+      for (let resultMesh of ev.data.meshes) {
+        let geometry = new THREE.BufferGeometry();
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(resultMesh.attributes.position.array, 3));
+        if (resultMesh.attributes.normal) {
+          geometry.setAttribute('normal', new THREE.Float32BufferAttribute(resultMesh.attributes.normal.array, 3));
         }
-        this.onLoadCallback();
-      },
-      // called when loading is in progresses
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-      },
-      // called when loading has errors
-      function (error) {
-        console.log('An error happened');
+        const index = Uint32Array.from(resultMesh.index.array);
+        geometry.setIndex(new THREE.BufferAttribute(index, 1));
+        let material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
+        const mesh = new THREE.Mesh (geometry, material);
+        mainObject.add(mesh);
+
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+        );
+        this.lineSegments.add(line);
       }
-    );
+      this.obj = mainObject;
+      this.onFileConverted();
+    });
+
+    worker.addEventListener ('error', (ev) => {
+      console.log(ev);
+    });
+
+
+    fetch(fileUrl).then(async response => {
+      let buffer = await response.arrayBuffer ();
+      let fileBuffer = new Uint8Array (buffer);
+      worker.postMessage ({
+        format : 'brep',
+        buffer : fileBuffer
+      });
+    });
+  }
+
+  onFileConverted() {
+    this.scene.add(this.obj);
+    if (ViewerConfig.showEdges) {
+      this.scene.add(this.lineSegments);
+    }
+    fitCameraToSelection(this.camera, this.controls, this.obj);
+    if (!this.axisHelper) {
+      this.addAxesHelper();
+    }
+    this.onLoadCallback();
   }
 
   initControls() {
@@ -156,7 +175,9 @@ export class Viewer {
     const maxSize = Math.max(size.x * 2, size.y * 2, size.z * 2);
 
     this.axisHelper = new THREE.AxesHelper( maxSize );
-    this.scene.add(this.axisHelper);
+    if (ViewerConfig.showAxisHelper) {
+      this.scene.add(this.axisHelper);
+    }
   }
 
   fitCameraToObjects() {
