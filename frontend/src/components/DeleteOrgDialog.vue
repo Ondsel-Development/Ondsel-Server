@@ -96,7 +96,10 @@ export default {
         this.$router.push({ name: 'LensHome' });
       }).catch((e) => {
         const msg = e.message;
-        console.log(msg);
+        if (e.name === "BadRequest") {
+          this.snackerMsg = msg;
+          this.showSnacker = true;
+        }
       });
       this.pendingDeleteOrg = false;
     },
