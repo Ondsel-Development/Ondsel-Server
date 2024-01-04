@@ -1,13 +1,11 @@
 import * as THREE from 'three';
-// import * as occtimportjs from 'occt-import-js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
+import { Importer } from '@/threejs/libs/import/importer';
+import { OBJ_COLOR, OBJ_HIGHLIGHTED_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
 
-const OBJ_COLOR = 0xcccccc;
-const OBJ_HIGHLIGHTED_COLOR = 0x76ff90;
-const EDGE_COLOR = 0x000000;
 
 const ViewerConfig = {
   showEdges: false,
@@ -34,6 +32,7 @@ export class Viewer {
     this.raycaster = new THREE.Raycaster();
     this.selectedObjs = []
     this.onLoadCallback = onLoadCallback;
+    this.importer = new Importer();
 
     this.initViewer();
   }
@@ -104,61 +103,31 @@ export class Viewer {
     if (this.lineSegments) {
       this.scene.remove(this.lineSegments);
     }
-    this.lineSegments = new THREE.Group()
-
-    let fileUrl = 'http://localhost:3000/dist/cube_gui.brep';
-
-    let worker = new Worker('/dist/occt-import-js/dist/occt-import-js-worker.js');
-
-    worker.addEventListener ('message', (ev) => {
-      let mainObject = new THREE.Object3D();
-      for (let resultMesh of ev.data.meshes) {
-        let geometry = new THREE.BufferGeometry();
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(resultMesh.attributes.position.array, 3));
-        if (resultMesh.attributes.normal) {
-          geometry.setAttribute('normal', new THREE.Float32BufferAttribute(resultMesh.attributes.normal.array, 3));
-        }
-        const index = Uint32Array.from(resultMesh.index.array);
-        geometry.setIndex(new THREE.BufferAttribute(index, 1));
-        let material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
-        const mesh = new THREE.Mesh (geometry, material);
-        mainObject.add(mesh);
-
-        const edges = new THREE.EdgesGeometry(geometry);
-        const line = new THREE.LineSegments(
-          edges,
-          new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-        );
-        this.lineSegments.add(line);
-      }
-      this.obj = mainObject;
-      this.onFileConverted();
-    });
-
-    worker.addEventListener ('error', (ev) => {
-      console.log(ev);
-    });
-
-
-    fetch(fileUrl).then(async response => {
-      let buffer = await response.arrayBuffer ();
-      let fileBuffer = new Uint8Array (buffer);
-      worker.postMessage ({
-        format : 'brep',
-        buffer : fileBuffer
-      });
-    });
+    this.importer.LoadFile(this.url, this.onFileConverted.bind(this));
   }
 
-  onFileConverted() {
+  onFileConverted(objs) {
+    this.obj = objs[0];
+    this.lineSegments = new THREE.Group()
+    for (let child of this.obj.children) {
+      if (child instanceof THREE.Mesh) {
+        if (child.geometry !== undefined) {
+          const edges = new THREE.EdgesGeometry(child.geometry);
+          const line = new THREE.LineSegments(
+            edges,
+            new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+          );
+          this.lineSegments.add(line);
+        }
+      }
+    }
     this.scene.add(this.obj);
     if (ViewerConfig.showEdges) {
       this.scene.add(this.lineSegments);
     }
-    fitCameraToSelection(this.camera, this.controls, this.obj);
     if (!this.axisHelper) {
       this.addAxesHelper();
+      fitCameraToSelection(this.camera, this.controls, this.obj);
     }
     this.onLoadCallback();
   }
