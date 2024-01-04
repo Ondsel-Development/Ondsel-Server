@@ -1,10 +1,16 @@
 import { models } from '@feathersjs/vuex';
-import {marked} from "marked";
-import axios from "axios";
 
 
 const state = {
   currentOrganization: null
+}
+
+function isObjectId(str) {
+  // Define the ObjectId pattern
+  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+
+  // Check if the string matches the ObjectId pattern
+  return objectIdPattern.test(str);
 }
 
 export default {
@@ -68,32 +74,17 @@ export default {
       // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
       // not even non-$or queries work
       //
-      // let userResult;
-      // userResult = await models.api.User.find({
-      //   query: {
-      //     publicInfo: "true",
-      //     "$or": [
-      //       {_id: id},
-      //       {username: name},
-      //     ]
-      //   }
-      // });
-      let base = import.meta.env.VITE_APP_API_URL;
-      let query = `${base}users?username=${name}&publicInfo=true`;
-      let response = await axios.get(query);
-      if (response.data) {
-        if (response.data.total === 1) {
-          return response.data.data[0];
+      const userResult = await models.api.User.find({
+        query: {
+          publicInfo: "true",
+          "$or": [
+            { username: name },
+            ...(isObjectId(name) ? [{_id: name}] : [])
+          ]
         }
-      }
-      if (name.length === 24) {
-        query = `${base}users?_id=${name}&publicInfo=true`;
-        response = await axios.get(query);
-        if (response.data) {
-          if (response.data.total === 1) {
-            return response.data.data[0];
-          }
-        }
+      });
+      if (userResult.total) {
+        return userResult.data[0];
       }
       return undefined;
     },
