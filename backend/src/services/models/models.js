@@ -192,12 +192,12 @@ const startObjGeneration = async (context) => {
 
   if (data.uniqueFileName) {
     fileName = data.uniqueFileName;
-  } else if (context.id && !context.data.uniqueFileName) {
-    const result = await context.service.get(context.id);
-    fileName = result.uniqueFileName;
   } else if (context.data.fileId) {
     const file = await context.app.service('file').get(context.data.fileId);
     fileName = file.currentVersion.uniqueFileName;
+  } else if (context.id && !context.data.uniqueFileName) {
+    const result = await context.service.get(context.id);
+    fileName = result.uniqueFileName;
   } else {
     throw new BadRequest('Not able to find filename')
   }
