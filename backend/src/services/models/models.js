@@ -428,7 +428,10 @@ const feedSystemGeneratedSharedModel = async (context) => {
     const systemGeneratedSharedModel = result.data[0];
     const patchData = {};
     if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
-      uploadService.copy(`${context.id.toString()}_generated.OBJ`, `${systemGeneratedSharedModel.model._id.toString()}_generated.OBJ`);
+
+      const isBrepExists = await uploadService.checkFileExists(context.app.get('awsClientModelBucket'), `${context.id.toString()}_generated.BREP` )
+      const extension = isBrepExists ? 'BREP' : 'OBJ';
+      uploadService.copy(`${context.id.toString()}_generated.${extension}`, `${systemGeneratedSharedModel.model._id.toString()}_generated.${extension}`);
       patchData['isObjGenerated'] = true;
       patchData['attributes'] = context.result.attributes;
 

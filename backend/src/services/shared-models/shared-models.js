@@ -176,6 +176,7 @@ export const sharedModels = (app) => {
 const createClone = async (context) => {
   const { data } = context;
   const modelService = context.app.service('models');
+  const uploadService = context.app.service('upload');
 
   if (context.result) {
     await modelService.patch(context.result.dummyModelId, { sharedModelId: context.result._id.toString() });
@@ -210,13 +211,18 @@ const createClone = async (context) => {
     });
 
     if (isObjGenerated) {
-      await context.app.service('upload').copy(
-        `${model._id.toString()}_generated.OBJ`,
-        `${newModel._id.toString()}_generated.OBJ`,
+      const isBrepExists = await uploadService.checkFileExists(
+        context.app.get('awsClientModelBucket'),
+        `${model._id.toString()}_generated.BREP`
+      )
+      const extension = isBrepExists ? 'BREP' : 'OBJ';
+      await uploadService.copy(
+        `${model._id.toString()}_generated.${extension}`,
+        `${newModel._id.toString()}_generated.${extension}`,
       );
     }
     if (isThumbnailGenerated) {
-      await context.app.service('upload').copy(
+      await uploadService.copy(
         `public/${model._id.toString()}_thumbnail.PNG`,
         `public/${newModel._id.toString()}_thumbnail.PNG`,
       );
