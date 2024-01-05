@@ -24,7 +24,7 @@ import {
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
-import {distributeFileSummaries} from "./file.distrib.js";
+import {distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
 import {
   canUserAccessDirectoryOrFileGetMethod,
   canUserAccessDirectoryOrFilePatchMethod,
@@ -69,20 +69,6 @@ export const file = (app) => {
     },
     before: {
       all: [
-        softDelete({
-          deletedQuery: async context => {
-            if ( context.method === 'remove') {
-              if (!context.params.$forceRemove) {
-                const file = await context.service.get(context.id);
-                if (file.modelId) {
-                  throw new BadRequest('To remove this file object, call remove attached model.');
-                }
-
-              }
-            }
-            return { deleted: { $ne: true } };
-          }
-        }),
         iff(
           context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
           (context) => {
@@ -136,7 +122,13 @@ export const file = (app) => {
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
-      remove: []
+      remove: [
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFilePatchMethod
+        ),
+        softDeleteFile
+      ]
     },
     after: {
       all: [],
@@ -145,6 +137,9 @@ export const file = (app) => {
       ],
       patch: [
         distributeFileSummaries,
+      ],
+      remove: [
+        distributeFileDeletion,
       ]
     },
     error: {
@@ -240,3 +235,66 @@ const updateVersionData = async (context) => {
   context.data = _.omit(context.data, ['shouldUpdateVersionData', 'version'])
   return context;
 };
+
+const softDeleteFile = async (context) => {
+
+  // TODO: consider supporting a param for # of shared links; to confirm that the user really wants them gone
+  //
+  // gather data before starting
+  //
+  const modelService = context.app.service('models');
+  const sharedLinkService = context.app.service('shared-models');
+  const file = await context.service.get(context.id);
+  const fileId = file._id.toString();
+  const models = await modelService.find({
+    query: {
+      paginate: false,
+      fileId: fileId,
+    }
+  });
+  let sharedLinks = [];
+  for (const model of models) {
+    const newLinks = await sharedLinkService.find({
+      query: {
+        paginate: false,
+        cloneModelId: model._id.toString(),
+      }
+    })
+    if (newLinks.length > 0) {
+      sharedLinks.push(...newLinks)
+    }
+  }
+  //
+  // mark the file as deleted
+  //
+  const fileAfterDelete = await context.service.patch(
+    context.id,
+    {
+      deleted: true,
+    }
+  );
+  //
+  // mark all the models for all the revisions as deleted
+  //
+  for (const model of models) {
+    await modelService.patch(
+      model.cloneModelId,
+      {
+        deleted: true,
+      }
+    )
+  }
+  //
+  // mark all the shared links for all the models as deleted
+  //
+  for (const link of sharedLinks) {
+    await sharedLinkService.patch(
+      link._id,
+      {
+        deleted: true,
+      }
+    )
+  }
+  context.result = fileAfterDelete;
+  return context;
+}

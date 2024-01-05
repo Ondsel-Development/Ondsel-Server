@@ -48,6 +48,25 @@ export async function distributeFileSummaries(context){
   return context;
 }
 
+export async function distributeFileDeletion(context){
+  todo
+  // try {
+  //   const fileId = context.id;
+  //   if (fileId !== undefined) {
+  //     const file = await context.app.service('file').get(fileId);
+  //     // for now, we are assuming any change anywhere in file should trigger a summary distribution
+  //     const fileSummary = buildFileSummary(file);
+  //     // to directories
+  //     if (file.directory?._id) {
+  //       await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
+  //     };
+  //   };
+  // } catch (error) {
+  //   console.log(error);
+  // }
+  return context;
+}
+
 //
 // UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops
 //
