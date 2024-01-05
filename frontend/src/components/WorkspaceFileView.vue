@@ -21,6 +21,13 @@
       <v-btn
         flat
         :disabled="!canUserWrite"
+        @click="$refs.deleteFile.openDeleteFileDialog();"
+      >
+        Delete
+      </v-btn>
+      <v-btn
+        flat
+        :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>
     </v-row>
@@ -45,18 +52,19 @@
       <file-versions-table :file="file" :can-user-write="canUserWrite" />
     </v-row>
     <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
+    <delete-file-dialog ref="deleteFile" :file="file" />
   </v-container>
 </template>
 
 <script>
 import FileVersionsTable from '@/components/FileVersionsTable.vue';
 import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.vue';
-
+import DeleteFileDialog from "@/components/DeleteFileDialog.vue";
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 
 export default {
   name: 'WorkspaceFileView',
-  components: { FileVersionsTable, UploadNewVersionFileDialog },
+  components: { FileVersionsTable, UploadNewVersionFileDialog, DeleteFileDialog },
   props: {
     file: Object,
     canUserWrite: {
