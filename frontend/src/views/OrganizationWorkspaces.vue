@@ -81,7 +81,7 @@ export default {
     }
     if (this.orgSrc !== "Open") {
       if (this.userCurrentOrganization.refName !== this.orgSrc.refName) {
-        this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.orgSrc.refName, urlCode: `/org/${this.orgSrc.refName}/workspaces`}})
+        this.$router.push({ name: 'PermissionError', params: {slug: this.orgSrc.refName, urlCode: `/org/${this.orgSrc.refName}/workspaces`}})
       }
     }
   },
@@ -135,10 +135,10 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'WorkspaceHome', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'EditWorkspace', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
     }
   },
   watch: {

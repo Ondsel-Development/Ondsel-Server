@@ -29,7 +29,7 @@ import OrganizationWorkspaces from "@/views/OrganizationWorkspaces.vue";
 import UserWorkspaces from "@/views/UserWorkspaces.vue";
 import LensHome from "@/views/LensHome.vue";
 import OrganizationHome from "@/views/OrganizationHome.vue";
-import OrganizationPermissionError from "@/views/OrganizationPermissionError.vue";
+import PermissionError from "@/views/PermissionError.vue";
 import UserHome from "@/views/UserHome.vue";
 
 
@@ -178,6 +178,18 @@ const routes = [
     name: 'AccountHistory',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/user/:slug/workspace/:wsname',
+    component: WorkspaceHome,
+    name: 'UserWorkspaceHome',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/workspace/:wsname/edit',
+    component: EditWorkspace,
+    name: 'UserEditWorkspace',
+    meta: { requiresAuth: true },
+  },
   //
   // ORG pages
   //
@@ -206,21 +218,21 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/workspace/:id',
+    path: '/org/:slug/workspace/:wsname',
     component: WorkspaceHome,
-    name: 'WorkspaceHome',
+    name: 'OrgWorkspaceHome',
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/workspace/:id/edit',
+    path: '/org/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
-    name: 'EditWorkspace',
+    name: 'OrgEditWorkspace',
     meta: { requiresAuth: true },
   },
   {
     path: '/org/:slug/504/:urlCode',
-    component: OrganizationPermissionError,
-    name: 'OrganizationPermissionError',
+    component: PermissionError,
+    name: 'PermissionError',
     meta: { requiresAuth: true },
   }
 ]
