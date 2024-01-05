@@ -71,3 +71,17 @@ export async function forDirectoryUpdateFileSummary(context, dirId, fileSummary)
     }
   );
 }
+
+export async function forDirectoryRemoveFileSummary(app, dirId, fileId) {
+  // limited patch designed to not spin up a summary-update loop; often stored in *.distrib.js file
+  const directoryService = app.service('directories');
+  const dir = await directoryService.get(dirId);
+  const fileList = dir.files || [];
+  const newFileList = fileList.filter((fileEntry) => fileEntry._id.toString() !== fileId.toString());
+  await directoryService.patch(
+    dirId,
+    {
+      files: newFileList,
+    }
+  );
+}

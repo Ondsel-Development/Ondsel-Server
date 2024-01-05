@@ -11,7 +11,7 @@
 
 import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
-import {forDirectoryUpdateFileSummary} from "../directories/helpers.js";
+import {forDirectoryRemoveFileSummary, forDirectoryUpdateFileSummary} from "../directories/helpers.js";
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileVersionSchema} from "./file.schema.js";
 
@@ -49,21 +49,16 @@ export async function distributeFileSummaries(context){
 }
 
 export async function distributeFileDeletion(context){
-  todo
-  // try {
-  //   const fileId = context.id;
-  //   if (fileId !== undefined) {
-  //     const file = await context.app.service('file').get(fileId);
-  //     // for now, we are assuming any change anywhere in file should trigger a summary distribution
-  //     const fileSummary = buildFileSummary(file);
-  //     // to directories
-  //     if (file.directory?._id) {
-  //       await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
-  //     };
-  //   };
-  // } catch (error) {
-  //   console.log(error);
-  // }
+  // for now, this really only affects directories
+  // this function is called post-delete, so the context.result already has content of "file"
+  try {
+    const file = context.result;
+    if (file.directory?._id) {
+      await forDirectoryRemoveFileSummary(context.app, file.directory._id, file._id);
+    };
+  } catch (error) {
+    console.log(error);
+  }
   return context;
 }
 

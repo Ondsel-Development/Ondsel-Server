@@ -134,7 +134,7 @@ export const subscriptionConstraintMap = {
 };
 
 export function getConstraint(user){
-  return _.get(subscriptionConstraintMap, user.tier, SubscriptionTypeMap.unverified);
+  return _.get(subscriptionConstraintMap, user?.tier, SubscriptionTypeMap.unverified);
 }
 
 export const LedgerMap = {

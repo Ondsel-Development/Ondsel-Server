@@ -237,8 +237,6 @@ const updateVersionData = async (context) => {
 };
 
 const softDeleteFile = async (context) => {
-
-  // TODO: consider supporting a param for # of shared links; to confirm that the user really wants them gone
   //
   // gather data before starting
   //
@@ -248,20 +246,18 @@ const softDeleteFile = async (context) => {
   const fileId = file._id.toString();
   const models = await modelService.find({
     query: {
-      paginate: false,
       fileId: fileId,
     }
   });
   let sharedLinks = [];
-  for (const model of models) {
+  for (const model of models.data) {
     const newLinks = await sharedLinkService.find({
       query: {
-        paginate: false,
         cloneModelId: model._id.toString(),
       }
     })
-    if (newLinks.length > 0) {
-      sharedLinks.push(...newLinks)
+    if (newLinks.total > 0) {
+      sharedLinks.push(...newLinks.data)
     }
   }
   //
@@ -276,9 +272,9 @@ const softDeleteFile = async (context) => {
   //
   // mark all the models for all the revisions as deleted
   //
-  for (const model of models) {
+  for (const model of models.data) {
     await modelService.patch(
-      model.cloneModelId,
+      model._id,
       {
         deleted: true,
       }
@@ -291,6 +287,7 @@ const softDeleteFile = async (context) => {
     await sharedLinkService.patch(
       link._id,
       {
+        isActive: false,
         deleted: true,
       }
     )

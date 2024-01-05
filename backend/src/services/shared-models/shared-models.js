@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -141,8 +141,11 @@ export const sharedModels = (app) => {
         ),
         preventChanges(false, 'thumbnailUrl'),
         iff(
-          context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
-          preventChanges(true, 'isActive')
+          isProvider('external'),
+          iff(
+            context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
+            preventChanges(true, 'isActive')
+          ),
         ),
         iff(
           context => context.data.shouldCreateInstance,
