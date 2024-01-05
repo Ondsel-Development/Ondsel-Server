@@ -9,19 +9,19 @@
         <div class="text-center">Change Name</div>
       </template>
       <v-progress-linear
-        :active="pendingChangeName"
+        :active="isPatchPending"
         indeterminate
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="changeNameDialogForm" @submit.prevent="pendingChangeName">
+      <v-form ref="changeNameDialogForm" @submit.prevent="isPatchPending">
         <v-card-text>
           <v-text-field
             v-model.trim="newOrgName"
             label="Name"
             hint="Enter the organization's name"
             :rules="[rules.isRequired]"
-            :disabled="pendingChangeName"
+            :disabled="isPatchPending"
           ></v-text-field>
         </v-card-text>
       </v-form>
@@ -32,7 +32,7 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="doNameChange()" color="primary" :disabled="pendingChangeName">Change</v-btn>
+        <v-btn @click="doNameChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
         <v-btn @click="dialog = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
@@ -41,7 +41,8 @@
 
 <script>
 
-import {models} from "@feathersjs/vuex";
+import { models } from '@feathersjs/vuex';
+import { mapState } from 'vuex';
 
 const { Organization } = models.api;
 
@@ -54,7 +55,6 @@ export default {
     this.newOrgName = this.org.name;
   },
   data: () => ({
-    pendingChangeName: false,
     dialog: false,
     rules: {
       isRequired: v => !!v || 'This field is required',
@@ -64,6 +64,7 @@ export default {
     newOrgName: '',
   }),
   computed: {
+    ...mapState('organizations', ['isPatchPending']),
   },
   methods: {
     async doNameChange() {
@@ -72,7 +73,6 @@ export default {
       if (!valid) {
         return;
       }
-      this.pendingChangeName = true;
       await Organization.patch(
         this.org._id,
         {
@@ -84,7 +84,6 @@ export default {
         const msg = e.message;
         console.log(msg);
       });
-      this.pendingChangeName = false;
     }
   },
 }
