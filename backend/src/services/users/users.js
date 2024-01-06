@@ -287,7 +287,7 @@ const createDefaultOrganization = async context => {
     { user: context.result }
   );
   const workspace = await workspaceService.create(
-    { name: 'Default', description: 'Your workspace', organizationId: organization._id, refName: context.result._id.toString() },
+    { name: 'Default', description: 'Your workspace', organizationId: organization._id, refName: 'default' },
     { user: context.result }
   )
   await context.service.patch(

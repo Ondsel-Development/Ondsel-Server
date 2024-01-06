@@ -159,7 +159,7 @@ export default {
                 await Model.create({
                   fileId: file.fileObj._id,
                   createSystemGeneratedShareLink: false,
-                  shouldStartObjGeneration: false,
+                  shouldStartObjGeneration: true,
                 });
               }
               if (index > -1) {

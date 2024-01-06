@@ -151,7 +151,7 @@
         <div class="text-grey-darken-1">You reached the end!</div>
       </template>
       <template v-else>
-        <v-btn flat variant="text" @click.stop="fetchModels">Load more</v-btn>
+        <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
       </template>
     </v-row>
   </v-container>
@@ -173,6 +173,7 @@ import { models } from '@feathersjs/vuex';
 
 import MangeSharedModels from '@/components/MangeSharedModels';
 import DeleteDialog from '@/components/DeleteDialog.vue';
+import scrollListenerMixin from '@/mixins/scrollListenerMixin';
 
 const { Model, SharedModel } = models.api;
 
@@ -180,6 +181,7 @@ export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Models',
   components: { MangeSharedModels, DeleteDialog },
+  mixins: [scrollListenerMixin],
   data: () => ({
     search: '',
     showRecentModels: true,
@@ -194,12 +196,16 @@ export default {
   async created() {
   },
   async mounted() {
-    await this.fetchModels();
-    window.addEventListener('scroll', () => {
-      if(document.documentElement.scrollHeight <= window.scrollY + window.innerHeight + 1) {
-        this.fetchModels();
-      }
-    });
+    await this.fetchDataOnScroll();
+  },
+  beforeRouteEnter(to, from, next) {
+    // Use a callback with "next" to pass the instantiated component
+    next(vm => { vm.setupScrollListener(); });
+  },
+
+  beforeRouteLeave(to, from, next) {
+    this.removeScrollListener();
+    next();
   },
   computed: {
     ...mapState('models', ['isFindPending']),
@@ -208,7 +214,10 @@ export default {
   },
   methods: {
     ...mapMutations('models', ['clearAll']),
-    async fetchModels() {
+    async fetchDataOnScroll() {
+      if (this.isFindPending) {
+        return;
+      }
       // const models = await Model.find({query: {}, pipelines: [{custFileName: { $regex: 'c3dfe466', $options: 'igm' }}]})
       if (this.myModels.data.length !== this.pagination.total) {
         const models = await Model.find({

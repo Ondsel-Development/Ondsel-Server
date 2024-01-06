@@ -59,7 +59,7 @@ import {mapGetters, mapState} from "vuex";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'OrganizationPermissionError',
+  name: 'PermissionError',
   components: { },
   data: () => ({
   }),
