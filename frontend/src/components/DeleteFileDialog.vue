@@ -26,6 +26,9 @@
 </template>
 <script>
 import { mapState } from 'vuex'
+import { models } from '@feathersjs/vuex';
+
+const {File} = models.api;
 
 export default {
   props: {
@@ -34,7 +37,7 @@ export default {
       required: true
     }
   },
-  emits: ['deleteFile'],
+  emits: ['deleteFile', 'selectedDirectory'],
   data() {
     return {
       showDialog: false
@@ -44,9 +47,15 @@ export default {
     ...mapState('files', ['isRemovePending']),
   },
   methods: {
-    deleteObject() {
-      this.$emit('deleteFile', this.file);
-      this.showDialog = false;
+    async deleteObject() {
+      await File.remove(
+        this.file._id
+      ).then(() => {
+        this.$emit('selectedDirectory', this.file.directory, `${this.file.directory.name}`);
+        this.showDialog = false;
+      }).catch((e) => {
+        console.log(e);
+      });
     },
     cancelDelete() {
       this.showDialog = false;

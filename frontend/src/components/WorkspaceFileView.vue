@@ -23,7 +23,7 @@
         :disabled="!canUserWrite"
         @click="$refs.deleteFile.openDeleteFileDialog();"
       >
-        Delete
+        Delete File
       </v-btn>
       <v-btn
         flat
