@@ -29,6 +29,7 @@ export const userSummarySchema = Type.Object(
     _id: ObjectIdSchema(),
     username: Type.String(),
     name: Type.String(),
+    tier: SubscriptionType,
   }
 )
 

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {buildUserSummary} from "../../users/users.distrib.js";
 
 export const editGroupOrUserOnWorkspace = async (context) => {
   const { data } = context;
@@ -12,7 +13,13 @@ export const editGroupOrUserOnWorkspace = async (context) => {
     throw new Error(`Cannot find ${groupOrUserId} in groupsOrUsers of workspace ${workspace._id}`);
   } else {
     groupsOrUsersOfWorkspace[index].permission = item.permission || groupsOrUsersOfWorkspace[index].permission;
-    groupsOrUsersOfWorkspace[index].groupOrUser.name = item.groupOrUser.name || groupsOrUsersOfWorkspace[index].groupOrUser.name;
+    if (groupsOrUsersOfWorkspace[index].type === 'User') {
+      groupsOrUsersOfWorkspace[index].groupOrUser.name = item.groupOrUser.name || groupsOrUsersOfWorkspace[index].groupOrUser.name;
+      groupsOrUsersOfWorkspace[index].groupOrUser.tier = item.groupOrUser.tier || groupsOrUsersOfWorkspace[index].groupOrUser.tier;
+      delete groupsOrUsersOfWorkspace[index].groupOrUser.email; // for handling legacy entries
+    } else {
+      groupsOrUsersOfWorkspace[index].groupOrUser.name = item.groupOrUser.name || groupsOrUsersOfWorkspace[index].groupOrUser.name;
+    }
   }
   data.groupsOrUsers = groupsOrUsersOfWorkspace;
   context.data = _.omit(data, ['shouldEditGroupOrUserOnWorkspace', 'groupOrUserData']);

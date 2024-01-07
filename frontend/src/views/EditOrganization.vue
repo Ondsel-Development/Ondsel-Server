@@ -12,6 +12,21 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
+    <v-row v-if="isLoggedInUserAdminOfOrganization" class="mt-12">
+      <v-btn
+        variant="outlined"
+        size="small"
+        :hidden="!isLoggedInUserAdminOfOrganization"
+        @click.stop="openOrgChangeNameDialog()"
+      >
+        Change Name
+      </v-btn>
+      <OrgChangeNameDialog
+        :is-active="isOrgChangeNameDialogActive"
+        :org="organization"
+        ref="orgChangeNameDialog"
+      />
+    </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
     </v-row>
@@ -26,15 +41,17 @@ import { mapActions, mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
+import OrgChangeNameDialog from "@/components/OrgChangeNameDialog.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
-  components: { OrganizationUsersTable, OrganizationGroupsTable },
+  components: {OrgChangeNameDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,
     orgDetail: null,
+    isOrgChangeNameDialogActive: false,
   }),
   async created() {
     try {
@@ -54,13 +71,18 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     organization: vm => vm.orgDetail,
+    isLoggedInUserAdminOfOrganization: vm => vm.organization.users.some(user => user._id === vm.loggedInUser.user._id && user.isAdmin),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
     async updateOrg() {
       this.orgSrc = await this.getOrgByIdOrNamePublic(this.$route.params.id);
       this.orgDetail = await Organization.get(this.orgSrc._id);
-    }
+    },
+    async openOrgChangeNameDialog() {
+      this.isOrgChangeNameDialogActive = true;
+      this.$refs.orgChangeNameDialog.$data.dialog = true;
+    },
   },
   watch: {
     async '$route'(to, from) {

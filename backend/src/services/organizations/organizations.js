@@ -31,7 +31,7 @@ import { removeUsersFromOrganization } from './commands/removeUsersFromOrganizat
 import { giveAdminAccessToUsersOfOrganization } from './commands/giveAdminAccessToUsersOfOrganization.js';
 import { revokeAdminAccessFromUsersOfOrganization } from './commands/revokeAdminAccessFromUsersOfOrganization.js';
 import { createDefaultEveryoneGroup } from '../groups/commands/createDefaultEveryoneGroup.js';
-import { distributeOrganizationSummaries } from './organizations.distrib.js';
+import {copyOrgBeforePatch, distributeOrganizationSummaries} from './organizations.distrib.js';
 import { addGroupsToOrganization } from './commands/addGroupsToOrganization.js';
 import {
   authenticateJwtWhenPrivate,
@@ -178,6 +178,7 @@ export const organization = (app) => {
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
+        copyOrgBeforePatch,
         iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner')),
         iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(

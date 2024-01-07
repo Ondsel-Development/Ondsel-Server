@@ -7,6 +7,8 @@
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {buildOrganizationSummary, upsertUserSummaryToOrganization} from "../organizations/organizations.distrib.js";
+import {upsertUserSummaryToGroup} from "../groups/groups.distrib.js";
+import {updateUserSummaryToWorkspace} from "../workspaces/workspaces.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
@@ -17,6 +19,7 @@ export function buildUserSummary(user) {
     _id: user._id,
     username: user.username,
     name: user.name,
+    tier: user.tier,
   };
   return summary;
 }
@@ -25,24 +28,83 @@ export function buildUserSummary(user) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
-export async function distributeUserSummaries(context, user){
-  // not a hook; but a hook could certainly call it
+export const copyUserBeforePatch = async (context) => {
+  // store a copy of the User in `context.beforePatchCopy` to help detect true changes
+  const userService = context.app.service('users');
+  const userId = context.id;
+  context.beforePatchCopy = await userService.get(userId);
+  return context;
+}
+
+export const distributeUserSummariesHook = async (context) => {
+  let summaryChangeDetected = false;
+  // _id and username cannot change. Ever. So just look at the other summary fields.
+  if (context.beforePatchCopy.name !== context.result.name) {
+    summaryChangeDetected = true;
+  }
+  if (context.beforePatchCopy.tier !== context.result.tier) {
+    summaryChangeDetected = true;
+  }
+  if (summaryChangeDetected) {
+    await distributeUserSummaries(context.app, context.result);
+  }
+  return context;
+}
+
+export async function distributeUserSummaries(app, user){
+  // not a hook; but it is called by one (see above)
   // this does NOT verify that a change has been detected in the user summary; it blindly sends the summary.
-  // if this function where to be added to a `patch` hook later, then that hook would need to detect change to prevent
-  // distributed update loops.
+  // returned log object is for use by migration commands
 
   const userSummary = buildUserSummary(user);
   let log = {}
   //
-  // distribute to each organization's user list
+  // distribute to each organization's user list and the subtending groups
   //
+  const orgService = app.service('organizations');
   for (const org of user.organizations) {
-    await upsertUserSummaryToOrganization(context, org._id, userSummary);
+    await upsertUserSummaryToOrganization(orgService, org._id, userSummary);
   }
   log["organizations"] = user.organizations.length;
 
-  // TODO: distribute to related group's users list.
-  // TODO: distribute to related workspace's groupOrUserList.
+  //
+  // distribute to groups containing this user
+  //
+  const groupService = app.service('groups');
+  const relatedGroups = await groupService.find({
+    paginate: false,
+    query: {
+      users: {
+        $elemMatch: {
+          username: user.username
+        }
+      }
+    }
+  });
+  for (const group of relatedGroups) {
+    await upsertUserSummaryToGroup(app, group._id.toString(), userSummary)
+  }
+  log["groups"] = relatedGroups.length;
+
+  //
+  // distribute to workspaces containing this user in groupOrUserList.
+  //
+  const workspaceService = app.service('workspaces');
+  const relatedWorkspaces = await workspaceService.find({
+    paginate: false,
+    query: {
+      groupsOrUsers: {
+        $elemMatch: {
+          "groupOrUser.username": user.username
+        }
+      }
+    }
+  });
+  for (const ws of relatedWorkspaces) {
+    await updateUserSummaryToWorkspace(app, ws._id.toString(), userSummary)
+  }
+  log["workspaces"] = relatedWorkspaces.length;
+
   return log;
 }
 

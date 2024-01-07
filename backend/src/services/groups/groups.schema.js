@@ -62,7 +62,8 @@ export const groupQuerySchema = Type.Intersect(
   [
     querySyntax(groupQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )
