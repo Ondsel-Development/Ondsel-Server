@@ -12,15 +12,15 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
-    <v-row class="mt-12">
+    <v-row v-if="isLoggedInUserAdminOfOrganization" class="mt-12">
       <v-btn
         variant="outlined"
         size="small"
+        :hidden="!isLoggedInUserAdminOfOrganization"
         @click.stop="openOrgChangeNameDialog()"
       >
         Change Name
       </v-btn>
-      <v-spacer></v-spacer>
       <OrgChangeNameDialog
         :is-active="isOrgChangeNameDialogActive"
         :org="organization"
@@ -71,6 +71,7 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     organization: vm => vm.orgDetail,
+    isLoggedInUserAdminOfOrganization: vm => vm.organization.users.some(user => user._id === vm.loggedInUser.user._id && user.isAdmin),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
