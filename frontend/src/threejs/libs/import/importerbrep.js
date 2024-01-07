@@ -34,7 +34,7 @@ export class ImporterBrep {
 
   ImportContent (fileContent, onFinish) {
 
-    this.worker = new Worker('/dist/occt-import-js/dist/occt-import-js-worker.js');
+    this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
 
     this.worker.addEventListener ('message', (ev) => {
       let mainObject = new THREE.Object3D();
