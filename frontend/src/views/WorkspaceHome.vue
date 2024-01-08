@@ -33,7 +33,13 @@
         />
       </v-col>
       <v-col cols="9">
-        <WorkspaceFileView v-if="activeFile" :file="activeFile" :can-user-write="workspace.haveWriteAccess" />
+        <WorkspaceFileView
+          v-if="activeFile"
+          :file="activeFile"
+          :full-path="activePath"
+          :can-user-write="workspace.haveWriteAccess"
+          @open-directory="clickedDirectory"
+        />
         <WorkspaceDirectoryView
           v-else
           :directory="activeDirectory || directory"
