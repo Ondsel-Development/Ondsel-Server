@@ -21,6 +21,13 @@
       <v-btn
         flat
         :disabled="!canUserWrite"
+        @click="$refs.deleteFile.openDeleteFileDialog();"
+      >
+        Delete File
+      </v-btn>
+      <v-btn
+        flat
+        :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>
     </v-row>
@@ -45,30 +52,42 @@
       <file-versions-table :file="file" :can-user-write="canUserWrite" />
     </v-row>
     <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
+    <delete-file-dialog ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
   </v-container>
 </template>
 
 <script>
 import FileVersionsTable from '@/components/FileVersionsTable.vue';
 import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.vue';
-
+import DeleteFileDialog from "@/components/DeleteFileDialog.vue";
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
+import {mapActions} from "vuex";
 
 export default {
   name: 'WorkspaceFileView',
-  components: { FileVersionsTable, UploadNewVersionFileDialog },
+  components: {FileVersionsTable, UploadNewVersionFileDialog, DeleteFileDialog},
   props: {
     file: Object,
     canUserWrite: {
       type: Boolean,
       default: false,
-    }
+    },
+    fullPath: String,
   },
+  emits: ['openDirectory'],
   mixins: [fileDownloadMixin],
-  data: () => ({
-  }),
+  data: () => ({}),
   computed: {
     fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
+  },
+  methods: {
+    async doneWithFile() {
+      // if invoked by a child, then this FileView should close and this file's directory should be displayed
+      const dir = this.file.directory;
+      let rootPath = this.fullPath.substring(0, this.fullPath.lastIndexOf("/"));
+      if (rootPath==="") rootPath = "/";
+      this.$emit('openDirectory', dir, rootPath);
+    }
   },
 }
 </script>
