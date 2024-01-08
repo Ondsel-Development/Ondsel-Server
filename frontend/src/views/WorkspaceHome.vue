@@ -5,7 +5,7 @@
         flat
         size="small"
         icon="mdi-arrow-left"
-        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: workspace.organizationId } })"
+        @click="goHome()"
       />
       <div class="text-body-1">Workspace &nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
@@ -55,7 +55,7 @@ import DirectoryListView from '@/components/DirectoryListView.vue';
 import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 
-const { Directory, Workspace, File, Organization } = models.api;
+const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
@@ -65,31 +65,54 @@ export default {
       activeFile: null,
       activeDirectory: null,
       activePath: '',
+      workspaceDetail: {},
+      directoryDetail: {},
+      organizationDetail: undefined,
+      slug: '',
     };
   },
   async created() {
-    try {
-      await Workspace.get(this.$route.params.id);
-    } catch (e) {
-      this.$router.push({ name: 'PageNotFound' });
+    this.slug = this.$route.params.slug;
+    if (this.userRouteFlag) {
+      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
+      if (!userDetail) {
+        this.$router.push({ name: 'PageNotFound' });
+        return;
+      }
+      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: userDetail._id.toString()} );
+    } else {
+      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: this.slug} );
     }
-    await Directory.get(this.workspace.rootDirectory._id);
+    if (!this.workspaceDetail) {
+      console.log(`Not found: ${this.slug} ${this.$route.params.wsname} combo not found in workspaces.`);
+      this.$router.push({ name: 'PageNotFound' });
+      return;
+    }
+    this.directoryDetail = await Directory.get(this.workspace?.rootDirectory?._id);
     if (!this.organization) {
-      await Organization.get(this.workspace.organizationId);
+      this.organizationDetail = await Organization.get(this.workspace.organizationId);
     }
     if (this.workspace.organizationId !== this.currentOrganization._id) {
-      await this.setCurrentOrganization(this.organization);
+      if (this.workspace.organization.type !== 'Open') {
+        if (this.userRouteFlag) {
+          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+        } else {
+          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+        }
+      }
     }
     this.activePath = this.directory.name;
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    directory: vm => Directory.getFromStore(vm.workspace.rootDirectory._id),
-    workspace: vm => Workspace.getFromStore(vm.$route.params.id),
-    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
+    directory: vm => vm.directoryDetail,
+    workspaceRefName: vm => vm.$route.params.wsname,
+    workspace: vm => vm.workspaceDetail,
+    organization: vm => vm.organizationDetail,
+    userRouteFlag: vm => vm.$route.path.startsWith("/user"),
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
+    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate', 'getUserByIdOrNamePublic']),
     async clickedFile(fileSubDocs, filePath) {
       let file = File.getFromStore(fileSubDocs._id);
       if (!file) {
@@ -109,7 +132,14 @@ export default {
       this.activeFile = null;
       this.activeDirectory = directory;
       this.activePath = dirPath;
-    }
+    },
+    async goHome() {
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserWorkspaces', params: { id: this.slug } });
+      } else {
+        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.slug } });
+      }
+    },
   },
 };
 </script>

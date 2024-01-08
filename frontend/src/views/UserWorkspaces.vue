@@ -43,7 +43,7 @@
       <div class="text-grey-darken-1">You reached the end!</div>
     </template>
     <template v-else>
-      <v-btn flat variant="text" @click.stop="fetchWorkspaces">Load more</v-btn>
+      <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
     </template>
   </v-row>
 </template>
@@ -52,12 +52,14 @@
 import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
+import scrollListenerMixin from '@/mixins/scrollListenerMixin';
 
 const { Organization, Workspace } = models.api;
 
 export default {
   name: 'UserWorkspaces',
   components: { CreateWorkspaceDialog },
+  mixins: [scrollListenerMixin],
   data: () => ({
     paginationData: {},
     orgSrc: null,
@@ -66,10 +68,10 @@ export default {
   async created() {
     this.orgName = this.user._id.toString();
     if (this.username !== this.user.username) { // this page should only be seen by the actual user
-      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
+      this.$router.push({ name: 'PermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
     }
     if (this.userCurrentOrganization.refName !== this.user._id.toString()) { // this page should only be seen by the actual user
-      this.$router.push({ name: 'OrganizationPermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
+      this.$router.push({ name: 'PermissionError', params: {slug: this.username, urlCode: `/user/${this.username}/workspaces`}})
     }
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
@@ -86,13 +88,17 @@ export default {
       }
     }
   },
+  beforeRouteEnter(to, from, next) {
+    // Use a callback with "next" to pass the instantiated component
+    next(vm => { vm.setupScrollListener(); });
+  },
+
+  beforeRouteLeave(to, from, next) {
+    this.removeScrollListener();
+    next();
+  },
   async mounted() {
-    await this.fetchWorkspaces();
-    window.addEventListener('scroll', () => {
-      if(document.documentElement.scrollHeight <= window.scrollY + window.innerHeight + 1) {
-        this.fetchWorkspaces();
-      }
-    });
+    await this.fetchDataOnScroll();
   },
   computed: {
     ...mapState('workspaces', ['isFindPending']),
@@ -114,7 +120,7 @@ export default {
         };
       }
     },
-    async fetchWorkspaces() {
+    async fetchDataOnScroll() {
       if (this.isFindPending) {
         return;
       }
@@ -133,16 +139,16 @@ export default {
       }
     },
     async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'WorkspaceHome', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'UserWorkspaceHome', params: { slug: this.username, wsname: workspace.refName } });
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'EditWorkspace', params: { slug: workspace.organization.refName, id: workspace._id } });
+      this.$router.push({ name: 'UserEditWorkspace', params: { slug: this.username, wsname: workspace.refName } });
     }
   },
   watch: {
     async '$route'(to, from) {
       if (to.name === 'UserWorkspaces') {
-        await this.fetchWorkspaces();
+        await this.fetchDataOnScroll();
       }
     }
   }

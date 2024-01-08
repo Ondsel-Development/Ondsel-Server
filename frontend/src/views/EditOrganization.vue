@@ -12,6 +12,21 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
+    <v-row v-if="isLoggedInUserAdminOfOrganization" class="mt-12">
+      <v-btn
+        variant="outlined"
+        size="small"
+        :hidden="!isLoggedInUserAdminOfOrganization"
+        @click.stop="openOrgChangeNameDialog()"
+      >
+        Change Name
+      </v-btn>
+      <OrgChangeNameDialog
+        :is-active="isOrgChangeNameDialogActive"
+        :org="organization"
+        ref="orgChangeNameDialog"
+      />
+    </r-row>
     <v-row class="mt-12" v-if="userIsOwner">
       <v-btn
         variant="outlined"
@@ -41,16 +56,18 @@ import { mapActions, mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
+import OrgChangeNameDialog from "@/components/OrgChangeNameDialog.vue";
 import DeleteOrgDialog from "@/components/DeleteOrgDialog.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
-  components: {DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
+  components: {OrgChangeNameDialog, DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,
     orgDetail: null,
+    isOrgChangeNameDialogActive: false,
     isDeleteOrgDialogActive: false,
     userIsOwner: false,
   }),
@@ -72,6 +89,7 @@ export default {
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     organization: vm => vm.orgDetail,
+    isLoggedInUserAdminOfOrganization: vm => vm.organization.users.some(user => user._id === vm.loggedInUser.user._id && user.isAdmin),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
@@ -79,6 +97,10 @@ export default {
       this.orgSrc = await this.getOrgByIdOrNamePublic(this.$route.params.id);
       this.orgDetail = await Organization.get(this.orgSrc._id);
       this.userIsOwner = this.orgDetail.owner._id === this.loggedInUser.user._id;
+    },
+    async openOrgChangeNameDialog() {
+      this.isOrgChangeNameDialogActive = true;
+      this.$refs.orgChangeNameDialog.$data.dialog = true;
     },
     async openDeleteOrgDialog() {
       this.isDeleteOrgDialogActive = true;

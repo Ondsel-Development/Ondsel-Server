@@ -5,6 +5,14 @@ const state = {
   currentOrganization: null
 }
 
+function isObjectId(str) {
+  // Define the ObjectId pattern
+  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+
+  // Check if the string matches the ObjectId pattern
+  return objectIdPattern.test(str);
+}
+
 export default {
   namespaced: true,
   state,
@@ -62,30 +70,45 @@ export default {
     },
     getUserByIdOrNamePublic: async (context, name) => {
       // get the public details of any user using _id or username
-      let result = undefined;
-      let userResult;
-      if (name.length === 24) {
-        userResult = await models.api.User.find({
-          query: {
-            publicInfo: "true",
-            $or: [
-              {_id: name},
-              {username: name},
-            ]
-          }
-        });
-      } else {
-        userResult = await models.api.User.find({
-          query: {
-            publicInfo: "true",
-            username: name,
-          }
-        });
+
+      // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
+      // not even non-$or queries work
+      //
+      const userResult = await models.api.User.find({
+        query: {
+          publicInfo: "true",
+          "$or": [
+            { username: name },
+            ...(isObjectId(name) ? [{_id: name}] : [])
+          ]
+        }
+      });
+      if (userResult.total) {
+        return userResult.data[0];
       }
-      if (userResult.total === 1) {
-        result = userResult.data[0];
+      return undefined;
+    },
+    getWorkspaceByNamePrivate: async (context, detail) => {
+      // get the private details of workspace via refName "slug"
+      // throws error if not found
+
+      let result = undefined;
+      let wsResult
+      try {
+        wsResult = await models.api.Workspace.find({
+          query: {
+            refName: detail.wsName,
+            "organization.refName": detail.orgName
+          }
+        })
+      } catch (e) {
+        console.log(`  >>> ERROR ${e}`);
+        console.log(e);
+      }
+      if (wsResult?.total === 1) {
+        result = wsResult.data[0];
       }
       return result;
-    }
+    },
   }
 }

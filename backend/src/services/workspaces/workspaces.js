@@ -62,7 +62,7 @@ export const workspace = (app) => {
     },
     before: {
       all: [
-        schemaHooks.validateQuery(workspaceQueryValidator),
+        iff(isProvider('external'), schemaHooks.validateQuery(workspaceQueryValidator)),
         schemaHooks.resolveQuery(workspaceQueryResolver)
       ],
       find: [

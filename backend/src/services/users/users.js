@@ -30,6 +30,7 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
+import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -153,6 +154,7 @@ export const user = (app) => {
         addVerification("auth-management"),
       ],
       patch: [
+        copyUserBeforePatch,
         preventChanges(
           false,
           'isTripe',
@@ -190,6 +192,9 @@ export const user = (app) => {
         createSampleModels,
         sendNotificationToSlack,
       ],
+      patch: [
+        distributeUserSummariesHook
+      ],
     },
     error: {
       all: []
@@ -200,7 +205,7 @@ export const user = (app) => {
 
 const createSampleModels = async (context) => {
   const sampleModelFileName = 'ondsel.FCStd';
-  const sampleModelObj = 'ondsel_generated.OBJ';
+  const sampleModelObj = 'ondsel_generated.BREP';
   const sampleModelThumbnail = 'public/ondsel_thumbnail.PNG';
   const attributes = {
     "Fillet1": {
@@ -287,7 +292,7 @@ const createDefaultOrganization = async context => {
     { user: context.result }
   );
   const workspace = await workspaceService.create(
-    { name: 'Default', description: 'Your workspace', organizationId: organization._id, refName: context.result._id.toString() },
+    { name: 'Default', description: 'Your workspace', organizationId: organization._id, refName: 'default' },
     { user: context.result }
   )
   await context.service.patch(

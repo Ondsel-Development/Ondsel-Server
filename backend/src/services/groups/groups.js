@@ -56,7 +56,7 @@ export const group = (app) => {
     },
     before: {
       all: [
-        schemaHooks.validateQuery(groupQueryValidator),
+        iff(isProvider('external'), schemaHooks.validateQuery(groupQueryValidator)), // external may not use $elemMatch etc
         schemaHooks.resolveQuery(groupQueryResolver)
       ],
       find: [userBelongingGroups],
@@ -67,7 +67,7 @@ export const group = (app) => {
         schemaHooks.resolveData(groupDataResolver)
       ],
       patch: [
-        preventChanges(false, 'users'),
+        iff(isProvider('external'), preventChanges(false, 'users')),
         isUserOwnerOrAdminOfOrganization,
         iff(
           context => context.data.shouldAddUsersToGroup,

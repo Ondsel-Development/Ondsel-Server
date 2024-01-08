@@ -145,6 +145,10 @@ export const file = (app) => {
       ],
       patch: [
         distributeFileSummaries,
+        iff(
+          context => context.$triggerLambda,
+          triggerLambda
+        ),
       ]
     },
     error: {
@@ -185,6 +189,8 @@ const commitNewVersion = async (context) => {
 
   context.data = _.omit(context.data, ['shouldCommitNewVersion', 'version'])
 
+  context.$triggerLambda = true;
+
   return context;
 };
 
@@ -201,6 +207,7 @@ const checkoutToVersion = async (context) => {
 
   context.data['currentVersionId'] = context.data.versionId
   context.data = _.omit(context.data, ['shouldCheckoutToVersion', 'versionId'])
+  context.$triggerLambda = true;
   return context;
 };
 
@@ -240,3 +247,21 @@ const updateVersionData = async (context) => {
   context.data = _.omit(context.data, ['shouldUpdateVersionData', 'version'])
   return context;
 };
+
+const triggerLambda = async context => {
+  const file = context.result;
+  if (file.modelId) {
+    await context.app.service('models').patch(
+      file.modelId,
+      {
+        shouldStartObjGeneration: true,
+        fileId: file._id,
+      },
+      {
+        $triggerObjGeneration: true,  // this will skip canUserUpdateModel check
+        accessToken: context.params.authentication?.accessToken || null,  // needed for lambda to patch response back
+      }
+    )
+  }
+  return context;
+}
