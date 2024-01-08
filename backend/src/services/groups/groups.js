@@ -23,7 +23,7 @@ import {iff, isProvider, preventChanges, discard} from "feathers-hooks-common";
 import { addUsersToGroup } from './commands/addUsersToGroup.js';
 import { removeUsersFromGroup } from './commands/removeUsersFromGroup.js';
 import { isUserOwnerOrAdminOfOrganization } from './helpers.js';
-import {distributeGroupSummaries} from "./groups.distrib.js";
+import {copyGroupBeforePatch, distributeGroupSummaries} from "./groups.distrib.js";
 
 export * from './groups.class.js'
 export * from './groups.schema.js'
@@ -67,6 +67,7 @@ export const group = (app) => {
         schemaHooks.resolveData(groupDataResolver)
       ],
       patch: [
+        copyGroupBeforePatch,
         iff(isProvider('external'), preventChanges(false, 'users')),
         isUserOwnerOrAdminOfOrganization,
         iff(

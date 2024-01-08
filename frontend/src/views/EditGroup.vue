@@ -5,7 +5,7 @@
         flat
         size="small"
         icon="mdi-arrow-left"
-        @click="$router.push({ name: 'EditOrganization', params: { id: group.organizationId } })"
+        @click="$router.push({ name: 'EditOrganization', params: { id: organization.refName } })"
       />
       <div class="text-body-1">Group&nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ group.name }}</div>

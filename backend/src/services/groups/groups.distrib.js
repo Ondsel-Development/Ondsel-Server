@@ -24,12 +24,23 @@ export function buildGroupSummary(group) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
+export const copyGroupBeforePatch = async (context) => {
+  // store a copy of the Group in `context.beforePatchCopy` to help detect true changes
+  const groupService = context.app.service('organizations');
+  context.beforePatchCopy = await groupService.get(context.id);
+  return context;
+}
+
+
 export const distributeGroupSummaries = async (context) => {
   // this function is for distributing changes from a PATCH
   try {
     const groupId = context.id;
     if (groupId !== undefined) {
-      const summaryChangeSeen = context.data.name !== undefined; // this is the only field that will trigger right now
+      let summaryChangeSeen = false;
+      if (context.beforePatchCopy.name !== context.result.name) {
+        summaryChangeSeen = true;
+      }
       if (summaryChangeSeen) {
         const group = await context.app.service('groups').get(groupId);
         const groupSummary = buildGroupSummary(group);
