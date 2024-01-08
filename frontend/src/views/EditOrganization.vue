@@ -26,7 +26,7 @@
         :org="organization"
         ref="orgChangeNameDialog"
       />
-    </r-row>
+    </v-row>
     <v-row class="mt-12" v-if="userIsOwner">
       <v-btn
         variant="outlined"
