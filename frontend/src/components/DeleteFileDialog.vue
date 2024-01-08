@@ -31,13 +31,14 @@ import { models } from '@feathersjs/vuex';
 const {File} = models.api;
 
 export default {
+  name: 'DeleteFileDialog',
   props: {
     file: {
       type: Object,
       required: true
     }
   },
-  emits: ['deleteFile', 'selectedDirectory'],
+  emits: ['doneWithFile'],
   data() {
     return {
       showDialog: false
@@ -51,7 +52,7 @@ export default {
       await File.remove(
         this.file._id
       ).then(() => {
-        this.$emit('selectedDirectory', this.file.directory, `${this.file.directory.name}`);
+        this.$emit('doneWithFile');
         this.showDialog = false;
       }).catch((e) => {
         console.log(e);
