@@ -27,8 +27,9 @@ import { directoryPath, directoryMethods } from './directories.shared.js'
 import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
-  canUserAccessDirectoryOrFilePatchMethod
+  canUserAccessDirectoryOrFilePatchMethod, isDirectoryReadyToDelete
 } from './helpers.js';
+import {distributeDirectoryDeletion} from "./directories.distrib.js";
 
 export * from './directories.class.js'
 export * from './directories.schema.js'
@@ -114,15 +115,31 @@ export const directory = (app) => {
         schemaHooks.resolveData(directoryPatchResolver)
       ],
       remove: [
-        // TODO: Implement delete feature later
-        disallow(),
+        iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
+        iff(isProvider('external'), isDirectoryReadyToDelete),
+        doSoftDeleteInstead,
       ]
     },
     after: {
-      all: []
+      all: [],
+      remove: [
+        distributeDirectoryDeletion,
+      ]
     },
     error: {
       all: []
     }
   })
+}
+
+
+const doSoftDeleteInstead = async context => {
+  const updatedResult = await context.service.patch(
+    context.id,
+    {
+      deleted: true,
+    }
+  )
+  context.result = updatedResult; // setting this prevents the true DELETE (removal from db) from happening
+  return context;
 }

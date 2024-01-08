@@ -71,3 +71,23 @@ export async function forDirectoryUpdateFileSummary(context, dirId, fileSummary)
     }
   );
 }
+
+export const isDirectoryReadyToDelete = async context => {
+  const directory = await context.service.get(context.id);
+  //
+  // Ensure this organization is not a root directory
+  //
+  if (directory.name === "/") {
+    throw new BadRequest('You cannot delete the root directory.');
+  }
+  //
+  // Ensure there are no files or subdirectories.
+  //
+  const fileCount = directory.files.length;
+  const dirCount = directory.directories.length;
+  if ( (fileCount > 0) || (dirCount > 0) ) {
+    throw new BadRequest(`Deletion error. There are ${fileCount} files and ${dirCount} sub-directories remaining in the directory. The directory must be empty.`);
+  }
+  //
+  return context;
+}
