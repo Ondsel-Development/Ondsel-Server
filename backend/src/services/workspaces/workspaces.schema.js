@@ -63,6 +63,8 @@ export const workspaceResolver = resolve({
 
 export const workspaceExternalResolver = resolve({})
 
+export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName'];
+
 // Schema for creating new entries
 export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
@@ -113,6 +115,7 @@ export const workspaceQuerySchema = Type.Intersect(
     Type.Object({
       "organization._id": Type.Optional(ObjectIdSchema()),
       "organization.refName": Type.Optional(Type.String()),
+      'publicInfo': Type.Optional(Type.String()),
     }, { additionalProperties: false })
   ],
   { additionalProperties: false }
