@@ -180,7 +180,7 @@ export const organization = (app) => {
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
-	copyOrgBeforePatch,
+	      copyOrgBeforePatch,
         iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner', 'deleted')),
         iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(
