@@ -42,13 +42,11 @@ export async function distributeDirectoryDeletion(context){
 export async function forDirectoryRemoveSubDirectory(app, dirId, subDirId) {
   // limited patch designed to not spin up a summary-update loop
   const directoryService = app.service('directories');
-  const dir = await directoryService.get(dirId);
-  const subDirList = dir.directories || [];
-  const newSubDirList = subDirList.filter((dirEntry) => dirEntry._id.toString() !== subDirId.toString());
   await directoryService.patch(
     dirId,
     {
-      directories: newSubDirList,
+      "shouldRemoveDirectoriesFromDirectory": true,
+      "directoryIds": [subDirId.toString()]
     }
   );
 }

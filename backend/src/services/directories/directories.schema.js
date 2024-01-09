@@ -53,7 +53,7 @@ export const directoryPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const directoryQueryProperties = Type.Pick(directorySchema, ['_id', 'name'])
+export const directoryQueryProperties = Type.Pick(directorySchema, ['_id', 'name', 'deleted'])
 export const directoryQuerySchema = Type.Intersect(
   [
     querySyntax(directoryQueryProperties),

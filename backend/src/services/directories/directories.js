@@ -117,7 +117,6 @@ export const directory = (app) => {
       remove: [
         iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
         iff(isProvider('external'), isDirectoryReadyToDelete),
-        doSoftDeleteInstead,
       ]
     },
     after: {
@@ -130,16 +129,4 @@ export const directory = (app) => {
       all: []
     }
   })
-}
-
-
-const doSoftDeleteInstead = async context => {
-  const updatedResult = await context.service.patch(
-    context.id,
-    {
-      deleted: true,
-    }
-  )
-  context.result = updatedResult; // setting this prevents the true DELETE (removal from db) from happening
-  return context;
 }
