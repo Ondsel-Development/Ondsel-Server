@@ -7,7 +7,7 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { feedWorkspaceAndDirectory, addFileToDirectory } from './helpers.js';
+import {feedWorkspaceAndDirectory, addFileToDirectory, buildRelatedUserDetails} from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -30,6 +30,7 @@ import {
   canUserAccessDirectoryOrFilePatchMethod,
   userBelongingDirectoriesOrFiles
 } from '../directories/helpers.js';
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -168,9 +169,13 @@ const commitNewVersion = async (context) => {
   }
 
   let versions = [];
+  let relatedUserDetails = [];
   if (context.id) {
     const file = await context.service.get(context.id)
     versions = file.versions
+    relatedUserDetails = await buildRelatedUserDetails(context, file);
+  } else {
+    relatedUserDetails = [buildUserSummary(context.params.user)]
   }
 
   versions.push(versionData);
@@ -181,6 +186,7 @@ const commitNewVersion = async (context) => {
   });
   context.data['versions'] = versions;
   context.data['currentVersionId'] = versionData._id;
+  context.data['relatedUserDetails'] = relatedUserDetails;
 
   context.data = _.omit(context.data, ['shouldCommitNewVersion', 'version'])
 
