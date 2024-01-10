@@ -24,7 +24,7 @@ import {
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
-import {distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
+import {copyFileBeforePatch, distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
 import {
   canUserAccessDirectoryOrFileGetMethod,
   canUserAccessDirectoryOrFilePatchMethod,
@@ -103,6 +103,7 @@ export const file = (app) => {
         schemaHooks.resolveData(fileDataResolver)
       ],
       patch: [
+        copyFileBeforePatch,
         iff(
           isProvider('external'),
           canUserAccessDirectoryOrFilePatchMethod

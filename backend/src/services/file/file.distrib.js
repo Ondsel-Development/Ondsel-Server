@@ -30,17 +30,36 @@ export function buildFileSummary(file) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
+export const copyFileBeforePatch = async (context) => {
+  // store a copy of the File in `context.beforePatchCopy` to help detect true changes
+  const fileService = context.app.service('file');
+  const fileId = context.id;
+  context.beforePatchCopy = await fileService.get(fileId);
+  return context;
+}
+
+
 export async function distributeFileSummaries(context){
   try {
     const fileId = context.id;
     if (fileId !== undefined) {
       const file = await context.app.service('file').get(fileId);
-      // for now, we are assuming any change anywhere in file should trigger a summary distribution
-      const fileSummary = buildFileSummary(file);
-      // to directories
-      if (file.directory?._id) {
-        await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
-      };
+      let changeDetected = false;
+      if (file.custFileName !== context.beforePatchCopy.custFileName) changeDetected = true;
+      if (file.modelId !== undefined && context.beforePatchCopy.modelId !== undefined) {
+        if (file.modelId.toString() !== context.beforePatchCopy.modelId.toString()) changeDetected = true;
+      }
+      if (file.currentVersion._id !== undefined && context.beforePatchCopy.currentVersion._id !== undefined) {
+        if (file.currentVersion._id.toString() !== context.beforePatchCopy.currentVersion._id.toString()) changeDetected = true;
+      }
+      if (file.model?.thumbnailUrlCache !== context.beforePatchCopy.model?.thumbnailUrlCache) changeDetected = true;
+      if (changeDetected) {
+        const fileSummary = buildFileSummary(file);
+        // to directories
+        if (file.directory?._id) {
+          await forDirectoryUpdateFileSummary(context, file.directory._id, fileSummary);
+        };
+      }
     };
   } catch (error) {
     console.log(error);
