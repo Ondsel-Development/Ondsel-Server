@@ -17,6 +17,7 @@ import {updateUserSummariesEverywhereCommand} from "./update-user-summaries-ever
 import {updateWorkspaceAndUserOrganizationInfoCommand} from "./update-workspace-and-user-organization-info.command.js";
 import {updateOrgUsersCommand} from "./update-org-users.command.js";
 import {updateGroupUsersCommand} from "./update-group-users.command.js";
+import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 
 
 async function runMigration() {
@@ -79,6 +80,9 @@ async function runMigration() {
       break;
     case 'updateGroupUsers':
       await updateGroupUsersCommand(app);
+      break;
+    case 'updateWorkspaceUsers':
+      await updateWorkspaceUsersCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
