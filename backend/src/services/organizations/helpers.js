@@ -31,6 +31,16 @@ export const isUserOwnerOrAdminOfOrganization = async context => {
   throw new BadRequest('Only admins of organization allow to perform this action');
 }
 
+export const isUserOwnerOfOrganization = async context => {
+  const organization = await context.service.get(context.id);
+
+  // Only Owner
+  if (context.params.user._id.toString() === organization.owner._id.toString() ) {
+    return context;
+  }
+  throw new BadRequest('Only the key owner of organization allow to perform this action');
+}
+
 export const canUserCreateOrganization = async context => {
   const { canCreateOrganization } = getConstraint(context.params.user);
   if (canCreateOrganization) {

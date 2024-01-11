@@ -27,6 +27,21 @@
         ref="orgChangeNameDialog"
       />
     </v-row>
+    <v-row class="mt-12" v-if="userIsOwner">
+      <v-btn
+        variant="outlined"
+        size="small"
+        @click.stop="openDeleteOrgDialog()"
+      >
+        Delete Organization
+      </v-btn>
+      <v-spacer></v-spacer>
+      <DeleteOrgDialog
+        :is-active="isDeleteOrgDialogActive"
+        :org="organization"
+        ref="deleteOrgDialog"
+      />
+    </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
     </v-row>
@@ -42,16 +57,19 @@ import { models } from '@feathersjs/vuex';
 import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
 import OrgChangeNameDialog from "@/components/OrgChangeNameDialog.vue";
+import DeleteOrgDialog from "@/components/DeleteOrgDialog.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
-  components: {OrgChangeNameDialog, OrganizationUsersTable, OrganizationGroupsTable },
+  components: {OrgChangeNameDialog, DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,
     orgDetail: null,
     isOrgChangeNameDialogActive: false,
+    isDeleteOrgDialogActive: false,
+    userIsOwner: false,
   }),
   async created() {
     try {
@@ -81,10 +99,15 @@ export default {
       if (this.orgDetail.type === 'Personal') {
         this.$router.push({ name: 'AccountSettings',  params: { slug: this.orgDetail.owner.username }})
       }
+      this.userIsOwner = this.orgDetail.owner._id === this.loggedInUser.user._id;
     },
     async openOrgChangeNameDialog() {
       this.isOrgChangeNameDialogActive = true;
       this.$refs.orgChangeNameDialog.$data.dialog = true;
+    },
+    async openDeleteOrgDialog() {
+      this.isDeleteOrgDialogActive = true;
+      this.$refs.deleteOrgDialog.$data.dialog = true;
     },
   },
   watch: {
