@@ -20,7 +20,7 @@
           dark
           class="mb-2"
           :hidden="!isLoggedInUserAdmin(organization)"
-          @click="$refs.inviteUserDialog.$data.dialog = true;"
+          @click="() => $refs.inviteUserDialog.openDialog()"
         >
           Invite new user
         </v-btn>
