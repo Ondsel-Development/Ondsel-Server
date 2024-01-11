@@ -41,11 +41,14 @@
                 <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn id="dropzone-click-target">BROWSE</v-btn>
               </div>
               <div class="text-caption mt-2 mb-6">Allowed extensions: .*</div>
+              <div class="text-h7 mt-6">
+                <strong class="text-red">{{ errorMsg }}</strong>
+              </div>
             </div>
           </v-card-item>
         </div>
         <v-card-actions class="justify-center">
-          <v-btn @click="dialog = false">
+          <v-btn @click="errorMsg = ''; dialog = false">
             <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
           </v-btn>
         </v-card-actions>
@@ -71,6 +74,7 @@ export default {
     dialog: false,
     dropzone: null,
     files: [],
+    errorMsg: '',
   }),
   mounted() {
   },
@@ -169,6 +173,9 @@ export default {
               }
               vm.dialog = false;
             } catch (e) {
+              if (e.name === 'BadRequest') {
+                vm.errorMsg = e.message;
+              }
               if (index > -1) {
                 vm.files[index].status = {
                   uploadInProgress: false,

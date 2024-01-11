@@ -7,7 +7,7 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { feedWorkspaceAndDirectory, addFileToDirectory } from './helpers.js';
+import {feedWorkspaceAndDirectory, addFileToDirectory, ensureUniqueCustFileName} from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -98,6 +98,7 @@ export const file = (app) => {
           context => context.data.shouldCommitNewVersion,
             commitNewVersion
         ),
+        ensureUniqueCustFileName,
         schemaHooks.validateData(fileDataValidator),
         schemaHooks.resolveData(fileDataResolver)
       ],
@@ -119,6 +120,7 @@ export const file = (app) => {
           context => context.data.shouldUpdateVersionData,
           updateVersionData,
         ),
+        ensureUniqueCustFileName,
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
