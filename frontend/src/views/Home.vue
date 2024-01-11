@@ -82,6 +82,15 @@
             >
               <span>Please upgrade your tier.</span>
             </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'ConflictingFilename'"
+            >
+              <span>This filename conflicts with a file you have already uploaded.</span>
+            </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
             <v-card
@@ -270,6 +279,11 @@ export default {
               vm.uploadInProgress = false;
             } catch (e) {
               vm.error = 'UpgradeTier';
+              if (e.name === 'BadRequest') {
+                if (e.message.startsWith('filename')) {
+                  vm.error = 'ConflictingFilename';
+                }
+              }
             }
           });
           // eslint-disable-next-line no-unused-vars

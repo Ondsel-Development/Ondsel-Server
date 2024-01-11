@@ -63,10 +63,13 @@ export const ensureUniqueCustFileName = async context => {
     }
   } else {
     // if NOT context.id, then this is a create/post
-    const parentDir = await directoryService.get(file.directory._id);
-    const result = parentDir.files.find((file) => file.custFileName === proposedCustFileName);
-    if (result) {
-      throw new BadRequest(`filename "${proposedCustFileName}" already found in directory [${result._id.toString()}]`)
+    const dirId = file.directory?._id;
+    if (dirId) { // if autocreated by model upload, the directory might not be set; so skip check
+      const parentDir = await directoryService.get(file.directory._id);
+      const result = parentDir.files.find((file) => file.custFileName === proposedCustFileName);
+      if (result) {
+        throw new BadRequest(`filename "${proposedCustFileName}" already found in directory [${result._id.toString()}]`)
+      }
     }
   }
   return context;
