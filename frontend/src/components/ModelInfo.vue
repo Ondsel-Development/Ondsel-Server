@@ -94,7 +94,7 @@ export default {
     },
     async fetchData() {
       this.isDataFetchingInProgress = true;
-      this.user = await this.getUserByIdOrNamePublic(this.fileObject.createdBy);
+      this.user = await this.getUserByIdOrNamePublic(this.fileObject.userId);
       if (this.fileObject.workspace) {
         this.workspace = await this.getWorkspaceByIdPublic(this.fileObject.workspace._id);
         this.organization = await this.getOrgByIdOrNamePublic(this.workspace.organizationId);
