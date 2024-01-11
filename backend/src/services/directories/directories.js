@@ -7,7 +7,6 @@ import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
-import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -27,9 +26,12 @@ import { directoryPath, directoryMethods } from './directories.shared.js'
 import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
-  canUserAccessDirectoryOrFilePatchMethod, isDirectoryReadyToDelete, handleAddRelatedUserDetailsQuery, ifNeededAddRelatedUserDetails
+  canUserAccessDirectoryOrFilePatchMethod,
+  isDirectoryReadyToDelete,
+  handleAddRelatedUserDetailsQuery,
+  ifNeededAddRelatedUserDetails,
+  removeFromParent
 } from './helpers.js';
-import {distributeDirectoryDeletion} from "./directories.distrib.js";
 
 export * from './directories.class.js'
 export * from './directories.schema.js'
@@ -132,16 +134,12 @@ export const directory = (app) => {
           context => context.data.shouldAddDirectoriesToDirectory,
           addDirectoriesToDirectory
         ),
-        iff(
-          context => context.data.shouldRemoveDirectoriesFromDirectory,
-          removeDirectoriesFromDirectory,
-        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
       remove: [
         iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
-        iff(isProvider('external'), isDirectoryReadyToDelete),
+        isDirectoryReadyToDelete,
       ]
     },
     after: {
@@ -150,7 +148,7 @@ export const directory = (app) => {
         ifNeededAddRelatedUserDetails,
       ],
       remove: [
-        distributeDirectoryDeletion,
+        removeFromParent,
       ]
     },
     error: {

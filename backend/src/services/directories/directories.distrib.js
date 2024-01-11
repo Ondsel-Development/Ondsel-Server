@@ -15,23 +15,6 @@
 // DISTRIBUTE AFTER (HOOK)
 //
 
-export async function distributeDirectoryDeletion(context){
-  // for now, this really only affects the parent directory
-  // this function is called post-delete, so the context.result already has content of "file"
-  try {
-    const refDir = context.result;
-    // remove self from parent directory
-    if (refDir.parentDirectory) {
-      const parentId = refDir.parentDirectory._id;
-      await forDirectoryRemoveSubDirectory(context.app, parentId, refDir._id)
-    } else {
-      console.log(`ERROR: parent directory missing when deleting directory ${refDir._id}.`)
-    }
-  } catch (error) {
-    console.log(error);
-  }
-  return context;
-}
 
 
 //
@@ -39,14 +22,3 @@ export async function distributeDirectoryDeletion(context){
 //             These routines are used by _other_ collections after creation/update/deletion
 //
 
-export async function forDirectoryRemoveSubDirectory(app, dirId, subDirId) {
-  // limited patch designed to not spin up a summary-update loop
-  const directoryService = app.service('directories');
-  await directoryService.patch(
-    dirId,
-    {
-      "shouldRemoveDirectoriesFromDirectory": true,
-      "directoryIds": [subDirId.toString()]
-    }
-  );
-}

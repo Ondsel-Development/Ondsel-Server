@@ -33,6 +33,7 @@ export const userBelongingDirectoriesOrFiles = async context => {
 
 
 export const canUserAccessDirectoryOrFilePatchMethod = async context => {
+  // should be called in 'before' of both 'patch' and 'delete'
   const directory = await context.service.get(context.id);
   try {
     const workspace = await context.app.service('workspaces').get(
@@ -147,6 +148,26 @@ export const ifNeededAddRelatedUserDetails = async context => {
       }
     }
     context.result.relatedUserDetails = relatedUserDetails;
+  }
+  return context;
+}
+
+export const removeFromParent = async context => {
+  // remove the just-deleted directory from the parent directory via direct administrative patch
+  // this should only be called 'after' then 'remove' method
+  const refDir = context.result;
+  if (refDir.parentDirectory) {
+    const srcList = refDir.directories || [];
+    const newDirList = srcList.filter((d) => d._id.toString() !== refDir._id.toString());
+    await context.service.patch(
+      refDir.parentDirectory._id,
+      {
+        directories: newDirList
+      }
+    )
+  } else {
+    // this should never happen given earlier 'before' checks
+    throw new BadRequest(`parent directory was missing when deleting directory ${refDir._id}.`)
   }
   return context;
 }
