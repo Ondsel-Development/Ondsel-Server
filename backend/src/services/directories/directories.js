@@ -6,7 +6,6 @@ import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
-import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
 import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
 import {
   directoryDataValidator,
