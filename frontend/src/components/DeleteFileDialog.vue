@@ -8,6 +8,12 @@
       <template v-slot:title>
         <div class="text-center">Delete File</div>
       </template>
+      <v-progress-linear
+        :active="isRemovePending"
+        indeterminate
+        absolute
+        bottom
+      ></v-progress-linear>
       <v-card-text>
         <p>Are you sure you want to delete <b>{{ file.custFileName }}</b>?</p>
         Deleting this file also deletes:
@@ -18,8 +24,8 @@
         </ul>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn color="primary" @click="deleteObject">Delete</v-btn>
-        <v-btn @click="cancelDelete">Cancel</v-btn>
+        <v-btn color="primary" :loading="isRemovePending" @click="deleteObject">Delete</v-btn>
+        <v-btn :disabled="isRemovePending" @click="cancelDelete">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -45,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('files', ['isRemovePending']),
+    ...mapState('file', ['isRemovePending']),
   },
   methods: {
     async deleteObject() {

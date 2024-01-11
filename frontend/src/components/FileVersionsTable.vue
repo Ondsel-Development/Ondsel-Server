@@ -14,8 +14,8 @@
     <template v-slot:item.createdAt="{ item }">
       {{ dateFormat(item.value.createdAt) }}
     </template>
-    <template v-slot:item.userId="{ item }">
-      {{ getUserLabel(item.value.userId) }}
+    <template v-slot:item.userRealName="{ item }">
+      {{ getUserLabel(item.value.userId, file.relatedUserDetails) }}
     </template>
     <template v-slot:item.active="{ item }">
       <v-icon v-if="file.currentVersionId === item.value._id" icon="mdi-check"/>
@@ -69,7 +69,7 @@ export default {
         title: 'Who',
         align: 'start',
         sortable: true,
-        key: 'userId',
+        key: 'userRealName',
       },
       {
         title: 'Message',
@@ -96,8 +96,13 @@ export default {
       const date = new Date(number);
       return date.toDateString();
     },
-    getUserLabel(userId) {
-      return userId.substr(-6);
+    getUserLabel(userId, userSummaryList) {
+      const cleanList = userSummaryList || [];
+      let userSum = cleanList.find((user) => user._id.toString() === userId.toString())
+      if (!userSum) {
+        return "ref:" + userId.substr(-6);
+      }
+      return userSum.name;
     },
     refLabel(refId) {
       return refId.substr(-6);

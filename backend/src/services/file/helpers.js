@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {BadRequest} from "@feathersjs/errors";
 import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export const feedWorkspaceAndDirectory = async context => {
   const { data, params } = context;
@@ -41,4 +42,30 @@ export const addFileToDirectory = async context => {
     )
   return context;
   }
+}
+
+export async function buildRelatedUserDetails(context, file) {
+  // this function will examine the file revisions and relatedUserDetails and will return an
+  // array of user summaries with exactly one entry per userId.
+  // if a user is not found, it should silently refrain from adding an entry to the list.
+  const userService = context.app.service('users');
+  let cleanUserDetails = [];
+  let oldDetails = file.relatedUserDetails || [];
+  for (const version of file.versions) {
+    if (cleanUserDetails.includes((user) => user._id === version.userId) === false) {
+      let newSum = oldDetails.find((user) => user._id === version.userId)
+      if (!newSum) {
+        try {
+          let user = await userService.get(version.userId);
+          newSum = buildUserSummary(user);
+        } catch (e) {
+          console.log(`Error: could not get user details for ${version.userId}`);
+        }
+      }
+      if (newSum) {
+        cleanUserDetails.push(newSum);
+      }
+    }
+  }
+  return cleanUserDetails;
 }

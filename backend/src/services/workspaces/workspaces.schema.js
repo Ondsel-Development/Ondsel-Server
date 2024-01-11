@@ -11,6 +11,7 @@ import {refNameHasher} from "../../refNameFunctions.js";
 import {BadRequest} from "@feathersjs/errors";
 import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
+import {buildUserSummary} from "../users/users.distrib.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -63,6 +64,8 @@ export const workspaceResolver = resolve({
 
 export const workspaceExternalResolver = resolve({})
 
+export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName'];
+
 // Schema for creating new entries
 export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
@@ -83,7 +86,7 @@ export const workspaceDataResolver = resolve({
       {
         type: 'User',
         permission: 'write',
-        groupOrUser: _.pick(_context.params.user,  ['_id', 'username', 'email', 'name']),
+        groupOrUser: buildUserSummary(_context.params.user),
       }
     ]
   },
@@ -113,6 +116,7 @@ export const workspaceQuerySchema = Type.Intersect(
     Type.Object({
       "organization._id": Type.Optional(ObjectIdSchema()),
       "organization.refName": Type.Optional(Type.String()),
+      'publicInfo': Type.Optional(Type.String()),
     }, { additionalProperties: false })
   ],
   { additionalProperties: false }

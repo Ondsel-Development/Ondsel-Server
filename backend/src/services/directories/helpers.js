@@ -1,4 +1,5 @@
 import { BadRequest } from '@feathersjs/errors';
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export const canUserAccessDirectoryOrFileGetMethod = async context => {
   const directoryOrFile = await context.service.get(context.id);
@@ -104,4 +105,48 @@ export async function forDirectoryRemoveFileSummary(app, dirId, fileId) {
       files: newFileList,
     }
   );
+}
+
+export const handleAddRelatedUserDetailsQuery = () => {
+  return async (context, next) => {
+    // this is an "around" hook
+    // looks for the "addRelatedUserDetails" query parameter. If found at all and set to "true", then
+    // context.addRelatedUserDetails is set to true else it is set to false.
+    // the 'addRelatedUserDetails' entry is then removed from query to prevent the parameter from being seen elsewhere.
+    if (context.params?.query?.addRelatedUserDetails === "true") {
+      delete context.params.query.addRelatedUserDetails;
+      context.addRelatedUserDetails = true
+    } else {
+      if (context.params?.query?.addRelatedUserDetails) { // if anything but "true"; still clean up
+        delete context.params.query.addRelatedUserDetails;
+      }
+      context.addRelatedUserDetails = false
+    }
+    await next();
+    return context;
+  }
+}
+
+export const ifNeededAddRelatedUserDetails = async context => {
+  if (context.addRelatedUserDetails) {
+    const userService = context.app.service('users');
+    let relatedUserDetails = [];
+    let directory = context.result;
+    for (const file of directory.files) {
+      let userId = file.currentVersion.userId.toString();
+      if (relatedUserDetails.find((user) => user._id.toString() === userId) === undefined) {
+        try {
+          const user = await userService.get(userId);
+          if (user) {
+            const newSum = buildUserSummary(user);
+            relatedUserDetails.push(newSum);
+          }
+        } catch (e) {
+          console.log(`Error: could not get user details for ${userId}`);
+        }
+      }
+    }
+    context.result.relatedUserDetails = relatedUserDetails;
+  }
+  return context;
 }
