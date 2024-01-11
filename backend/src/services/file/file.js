@@ -7,7 +7,7 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import {feedWorkspaceAndDirectory, addFileToDirectory, ensureUniqueCustFileName} from './helpers.js';
+import {feedWorkspaceAndDirectory, addFileToDirectory, ensureUniqueCustFileName, buildRelatedUserDetails} from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -24,12 +24,13 @@ import {
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
-import {distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
+import {copyFileBeforePatch, distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
 import {
   canUserAccessDirectoryOrFileGetMethod,
   canUserAccessDirectoryOrFilePatchMethod,
   userBelongingDirectoriesOrFiles
 } from '../directories/helpers.js';
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -103,6 +104,7 @@ export const file = (app) => {
         schemaHooks.resolveData(fileDataResolver)
       ],
       patch: [
+        copyFileBeforePatch,
         iff(
           isProvider('external'),
           canUserAccessDirectoryOrFilePatchMethod
@@ -170,9 +172,13 @@ const commitNewVersion = async (context) => {
   }
 
   let versions = [];
+  let relatedUserDetails = [];
   if (context.id) {
     const file = await context.service.get(context.id)
     versions = file.versions
+    relatedUserDetails = await buildRelatedUserDetails(context, file);
+  } else {
+    relatedUserDetails = [buildUserSummary(context.params.user)]
   }
 
   versions.push(versionData);
@@ -183,6 +189,7 @@ const commitNewVersion = async (context) => {
   });
   context.data['versions'] = versions;
   context.data['currentVersionId'] = versionData._id;
+  context.data['relatedUserDetails'] = relatedUserDetails;
 
   context.data = _.omit(context.data, ['shouldCommitNewVersion', 'version'])
 
