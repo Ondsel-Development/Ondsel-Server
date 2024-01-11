@@ -36,6 +36,12 @@
           >Create</v-btn>
         </v-card-actions>
       </v-form>
+      <v-snackbar
+        :timeout="2000"
+        v-model="showSnacker"
+      >
+        {{ snackerMsg }}
+      </v-snackbar>
     </v-card>
   </v-dialog>
 
@@ -52,7 +58,9 @@ export default {
     directoryName: '',
     rules: [
       v => !!v || 'Directory name is required',
-    ]
+    ],
+    snackerMsg: '',
+    showSnacker: false,
   }),
   computed: {
     ...mapState('directories', ['isCreatePending', 'isPatchPending']),

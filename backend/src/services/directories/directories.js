@@ -27,7 +27,10 @@ import { directoryPath, directoryMethods } from './directories.shared.js'
 import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
-  canUserAccessDirectoryOrFilePatchMethod, handleAddRelatedUserDetailsQuery, ifNeededAddRelatedUserDetails
+  canUserAccessDirectoryOrFilePatchMethod,
+  handleAddRelatedUserDetailsQuery,
+  ifNeededAddRelatedUserDetails,
+  doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
 } from './helpers.js';
 
 export * from './directories.class.js'
@@ -107,6 +110,11 @@ export const directory = (app) => {
         )
       ],
       create: [
+        iff(
+          isProvider('external'),
+          doesUserHaveWorkspaceWriteRights
+        ),
+        verifyDirectoryUniqueness,
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
       ],
@@ -128,10 +136,6 @@ export const directory = (app) => {
           removeFilesFromDirectory
         ),
         iff(
-          context => context.data.shouldAddDirectoriesToDirectory,
-          addDirectoriesToDirectory
-        ),
-        iff(
           context => context.data.shouldRemoveDirectoriesFromDirectory,
           removeDirectoriesFromDirectory,
         ),
@@ -145,6 +149,9 @@ export const directory = (app) => {
     },
     after: {
       all: [],
+      create: [
+        attachNewDirectoryToParent,
+      ],
       get: [
         ifNeededAddRelatedUserDetails,
       ],
