@@ -16,6 +16,8 @@ import { addPersonalOrgToUserCommand } from './add-personal-org-to-user.js';
 import {updateUserSummariesEverywhereCommand} from "./update-user-summaries-everywhere.command.js";
 import {updateWorkspaceAndUserOrganizationInfoCommand} from "./update-workspace-and-user-organization-info.command.js";
 import {updateOrgUsersCommand} from "./update-org-users.command.js";
+import {updateGroupUsersCommand} from "./update-group-users.command.js";
+import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
 
 
@@ -76,6 +78,12 @@ async function runMigration() {
       break;
     case 'updateOrgUsers':
       await updateOrgUsersCommand(app);
+      break;
+    case 'updateGroupUsers':
+      await updateGroupUsersCommand(app);
+      break;
+    case 'updateWorkspaceUsers':
+      await updateWorkspaceUsersCommand(app);
       break;
     case 'updateFileRelatedUserDetails':
       await updateFileRelatedUserDetailsCommand(app);

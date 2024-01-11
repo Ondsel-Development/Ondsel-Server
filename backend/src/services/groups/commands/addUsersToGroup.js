@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
+import {buildUserSummary} from "../../users/users.distrib.js";
 
 export const addUsersToGroup = async context => {
   const { data } = context;
@@ -15,7 +16,7 @@ export const addUsersToGroup = async context => {
         throw new BadRequest(`User (id: ${userId}) must be a member to this group organization`)
       }
       groupUsers.push(
-        _.pick(user, ['_id', 'username', 'email', 'name'])
+        buildUserSummary(user)
       );
     }
   }
