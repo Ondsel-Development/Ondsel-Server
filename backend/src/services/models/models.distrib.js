@@ -62,9 +62,11 @@ export const distributeModelSummaries = async (context) => {
   const modelId = context.id;
   if (modelId !== undefined) {
     const model = await getModelById(context.app, modelId);
-    const modelSummary = buildModelSummary(model);
-    if (modelSummary !== null) {
-      await applyModelSummaryToFile(context.app, model.fileId, modelSummary);
+    if (model) { // might not get a value on a "soft delete" or "file delete", so don't do distribution
+      const modelSummary = buildModelSummary(model);
+      if (modelSummary !== null) {
+        await applyModelSummaryToFile(context.app, model.fileId, modelSummary);
+      }
     }
   }
   return context;

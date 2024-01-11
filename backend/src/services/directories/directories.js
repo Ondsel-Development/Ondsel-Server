@@ -27,7 +27,7 @@ import { directoryPath, directoryMethods } from './directories.shared.js'
 import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
-  canUserAccessDirectoryOrFilePatchMethod
+  canUserAccessDirectoryOrFilePatchMethod, handleAddRelatedUserDetailsQuery, ifNeededAddRelatedUserDetails
 } from './helpers.js';
 
 export * from './directories.class.js'
@@ -44,9 +44,33 @@ export const directory = (app) => {
     docs: swagger.createSwaggerServiceOptions({
       schemas: { directorySchema, directoryDataSchema, directoryPatchSchema , directoryQuerySchema, },
       docs: {
-        description: 'A organization service',
+        description: 'A directory service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ObjectID of Directory to return",
+                "in": "path",
+                "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "If provided and set to \"true\", a \"relatedUserDetails\" array of user summaries is added",
+                "in": "query",
+                "name": "addRelatedUserDetails",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          },
+        }
       }
     })
   })
@@ -59,6 +83,7 @@ export const directory = (app) => {
   app.service(directoryPath).hooks({
     around: {
       all: [
+        handleAddRelatedUserDetailsQuery(),
         authenticate('jwt'),
         schemaHooks.resolveExternal(directoryExternalResolver),
         schemaHooks.resolveResult(directoryResolver)
@@ -119,7 +144,10 @@ export const directory = (app) => {
       ]
     },
     after: {
-      all: []
+      all: [],
+      get: [
+        ifNeededAddRelatedUserDetails,
+      ],
     },
     error: {
       all: []

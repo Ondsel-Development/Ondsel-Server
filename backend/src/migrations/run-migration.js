@@ -18,6 +18,7 @@ import {updateWorkspaceAndUserOrganizationInfoCommand} from "./update-workspace-
 import {updateOrgUsersCommand} from "./update-org-users.command.js";
 import {updateGroupUsersCommand} from "./update-group-users.command.js";
 import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
+import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
 
 
 async function runMigration() {
@@ -83,6 +84,9 @@ async function runMigration() {
       break;
     case 'updateWorkspaceUsers':
       await updateWorkspaceUsersCommand(app);
+      break;
+    case 'updateFileRelatedUserDetails':
+      await updateFileRelatedUserDetailsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

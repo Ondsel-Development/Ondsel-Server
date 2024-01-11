@@ -71,7 +71,7 @@ export default {
       },
       {
         name: 'Who',
-        value: vm.selectedFileVersion.userId,
+        value: vm.getUserLabel(vm.selectedFileVersion.userId, vm.file.relatedUserDetails),
       },
       {
         name: 'When',
@@ -92,7 +92,15 @@ export default {
         }
       });
       this.dialog = false;
-    }
+    },
+    getUserLabel(userId, userSummaryList) {
+      const cleanList = userSummaryList || [];
+      let userSum = cleanList.find((user) => user._id.toString() === userId.toString())
+      if (!userSum) {
+        return "ref:" + userId.substr(-6);
+      }
+      return userSum.name;
+    },
   }
 }
 </script>

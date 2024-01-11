@@ -7,6 +7,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { directorySummary } from '../directories/directories.subdocs.js';
 import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 import { modelSummarySchema } from "../models/models.distrib.js";
+import {userSummarySchema} from "../users/users.subdocs.schema.js";
 
 export const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
@@ -33,6 +34,7 @@ export const fileSchema = Type.Object(
     versions: Type.Array(fileVersionSchema),
     directory: Type.Optional(Type.Union([Type.Null(), directorySummary])),
     workspace: Type.Optional(workspaceSummary),
+    relatedUserDetails: Type.Array(userSummarySchema),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -51,7 +53,7 @@ export const fileResolver = resolve({
 export const fileExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory'], {
+export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory', 'relatedUserDetails'], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
@@ -80,7 +82,7 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'deleted'])
+export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'relatedUserDetails', 'deleted'])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {
