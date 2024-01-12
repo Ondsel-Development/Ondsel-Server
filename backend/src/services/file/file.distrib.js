@@ -46,11 +46,11 @@ export async function distributeFileSummaries(context){
       const file = await context.app.service('file').get(fileId);
       let changeDetected = false;
       if (file.custFileName !== context.beforePatchCopy.custFileName) changeDetected = true;
-      if (file.modelId !== undefined && context.beforePatchCopy.modelId !== undefined) {
-        if (file.modelId.toString() !== context.beforePatchCopy.modelId.toString()) changeDetected = true;
+      if (file.modelId !== undefined && !file.modelId.equals(context.beforePatchCopy.modelId)) {
+        changeDetected = true;
       }
-      if (file.currentVersion._id !== undefined && context.beforePatchCopy.currentVersion._id !== undefined) {
-        if (file.currentVersion._id.toString() !== context.beforePatchCopy.currentVersion._id.toString()) changeDetected = true;
+      if (file.currentVersion._id !== undefined && !file.currentVersion._id.equals(context.beforePatchCopy.currentVersion._id)) {
+        changeDetected = true;
       }
       if (file.model?.thumbnailUrlCache !== context.beforePatchCopy.model?.thumbnailUrlCache) changeDetected = true;
       if (changeDetected) {
