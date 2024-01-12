@@ -7,7 +7,6 @@ import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
 import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
-import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -27,7 +26,11 @@ import { directoryPath, directoryMethods } from './directories.shared.js'
 import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
-  canUserAccessDirectoryOrFilePatchMethod, handleAddRelatedUserDetailsQuery, ifNeededAddRelatedUserDetails
+  canUserAccessDirectoryOrFilePatchMethod,
+  isDirectoryReadyToDelete,
+  handleAddRelatedUserDetailsQuery,
+  ifNeededAddRelatedUserDetails,
+  removeFromParent
 } from './helpers.js';
 
 export * from './directories.class.js'
@@ -131,16 +134,12 @@ export const directory = (app) => {
           context => context.data.shouldAddDirectoriesToDirectory,
           addDirectoriesToDirectory
         ),
-        iff(
-          context => context.data.shouldRemoveDirectoriesFromDirectory,
-          removeDirectoriesFromDirectory,
-        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
       remove: [
-        // TODO: Implement delete feature later
-        disallow(),
+        iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
+        isDirectoryReadyToDelete,
       ]
     },
     after: {
@@ -148,6 +147,9 @@ export const directory = (app) => {
       get: [
         ifNeededAddRelatedUserDetails,
       ],
+      remove: [
+        removeFromParent,
+      ]
     },
     error: {
       all: []
