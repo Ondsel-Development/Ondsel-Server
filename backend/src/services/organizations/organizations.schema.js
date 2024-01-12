@@ -69,7 +69,7 @@ export const organizationDataResolver = resolve({
   users: async (_value, _message, context) => {
     return [
       {
-        ..._.pick(context.params.user,  ['_id', 'username', 'email', 'name']),
+        ...buildUserSummary(context.params.user),
         isAdmin: true,
       }
     ]

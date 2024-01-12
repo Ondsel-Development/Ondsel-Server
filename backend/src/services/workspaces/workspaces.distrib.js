@@ -73,19 +73,24 @@ export async function updateOrganizationSummaryToWorkspace(context, workspaceId,
 }
 
 export async function updateUserSummaryToWorkspace(app, workspaceId, userSummary) {
-  const workspaceService = app.service('workspaces');
-  const workspace = await workspaceService.get(workspaceId);
-  let groupsOrUsersList = workspace.groupsOrUsers || [];
-  const index = groupsOrUsersList.findIndex((u) => (u.type === 'User') && (u.groupOrUser._id.toString() === userSummary._id.toString()));
-  if (index === -1) {
-    console.log(`Error: when distributing summary from user ${userSummary._id}, workspace ${workspaceId} was missing item in groupsOrUsers field.`);
-  } else {
-    await workspaceService.patch(
-      workspaceId,
-      {
-        shouldEditGroupOrUserOnWorkspace: true,
-        groupOrUserData: { groupOrUser: userSummary }
-      }
-    );
+  try {
+    const workspaceService = app.service('workspaces');
+    const workspace = await workspaceService.get(workspaceId);
+    let groupsOrUsersList = workspace.groupsOrUsers || [];
+    const index = groupsOrUsersList.findIndex((u) => (u.type === 'User') && (u.groupOrUser._id.toString() === userSummary._id.toString()));
+    if (index === -1) {
+      console.log(`Error: when distributing summary from user ${userSummary._id}, workspace ${workspaceId} was missing item in groupsOrUsers field.`);
+    } else {
+      await workspaceService.patch(
+        workspaceId,
+        {
+          shouldEditGroupOrUserOnWorkspace: true,
+          groupOrUserData: { groupOrUser: userSummary }
+        }
+      );
+    }
+  } catch (e) {
+    console.log(`encountered error while distributing user sum to workspace ${workspaceId}`);
+    console.log(e);
   }
 }

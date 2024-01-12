@@ -110,5 +110,24 @@ export default {
       }
       return result;
     },
+    getWorkspaceByIdPublic: async (context, workspaceId) => {
+      // get the public details of any workspace using _id
+
+      // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
+      // not even non-$or queries work
+      //
+      try {
+        const userResult = await models.api.Workspace.get(
+          workspaceId,
+          {
+            query: {
+              publicInfo: "true",
+            }
+          });
+        return userResult;
+      } catch (e) {
+        return undefined;
+      }
+    },
   }
 }

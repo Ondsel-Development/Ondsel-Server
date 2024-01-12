@@ -14,8 +14,9 @@ export const addUsersToOrganization = async (context) => {
       const user = await userService.get(userId);
       const userOrganizations = user.organizations || [];
 
+      const userSum = buildUserSummary(user);
       organizationUsers.push({
-        ..._.pick(user, ['_id', 'username', 'email', 'name']),
+        ...userSum,
         isAdmin: false
       });
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {

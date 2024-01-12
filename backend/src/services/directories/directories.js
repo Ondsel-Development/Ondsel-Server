@@ -6,7 +6,6 @@ import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
-import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -27,8 +26,10 @@ import {
   canUserAccessDirectoryOrFileGetMethod,
   userBelongingDirectoriesOrFiles,
   canUserAccessDirectoryOrFilePatchMethod,
+  isDirectoryReadyToDelete,
   handleAddRelatedUserDetailsQuery,
   ifNeededAddRelatedUserDetails,
+  removeFromParent,
   doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
 } from './helpers.js';
 
@@ -134,16 +135,12 @@ export const directory = (app) => {
           context => context.data.shouldRemoveFilesFromDirectory,
           removeFilesFromDirectory
         ),
-        iff(
-          context => context.data.shouldRemoveDirectoriesFromDirectory,
-          removeDirectoriesFromDirectory,
-        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
       remove: [
-        // TODO: Implement delete feature later
-        disallow(),
+        iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
+        isDirectoryReadyToDelete,
       ]
     },
     after: {
@@ -154,6 +151,9 @@ export const directory = (app) => {
       get: [
         ifNeededAddRelatedUserDetails,
       ],
+      remove: [
+        removeFromParent,
+      ]
     },
     error: {
       all: []

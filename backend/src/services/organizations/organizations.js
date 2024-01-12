@@ -24,7 +24,7 @@ import {
   isUserMemberOfOrganization,
   isUserOwnerOrAdminOfOrganization,
   canUserCreateOrganization,
-  assignOrganizationIdToUser
+  assignOrganizationIdToUser, isUserOwnerOfOrganization
 } from './helpers.js';
 import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
 import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
@@ -39,6 +39,8 @@ import {
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
 import {userPublicFields, userResolver} from "../users/users.schema.js";
+import {BadRequest} from "@feathersjs/errors";
+import {OrganizationTypeMap} from "./organizations.subdocs.schema.js";
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -152,15 +154,15 @@ export const organization = (app) => {
     },
     before: {
       all: [
-        softDelete({
-          deletedQuery: async context => {
-            // Allow only owner to delete organization
-            if ( context.method === 'remove' && context.params.user ) {
-              return { createdBy: context.params.user._id, deleted: { $ne: true } }
-            }
-            return { deleted: { $ne: true } };
-          }
-        }),
+        // softDelete({
+        //   deletedQuery: async context => {
+        //     // Allow only owner to delete organization
+        //     if ( context.method === 'remove' && context.params.user ) {
+        //       return { createdBy: context.params.user._id, deleted: { $ne: true } }
+        //     }
+        //     return { deleted: { $ne: true } };
+        //   }
+        // }),
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
@@ -178,8 +180,8 @@ export const organization = (app) => {
         schemaHooks.resolveData(organizationDataResolver)
       ],
       patch: [
-        copyOrgBeforePatch,
-        iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner')),
+	      copyOrgBeforePatch,
+        iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner', 'deleted')),
         iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(
           context => context.data.shouldAddUsersToOrganization,
@@ -204,7 +206,11 @@ export const organization = (app) => {
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)
       ],
-      remove: []
+      remove: [
+        iff(isProvider('external'), isUserOwnerOfOrganization),
+        iff(isProvider('external'), isOrganizationReadyToDelete),
+        doSoftDeleteInstead,
+      ],
     },
     after: {
       all: [
@@ -244,5 +250,59 @@ const detectOrgRefNameInId = async context => {
   if (orgList?.total === 1) {
     context.result = orgList.data[0]; // only change things if we actually find something
   }
+  return context;
+}
+
+const isOrganizationReadyToDelete = async context => {
+  const organization = await context.service.get(context.id);
+  //
+  // Ensure this organization is not a Personal org
+  //
+  if (organization.type === OrganizationTypeMap.personal) {
+    throw new BadRequest('You cannot delete your personal organization.');
+  }
+  //
+  // Ensure there are no users other than the owner
+  //
+  if (organization.users.length > 1) {
+    throw new BadRequest('To delete, other than the owner, there can be no users in the organization.');
+  } else if (organization.users.length === 0) {
+    throw new BadRequest('Deletion error. The owner of the organization is missing.'); // this SHOULD NOT happen
+  }
+  if (organization.users[0]._id.toString() !== organization.owner._id.toString()) {
+    throw new BadRequest('Deletion error. The remaining user is not the owner.');
+  }
+  //
+  // Ensure there are no more workspaces
+  //
+  const wsList = await context.app.service('workspaces').find({
+    query: {
+      organizationId: organization._id,
+    }
+  });
+  if (wsList.total !== 0) {
+    throw new BadRequest(`Deletion error. There are ${wsList.total} remaining workspace(s) in the organization.`);
+  }
+  //
+  return context;
+}
+
+const doSoftDeleteInstead = async context => {
+  const updatedResult = await context.service.patch(
+    context.id,
+    {
+      deleted: true,
+    }
+  )
+  context.result = updatedResult; // setting this prevents the true DELETE (removal from db) from happening
+  const userId = context.result.users[0]._id;
+  const user = await context.app.service('users').get(userId);
+  let reducedOrgList = user.organizations.filter((org) => org._id.toString() !== context.id.toString());
+  await context.app.service('users').patch(
+    userId,
+    {
+      organizations: reducedOrgList
+    }
+  )
   return context;
 }

@@ -4,6 +4,7 @@
       <v-spacer />
       <v-btn flat :disabled="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
       <v-btn flat class="ml-1" :disabled="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
+      <v-btn v-if="directory.name!=='/'" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.deleteDirectoryDialog.$data.dialog=true;">Delete Directory</v-btn>
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
@@ -44,6 +45,7 @@
     </v-row>
     <upload-file-dialog ref="uploadFileDialog" :directory="directory" />
     <create-directory-dialog ref="createDirectoryDialog" @create-directory="createDirectory"/>
+    <delete-directory-dialog ref="deleteDirectoryDialog" :directory-name="directory.name" @delete-directory="deleteThisDirectory"/>
   </v-container>
 </template>
 
@@ -51,6 +53,7 @@
 import CreateDirectoryDialog from '@/components/CreateDirectoryDialog.vue';
 import UploadFileDialog from '@/components/UploadFileDialog.vue';
 import { models } from '@feathersjs/vuex';
+import DeleteDirectoryDialog from "@/components/DeleteDirectoryDialog.vue";
 
 const { Directory } = models.api;
 
@@ -65,11 +68,24 @@ export default {
       default: false,
     }
   },
-  components: { CreateDirectoryDialog, UploadFileDialog },
+  components: {DeleteDirectoryDialog, CreateDirectoryDialog, UploadFileDialog },
   data: () => ({
     directoryDialog: false,
   }),
   methods: {
+    async deleteThisDirectory() {
+      await Directory.remove(
+        this.directory._id
+      ).then(() => {
+        let rootPath = this.directoryPath.substring(0, this.directoryPath.lastIndexOf("/"));
+        if (rootPath==="") rootPath = "/";
+        this.$emit('openDirectory', this.directory.parentDirectory, rootPath);
+        this.$refs.deleteDirectoryDialog.$data.dialog = false;
+      }).catch((e) => {
+        this.$refs.deleteDirectoryDialog.$data.snackerMsg = e.message;
+        this.$refs.deleteDirectoryDialog.$data.showSnacker = true;
+      });
+    },
     async createDirectory(directoryName) {
       try {
         await Directory.create({

@@ -114,19 +114,24 @@ export async function distributeUserSummaries(app, user){
 //
 
 export async function upsertOrganizationSummaryToUser(context, userId, orgSummary) {
-  const userService = context.app.service('users');
-  const user = await userService.get(userId);
-  let orgList = user.organizations || [];
-  const index = orgList.findIndex((o) => o._id.toString() === orgSummary._id.toString());
-  if (index === -1) {
-    orgList.push(orgSummary);
-  } else {
-    orgList[index] = orgSummary;
-  }
-  await userService.patch(
-    userId,
-    {
-      organizations: orgList,
+  try {
+    const userService = context.app.service('users');
+    const user = await userService.get(userId);
+    let orgList = user.organizations || [];
+    const index = orgList.findIndex((o) => o._id.toString() === orgSummary._id.toString());
+    if (index === -1) {
+      orgList.push(orgSummary);
+    } else {
+      orgList[index] = orgSummary;
     }
-  );
+    await userService.patch(
+      userId,
+      {
+        organizations: orgList,
+      }
+    );
+  } catch (e) {
+    console.log(`encountered error while distributing org sum to user ${userId}`);
+    console.log(e);
+  }
 }

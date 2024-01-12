@@ -29,7 +29,7 @@
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
-        @click="$router.push({ name: 'EditGroup', params: { id: item.value._id } })"
+        @click="$router.push({ name: 'EditGroup', params: { slug: organization.refName, id: item.value._id } })"
       >
         mdi-pencil
       </v-icon>
