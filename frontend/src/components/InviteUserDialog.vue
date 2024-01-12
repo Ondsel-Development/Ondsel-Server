@@ -33,12 +33,19 @@
           ></v-text-field>
         </v-card-text>
         <v-card-actions class="justify-center">
-          <v-btn @click="dialog = false;">Cancel</v-btn>
           <v-btn
-            type="submit"
+            v-if="label && label.type === 'success'"
             color="primary"
-            :disabled="isCreatePending"
-          >Send</v-btn>
+            @click="dialog = false;"
+          >Close</v-btn>
+          <template v-else>
+            <v-btn @click="dialog = false;">Cancel</v-btn>
+            <v-btn
+              type="submit"
+              color="primary"
+              :disabled="isCreatePending"
+            >Send</v-btn>
+          </template>
         </v-card-actions>
       </v-form>
     </v-card>
@@ -94,6 +101,11 @@ export default {
           msg: 'Internal Server error'
         }
       }
+    },
+    openDialog() {
+      this.email = '';
+      this.label = undefined;
+      this.dialog = true;
     }
   }
 }
