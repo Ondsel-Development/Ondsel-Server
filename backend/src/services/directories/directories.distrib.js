@@ -10,11 +10,16 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
+export function buildDirectorySummary(directory) {
+  return {
+    _id: directory._id,
+    name: directory.name,
+  };
+}
 
 //
 // DISTRIBUTE AFTER (HOOK)
 //
-
 
 
 //

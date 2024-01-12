@@ -87,17 +87,21 @@ export default {
       });
     },
     async createDirectory(directoryName) {
-      const directory = await Directory.create({
-        name: directoryName,
-        workspace: this.directory.workspace
-      });
-      await Directory.patch(
-        this.directory._id,
-        {
-          shouldAddDirectoriesToDirectory: true,
-          directoryIds: [directory._id.toString()]
-        }
-      )
+      try {
+        await Directory.create({
+          name: directoryName,
+          workspace: this.directory.workspace,
+          parentDirectory: {
+            _id: this.directory._id,
+            name: this.directory.name,
+          }
+        });
+      } catch (e) {
+        const msg = e.message;
+        this.$refs.createDirectoryDialog.$data.snackerMsg = msg;
+        this.$refs.createDirectoryDialog.$data.showSnacker = true;
+        return;
+      }
       this.$refs.createDirectoryDialog.$data.dialog = false;
     },
     async openDirectory(dirSubDocs) {

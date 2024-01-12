@@ -6,7 +6,6 @@ import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
-import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -30,7 +29,8 @@ import {
   isDirectoryReadyToDelete,
   handleAddRelatedUserDetailsQuery,
   ifNeededAddRelatedUserDetails,
-  removeFromParent
+  removeFromParent,
+  doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
 } from './helpers.js';
 
 export * from './directories.class.js'
@@ -110,6 +110,11 @@ export const directory = (app) => {
         )
       ],
       create: [
+        iff(
+          isProvider('external'),
+          doesUserHaveWorkspaceWriteRights
+        ),
+        verifyDirectoryUniqueness,
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
       ],
@@ -130,10 +135,6 @@ export const directory = (app) => {
           context => context.data.shouldRemoveFilesFromDirectory,
           removeFilesFromDirectory
         ),
-        iff(
-          context => context.data.shouldAddDirectoriesToDirectory,
-          addDirectoriesToDirectory
-        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
@@ -144,6 +145,9 @@ export const directory = (app) => {
     },
     after: {
       all: [],
+      create: [
+        attachNewDirectoryToParent,
+      ],
       get: [
         ifNeededAddRelatedUserDetails,
       ],

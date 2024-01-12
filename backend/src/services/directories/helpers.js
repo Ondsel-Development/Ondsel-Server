@@ -1,5 +1,6 @@
 import { BadRequest } from '@feathersjs/errors';
 import {buildUserSummary} from "../users/users.distrib.js";
+import {buildDirectorySummary} from "./directories.distrib.js";
 
 export const canUserAccessDirectoryOrFileGetMethod = async context => {
   const directoryOrFile = await context.service.get(context.id);
@@ -31,6 +32,48 @@ export const userBelongingDirectoriesOrFiles = async context => {
   return context;
 }
 
+export const doesUserHaveWorkspaceWriteRights = async context => {
+  // used 'before' a 'create'
+  const workspace = await context.app.service('workspaces').get(
+    context.data.workspace._id,
+    {
+      user: context.params.user
+    }
+  )
+  if (workspace.haveWriteAccess) {
+    return context;
+  }
+  throw new BadRequest({ type: 'PermissionError', msg: 'You dont have write access to this workspace'});
+}
+
+export const verifyDirectoryUniqueness = async context => {
+  // used 'before' a 'create'
+  if (context.data.name === "/" && !context.data.parentDirectory) {
+    return context;  // root is always unique
+  }
+  const pDir = await context.service.get(context.data.parentDirectory._id);
+  const siblings = pDir.directories || [];
+  const twin = siblings.find((d) => d.name === context.data.name);
+  if (twin) {
+    throw new BadRequest(`A directory by the same name (${context.data.name}) already exists`);
+  }
+  return context;
+}
+
+export const attachNewDirectoryToParent = async context => {
+  // used 'after' a 'create'
+  // by the time this is called, the correctness of insertion (rights, uniqueness, etc.) has been verified
+  const childDir = context.result;
+  const parentDir = await context.service.get(childDir.parentDirectory._id);
+  let directories = parentDir.directories || [];
+  directories.push(buildDirectorySummary(childDir));
+  await context.service.patch(
+    parentDir._id,
+    {
+      directories: directories,
+    }
+  )
+}
 
 export const canUserAccessDirectoryOrFilePatchMethod = async context => {
   // should be called in 'before' of both 'patch' and 'delete'
