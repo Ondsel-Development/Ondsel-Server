@@ -40,7 +40,7 @@
                 :to="{ name: 'OrganizationHome', params: { slug: organization.refName } }"
                 target="_blank"
               >
-                <template v-if="organization.type === 'Personal'">
+                <template v-if="organization.type === 'Personal' && user">
                   {{ user.name }} (Personal)
                 </template>
                 <template v-else>
