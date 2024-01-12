@@ -4,7 +4,7 @@ import {BadRequest} from "@feathersjs/errors";
 
 
 export const isUserBelongsToWorkspace = async context => {
-  if (context.params.user) {
+  if (!context.publicDataOnly && context.params.user) {
     // if user is owner of organization, then allow workspace
     if (context.method === 'get') {
       const workspace = await context.service.get(context.id);
