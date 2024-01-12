@@ -1,13 +1,17 @@
 import _ from 'lodash';
-import {buildOrganizationSummary, upsertGroupSummaryToOrganization} from "../organizations.distrib.js";
-import {buildGroupSummary} from "../../groups/groups.distrib.js";
-import {buildUserSummary} from "../../users/users.distrib.js";
+import { buildOrganizationSummary } from '../organizations.distrib.js';
+import { buildUserSummary } from '../../users/users.distrib.js';
+import { BadRequest } from '@feathersjs/errors';
+import { OrganizationTypeMap } from '../organizations.subdocs.schema.js';
 
 export const addUsersToOrganization = async (context) => {
   const { data } = context;
   const userService = context.app.service('users');
 
   const organization = await context.service.get(context.id);
+  if (organization.type === OrganizationTypeMap.personal) {
+    throw new BadRequest('Personal organization not allowed to perform `addUsersToOrganization` operation');
+  }
   const organizationUsers = organization.users || [];
   for (let userId of data.userIds) {
     if (!organizationUsers.some(user => user._id.toString() === userId)){

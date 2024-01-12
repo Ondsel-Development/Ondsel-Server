@@ -96,6 +96,9 @@ export default {
     async updateOrg() {
       this.orgSrc = await this.getOrgByIdOrNamePublic(this.$route.params.id);
       this.orgDetail = await Organization.get(this.orgSrc._id);
+      if (this.orgDetail.type === 'Personal') {
+        this.$router.push({ name: 'AccountSettings',  params: { slug: this.orgDetail.owner.username }})
+      }
       this.userIsOwner = this.orgDetail.owner._id === this.loggedInUser.user._id;
     },
     async openOrgChangeNameDialog() {

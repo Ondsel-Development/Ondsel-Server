@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import { buildGroupSummary } from '../../groups/groups.distrib.js';
 import { buildWorkspaceSummary } from '../../workspaces/workspaces.distrib.js';
+import { OrganizationTypeMap } from '../organizations.subdocs.schema.js';
 
 
 const isUserMemberofAnyOrganizationGroups = async (context, organization, user) => {
@@ -31,6 +32,9 @@ export const removeUsersFromOrganization = async (context) => {
   const userService = context.app.service('users');
 
   const organization = await context.service.get(context.id);
+  if (organization.type === OrganizationTypeMap.personal) {
+    throw new BadRequest('Personal organization not allowed to perform `removeUsersToOrganization` operation');
+  }
   let organizationUsers = organization.users || [];
   for (let userId of data.userIds) {
     const user = await userService.get(userId);
