@@ -7,6 +7,13 @@
         location="start"
       >File info</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="modelInfoDrawerClicked">
+      <v-icon>mdi-information-outline</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Get Info</v-tooltip>
+    </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
       <v-tooltip
@@ -134,6 +141,15 @@
     :shared-model-id="sharedModel._id"
     ref="shareLinkDialog"
   />
+  <v-navigation-drawer
+    v-model="isDrawerOpen"
+    location="right"
+    width="1100"
+    temporary
+  >
+    <ModelInfo ref="modelInfoDrawer" :shared-model="sharedModel"/>
+  </v-navigation-drawer>
+
 </template>
 
 <script>
@@ -144,12 +160,13 @@ import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
+import ModelInfo from '@/components/ModelInfo.vue';
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: {ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog },
+  components: {ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo },
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -161,6 +178,7 @@ export default {
     isReloadingOBJ: false,
     error: '',
     isShareLinkDialogActive: false,
+    isDrawerOpen: false,
   }),
   async created() {
     const shareModelId = this.$route.params.id;
@@ -264,6 +282,10 @@ export default {
       }
       this.isModelLoaded = true;
       setTimeout(() => this.uploadThumbnail(), 500);
+    },
+    async modelInfoDrawerClicked() {
+      this.isDrawerOpen = !this.isDrawerOpen;
+      await this.$refs.modelInfoDrawer.fetchData();
     },
   },
   watch: {

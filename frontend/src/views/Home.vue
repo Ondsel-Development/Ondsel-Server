@@ -7,6 +7,13 @@
         location="start"
       >Open a file</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="modelInfoDrawerClicked">
+      <v-icon>mdi-information-outline</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Get Info</v-tooltip>
+    </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
       <v-tooltip
@@ -161,12 +168,13 @@
       ref="exportModelDialog"
     />
     <v-navigation-drawer
-      v-model="manageSharedModelsDrawer"
+      v-model="isDrawerOpen"
       location="right"
       width="1100"
       temporary
     >
-      <MangeSharedModels :model="model"/>
+      <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>
+      <ModelInfo ref="modelInfoDrawer" v-else-if="drawerActiveWindow === 'modelInfo'" :model="model"/>
     </v-navigation-drawer>
   </div>
 </template>
@@ -176,17 +184,19 @@ import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
+import { nextTick } from 'vue';
 
 import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import MangeSharedModels from '@/components/MangeSharedModels';
+import ModelInfo from '@/components/ModelInfo.vue';
 
 const { Model, SharedModel, Workspace, Organization } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog },
+  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog, ModelInfo },
   data: () => ({
     dialog: true,
     model: null,
@@ -198,6 +208,8 @@ export default {
     isReloadingOBJ: false,
     error: '',
     manageSharedModelsDrawer: false,
+    isDrawerOpen: false,
+    drawerActiveWindow: null,
     generatePublicLinkValue: null,
   }),
   mounted() {
@@ -355,13 +367,28 @@ export default {
       }
     },
     async sharedModelDrawerClicked() {
-      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
+      if (this.drawerActiveWindow === 'sharedModel') {
+        this.isDrawerOpen = !this.isDrawerOpen;
+      } else {
+        this.isDrawerOpen = true;
+      }
+      this.drawerActiveWindow = 'sharedModel';
       await SharedModel.find({
         query: {
           cloneModelId: this.model._id,
           $paginate: false
         },
       })
+    },
+    async modelInfoDrawerClicked() {
+      if (this.drawerActiveWindow === 'modelInfo') {
+        this.isDrawerOpen = !this.isDrawerOpen;
+      } else {
+        this.isDrawerOpen = true;
+      }
+      this.drawerActiveWindow = 'modelInfo';
+      await nextTick();
+      await this.$refs.modelInfoDrawer.fetchData();
     },
     modelLoaded() {
       if (this.isReloadingOBJ) {

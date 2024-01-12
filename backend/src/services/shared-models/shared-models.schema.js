@@ -74,6 +74,11 @@ export const sharedModelsResolver = resolve({
     }
     return '';
   }),
+  cloneModel: virtual(async (message, context) => {
+    const modelService = context.app.service('models');
+    const model = await modelService.get(message.cloneModelId);
+    return _.pick(model, ['file.custFileName', 'file._id', 'file.workspace', 'file.directory', 'file.userId', 'file.createdAt']);
+  }),
 })
 
 export const sharedModelsExternalResolver = resolve({})
