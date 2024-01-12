@@ -91,6 +91,10 @@ export const isDirectoryReadyToDelete = async context => {
     throw new BadRequest(`Deletion error. There are ${fileCount} files and ${dirCount} sub-directories remaining in the directory. The directory must be empty.`);
   }
   //
+  // Ensure that the parent directory is really accessible. (it will throw if not)
+  //
+  await context.service.get(directory.parentDirectory._id);
+  //
   return context;
 }
 
