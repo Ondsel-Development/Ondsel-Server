@@ -20,6 +20,7 @@ import {updateGroupUsersCommand} from "./update-group-users.command.js";
 import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
 import {addEmptyDirectoriesFieldToDirectoryCommand} from "./add_empty_directories_field_to_directory.js";
+import {updateWorkspaceSummariesEverywhereCommand} from "./update-workspace-summaries-everywhere.command.js";
 
 
 async function runMigration() {
@@ -91,6 +92,9 @@ async function runMigration() {
       break;
     case 'addEmptyDirectoriesFieldToDirectory':
       await addEmptyDirectoriesFieldToDirectoryCommand(app);
+      break;
+    case 'updateWorkspaceSummariesEverywhere':
+      await updateWorkspaceSummariesEverywhereCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

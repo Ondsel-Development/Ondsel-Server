@@ -28,6 +28,7 @@ export const workspaceSchema = Type.Object(
     name: Type.String(),
     refName: Type.String(),
     refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
+    public: Type.Boolean(),
     description: Type.String(),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
@@ -67,7 +68,7 @@ export const workspaceExternalResolver = resolve({})
 export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName'];
 
 // Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'public', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
 })
 export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
@@ -108,7 +109,7 @@ export const workspacePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'refNameHash', 'organizationId'])
+export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'public', 'refNameHash', 'organizationId'])
 export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),

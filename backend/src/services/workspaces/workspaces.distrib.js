@@ -16,6 +16,7 @@ export function buildWorkspaceSummary(workspace) {
     _id: workspace._id,
     name: workspace.name,
     refName: workspace.refName,
+    public: workspace.public,
   };
 }
 
