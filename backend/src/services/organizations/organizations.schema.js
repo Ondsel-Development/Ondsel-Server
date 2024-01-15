@@ -4,7 +4,12 @@ import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import {getConstraint, userSummarySchema} from '../users/users.subdocs.schema.js';
+import {
+  getConstraint,
+  subscriptionConstraintMap,
+  SubscriptionTypeMap,
+  userSummarySchema
+} from '../users/users.subdocs.schema.js';
 import {groupSummary} from "../groups/groups.subdocs.schema.js";
 import {ObjectId} from "mongodb";
 import {BadRequest} from "@feathersjs/errors";
@@ -41,10 +46,13 @@ export const organizationSchema = Type.Object(
 export const organizationValidator = getValidator(organizationSchema, dataValidator)
 export const organizationResolver = resolve({
   constraint: virtual(async (message, _context) => {
-    const user = await _context.app.service('users').get(
-      message.owner._id,
-    );
-    return getConstraint(user);
+    if (message.owner) {
+      const user = await _context.app.service('users').get(
+        message.owner._id,
+      );
+      return getConstraint(user);
+    }
+    return _.get(subscriptionConstraintMap, SubscriptionTypeMap.unverified)
   })
 })
 
