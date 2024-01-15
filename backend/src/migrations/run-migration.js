@@ -19,6 +19,7 @@ import {updateOrgUsersCommand} from "./update-org-users.command.js";
 import {updateGroupUsersCommand} from "./update-group-users.command.js";
 import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
+import {addEmptyDirectoriesFieldToDirectoryCommand} from "./add_empty_directories_field_to_directory.js";
 
 
 async function runMigration() {
@@ -87,6 +88,9 @@ async function runMigration() {
       break;
     case 'updateFileRelatedUserDetails':
       await updateFileRelatedUserDetailsCommand(app);
+      break;
+    case 'addEmptyDirectoriesFieldToDirectory':
+      await addEmptyDirectoriesFieldToDirectoryCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
