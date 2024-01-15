@@ -61,6 +61,7 @@ class User extends BaseModel {
 const servicePath = 'users'
 const servicePlugin = makeServicePlugin({
   Model: User,
+  paramsForServer: ['publicInfo'],
   service: feathersClient.service(servicePath),
   servicePath
 })

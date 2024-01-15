@@ -134,7 +134,7 @@ export default {
       } else {
         this.verificationMsg = '... account already verified so redirecting home ...';
         this.$router
-          .push({ name: 'Models' }) // when here, an old user is verifying a new email
+          .push({ name: 'Models', params: { slug: this.loggedInUser.user.username }}) // when here, an old user is verifying a new email
           .then(() => { this.$router.go() }) // this forces a refresh on destination
       }
     },

@@ -6,9 +6,6 @@ import { hooks as schemaHooks } from '@feathersjs/schema'
 import { iff, preventChanges, disallow, isProvider } from 'feathers-hooks-common';
 import { addFilesToDirectory } from './commands/addFilesToDirectory.js';
 import { removeFilesFromDirectory } from './commands/removeFilesFromDirectory.js';
-import { addDirectoriesToDirectory } from './commands/addDirectoriesToDirectory.js';
-import { removeDirectoriesFromDirectory } from './commands/removeDirectoriesFromDirectory.js';
-import { userReadAccessDirectories, userWriteAccessDirectories } from './helpers.js';
 import {
   directoryDataValidator,
   directoryPatchValidator,
@@ -25,6 +22,16 @@ import {
 } from './directories.schema.js'
 import { DirectoryService, getOptions } from './directories.class.js'
 import { directoryPath, directoryMethods } from './directories.shared.js'
+import {
+  canUserAccessDirectoryOrFileGetMethod,
+  userBelongingDirectoriesOrFiles,
+  canUserAccessDirectoryOrFilePatchMethod,
+  isDirectoryReadyToDelete,
+  handleAddRelatedUserDetailsQuery,
+  ifNeededAddRelatedUserDetails,
+  removeFromParent,
+  doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
+} from './helpers.js';
 
 export * from './directories.class.js'
 export * from './directories.schema.js'
@@ -40,16 +47,46 @@ export const directory = (app) => {
     docs: swagger.createSwaggerServiceOptions({
       schemas: { directorySchema, directoryDataSchema, directoryPatchSchema , directoryQuerySchema, },
       docs: {
-        description: 'A organization service',
+        description: 'A directory service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ObjectID of Directory to return",
+                "in": "path",
+                "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "If provided and set to \"true\", a \"relatedUserDetails\" array of user summaries is added",
+                "in": "query",
+                "name": "addRelatedUserDetails",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          },
+        }
       }
     })
   })
+
+  app.service(directoryPath).publish((data, context) => {
+    return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+  })
+
   // Initialize hooks
   app.service(directoryPath).hooks({
     around: {
       all: [
+        handleAddRelatedUserDetailsQuery(),
         authenticate('jwt'),
         schemaHooks.resolveExternal(directoryExternalResolver),
         schemaHooks.resolveResult(directoryResolver)
@@ -63,25 +100,33 @@ export const directory = (app) => {
       find: [
         iff(
           isProvider('external'),
-          userReadAccessDirectories
+          userBelongingDirectoriesOrFiles
         )
       ],
       get: [
         iff(
           isProvider('external'),
-          userReadAccessDirectories
+          canUserAccessDirectoryOrFileGetMethod,
         )
       ],
       create: [
+        iff(
+          isProvider('external'),
+          doesUserHaveWorkspaceWriteRights
+        ),
+        verifyDirectoryUniqueness,
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
       ],
       patch: [
         iff(
           isProvider('external'),
-          userWriteAccessDirectories
+          canUserAccessDirectoryOrFilePatchMethod
         ),
-        preventChanges(false, 'workspace', 'files', 'directories'),
+        iff(
+          isProvider('external'),
+          preventChanges(false, 'workspace', 'files', 'directories'),
+        ),
         iff(
           context => context.data.shouldAddFilesToDirectory,
           addFilesToDirectory
@@ -90,24 +135,25 @@ export const directory = (app) => {
           context => context.data.shouldRemoveFilesFromDirectory,
           removeFilesFromDirectory
         ),
-        iff(
-          context => context.data.shouldAddDirectoriesToDirectory,
-          addDirectoriesToDirectory
-        ),
-        iff(
-          context => context.data.shouldRemoveDirectoriesFromDirectory,
-          removeDirectoriesFromDirectory,
-        ),
         schemaHooks.validateData(directoryPatchValidator),
         schemaHooks.resolveData(directoryPatchResolver)
       ],
       remove: [
-        // TODO: Implement delete feature later
-        disallow(),
+        iff(isProvider('external'), canUserAccessDirectoryOrFilePatchMethod),
+        isDirectoryReadyToDelete,
       ]
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        attachNewDirectoryToParent,
+      ],
+      get: [
+        ifNeededAddRelatedUserDetails,
+      ],
+      remove: [
+        removeFromParent,
+      ]
     },
     error: {
       all: []

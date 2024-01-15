@@ -1,13 +1,13 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import _ from 'lodash';
 import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import { feedWorkspaceAndDirectory, addFileToDirectory } from './helpers.js';
+import {feedWorkspaceAndDirectory, addFileToDirectory, ensureUniqueCustFileName, buildRelatedUserDetails} from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -24,6 +24,13 @@ import {
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
+import {copyFileBeforePatch, distributeFileDeletion, distributeFileSummaries} from "./file.distrib.js";
+import {
+  canUserAccessDirectoryOrFileGetMethod,
+  canUserAccessDirectoryOrFilePatchMethod,
+  userBelongingDirectoriesOrFiles
+} from '../directories/helpers.js';
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -45,6 +52,13 @@ export const file = (app) => {
       }
     })
   })
+
+  app.service(filePath).publish((data, context) => {
+    if (context.result.workspace) {
+      return app.channel(`workspace/${context.result.workspace._id.toString()}`)
+    }
+  })
+
   // Initialize hooks
   app.service(filePath).hooks({
     around: {
@@ -56,20 +70,6 @@ export const file = (app) => {
     },
     before: {
       all: [
-        softDelete({
-          deletedQuery: async context => {
-            if ( context.method === 'remove') {
-              if (!context.params.$forceRemove) {
-                const file = await context.service.get(context.id);
-                if (file.modelId) {
-                  throw new BadRequest('To remove this file object, call remove attached model.');
-                }
-
-              }
-            }
-            return { deleted: { $ne: true } };
-          }
-        }),
         iff(
           context => context.method === 'find' && context.params.query && context.params.query.hasOwnProperty('$paginate'),
           (context) => {
@@ -82,18 +82,33 @@ export const file = (app) => {
       ],
       find: [
         schemaHooks.validateQuery(fileQueryValidator),  // if not validate then $exists operator raise exception
+        iff(
+          isProvider('external'),
+          userBelongingDirectoriesOrFiles
+        ),
       ],
-      get: [],
+      get: [
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFileGetMethod,
+        )
+      ],
       create: [
         feedWorkspaceAndDirectory,
         iff(
           context => context.data.shouldCommitNewVersion,
             commitNewVersion
         ),
+        ensureUniqueCustFileName,
         schemaHooks.validateData(fileDataValidator),
         schemaHooks.resolveData(fileDataResolver)
       ],
       patch: [
+        copyFileBeforePatch,
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFilePatchMethod
+        ),
         preventChanges(false, 'versions', 'currentVersionId'),
         iff(
           context => context.data.shouldCommitNewVersion,
@@ -107,16 +122,33 @@ export const file = (app) => {
           context => context.data.shouldUpdateVersionData,
           updateVersionData,
         ),
+        ensureUniqueCustFileName,
         schemaHooks.validateData(filePatchValidator),
         schemaHooks.resolveData(filePatchResolver)
       ],
-      remove: []
+      remove: [
+        iff(
+          isProvider('external'),
+          canUserAccessDirectoryOrFilePatchMethod
+        ),
+        softDeleteFile
+      ]
     },
     after: {
       all: [],
       create: [
         addFileToDirectory,
       ],
+      patch: [
+        distributeFileSummaries,
+        iff(
+          context => context.$triggerLambda,
+          triggerLambda
+        ),
+      ],
+      remove: [
+        distributeFileDeletion,
+      ]
     },
     error: {
       all: []
@@ -140,9 +172,13 @@ const commitNewVersion = async (context) => {
   }
 
   let versions = [];
+  let relatedUserDetails = [];
   if (context.id) {
     const file = await context.service.get(context.id)
     versions = file.versions
+    relatedUserDetails = await buildRelatedUserDetails(context, file);
+  } else {
+    relatedUserDetails = [buildUserSummary(context.params.user)]
   }
 
   versions.push(versionData);
@@ -153,8 +189,11 @@ const commitNewVersion = async (context) => {
   });
   context.data['versions'] = versions;
   context.data['currentVersionId'] = versionData._id;
+  context.data['relatedUserDetails'] = relatedUserDetails;
 
   context.data = _.omit(context.data, ['shouldCommitNewVersion', 'version'])
+
+  context.$triggerLambda = true;
 
   return context;
 };
@@ -172,6 +211,7 @@ const checkoutToVersion = async (context) => {
 
   context.data['currentVersionId'] = context.data.versionId
   context.data = _.omit(context.data, ['shouldCheckoutToVersion', 'versionId'])
+  context.$triggerLambda = true;
   return context;
 };
 
@@ -211,3 +251,81 @@ const updateVersionData = async (context) => {
   context.data = _.omit(context.data, ['shouldUpdateVersionData', 'version'])
   return context;
 };
+
+const triggerLambda = async context => {
+  const file = context.result;
+  if (file.modelId) {
+    await context.app.service('models').patch(
+      file.modelId,
+      {
+        shouldStartObjGeneration: true,
+        fileId: file._id,
+      },
+      {
+        $triggerObjGeneration: true,  // this will skip canUserUpdateModel check
+        accessToken: context.params.authentication?.accessToken || null,  // needed for lambda to patch response back
+      }
+    )
+  }
+  return context;
+}
+
+const softDeleteFile = async (context) => {
+  //
+  // gather data before starting
+  //
+  const modelService = context.app.service('models');
+  const sharedLinkService = context.app.service('shared-models');
+  const file = await context.service.get(context.id);
+  const fileId = file._id.toString();
+  const models = await modelService.find({
+    query: {
+      fileId: fileId,
+    }
+  });
+  let sharedLinks = [];
+  for (const model of models.data) {
+    const newLinks = await sharedLinkService.find({
+      query: {
+        cloneModelId: model._id.toString(),
+      }
+    })
+    if (newLinks.total > 0) {
+      sharedLinks.push(...newLinks.data)
+    }
+  }
+  //
+  // mark the file as deleted
+  //
+  const fileAfterDelete = await context.service.patch(
+    context.id,
+    {
+      deleted: true,
+    }
+  );
+  //
+  // mark all the models for all the revisions as deleted
+  //
+  for (const model of models.data) {
+    await modelService.patch(
+      model._id,
+      {
+        deleted: true,
+      }
+    )
+  }
+  //
+  // mark all the shared links for all the models as deleted
+  //
+  for (const link of sharedLinks) {
+    await sharedLinkService.patch(
+      link._id,
+      {
+        isActive: false,
+        deleted: true,
+      }
+    )
+  }
+  context.result = fileAfterDelete;
+  return context;
+}

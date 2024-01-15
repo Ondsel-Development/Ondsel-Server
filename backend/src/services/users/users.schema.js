@@ -17,7 +17,7 @@ import {
   userAccountingSchema
 } from "./users.subdocs.schema.js";
 import {ObjectId} from "mongodb";
-import {usernameHasher} from "../../usernameFunctions.js";
+import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 
 // Main data model schema
@@ -30,6 +30,8 @@ export const userSchema = Type.Object(
     // file object created under default workspace when no workspace is mentioned in file payload.
     // This helps to support current frontend as it not supports shared-workspace feature yet.
     defaultWorkspaceId: ObjectIdSchema(),
+    personalOrganization: organizationSummarySchema,
+    currentOrganizationId: ObjectIdSchema(),
     organizations: Type.Array(organizationSummarySchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),
@@ -99,7 +101,7 @@ export const userDataResolver = resolve({
   updatedAt: async () => Date.now(),
   isTripe: async () => null,
   usernameHash: async (_value, message, _context) => {
-    return usernameHasher(message.username)
+    return refNameHasher(message.username)
   },
   tier: async () => SubscriptionTypeMap.unverified,
   constraint: async () => null, // DO NOT STORE constraints; they are to be derived
@@ -124,6 +126,7 @@ export const userDataResolver = resolve({
     }
   },
 })
+export const userPublicFields = ['_id', 'name', 'username', 'tier', 'createdAt'];
 
 // Schema for updating existing entries
 export const userPatchSchema = Type.Partial(userSchema, {
@@ -155,12 +158,15 @@ export const userQueryProperties = Type.Pick(userSchema, [
   'resetExpires',
   'resetAttempts',
   'constraint',
+  'createdAt',
 ])
 export const userQuerySchema = Type.Intersect(
   [
     querySyntax(userQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      'publicInfo': Type.Optional(Type.String()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )
@@ -193,7 +199,7 @@ export const uniqueUserValidator = async (context) => {
     })
   }
   if (context.data.username) {
-    const hash = usernameHasher(context.data.username);
+    const hash = refNameHasher(context.data.username);
     const result = await userService.find({query: {usernameHash: hash }});
     if (result.total > 0) {
       throw new BadRequest('Invalid: Username already taken', {
@@ -217,7 +223,7 @@ export const uniqueUserPatchValidator = async (context) => {
     }
   }
   if (context.data.username) {
-    const hash = usernameHasher(context.data.username);
+    const hash = refNameHasher(context.data.username);
     const result = await userService.find({query: {usernameHash: hash }});
     if (result.total > 0) {
       throw new BadRequest('Invalid: Username already taken', {

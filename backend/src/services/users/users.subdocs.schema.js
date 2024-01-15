@@ -28,8 +28,8 @@ export const userSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     username: Type.String(),
-    email: Type.String({ format: "email"}),
     name: Type.String(),
+    tier: SubscriptionType,
   }
 )
 
@@ -97,6 +97,7 @@ export const subscriptionConstraintMap = {
     canExportModel: false,
     defaultValueOfPublicLinkGeneration: true,
     canDisableAutomaticGenerationOfPublicLink: false,
+    canCreateOrganization: false,
   },
   'Solo': {
     maxModelObjects: 50,
@@ -107,6 +108,7 @@ export const subscriptionConstraintMap = {
     canExportModel: false,
     defaultValueOfPublicLinkGeneration: true,
     canDisableAutomaticGenerationOfPublicLink: false,
+    canCreateOrganization: false,
   },
   'Peer': {
     maxModelObjects: 250,
@@ -117,6 +119,7 @@ export const subscriptionConstraintMap = {
     canExportModel: true,
     defaultValueOfPublicLinkGeneration: false,
     canDisableAutomaticGenerationOfPublicLink: true,
+    canCreateOrganization: false,
   },
   'Enterprise': {
     maxModelObjects: 1000,
@@ -127,11 +130,12 @@ export const subscriptionConstraintMap = {
     canExportModel: true,
     defaultValueOfPublicLinkGeneration: false,
     canDisableAutomaticGenerationOfPublicLink: true,
+    canCreateOrganization: true,
   },
 };
 
 export function getConstraint(user){
-  return _.get(subscriptionConstraintMap, user.tier, SubscriptionTypeMap.unverified);
+  return _.get(subscriptionConstraintMap, user?.tier, SubscriptionTypeMap.unverified);
 }
 
 export const LedgerMap = {

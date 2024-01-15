@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, preventChanges, softDelete } from 'feathers-hooks-common'
+import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import axios from 'axios';
 import swagger from 'feathers-swagger';
@@ -26,6 +26,7 @@ import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {distributeModelSummaries} from "./models.distrib.js";
+import { canUserAccessModelGetMethod, userBelongingModels, canUserAccessModelPatchMethod } from './helpers.js';
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -49,6 +50,11 @@ export const model = (app) => {
   })
 
   app.service(modelPath).publish((data, context) => {
+    const workspaceId = _.get(data, 'file.workspace._id', undefined);
+    if (workspaceId) {
+      return app.channel(`workspace/${workspaceId.toString()}`)
+    }
+    // workspace not exists for shared-model object, so use userId
     return app.channel(context.result.userId.toString())
   })
 
@@ -82,16 +88,33 @@ export const model = (app) => {
         schemaHooks.validateQuery(modelQueryValidator),
         schemaHooks.resolveQuery(modelQueryResolver)
       ],
-      find: [],
-      get: [],
+      find: [
+        iff(
+          isProvider('external'),
+          userBelongingModels
+        )
+      ],
+      get: [
+        iff(
+          isProvider('external'),
+          canUserAccessModelGetMethod
+        )
+      ],
       create: [
-        canUserCreateModel,
+        iff(
+          isProvider('external'),
+          canUserCreateModel,
+        ),
         verifyToCreateSystemGeneratedShareLink,
         createFileVersionControlObject,
         schemaHooks.validateData(modelDataValidator),
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
+        iff(
+          isProvider('external'),
+          canUserAccessModelPatchMethod
+        ),
         preventChanges(false, 'isSharedModel', 'custFileName'),
         iff(
           context => context.data.shouldCommitNewVersion,
@@ -169,12 +192,12 @@ const startObjGeneration = async (context) => {
 
   if (data.uniqueFileName) {
     fileName = data.uniqueFileName;
-  } else if (context.id && !context.data.uniqueFileName) {
-    const result = await context.service.get(context.id);
-    fileName = result.uniqueFileName;
   } else if (context.data.fileId) {
     const file = await context.app.service('file').get(context.data.fileId);
     fileName = file.currentVersion.uniqueFileName;
+  } else if (context.id && !context.data.uniqueFileName) {
+    const result = await context.service.get(context.id);
+    fileName = result.uniqueFileName;
   } else {
     throw new BadRequest('Not able to find filename')
   }
@@ -405,7 +428,10 @@ const feedSystemGeneratedSharedModel = async (context) => {
     const systemGeneratedSharedModel = result.data[0];
     const patchData = {};
     if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
-      uploadService.copy(`${context.id.toString()}_generated.OBJ`, `${systemGeneratedSharedModel.model._id.toString()}_generated.OBJ`);
+
+      const isBrepExists = await uploadService.checkFileExists(context.app.get('awsClientModelBucket'), `${context.id.toString()}_generated.BREP` )
+      const extension = isBrepExists ? 'BREP' : 'OBJ';
+      uploadService.copy(`${context.id.toString()}_generated.${extension}`, `${systemGeneratedSharedModel.model._id.toString()}_generated.${extension}`);
       patchData['isObjGenerated'] = true;
       patchData['attributes'] = context.result.attributes;
 
@@ -428,7 +454,12 @@ const feedSystemGeneratedSharedModel = async (context) => {
 
 const verifyToCreateSystemGeneratedShareLink = context => {
   const { data } = context;
-  const tierConfig = getConstraint(context.params.user);
+  let tierConfig;
+  if (context.$organization) {
+    tierConfig = context.$organization.constraint;
+  } else {
+    tierConfig = getConstraint(context.params.user);
+  }
   let createShareLink = tierConfig.defaultValueOfPublicLinkGeneration;
   if ('createSystemGeneratedShareLink' in data && tierConfig.canDisableAutomaticGenerationOfPublicLink) {
     createShareLink = data.createSystemGeneratedShareLink;

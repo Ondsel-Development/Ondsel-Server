@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import auth from './store.auth'
+import app from '@/store/services/app';
 import user from './services/users';
 import model from './services/models';
 import sharedModel from './services/sharedModel';
@@ -8,12 +9,35 @@ import agreements from "./services/agreements";
 import acceptAgreement from "@/store/services/accept-agreement";
 import file from "@/store/services/file";
 import authManagement from "@/store/services/auth-management";
+import organization from '@/store/services/organizations';
+import group from '@/store/services/groups';
+import orgInvite from '@/store/services/orgInvites';
+import directory from '@/store/services/directories';
+import workspace from '@/store/services/workspaces';
 
 const store =  new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
-  plugins: [user, auth, model, sharedModel, accountEvent, agreements, acceptAgreement, file, authManagement]
+  modules: {
+    app
+  },
+  plugins: [
+    user,
+    auth,
+    model,
+    sharedModel,
+    accountEvent,
+    agreements,
+    acceptAgreement,
+    file,
+    authManagement,
+    organization,
+    group,
+    orgInvite,
+    directory,
+    workspace,
+  ]
 })
 
 

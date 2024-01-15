@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import {buildWorkspaceSummary} from "../workspaces.distrib.js";
+import {buildUserSummary} from "../../users/users.distrib.js";
 
 export const addGroupsOrUsersToWorkspace = async context => {
   const { data } = context;
@@ -31,7 +32,7 @@ export const addGroupsOrUsersToWorkspace = async context => {
         groupsOrUsersOfWorkspace.push({
           type,
           permission,
-          groupOrUser: _.pick(user, ['_id', 'username', 'email', 'name']),
+          groupOrUser: buildUserSummary(user),
         });
       } else {
         throw new BadRequest('Type must be either Group or User');

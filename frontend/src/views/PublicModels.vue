@@ -1,5 +1,6 @@
 <template>
   <v-container>
+<!--    {{ sharedModelsFiltered }}-->
     <v-row class="pl-4 pr-4">
       <div class="text-h5">Public Models</div>
       <v-spacer />
@@ -126,7 +127,7 @@
         <div class="text-grey-darken-1">You reached the end!</div>
       </template>
       <template v-else>
-        <v-btn flat variant="text" @click.stop="fetchModels">Load more</v-btn>
+        <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
       </template>
     </v-row>
     <ShareLinkDialog
@@ -142,12 +143,14 @@ import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import ShareLinkDialog from '@/components/ShareLinkDialog.vue';
+import scrollListenerMixin from '@/mixins/scrollListenerMixin';
 
 const { SharedModel } = models.api;
 
 export default {
   name: 'PublicModels',
   components: { ShareLinkDialog },
+  mixins: [scrollListenerMixin],
   data: () => ({
     showRecentModels: true,
     pagination: {
@@ -157,24 +160,33 @@ export default {
     },
     isShareLinkDialogActive: false,
     activeShareModel: {},
+    loading: false,
+    scrollListener: null,
   }),
-  async created() {
-  },
   async mounted() {
-    await this.fetchModels();
-    window.addEventListener('scroll', e => {
-      if(document.documentElement.scrollHeight <= window.scrollY + window.innerHeight + 1) {
-        this.fetchModels();
-      }
-    });
+    await this.fetchDataOnScroll();
+  },
+
+  beforeRouteEnter(to, from, next) {
+    // Use a callback with "next" to pass the instantiated component
+    next(vm => { vm.setupScrollListener(); });
+  },
+
+  beforeRouteLeave(to, from, next) {
+    this.removeScrollListener();
+    next();
   },
   computed: {
     ...mapState('shared-models', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
+    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
+    // sharedModelsFiltered: () => SharedModel.findInStore({ query: { "model.isThumbnailGenerated": true , isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
   },
   methods: {
-    async fetchModels() {
+    async fetchDataOnScroll() {
+      if (this.isFindPending) {
+        return;
+      }
       if (this.sharedModels.data.length !== this.pagination.total) {
         const models = await SharedModel.find({
           query: {
@@ -185,6 +197,7 @@ export default {
             },
             isSystemGenerated: true,
             isActive: true,
+            // "model.isThumbnailGenerated": true,
           }
         });
         this.pagination.skip = models.skip + this.pagination.limit;

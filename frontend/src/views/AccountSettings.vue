@@ -12,9 +12,35 @@
 
         <v-divider />
         <v-list-item>
-          <v-list-item-title>User Name</v-list-item-title>
+          <v-list-item-title>Name</v-list-item-title>
           <v-list-item-subtitle>
-            {{ user.username }}
+            {{ user.name }}
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openUserChangeNameDialog()"
+              >
+                Change Name
+              </v-btn>
+              <v-spacer></v-spacer>
+              <UserChangeNameDialog
+                :is-active="isUserChangeNameDialogActive"
+                :user="user"
+                ref="userChangeNameDialog"
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Username</v-list-item-title>
+          <v-list-item-subtitle>
+            <code>{{ user.username }}</code>
           </v-list-item-subtitle>
         </v-list-item>
 
@@ -27,21 +53,6 @@
     >
       <v-list lines="three">
         <v-list-subheader class="mb-2">Private</v-list-subheader>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Name</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ user.name }}
-          </v-list-item-subtitle>
-<!--          <template #append>-->
-<!--            <v-list-item-action>-->
-<!--              <v-btn variant="outlined" color="default" size="small">-->
-<!--                Change Name-->
-<!--              </v-btn>-->
-<!--            </v-list-item-action>-->
-<!--          </template>-->
-        </v-list-item>
 
         <v-divider />
         <v-list-item>
@@ -153,18 +164,19 @@ import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
-import ShareLinkDialog from "@/components/ShareLinkDialog.vue";
 import VerifyEmailDialog from "@/components/VerifyEmailDialog.vue";
+import UserChangeNameDialog from "@/components/UserChangeNameDialog.vue";
 
-const { Model, User } = models.api;
+const { Model } = models.api;
 
 export default {
   name: 'AccountSettings',
-  components: {VerifyEmailDialog, ShareLinkDialog, ResetPasswordDialog},
+  components: {UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},
   data() {
     return {
       isResetPasswordDialogActive: false,
       isVerifyEmailDialogActive: false,
+      isUserChangeNameDialogActive: false,
       remainingFiles: "processing..."
     }
   },
@@ -186,7 +198,7 @@ export default {
       this.$router.push({name: 'ChooseTier'});
     },
     gotoAccountHistory() {
-      this.$router.push({name: 'AccountHistory'});
+      this.$router.push({name: 'AccountHistory', params: {slug: this.user.username}});
     },
     async getRemainingFiles() {
       const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
@@ -200,6 +212,10 @@ export default {
       this.isVerifyEmailDialogActive = true;
       this.$refs.verifyEmailDialog.$data.dialog = true;
     },
+    openUserChangeNameDialog() {
+      this.isUserChangeNameDialogActive = true;
+      this.$refs.userChangeNameDialog.$data.dialog = true;
+    }
   }
 }
 </script>

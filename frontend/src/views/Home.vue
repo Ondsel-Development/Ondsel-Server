@@ -7,6 +7,13 @@
         location="start"
       >Open a file</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="modelInfoDrawerClicked">
+      <v-icon>mdi-information-outline</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Get Info</v-tooltip>
+    </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
       <v-icon>mdi-magnify</v-icon>
       <v-tooltip
@@ -82,6 +89,15 @@
             >
               <span>Please upgrade your tier.</span>
             </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-else-if="error === 'ConflictingFilename'"
+            >
+              <span>This filename conflicts with a file you have already uploaded.</span>
+            </v-alert>
           </v-card-item>
           <v-card-item v-if="model">
             <v-card
@@ -135,7 +151,7 @@
             <v-btn v-if="model && !error" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
-            <v-btn v-else icon flat :to="{ name: 'Models' }">
+            <v-btn v-else icon flat :to="{ name: 'LensHome' }">
               <v-icon icon="mdi-arrow-left" size="x-large"></v-icon>
             </v-btn>
           </v-card-actions>
@@ -143,27 +159,31 @@
       </div>
     </v-dialog>
     <AttributeViewer
-      v-if="model"
+      v-if="model && organization"
       :is-active="isAttributeViewerActive"
       :attributes="model.attributes"
       :is-obj-generated="model.isObjGenerated"
       :is-model-loaded="isModelLoaded"
+      :can-have-write-access-to-workspace="canHaveWriteAccess"
+      :organization-constraints="organization.constraint"
       ref="attributeViewer"
       @update-model="updateModel"
     />
     <ExportModelDialog
-      v-if="model"
+      v-if="model && organization"
       :is-active="isExportModelDialogActive"
       :model="model"
+      :organization-constraints="organization.constraint"
       ref="exportModelDialog"
     />
     <v-navigation-drawer
-      v-model="manageSharedModelsDrawer"
+      v-model="isDrawerOpen"
       location="right"
       width="1100"
       temporary
     >
-      <MangeSharedModels :model="model"/>
+      <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>
+      <ModelInfo ref="modelInfoDrawer" v-else-if="drawerActiveWindow === 'modelInfo'" :model="model"/>
     </v-navigation-drawer>
   </div>
 </template>
@@ -173,17 +193,19 @@ import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
 import { mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
+import { nextTick } from 'vue';
 
 import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import MangeSharedModels from '@/components/MangeSharedModels';
+import ModelInfo from '@/components/ModelInfo.vue';
 
-const { Model, SharedModel } = models.api;
+const { Model, SharedModel, Workspace, Organization } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog },
+  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog, ModelInfo },
   data: () => ({
     dialog: true,
     model: null,
@@ -195,6 +217,8 @@ export default {
     isReloadingOBJ: false,
     error: '',
     manageSharedModelsDrawer: false,
+    isDrawerOpen: false,
+    drawerActiveWindow: null,
     generatePublicLinkValue: null,
   }),
   mounted() {
@@ -205,6 +229,8 @@ export default {
     if (modelId) {
       try {
         this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
+        await Workspace.get(this.model.file.workspace._id);
+        await Organization.get(this.workspace.organizationId);
       } catch (error) {
         this.error = 'NotFound';
       }
@@ -220,6 +246,9 @@ export default {
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
+    canHaveWriteAccess: vm => vm.workspace ? vm.workspace.haveWriteAccess : false,
+    workspace: vm => vm.model && vm.model.file && Workspace.getFromStore(vm.model.file.workspace._id),
+    organization: vm => vm.workspace && Organization.getFromStore(vm.workspace.organizationId),
     dropzoneOptions() {
       const h = import.meta.env.VITE_APP_API_URL;
       const vm = this;
@@ -257,9 +286,16 @@ export default {
                   uniqueFileName: vm.uniqueFileName,
                 }
               })
+              await Workspace.get(vm.model.file.workspace._id);
+              await Organization.get(vm.workspace.organizationId);
               vm.uploadInProgress = false;
             } catch (e) {
               vm.error = 'UpgradeTier';
+              if (e.name === 'BadRequest') {
+                if (e.message.startsWith('filename')) {
+                  vm.error = 'ConflictingFilename';
+                }
+              }
             }
           });
           // eslint-disable-next-line no-unused-vars
@@ -345,13 +381,28 @@ export default {
       }
     },
     async sharedModelDrawerClicked() {
-      this.manageSharedModelsDrawer = !this.manageSharedModelsDrawer;
+      if (this.drawerActiveWindow === 'sharedModel') {
+        this.isDrawerOpen = !this.isDrawerOpen;
+      } else {
+        this.isDrawerOpen = true;
+      }
+      this.drawerActiveWindow = 'sharedModel';
       await SharedModel.find({
         query: {
           cloneModelId: this.model._id,
           $paginate: false
         },
       })
+    },
+    async modelInfoDrawerClicked() {
+      if (this.drawerActiveWindow === 'modelInfo') {
+        this.isDrawerOpen = !this.isDrawerOpen;
+      } else {
+        this.isDrawerOpen = true;
+      }
+      this.drawerActiveWindow = 'modelInfo';
+      await nextTick();
+      await this.$refs.modelInfoDrawer.fetchData();
     },
     modelLoaded() {
       if (this.isReloadingOBJ) {

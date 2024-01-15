@@ -1,3 +1,5 @@
+import { orgInvites } from './org-invites/org-invites.js'
+
 import { directory } from './directories/directories.js'
 
 import { group } from './groups/groups.js'
@@ -29,6 +31,8 @@ import { upload } from './upload/upload.js'
 import { user } from './users/users.js'
 
 export const services = (app) => {
+  app.configure(orgInvites)
+
   app.configure(directory)
 
   app.configure(group)

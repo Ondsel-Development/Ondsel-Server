@@ -53,4 +53,25 @@ export const distributeGroupSummaries = async (context) => {
 //             These routines are used by _other_ collections after creation/update/deletion
 //
 
-// nothing
+export async function upsertUserSummaryToGroup(app, groupId, userSummary) {
+  try {
+    const groupService = app.service('groups');
+    const group = await groupService.get(groupId);
+    let userList = group.users || [];
+    const index = userList.findIndex((u) => u._id.toString() === userSummary._id.toString());
+    if (index === -1) {
+      userList.push(userSummary);
+    } else {
+      userList[index] = userSummary;
+    }
+    await groupService.patch(
+      groupId,
+      {
+        users: userList,
+      }
+    );
+  } catch (e) {
+    console.log(`encountered error while distributing user sum to group ${groupId}`);
+    console.log(e);
+  }
+}

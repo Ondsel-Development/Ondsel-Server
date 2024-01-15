@@ -19,7 +19,7 @@ import {
 } from './groups.schema.js'
 import { GroupService, getOptions } from './groups.class.js'
 import { groupPath, groupMethods } from './groups.shared.js'
-import {iff, isProvider, preventChanges} from "feathers-hooks-common";
+import {iff, isProvider, preventChanges, discard} from "feathers-hooks-common";
 import { addUsersToGroup } from './commands/addUsersToGroup.js';
 import { removeUsersFromGroup } from './commands/removeUsersFromGroup.js';
 import { isUserOwnerOrAdminOfOrganization } from './helpers.js';
@@ -55,16 +55,19 @@ export const group = (app) => {
       ]
     },
     before: {
-      all: [schemaHooks.validateQuery(groupQueryValidator), schemaHooks.resolveQuery(groupQueryResolver)],
+      all: [
+        iff(isProvider('external'), schemaHooks.validateQuery(groupQueryValidator)), // external may not use $elemMatch etc
+        schemaHooks.resolveQuery(groupQueryResolver)
+      ],
       find: [userBelongingGroups],
       get: [userBelongingGroups],
       create: [
-        iff(isProvider('external'), preventChanges(false, '_id', 'users')),
+        iff(isProvider('external'), discard('users')),
         schemaHooks.validateData(groupDataValidator),
         schemaHooks.resolveData(groupDataResolver)
       ],
       patch: [
-        preventChanges(false, 'users'),
+        iff(isProvider('external'), preventChanges(false, 'users')),
         isUserOwnerOrAdminOfOrganization,
         iff(
           context => context.data.shouldAddUsersToGroup,
@@ -81,6 +84,9 @@ export const group = (app) => {
     },
     after: {
       all: [],
+      create: [
+        addGroupToOrganization,
+      ],
       patch: [
         distributeGroupSummaries,
       ]
@@ -100,4 +106,18 @@ const userBelongingGroups = async context => {
     }
   }
   return context;
+}
+
+
+const addGroupToOrganization = async context => {
+  await context.app.service('organizations').patch(
+    context.result.organizationId,
+    {
+      shouldAddGroupsToOrganization: true,
+      groupIds: [context.result._id],
+    },
+    {
+      user: context.params.user
+    }
+  )
 }

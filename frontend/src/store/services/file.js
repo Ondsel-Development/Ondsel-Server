@@ -10,15 +10,7 @@ class File extends BaseModel {
   static instanceDefaults() {
     return {
       custFileName: undefined,
-      currentVersionId: undefined,
-      userId: null,
-      modelId: null,
       isSystemGenerated: false,
-      createdAt: null,
-      updatedAt: null,
-      versions: [],
-      deleted: null,
-      uniqueFileName: '',
     }
   }
 }

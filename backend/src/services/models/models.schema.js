@@ -60,7 +60,10 @@ export const modelResolver = resolve({
   objUrl: virtual(async(message, context) => {
     const { app } = context;
     if (message.isObjGenerated) {
-      const r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
+      let r = await app.service('upload').get(`${message._id.toString()}_generated.BREP`);
+      if (!r.url) {
+        r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
+      }
       return r.url
     }
     return '';
@@ -190,11 +193,4 @@ export const modelQuerySchema = Type.Intersect(
   { additionalProperties: false }
 )
 export const modelQueryValidator = getValidator(modelQuerySchema, queryValidator)
-export const modelQueryResolver = resolve({
-  userId: async (value, user, context) => {
-    if (!context.params.query.isSharedModel && context.params.user) {
-      return context.params.user._id
-    }
-    return value
-  },
-})
+export const modelQueryResolver = resolve({})

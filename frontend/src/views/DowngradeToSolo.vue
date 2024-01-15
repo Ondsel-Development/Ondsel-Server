@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     async goHome() {
-      this.$router.push({name: 'Models'})
+      this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}})
     },
     async applySubscription() {
       this.accountEvent.event = AccountEventTypeMap.subscriptionTierDowngrade;

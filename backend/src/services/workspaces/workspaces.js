@@ -16,7 +16,7 @@ import {
   workspaceDataSchema,
   workspacePatchSchema,
   workspaceQuerySchema,
-  workspaceSchema,
+  workspaceSchema, uniqueWorkspaceValidator, workspacePublicFields,
 } from './workspaces.schema.js'
 import { WorkspaceService, getOptions } from './workspaces.class.js'
 import { workspacePath, workspaceMethods } from './workspaces.shared.js'
@@ -25,6 +25,11 @@ import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorksp
 import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
 import { editGroupOrUserOnWorkspace } from './commands/editGroupOrUserOnWorkspace.js';
 import { isUserBelongsToWorkspace, createAndAssignRootDirectory } from './helpers.js';
+import {
+  authenticateJwtWhenPrivate,
+  handlePublicOnlyQuery,
+  resolvePrivateResults
+} from '../../hooks/handle-public-info-query.js';
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -43,21 +48,57 @@ export const workspace = (app) => {
         description: 'A Workspace service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+           'parameters': [
+             {
+               'description': 'ID of Workspace to return',
+               'in': 'path',
+               'name': '_id',
+               'schema': {
+                 'type': 'string'
+               },
+               'required': true,
+             },
+             {
+               'description': 'If provided and set to \'true\', then only return public data',
+               'in': 'query',
+               'name': 'publicInfo',
+               'schema': {
+                 'type': 'string'
+               },
+               'required': false,
+             },
+           ]
+          }
+
+        }
       }
     })
   })
+
+  app.service(workspacePath).publish((data, context) => {
+    return app.channel(`workspace/${context.result._id.toString()}`)
+  })
+
   // Initialize hooks
   app.service(workspacePath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
         schemaHooks.resolveExternal(workspaceExternalResolver),
-        schemaHooks.resolveResult(workspaceResolver)
-      ]
+        handlePublicOnlyQuery(workspacePublicFields),
+        resolvePrivateResults(workspaceResolver),
+      ],
+      find: [authenticate('jwt')],
+      get: [authenticateJwtWhenPrivate()],
+      create: [authenticate('jwt')],
+      update: [authenticate('jwt')],
+      patch: [authenticate('jwt')],
+      remove: [authenticate('jwt')],
     },
     before: {
       all: [
-        schemaHooks.validateQuery(workspaceQueryValidator),
+        iff(isProvider('external'), schemaHooks.validateQuery(workspaceQueryValidator)),
         schemaHooks.resolveQuery(workspaceQueryResolver)
       ],
       find: [
@@ -68,7 +109,8 @@ export const workspace = (app) => {
       ],
       create: [
         schemaHooks.validateData(workspaceDataValidator),
-        schemaHooks.resolveData(workspaceDataResolver)
+        schemaHooks.resolveData(workspaceDataResolver),
+        uniqueWorkspaceValidator,
       ],
       patch: [
         preventChanges(false, 'groupsOrUsers'),

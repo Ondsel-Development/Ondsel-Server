@@ -3,10 +3,14 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
+import { Importer } from '@/threejs/libs/import/importer';
+import { OBJ_COLOR, OBJ_HIGHLIGHTED_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
 
-const OBJ_COLOR = 0xcccccc;
-const OBJ_HIGHLIGHTED_COLOR = 0x76ff90;
-const EDGE_COLOR = 0x000000;
+
+const ViewerConfig = {
+  showEdges: false,
+  showAxisHelper: true,
+}
 
 export class Viewer {
 
@@ -28,6 +32,7 @@ export class Viewer {
     this.raycaster = new THREE.Raycaster();
     this.selectedObjs = []
     this.onLoadCallback = onLoadCallback;
+    this.importer = new Importer();
 
     this.initViewer();
   }
@@ -98,50 +103,33 @@ export class Viewer {
     if (this.lineSegments) {
       this.scene.remove(this.lineSegments);
     }
+    this.importer.LoadFile(this.url, this.onFileConverted.bind(this));
+  }
+
+  onFileConverted(objs) {
+    this.obj = objs[0];
     this.lineSegments = new THREE.Group()
-
-    this.objLoader.load(
-      this.url,
-      // called when resource is loaded
-      (object) => {
-        this.obj = object
-        object.traverse((child) => {
-          if ( child instanceof THREE.Mesh ) {
-            child.material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
-            if (child.geometry !== undefined) {
-              const edges = new THREE.EdgesGeometry(child.geometry);
-              const line = new THREE.LineSegments(
-                edges,
-                new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-              );
-              this.lineSegments.add(line);
-            }
-          } else if ( child instanceof THREE.LineSegments ) {
-            const line = new THREE.LineSegments(
-              child.geometry.clone(),
-              new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-            );
-            this.lineSegments.add(line);
-          }
-        })
-        this.scene.add(object);
-        this.scene.add(this.lineSegments);
-
-        if (!this.axisHelper) {
-          this.addAxesHelper();
-          fitCameraToSelection(this.camera, this.controls, this.obj);
+    for (let child of this.obj.children) {
+      if (child instanceof THREE.Mesh) {
+        if (child.geometry !== undefined) {
+          const edges = new THREE.EdgesGeometry(child.geometry);
+          const line = new THREE.LineSegments(
+            edges,
+            new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+          );
+          this.lineSegments.add(line);
         }
-        this.onLoadCallback();
-      },
-      // called when loading is in progresses
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-      },
-      // called when loading has errors
-      function (error) {
-        console.log('An error happened');
       }
-    );
+    }
+    this.scene.add(this.obj);
+    if (ViewerConfig.showEdges) {
+      this.scene.add(this.lineSegments);
+    }
+    if (!this.axisHelper) {
+      this.addAxesHelper();
+      fitCameraToSelection(this.camera, this.controls, this.obj);
+    }
+    this.onLoadCallback();
   }
 
   initControls() {
@@ -156,7 +144,9 @@ export class Viewer {
     const maxSize = Math.max(size.x * 2, size.y * 2, size.z * 2);
 
     this.axisHelper = new THREE.AxesHelper( maxSize );
-    this.scene.add(this.axisHelper);
+    if (ViewerConfig.showAxisHelper) {
+      this.scene.add(this.axisHelper);
+    }
   }
 
   fitCameraToObjects() {

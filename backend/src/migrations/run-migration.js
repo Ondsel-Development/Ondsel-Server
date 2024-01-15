@@ -5,6 +5,21 @@ import {addUsernameCommand} from "./add-username.command.js";
 import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
 import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
+import { migrateWorkspaceGroupsOrUsersCommand } from "./update-workspace-groupsOrUsers.js";
+import {updateDirectoryFileSummariesCommand} from "./update-directory-file-summaries.command.js";
+import {addInitialTosPp} from "./add-initial-tos-pp.js";
+import {updateTos2023Aug31Command} from "./update-tos-2023-aug-31.command.js";
+import {addMissingRefNamesCommand} from "./add-missing-ref-names.command.js";
+import { updateDirectoryWorkspaceSubDocs } from './update-workspaceSubDocs-for-directory.js';
+import { addOwnerToOrganizationCommand } from './add-owner-to-organization.js';
+import { addPersonalOrgToUserCommand } from './add-personal-org-to-user.js';
+import {updateUserSummariesEverywhereCommand} from "./update-user-summaries-everywhere.command.js";
+import {updateWorkspaceAndUserOrganizationInfoCommand} from "./update-workspace-and-user-organization-info.command.js";
+import {updateOrgUsersCommand} from "./update-org-users.command.js";
+import {updateGroupUsersCommand} from "./update-group-users.command.js";
+import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
+import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
+
 
 async function runMigration() {
   console.log('Migration start');
@@ -19,12 +34,12 @@ async function runMigration() {
     // case 'updateTierNames':
     //   await updateTierNames(app);
     //   break;
-    // case 'addInitialTosPp':
-    //   await addInitialTosPp(app);
-    //   break;
-    // case 'updateTos2023Aug31':
-    //   await updateTos2023Aug31Command(app);
-    //   break;
+    case 'addInitialTosPp':
+      await addInitialTosPp(app);
+      break;
+    case 'updateTos2023Aug31':
+      await updateTos2023Aug31Command(app);
+      break;
     // case 'addUsername':
     //   await addUsernameCommand(app);
     //   break;
@@ -36,6 +51,42 @@ async function runMigration() {
       break;
     case 'migrateObjectsForSharedWorkspace':
       await migrateObjectsForSharedWorkspaceCommand(app);
+      break;
+    case 'migrateWorkspaceGroupsOrUsers':
+      await migrateWorkspaceGroupsOrUsersCommand(app);
+      break;
+    case 'updateDirectoryFileSummaries':
+      await updateDirectoryFileSummariesCommand(app);
+      break
+    case 'addMissingRefNames':
+      await addMissingRefNamesCommand(app)
+      break;
+    case 'updateDirectoryWorkspaceSubDocs':
+      await updateDirectoryWorkspaceSubDocs(app);
+      break;
+    case 'addOwnerToOrganization':
+      await addOwnerToOrganizationCommand(app);
+      break;
+    case 'addPersonalOrganizationToUser':
+      await addPersonalOrgToUserCommand(app);
+      break;
+    case 'updateUserSummariesEverywhere':
+      await updateUserSummariesEverywhereCommand(app);
+      break;
+    case 'updateWorkspaceAndUserOrganizationInfo':
+      await updateWorkspaceAndUserOrganizationInfoCommand(app);
+      break;
+    case 'updateOrgUsers':
+      await updateOrgUsersCommand(app);
+      break;
+    case 'updateGroupUsers':
+      await updateGroupUsersCommand(app);
+      break;
+    case 'updateWorkspaceUsers':
+      await updateWorkspaceUsersCommand(app);
+      break;
+    case 'updateFileRelatedUserDetails':
+      await updateFileRelatedUserDetailsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

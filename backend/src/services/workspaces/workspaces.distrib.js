@@ -9,10 +9,13 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
 //
 
+import {workspace} from "./workspaces.js";
+
 export function buildWorkspaceSummary(workspace) {
   return {
     _id: workspace._id,
     name: workspace.name,
+    refName: workspace.refName,
   };
 }
 
@@ -44,5 +47,50 @@ export async function upsertGroupSummarytoWorkspaces(context, workspaceId, group
         groupOrUserData: { groupOrUser: groupSummary }
       }
     );
+  }
+}
+
+export async function updateOrganizationSummaryToMatchingWorkspaces(context, orgSummary) {
+  const workspaceService = context.app.service('workspaces');
+  const matchingWorkspaces = await workspaceService.find({
+    query: {
+      organizationId: orgSummary._id,
+    }
+  });
+  for (const ws of matchingWorkspaces.data) {
+    await updateOrganizationSummaryToWorkspace(context, ws._id, orgSummary);
+  }
+}
+
+export async function updateOrganizationSummaryToWorkspace(context, workspaceId, orgSummary) {
+  const workspaceService = context.app.service('workspaces');
+  await workspaceService.patch(
+    workspaceId,
+    {
+      organization: orgSummary,
+    }
+  );
+}
+
+export async function updateUserSummaryToWorkspace(app, workspaceId, userSummary) {
+  try {
+    const workspaceService = app.service('workspaces');
+    const workspace = await workspaceService.get(workspaceId);
+    let groupsOrUsersList = workspace.groupsOrUsers || [];
+    const index = groupsOrUsersList.findIndex((u) => (u.type === 'User') && (u.groupOrUser._id.toString() === userSummary._id.toString()));
+    if (index === -1) {
+      console.log(`Error: when distributing summary from user ${userSummary._id}, workspace ${workspaceId} was missing item in groupsOrUsers field.`);
+    } else {
+      await workspaceService.patch(
+        workspaceId,
+        {
+          shouldEditGroupOrUserOnWorkspace: true,
+          groupOrUserData: { groupOrUser: userSummary }
+        }
+      );
+    }
+  } catch (e) {
+    console.log(`encountered error while distributing user sum to workspace ${workspaceId}`);
+    console.log(e);
   }
 }
