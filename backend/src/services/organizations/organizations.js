@@ -232,23 +232,24 @@ export const organization = (app) => {
 
 const detectOrgRefNameInId = async context => {
   const id = context.id.toString();
-  // note: both ID _and_ refName can be 24 digits because of personal orgs; so just speculatively try refName
-  let orgList = {};
-  if (context.publicDataOnly) {
-    orgList = await context.service.find({
-      query: {
-        publicInfo: "true",
-        refName: id,
-        $select: organizationPublicFields,
-      }
-    });
-  } else {
-    orgList = await context.service.find(
-      {query: { refName: id } }
-    );
-  }
-  if (orgList?.total === 1) {
-    context.result = orgList.data[0]; // only change things if we actually find something
+  if (id.length < 24) { // a 24 character id is an OID not a refName, so only look at refName if shorter
+    let orgList = {};
+    if (context.publicDataOnly) {
+      orgList = await context.service.find({
+        query: {
+          publicInfo: "true",
+          refName: id,
+          $select: organizationPublicFields,
+        }
+      });
+    } else {
+      orgList = await context.service.find(
+        {query: { refName: id } }
+      );
+    }
+    if (orgList?.total === 1) {
+      context.result = orgList.data[0];
+    }
   }
   return context;
 }
