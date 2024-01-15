@@ -19,6 +19,9 @@ import {updateOrgUsersCommand} from "./update-org-users.command.js";
 import {updateGroupUsersCommand} from "./update-group-users.command.js";
 import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
+import {
+  updateDirectoriesNeedingEmptySubdirectoryArraysCommand
+} from "./update-directories-needing-empty-subdirectory-arrays.command.js";
 
 
 async function runMigration() {
@@ -87,6 +90,9 @@ async function runMigration() {
       break;
     case 'updateFileRelatedUserDetails':
       await updateFileRelatedUserDetailsCommand(app);
+      break;
+    case 'updateDirectoriesNeedingEmptySubdirectoryArrays':
+      await updateDirectoriesNeedingEmptySubdirectoryArraysCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
