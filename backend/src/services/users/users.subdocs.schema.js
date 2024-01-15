@@ -108,7 +108,7 @@ export const subscriptionConstraintMap = {
     canExportModel: false,
     defaultValueOfPublicLinkGeneration: true,
     canDisableAutomaticGenerationOfPublicLink: false,
-    canCreateOrganization: true,
+    canCreateOrganization: false,
   },
   'Peer': {
     maxModelObjects: 250,
@@ -119,7 +119,7 @@ export const subscriptionConstraintMap = {
     canExportModel: true,
     defaultValueOfPublicLinkGeneration: false,
     canDisableAutomaticGenerationOfPublicLink: true,
-    canCreateOrganization: true,
+    canCreateOrganization: false,
   },
   'Enterprise': {
     maxModelObjects: 1000,
