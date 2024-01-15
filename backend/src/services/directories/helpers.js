@@ -64,15 +64,18 @@ export const attachNewDirectoryToParent = async context => {
   // used 'after' a 'create'
   // by the time this is called, the correctness of insertion (rights, uniqueness, etc.) has been verified
   const childDir = context.result;
-  const parentDir = await context.service.get(childDir.parentDirectory._id);
-  let directories = parentDir.directories || [];
-  directories.push(buildDirectorySummary(childDir));
-  await context.service.patch(
-    parentDir._id,
-    {
-      directories: directories,
-    }
-  )
+  // workspace root directory doesn't have parentDirectory
+  if (childDir.parentDirectory?._id) {
+    const parentDir = await context.service.get(childDir.parentDirectory._id);
+    let directories = parentDir.directories || [];
+    directories.push(buildDirectorySummary(childDir));
+    await context.service.patch(
+      parentDir._id,
+      {
+        directories: directories,
+      }
+    )
+  }
 }
 
 export const canUserAccessDirectoryOrFilePatchMethod = async context => {
