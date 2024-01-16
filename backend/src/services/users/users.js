@@ -252,7 +252,7 @@ const createSampleModels = async (context) => {
       version: {
         uniqueFileName: sampleModelFileName,
       }
-    }, { user: { _id: context.result._id }})
+    }, { user: context.result, $triggerLambda: false })
 
     const model  = await modelService.create({
       fileId: file._id.toString(),
