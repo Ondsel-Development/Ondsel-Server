@@ -76,8 +76,15 @@ export const sharedModelsResolver = resolve({
   }),
   cloneModel: virtual(async (message, context) => {
     const modelService = context.app.service('models');
-    const model = await modelService.get(message.cloneModelId);
-    return _.pick(model, ['file.custFileName', 'file._id', 'file.workspace', 'file.directory', 'file.userId', 'file.createdAt']);
+    try {
+      const model = await modelService.get(message.cloneModelId);
+      return _.pick(model, ['file.custFileName', 'file._id', 'file.workspace', 'file.directory', 'file.userId', 'file.createdAt']);
+    } catch (error) {
+      if (error instanceof NotFound) {
+        return {};
+      }
+      throw error;
+    }
   }),
 })
 
