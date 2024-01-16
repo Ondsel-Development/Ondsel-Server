@@ -193,7 +193,9 @@ const commitNewVersion = async (context) => {
 
   context.data = _.omit(context.data, ['shouldCommitNewVersion', 'version'])
 
-  context.$triggerLambda = true;
+  if (context.$triggerLambda === undefined) {
+    context.$triggerLambda = true;
+  }
 
   return context;
 };
@@ -211,7 +213,9 @@ const checkoutToVersion = async (context) => {
 
   context.data['currentVersionId'] = context.data.versionId
   context.data = _.omit(context.data, ['shouldCheckoutToVersion', 'versionId'])
-  context.$triggerLambda = true;
+  if (context.$triggerLambda === undefined) {
+    context.$triggerLambda = true;
+  }
   return context;
 };
 
