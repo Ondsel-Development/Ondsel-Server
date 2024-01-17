@@ -12,6 +12,7 @@ import {BadRequest} from "@feathersjs/errors";
 import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
+import {LicenseType} from "./workspaces.subdocs.schema.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -28,8 +29,10 @@ export const workspaceSchema = Type.Object(
     name: Type.String(),
     refName: Type.String(),
     refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
-    public: Type.Boolean(),
+    open: Type.Boolean(),
+    license: Type.Optional(Type.Union([Type.Null(), LicenseType])),
     description: Type.String(),
+    long_description: Type.String(),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -68,7 +71,7 @@ export const workspaceExternalResolver = resolve({})
 export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName'];
 
 // Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'public', 'description', 'organizationId'], {
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'license', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
 })
 export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
@@ -96,6 +99,10 @@ export const workspaceDataResolver = resolve({
     const orgId = message.organizationId;
     const org = await orgService.get(orgId);
     return buildOrganizationSummary(org);
+  },
+  public: async (_value, _message, _context) => {
+    // TODO: later this will return "true" for open org
+    return false;
   }
 })
 
@@ -109,7 +116,7 @@ export const workspacePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'public', 'refNameHash', 'organizationId'])
+export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'open', 'license', 'description', 'long_description', 'refNameHash', 'organizationId'])
 export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),

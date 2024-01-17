@@ -15,6 +15,12 @@
 <!--      </div>-->
     </v-row>
     <v-row class="mt-10">
+      <p>"{{workspace.description}}"</p>
+    </v-row>
+    <v-row class="mt-10">
+      <p><i>{{openMessage}}</i></p>
+    </v-row>
+    <v-row class="mt-10">
       <v-text-field
         v-model="activePath"
         variant="outlined"
@@ -75,6 +81,7 @@ export default {
       directoryDetail: {},
       organizationDetail: undefined,
       slug: '',
+      openMessage: '',
     };
   },
   async created() {
@@ -93,6 +100,12 @@ export default {
       console.log(`Not found: ${this.slug} ${this.$route.params.wsname} combo not found in workspaces.`);
       this.$router.push({ name: 'PageNotFound' });
       return;
+    }
+    if (this.workspaceDetail.open) {
+      this.openMessage = "Open (shared with public)"
+      if (this.workspace.license) {
+        this.openMessage += " under license " + this.workspace.license;
+      }
     }
     this.directoryDetail = await Directory.get(this.workspace?.rootDirectory?._id);
     if (!this.organization) {

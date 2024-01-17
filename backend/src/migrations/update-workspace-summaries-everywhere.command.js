@@ -1,36 +1,16 @@
 import {buildWorkspaceSummary} from "../services/workspaces/workspaces.distrib.js";
 import {buildUserSummary} from "../services/users/users.distrib.js";
+import {OrganizationTypeMap} from "../services/organizations/organizations.subdocs.schema.js";
+import {SubscriptionTypeMap} from "../services/users/users.subdocs.schema.js";
 
 export async function updateWorkspaceSummariesEverywhereCommand(app) {
   // bluntly update directories, files, and groups with new Workspace summary
-  // update workspaces to public=false if not set
+  // update workspaces to `open` field if missing
   const workspaceService = app.service('workspaces');
   const userService = app.service('users');
   const directoryService = app.service('directories');
   const fileService = app.service('file');
   const groupService = app.service('groups');
-
-  console.log('>>> getting all workspaces');
-  let wsMap = {};
-  let wsMapFull = {};
-  const wsList = await workspaceService.find({
-    paginate: false,
-  });
-  for (const ws of wsList) {
-    wsMap[ws._id.toString()] = buildWorkspaceSummary(ws);
-    wsMapFull[ws._id.toString()] = ws;
-    if (ws.public === undefined || ws.public === null) {
-      await workspaceService.patch(
-        ws._id.toString(),
-        {
-          public: false,
-        }
-      );
-      wsMap[ws._id.toString()].public = false;
-    }
-  }
-  console.log(`>>> workspaces found: ${wsList.length}`);
-
 
   console.log('>>> getting all users');
   let userMapFull = {};
@@ -41,6 +21,36 @@ export async function updateWorkspaceSummariesEverywhereCommand(app) {
     userMapFull[u._id.toString()] = u;
   }
   console.log(`>>> users found: ${userList.length}`);
+
+
+  console.log('>>> getting all workspaces');
+  let wsMap = {};
+  let wsMapFull = {};
+  const wsList = await workspaceService.find({
+    paginate: false,
+  });
+  console.log(`>>> workspaces found: ${wsList.length}`);
+  for (const ws of wsList) {
+    wsMap[ws._id.toString()] = buildWorkspaceSummary(ws);
+    wsMapFull[ws._id.toString()] = ws;
+    if (ws.open === undefined || ws.open === null) {
+      let openFlag = false;
+      if (ws.organization.type === OrganizationTypeMap.personal) {
+        let userForWs = userMapFull[ws.createdBy?.toString()];
+        if (userForWs === undefined || userForWs.tier === SubscriptionTypeMap.solo || userForWs.tier === SubscriptionTypeMap.unverified) {
+          openFlag = true;
+        }
+      }
+      await workspaceService.patch(
+        ws._id.toString(),
+        {
+          open: openFlag,
+        }
+      );
+      wsMap[ws._id.toString()].open = openFlag;
+      console.log(`  >>> modified ws ${ws._id.toString()} "open" to ${openFlag}`)
+    }
+  }
 
 
   console.log('>>> getting all directories');
