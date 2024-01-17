@@ -44,6 +44,13 @@
           </v-list-item-subtitle>
         </v-list-item>
 
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Public Page</v-list-item-title>
+          <v-list-item-subtitle>
+            <a :href="userHomeUrl">User {{user.name}}</a>
+          </v-list-item-subtitle>
+        </v-list-item>
       </v-list>
     </v-card>
     <v-card
@@ -177,7 +184,8 @@ export default {
       isResetPasswordDialogActive: false,
       isVerifyEmailDialogActive: false,
       isUserChangeNameDialogActive: false,
-      remainingFiles: "processing..."
+      remainingFiles: "processing...",
+      userHomeUrl: 'tbd',
     }
   },
   computed: {
@@ -192,6 +200,7 @@ export default {
   },
   async mounted() {
     await this.getRemainingFiles();
+    this.userHomeUrl = `/user/${this.user.username}/`;
   },
   methods: {
     gotoChooseTier() {

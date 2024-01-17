@@ -34,12 +34,6 @@
         </v-row>
       </v-card-text>
     </v-card>
-
-    <div v-if="iAmThisUser">
-      <v-list>
-        <v-list-item title="visit your workspaces" :to="{ name: 'UserWorkspaces', params: {id: targetUsername} }"></v-list-item>
-      </v-list>
-    </div>
   </v-container>
 </template>
 
@@ -68,7 +62,6 @@ export default {
       }
     })
     this.publicWorkspacesDetail = wsList.data;
-    console.log(JSON.stringify(this.publicWorkspacesDetail));
   },
   computed: {
     ...mapState('auth', ['user']),
@@ -79,7 +72,10 @@ export default {
     iAmThisUser: vm => vm.loggedInUser?.user?.username === vm.$route.params.slug,
   },
   methods: {
-    ...mapActions('app', ['getUserByIdOrNamePublic'])
+    ...mapActions('app', ['getUserByIdOrNamePublic']),
+    async goToWorkspaceHome(workspace) {
+      this.$router.push({ name: 'UserWorkspaceHome', params: { slug: this.userSum.username, wsname: workspace.refName } });
+    },
   },
   watch: {
     async '$route'(to, from) {
