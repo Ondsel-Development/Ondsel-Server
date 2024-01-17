@@ -26,6 +26,7 @@ export const directoryValidator = getValidator(directorySchema, dataValidator)
 export const directoryResolver = resolve({})
 
 export const directoryExternalResolver = resolve({})
+export const directoryPublicFields = ['_id', 'name', 'parentDirectory', 'files', 'directories'];
 
 // Schema for creating new entries
 export const directoryDataSchema = Type.Pick(directorySchema, ['name', 'parentDirectory', 'workspace'], {
@@ -53,7 +54,7 @@ export const directoryPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const directoryQueryProperties = Type.Pick(directorySchema, ['_id', 'name', 'deleted'])
+export const directoryQueryProperties = Type.Pick(directorySchema, ['_id', 'name', 'deleted', 'parentDirectory', 'files', 'directories'])
 export const directoryQuerySchema = Type.Intersect(
   [
     querySyntax(directoryQueryProperties),

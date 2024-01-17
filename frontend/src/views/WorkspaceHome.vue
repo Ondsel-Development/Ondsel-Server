@@ -18,6 +18,9 @@
       <p>"{{workspace.description}}"</p>
     </v-row>
     <v-row class="mt-10">
+      <p>Owned by {{ownerText}}</p>
+    </v-row>
+    <v-row class="mt-10">
       <p><i>{{openMessage}}</i></p>
     </v-row>
     <v-row class="mt-10">
@@ -44,6 +47,7 @@
           :file="activeFile"
           :full-path="activePath"
           :can-user-write="workspace.haveWriteAccess"
+          :public-view="publicView"
           @open-directory="clickedDirectory"
         />
         <WorkspaceDirectoryView
@@ -51,6 +55,7 @@
           :directory="activeDirectory || directory"
           :directoryPath="activePath === '/' ? '' : activePath"
           :can-user-write="workspace.haveWriteAccess"
+          :public-view="publicView"
           @open-file="clickedFile"
           @open-directory="clickedDirectory"
         />
@@ -82,22 +87,35 @@ export default {
       organizationDetail: undefined,
       slug: '',
       openMessage: '',
+      publicViewDetail: false,
+      ownerText: 'tbd',
     };
   },
   async created() {
     this.slug = this.$route.params.slug;
+    const wsName = this.$route.params.wsname;
+    let orgRefName = '';
+    let ownerRealName = '';
     if (this.userRouteFlag) {
       const userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
+        console.log(`No such user for ${this.slug}`);
         this.$router.push({ name: 'PageNotFound' });
         return;
       }
-      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: userDetail._id.toString()} );
+      orgRefName = userDetail._id.toString();
+      ownerRealName = userDetail.name;
     } else {
-      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: this.$route.params.wsname, orgName: this.slug} );
+      orgRefName = this.slug;
     }
+    this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
     if (!this.workspaceDetail) {
-      console.log(`Not found: ${this.slug} ${this.$route.params.wsname} combo not found in workspaces.`);
+      this.publicViewDetail = true;
+      this.workspaceDetail = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: orgRefName} );
+    }
+    //
+    if (!this.workspaceDetail) {
+      console.log(`Not found: ${this.slug} ${wsName} combo not found in workspaces.`);
       this.$router.push({ name: 'PageNotFound' });
       return;
     }
@@ -107,16 +125,28 @@ export default {
         this.openMessage += " under license " + this.workspace.license;
       }
     }
-    this.directoryDetail = await Directory.get(this.workspace?.rootDirectory?._id);
+    this.directoryDetail = this.publicViewDetail
+      ? await this.getDirectoryByIdPublic(this.workspaceDetail.rootDirectory._id)
+      : await Directory.get(this.workspace?.rootDirectory?._id);
+    console.log(this.directoryDetail);
     if (!this.organization) {
-      this.organizationDetail = await Organization.get(this.workspace.organizationId);
+      this.organizationDetail = this.publicViewDetail
+        ? await this.getOrgByIdOrNamePublic(this.workspace.organizationId)
+        : await Organization.get(this.workspace.organizationId);
     }
-    if (this.workspace.organizationId !== this.currentOrganization._id) {
-      if (this.workspace.organization.type !== 'Open') {
-        if (this.userRouteFlag) {
-          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
-        } else {
-          this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+    if (this.userRouteFlag) {
+      this.ownerText = `user ${ownerRealName}`;
+    } else {
+      this.ownerText = `organization ${this.organizationDetail.name}`;
+    }
+    if (!this.publicViewDetail) {
+      if (this.organization._id !== this.currentOrganization._id) {
+        if (this.organization.type !== 'Open') {
+          if (this.userRouteFlag) {
+            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+          } else {
+            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+          }
         }
       }
     }
@@ -129,9 +159,16 @@ export default {
     workspace: vm => vm.workspaceDetail,
     organization: vm => vm.organizationDetail,
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
+    publicView: vm => vm.publicViewDetail,
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate', 'getUserByIdOrNamePublic']),
+    ...mapActions('app', [
+      'getWorkspaceByNamePrivate',
+      'getUserByIdOrNamePublic',
+      'getWorkspaceByNamePublic',
+      'getDirectoryByIdPublic',
+      'getOrgByIdOrNamePublic',
+    ]),
     async clickedFile(fileSubDocs, filePath) {
       let file = File.getFromStore(fileSubDocs._id);
       if (!file) {
@@ -143,7 +180,9 @@ export default {
       this.activePath = filePath;
     },
     async clickedDirectory(directorySubDocs, dirPath) {
-      let directory = Directory.getFromStore(directorySubDocs._id);
+      let directory = this.publicView
+        ? await this.getDirectoryByIdPublic(directorySubDocs._id)
+        : await Directory.get(directorySubDocs._id);
       if (!directory) {
         await Directory.get(directorySubDocs._id);
         directory = Directory.getFromStore(directorySubDocs._id);

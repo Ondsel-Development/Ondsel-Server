@@ -73,6 +73,7 @@ export default {
       default: false,
     },
     fullPath: String,
+    publicView: Boolean,
   },
   emits: ['openDirectory'],
   mixins: [fileDownloadMixin],

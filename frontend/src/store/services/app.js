@@ -109,6 +109,28 @@ export default {
       }
       return result;
     },
+    getWorkspaceByNamePublic: async (context, detail) => {
+      // get the public details of workspace via refName "slug"
+
+      let result = undefined;
+      let wsResult
+      try {
+        wsResult = await models.api.Workspace.find({
+          query: {
+            publicInfo: "true",
+            refName: detail.wsName,
+            "organization.refName": detail.orgName
+          }
+        })
+      } catch (e) {
+        console.log(`  >>> ERROR ${e}`);
+        console.log(e);
+      }
+      if (wsResult?.total === 1) {
+        result = wsResult.data[0];
+      }
+      return result;
+    },
     getWorkspaceByIdPublic: async (context, workspaceId) => {
       // get the public details of any workspace using _id
 
@@ -124,6 +146,21 @@ export default {
             }
           });
         return userResult;
+      } catch (e) {
+        return undefined;
+      }
+    },
+    getDirectoryByIdPublic: async (context, workspaceId) => {
+      // get the public details of any directory in an open workspace
+      try {
+        const dirResult = await models.api.Directory.get(
+          workspaceId,
+          {
+            query: {
+              publicInfo: "true",
+            }
+          });
+        return dirResult;
       } catch (e) {
         return undefined;
       }
