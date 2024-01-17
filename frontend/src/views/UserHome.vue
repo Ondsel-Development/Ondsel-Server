@@ -58,7 +58,7 @@ export default {
     const wsList = await Workspace.find({
       query: {
         "organization.refName": this.userSumDetail._id.toString(),
-        open: true,
+        publicInfo: 'true',
       }
     })
     this.publicWorkspacesDetail = wsList.data;
@@ -72,7 +72,7 @@ export default {
     iAmThisUser: vm => vm.loggedInUser?.user?.username === vm.$route.params.slug,
   },
   methods: {
-    ...mapActions('app', ['getUserByIdOrNamePublic']),
+    ...mapActions('app', ['getUserByIdOrNamePublic', 'getOrgByIdOrNamePublic']),
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'UserWorkspaceHome', params: { slug: this.userSum.username, wsname: workspace.refName } });
     },

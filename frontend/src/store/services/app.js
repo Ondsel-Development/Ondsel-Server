@@ -46,7 +46,7 @@ export default {
       // get the public details of any organization using _id or refName (slug)
       let result = undefined;
       let orgResult;
-      if (name.length === 24) {
+      if (isObjectId(name)) {
         orgResult = await models.api.Organization.find({
           query: {
             publicInfo: "true",

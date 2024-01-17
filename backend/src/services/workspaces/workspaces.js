@@ -24,7 +24,11 @@ import { isUserOwnerOrAdminOfOrganization } from '../groups/helpers.js';
 import { addGroupsOrUsersToWorkspace } from './commands/addGroupsOrUsersToWorkspace.js';
 import { removeGroupsOrUsersFromWorkspace } from './commands/removeGroupsOrUsersFromWorkspace.js';
 import { editGroupOrUserOnWorkspace } from './commands/editGroupOrUserOnWorkspace.js';
-import { isUserBelongsToWorkspace, createAndAssignRootDirectory } from './helpers.js';
+import {
+  isUserBelongsToWorkspace,
+  createAndAssignRootDirectory,
+  limitPublicOnlyRequestsToOpenWorkspaces
+} from './helpers.js';
 import {
   authenticateJwtWhenPrivate,
   handlePublicOnlyQuery,
@@ -70,8 +74,46 @@ export const workspace = (app) => {
                'required': false,
              },
            ]
-          }
-
+          },
+          find: {
+            "parameters": [
+              {
+                "description": "Number of results to return",
+                "in": "query",
+                "name": "$limit",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              {
+                "description": "Number of results to skip",
+                "in": "query",
+                "name": "$skip",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              {
+                'description': 'If provided and set to \'true\', then only return open workspace details; No auth needed.',
+                'in': 'query',
+                'name': 'publicInfo',
+                'schema': {
+                  'type': 'string'
+                },
+                'required': false,
+              },
+              {
+                "description": "Query parameters",
+                "in": "query",
+                "name": "filter",
+                "style": "form",
+                "explode": true,
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceQuery"
+                }
+              }
+            ]
+          },
         }
       }
     })
@@ -89,7 +131,7 @@ export const workspace = (app) => {
         handlePublicOnlyQuery(workspacePublicFields),
         resolvePrivateResults(workspaceResolver),
       ],
-      find: [authenticate('jwt')],
+      find: [authenticateJwtWhenPrivate()],
       get: [authenticateJwtWhenPrivate()],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
@@ -103,6 +145,7 @@ export const workspace = (app) => {
       ],
       find: [
         isUserBelongsToWorkspace,
+        limitPublicOnlyRequestsToOpenWorkspaces,
       ],
       get: [
         isUserBelongsToWorkspace,
