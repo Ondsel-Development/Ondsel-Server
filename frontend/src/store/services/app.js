@@ -1,4 +1,5 @@
 import { models } from '@feathersjs/vuex';
+import axios from "axios";
 
 
 const state = {
@@ -71,20 +72,18 @@ export default {
     getUserByIdOrNamePublic: async (context, name) => {
       // get the public details of any user using _id or username
 
-      // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
-      // not even non-$or queries work
+      // using direct axios query to bypass find/get bug
       //
-      const userResult = await models.api.User.find({
-        query: {
-          publicInfo: "true",
-          "$or": [
-            { username: name },
-            ...(isObjectId(name) ? [{_id: name}] : [])
-          ]
+      const base = import.meta.env.VITE_APP_API_URL;
+      let query = `${base}users?username=${name}&publicInfo=true`;
+      if (isObjectId(name)) {
+        query = `${base}users?_id=${name}&publicInfo=true`;
+      }
+      let response = await axios.get(query);
+      if (response.data) {
+        if (response.data.total === 1) {
+          return response.data.data[0];
         }
-      });
-      if (userResult.total) {
-        return userResult.data[0];
       }
       return undefined;
     },
