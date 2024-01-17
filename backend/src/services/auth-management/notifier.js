@@ -35,48 +35,61 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: "Please confirm this e-mail address for your Ondsel account",
-          text: "To verify, click here: " + getLink('verify-email', user.verifyToken, user._id, baseUrl),
+          subject: `[Ondsel] Please confirm your Ondsel account`,
+          text: "To verify your newly registered account with Ondsel, please click here: `
+            + " + getLink('verify-email', user.verifyToken, user._id, baseUrl)
+            + `\n\nYours sincerely,\n`
+            + `Team Ondsel`,
         });
       case authManagementActionTypeMap.verifySignupLong:
       case verifySignupGENERIC:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: "E-Mail address for Ondsel Account verified",
-          text: `Verification of ${user.email} complete. Thanks for working with us!`,
+          subject: `[Ondsel] Thanks for confirming your account`,
+          text: `Verification of ${user.email} is complete. Welcome to Ondsel Lens!\n\n`
+            + `Yours sincerely,\n`
+            + `Team Ondsel`,
         });
       case authManagementActionTypeMap.sendResetPwd:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: "Reset password for your Ondsel account.",
-          text: `To reset your ${user.username} password, click here: `
-            + getLink('change-password', user.resetToken, user._id, baseUrl),
+          subject: `[Ondsel] Reset password for your Ondsel account.`,
+          text: `To reset your ${user.username} password, please click here: `
+            + getLink('change-password', user.resetToken, user._id, baseUrl)
+            + `\n\nYours sincerely,\n`
+            + `Team Ondsel`
         });
       case authManagementActionTypeMap.resetPwdLong:
       case resetPwdGENERIC:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: "Notification: Ondsel password has been change",
-          text: `Your password for ${user.username} has been successfully changed!`,
+          subject: `[Ondsel] Your password has been changed`,
+          text: `Your password for ${user.username} at Ondsel has been successfully changed.\n\n`
+            + `Yours sincerely,\n`
+            + `Team Ondsel`,
         });
       case orgInviteStateTypeMap.sendOrgInviteEmail:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email,
-          subject: `[Ondsel] You have been invited to org ${invite.organization.name}`,
+          subject: `[Ondsel] You have been invited to "${invite.organization.name}"`,
           text: `You have been invited to join an organization titled "${invite.organization.name}".\n`
-            + `Click on the following link to accept: `
-            + getLink('join-org', invite.inviteToken, invite.inviteId, baseUrl),
+            + `Please click the following link to accept: `
+            + getLink('join-org', invite.inviteToken, invite.inviteId, baseUrl)
+            + `\n\nYours sincerely,\n`
+            + `Team Ondsel`,
         });
       case orgInviteStateTypeMap.verifyOrgInviteEmail:
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email, // NOTE: this email is the User's email; NOT the invite's original email (if different)
-          subject: `[Ondsel] You have been Accepted to organization ${invite.organization.name}`,
-          text: `You are now part of organization ${invite.organization.name}.`,
+          subject: `[Ondsel] You have been accepted to "${invite.organization.name}"`,
+          text: `You are now a member of the "${invite.organization.name}" organization.\n\n`
+            + `Yours sincerely,\n`
+            + `Team Ondsel`,
         });
       default:
         throw new BadRequest(`unhandled auth-management type ${type}`);
