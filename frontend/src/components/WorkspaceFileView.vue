@@ -11,7 +11,7 @@
         <v-btn flat>Explore</v-btn>
       </a>
       <v-btn
-        :disabled="isFileDownloadInProgress"
+        :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
         flat
@@ -63,7 +63,7 @@ import FileVersionsTable from '@/components/FileVersionsTable.vue';
 import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.vue';
 import DeleteFileDialog from "@/components/DeleteFileDialog.vue";
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
-import {mapActions} from "vuex";
+import {mapActions, mapState} from "vuex";
 
 export default {
   name: 'WorkspaceFileView',
@@ -81,6 +81,7 @@ export default {
   mixins: [fileDownloadMixin],
   data: () => ({}),
   computed: {
+    ...mapState('auth', ['user']),
     fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
   },
   methods: {

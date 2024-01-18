@@ -28,7 +28,7 @@
         <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
           color="primary"
-          :disabled="isFileDownloadInProgress"
+          :disabled="isFileDownloadInProgress || !user"
           :loading="isFileDownloadInProgress"
           @click="downloadFile(selectedFileVersion.uniqueFileName, `${selectedFileVersion._id.substr(-6)}_${file.custFileName}`)"
         >Download Copy</v-btn>
@@ -65,6 +65,7 @@ export default {
     dialog: false,
   }),
   computed: {
+    ...mapState('auth', ['user']),
     ...mapState('file', ['isPatchPending']),
     tableData: (vm) => ([
       {
