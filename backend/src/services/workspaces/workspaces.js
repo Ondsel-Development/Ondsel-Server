@@ -34,6 +34,7 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from '../../hooks/handle-public-info-query.js';
+import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -156,6 +157,7 @@ export const workspace = (app) => {
         uniqueWorkspaceValidator,
       ],
       patch: [
+        copyWorkspaceBeforePatch,
         preventChanges(false, 'groupsOrUsers'),
         iff(
           isProvider('external'),
@@ -180,6 +182,9 @@ export const workspace = (app) => {
     },
     after: {
       all: [],
+      patch: [
+        distributeWorkspaceSummaries,
+      ],
       create: [
         createAndAssignRootDirectory,
       ],

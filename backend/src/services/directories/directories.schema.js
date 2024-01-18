@@ -59,7 +59,9 @@ export const directoryQuerySchema = Type.Intersect(
   [
     querySyntax(directoryQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      "workspace._id": Type.Optional(ObjectIdSchema()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )

@@ -89,7 +89,6 @@ export default {
     },
     getWorkspaceByNamePrivate: async (context, detail) => {
       // get the private details of workspace via refName "slug"
-      // throws error if not found
 
       let result = undefined;
       let wsResult
@@ -101,8 +100,8 @@ export default {
           }
         })
       } catch (e) {
-        console.log(`  >>> ERROR ${e}`);
-        console.log(e);
+        // console.log(`  >>> ERROR ${e}`);
+        // console.log(e);
       }
       if (wsResult?.total === 1) {
         result = wsResult.data[0];
