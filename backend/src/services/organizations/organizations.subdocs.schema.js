@@ -4,11 +4,13 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 // Main data model schema
 export const OrganizationTypeMap = {
   personal: 'Personal',
+  open: 'Open',
   private: 'Private',
 }
 
 export const OrganizationType = StringEnum([
   OrganizationTypeMap.personal,
+  OrganizationTypeMap.open,
   OrganizationTypeMap.private
 ])
 

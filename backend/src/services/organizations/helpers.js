@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import {buildOrganizationSummary} from "./organizations.distrib.js";
 import { getConstraint } from "../users/users.subdocs.schema.js";
+import {OrganizationType, OrganizationTypeMap} from "./organizations.subdocs.schema.js";
 
 export const isUserMemberOfOrganization = async context => {
   // this is called from after/get; so result has the org (if found)
@@ -42,10 +43,14 @@ export const isUserOwnerOfOrganization = async context => {
 }
 
 export const canUserCreateOrganization = async context => {
-  const { canCreateOrganization } = getConstraint(context.params.user);
-  if (canCreateOrganization) {
+  const { canCreateOpenOrganization, canCreatePrivateOrganization } = getConstraint(context.params.user);
+  if (canCreatePrivateOrganization && context.data.type === OrganizationTypeMap.private) {
     return context;
   }
+  if (canCreateOpenOrganization && context.data.type === OrganizationTypeMap.open) {
+    return context;
+  }
+  // note: user cannot ever "create" a new personal organization.
   throw new BadRequest(`User doesn't have enough permissions to create a organization`);
 }
 

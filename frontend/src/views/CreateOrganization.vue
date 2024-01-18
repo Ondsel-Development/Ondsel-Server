@@ -74,7 +74,7 @@ export default {
     ...mapState('organizations', ['isCreatePending'])
   },
   created() {
-    if (!this.user.constraint.canCreateOrganization) {
+    if (!this.user.constraint.canCreatePrivateOrganization && !this.user.constraint.canCreateOpenOrganization) {
       this.$router.push({ name: 'PageNotFound' });
     }
   },
