@@ -179,8 +179,7 @@ export default {
   computed: {
     ...mapState('shared-models', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
-    // sharedModelsFiltered: () => SharedModel.findInStore({ query: { "model.isThumbnailGenerated": true , isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
+    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isThumbnailGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
   },
   methods: {
     async fetchDataOnScroll() {
@@ -197,7 +196,7 @@ export default {
             },
             isSystemGenerated: true,
             isActive: true,
-            // "model.isThumbnailGenerated": true,
+            isThumbnailGenerated: true,
           }
         });
         this.pagination.skip = models.skip + this.pagination.limit;

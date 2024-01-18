@@ -443,7 +443,10 @@ const feedSystemGeneratedSharedModel = async (context) => {
     if (Object.keys(patchData).length) {
       context.app.service('shared-models').patch(
         systemGeneratedSharedModel._id,
-        { model: patchData },
+        {
+          model: patchData,
+          ...(patchData.isThumbnailGenerated && { isThumbnailGenerated: patchData.isThumbnailGenerated })
+        },
         { authentication: context.params.authentication }
       )
     }

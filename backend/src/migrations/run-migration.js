@@ -21,6 +21,7 @@ import {updateWorkspaceUsersCommand} from "./update-workspace-users.command.js";
 import {updateFileRelatedUserDetailsCommand} from "./update-file-related-user-details.command.js";
 import {addEmptyDirectoriesFieldToDirectoryCommand} from "./add_empty_directories_field_to_directory.js";
 import {updateWorkspaceSummariesEverywhereCommand} from "./update-workspace-summaries-everywhere.command.js";
+import {addIsThumbnailGeneratedFieldToSharedModelsCommand} from "./add-isThumbnailGenerated-field-to-shared-models.js";
 
 
 async function runMigration() {
@@ -95,6 +96,9 @@ async function runMigration() {
       break;
     case 'updateWorkspaceSummariesEverywhere':
       await updateWorkspaceSummariesEverywhereCommand(app);
+      break;
+    case 'addIsThumbnailGeneratedFieldToSharedModels':
+      await addIsThumbnailGeneratedFieldToSharedModelsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

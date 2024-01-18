@@ -261,7 +261,8 @@ export default {
               model: {
                 _id: this.sharedModel.dummyModelId,
                 isThumbnailGenerated: true,
-              }
+              },
+              isThumbnailGenerated: true,
             }
           })
         });
