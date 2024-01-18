@@ -33,6 +33,7 @@
           @click="downloadFile(selectedFileVersion.uniqueFileName, `${selectedFileVersion._id.substr(-6)}_${file.custFileName}`)"
         >Download Copy</v-btn>
         <v-btn
+          v-if="!publicView"
           color="primary"
           :disabled="!canUserWrite"
           :loading="isPatchPending"
@@ -56,7 +57,8 @@ export default {
     canUserWrite: {
       type: Boolean,
       default: false,
-    }
+    },
+    publicView: Boolean,
   },
   mixins: [fileDownloadMixin],
   data: () => ({
@@ -70,15 +72,15 @@ export default {
         value: vm.file.custFileName,
       },
       {
-        name: 'Who',
+        name: 'Committer',
         value: vm.getUserLabel(vm.selectedFileVersion.userId, vm.file.relatedUserDetails),
       },
       {
-        name: 'When',
-        value: (new Date(vm.selectedFileVersion.createdAt)).toDateString(),
+        name: 'Date',
+        value: (new Date(vm.selectedFileVersion.createdAt)).toLocaleString(),
       },
       {
-        name: 'Why',
+        name: 'Message',
         value: vm.selectedFileVersion.message
       },
     ])

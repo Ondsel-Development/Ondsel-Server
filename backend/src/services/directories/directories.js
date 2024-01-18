@@ -18,7 +18,8 @@ import {
   directorySchema,
   directoryDataSchema,
   directoryPatchSchema,
-  directoryQuerySchema
+  directoryQuerySchema,
+  directoryPublicFields,
 } from './directories.schema.js'
 import { DirectoryService, getOptions } from './directories.class.js'
 import { directoryPath, directoryMethods } from './directories.shared.js'
@@ -97,12 +98,12 @@ export const directory = (app) => {
     around: {
       all: [
         handleAddRelatedUserDetailsQuery(),
-        handlePublicOnlyQuery(),
+        handlePublicOnlyQuery(directoryPublicFields),
         schemaHooks.resolveExternal(directoryExternalResolver),
         schemaHooks.resolveResult(directoryResolver)
       ],
       find: [authenticate('jwt')],
-      get: [authenticateJwtWhenPrivate()],
+      get: [authenticateJwtWhenPrivate(directoryPublicFields)],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],

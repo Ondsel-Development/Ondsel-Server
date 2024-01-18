@@ -19,6 +19,7 @@
         Download Active
       </v-btn>
       <v-btn
+        v-if="!publicView"
         flat
         :disabled="!canUserWrite"
         @click="$refs.deleteFile.openDeleteFileDialog();"
@@ -26,6 +27,7 @@
         Delete File
       </v-btn>
       <v-btn
+        v-if="!publicView"
         flat
         :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
@@ -49,10 +51,10 @@
       </v-sheet>
     </v-row>
     <v-row>
-      <file-versions-table :file="file" :can-user-write="canUserWrite" />
+      <file-versions-table :file="file" :can-user-write="canUserWrite" :public-view="publicView" />
     </v-row>
-    <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
-    <delete-file-dialog ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
+    <upload-new-version-file-dialog v-if="!publicView" ref="uploadNewVersionFile" :file="file" />
+    <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
   </v-container>
 </template>
 

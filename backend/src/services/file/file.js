@@ -21,6 +21,7 @@ import {
   fileDataSchema,
   filePatchSchema,
   fileQuerySchema,
+  filePublicFields,
 } from './file.schema.js'
 import { FileService, getOptions } from './file.class.js'
 import { filePath, fileMethods } from './file.shared.js'
@@ -31,6 +32,7 @@ import {
   userBelongingDirectoriesOrFiles
 } from '../directories/helpers.js';
 import {buildUserSummary} from "../users/users.distrib.js";
+import {authenticateJwtWhenPrivate, handlePublicOnlyQuery} from "../../hooks/handle-public-info-query.js";
 
 export * from './file.class.js'
 export * from './file.schema.js'
@@ -49,6 +51,30 @@ export const file = (app) => {
         description: 'A file service for file version control',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ObjectID of File to return",
+                "in": "path",
+                "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "If provided and set to \"true\", only public data is returned IF the corresponding workspace is open",
+                "in": "query",
+                "name": "publicInfo",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          },
+        }
       }
     })
   })
@@ -63,10 +89,17 @@ export const file = (app) => {
   app.service(filePath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
+        handlePublicOnlyQuery(null),
         schemaHooks.resolveExternal(fileExternalResolver),
         schemaHooks.resolveResult(fileResolver)
-      ]
+      ],
+      find: [authenticate('jwt')],
+      get: [authenticateJwtWhenPrivate()],
+      create: [authenticate('jwt')],
+      update: [authenticate('jwt')],
+      patch: [authenticate('jwt')],
+      remove: [authenticate('jwt')],
+
     },
     before: {
       all: [

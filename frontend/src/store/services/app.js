@@ -150,17 +150,32 @@ export default {
         return undefined;
       }
     },
-    getDirectoryByIdPublic: async (context, workspaceId) => {
+    getDirectoryByIdPublic: async (context, dirId) => {
       // get the public details of any directory in an open workspace
       try {
         const dirResult = await models.api.Directory.get(
-          workspaceId,
+          dirId,
           {
             query: {
               publicInfo: "true",
             }
           });
         return dirResult;
+      } catch (e) {
+        return undefined;
+      }
+    },
+    getFileByIdPublic: async (context, fileId) => {
+      // get the public details of any directory in an open workspace
+      try {
+        const fileResult = await models.api.File.get(
+          fileId,
+          {
+            query: {
+              publicInfo: "true",
+            }
+          });
+        return fileResult;
       } catch (e) {
         return undefined;
       }

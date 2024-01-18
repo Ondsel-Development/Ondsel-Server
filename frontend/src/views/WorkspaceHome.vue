@@ -128,7 +128,6 @@ export default {
     this.directoryDetail = this.publicViewDetail
       ? await this.getDirectoryByIdPublic(this.workspaceDetail.rootDirectory._id)
       : await Directory.get(this.workspace?.rootDirectory?._id);
-    console.log(this.directoryDetail);
     if (!this.organization) {
       this.organizationDetail = this.publicViewDetail
         ? await this.getOrgByIdOrNamePublic(this.workspace.organizationId)
@@ -168,9 +167,10 @@ export default {
       'getWorkspaceByNamePublic',
       'getDirectoryByIdPublic',
       'getOrgByIdOrNamePublic',
+      'getFileByIdPublic',
     ]),
     async clickedFile(fileSubDocs, filePath) {
-      let file = File.getFromStore(fileSubDocs._id);
+      let file = await this.getFileByIdPublic(fileSubDocs._id);
       if (!file) {
         await File.get(fileSubDocs._id);
         file = File.getFromStore(fileSubDocs._id);
