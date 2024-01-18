@@ -7,7 +7,7 @@
         icon="mdi-arrow-left"
         @click="goHome()"
       />
-      <div class="text-body-1">Workspace &nbsp</div>
+      <div class="text-body-1">Workspace &nbsp;</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
 <!--      <v-spacer />-->
 <!--      <div class="align-end">-->
@@ -192,10 +192,18 @@ export default {
       this.activePath = dirPath;
     },
     async goHome() {
-      if (this.userRouteFlag) {
-        this.$router.push({ name: 'UserWorkspaces', params: { id: this.slug } });
+      if (this.publicView) {
+        if (this.userRouteFlag) {
+          this.$router.push({ name: 'UserHome', params: { slug: this.slug } });
+        } else {
+          this.$router.push({ name: 'OrganizationHome', params: { slug: this.slug } });
+        }
       } else {
-        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.slug } });
+        if (this.userRouteFlag) {
+          this.$router.push({ name: 'UserWorkspaces', params: { id: this.slug } });
+        } else {
+          this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.slug } });
+        }
       }
     },
   },
