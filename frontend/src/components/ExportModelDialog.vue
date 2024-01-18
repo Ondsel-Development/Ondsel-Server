@@ -2,7 +2,6 @@
   <v-dialog
     v-model="dialog"
     width="auto"
-    persistent
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
@@ -97,12 +96,12 @@ export default {
     },
     formats: (vm) => {
       if (vm.model) {
-        return ['Default model', 'FCStd', 'STEP', 'STL', 'OBJ']
+        return [vm.exportDefaultModelLabel(), 'FCStd', 'STEP', 'STL', 'OBJ']
       }
       const outputFormats = []
       if (vm.sharedModel) {
         if (vm.sharedModel.canDownloadDefaultModel) {
-          outputFormats.push('Default model');
+          outputFormats.push(vm.exportDefaultModelLabel());
         }
         if (vm.sharedModel.canExportFCStd) {
           outputFormats.push('FCStd');
@@ -122,6 +121,10 @@ export default {
 
   },
   methods: {
+    exportDefaultModelLabel() {
+      const model = this.model || this.sharedModel.model;
+      return `Original file (${model.file.custFileName})`;
+    },
     async runExportCmd() {
       if (!this.format) {
         return

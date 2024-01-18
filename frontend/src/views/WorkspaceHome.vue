@@ -9,6 +9,7 @@
       />
       <div class="text-body-1">Workspace &nbsp</div>
       <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
+      <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
 <!--      <v-spacer />-->
 <!--      <div class="align-end">-->
 <!--        <v-btn flat icon="mdi-pencil"></v-btn>-->
@@ -146,6 +147,9 @@ export default {
         this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.slug } });
       }
     },
+    async goToWorkspaceEdit(workspace) {
+      this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
+    }
   },
 };
 </script>
