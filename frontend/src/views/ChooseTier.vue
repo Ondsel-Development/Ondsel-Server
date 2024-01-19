@@ -11,10 +11,10 @@
               <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Full FreeCAD Application</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Local Workspaces</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>50 models (public only)</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Version History</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Full 3D CAD design suite for the desktop</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 1GB to the online vault. open models only</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Version history</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Multiple open workspaces</v-list-item>
                 </v-list>
               </v-card-text>
               <v-spacer></v-spacer>
@@ -47,12 +47,11 @@
               <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Everything in Solo</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>250 models</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Private models</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Customizable models</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Control what the viewer can download</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Equivalent to $10/month</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Solo</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 10GB to the online vault. 100 compute minutes</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Open organizations for team management</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private workspaces and models for personal work</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Control what viewers can download from the vault</v-list-item>
                 </v-list>
               </v-card-text>
               <v-spacer></v-spacer>
@@ -84,8 +83,12 @@
               <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
               <v-card-text>
                 <v-list>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Everything in Peer</v-list-item>
-                  <v-list-item><template v-slot:prepend>*&nbsp;</template>Organization Workspaces</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Peer</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 50GB to the online vault. 500 compute minutes</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private and open organizations for team management</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Organization workspaces</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Outside collaborators</v-list-item>
+                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Ability to run custom scripts</v-list-item>
                 </v-list>
               </v-card-text>
               <v-spacer></v-spacer>
@@ -100,7 +103,7 @@
                        variant="text"
                        disabled
                 >
-                  NOT AVAILABLE YET
+                  COMING SOON
                 </v-btn>
                 <v-btn v-else
                        variant="text"
