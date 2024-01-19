@@ -49,22 +49,24 @@
           class="mx-auto"
           width="344"
         >
-          <template v-if="model.thumbnailUrl">
-            <v-img
-              :src="model.thumbnailUrl"
-              height="200px"
-              cover
-            ></v-img>
-          </template>
-          <template v-else>
-            <v-sheet
-              color="#F4F4F4"
-              height="200px"
-              class="d-flex justify-center align-center"
-            >
-              <span style="color: #8D8D8D">?</span>
-            </v-sheet>
-          </template>
+          <router-link :to="{ name: 'Home', params: { id: model._id } }" style="text-decoration: none;">
+            <template v-if="model.thumbnailUrl">
+              <v-img
+                :src="model.thumbnailUrl"
+                height="200px"
+                cover
+              ></v-img>
+            </template>
+            <template v-else>
+              <v-sheet
+                color="#F4F4F4"
+                height="200px"
+                class="d-flex justify-center align-center"
+              >
+                <span style="color: #8D8D8D">?</span>
+              </v-sheet>
+            </template>
+          </router-link>
 
           <v-card-title>
             {{ model.customerFileName }}
@@ -86,7 +88,7 @@
             <v-spacer></v-spacer>
             <DeleteDialog :model="model" @delete-model="deleteModel" />
             <v-btn
-              icon="mdi-format-list-checks"
+              icon="mdi-share-variant"
               density="comfortable"
               @click.stop="sharedModelDrawerClicked(model)"
             ></v-btn>

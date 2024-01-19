@@ -64,12 +64,6 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            variant="text"
-            @click="menu = false"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
             color="primary"
             variant="text"
             @click="logout"
@@ -134,9 +128,11 @@ export default {
     // ...mapActions('app', ['setCurrentOrganization']),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
+      this.menu = false;
     },
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
+      this.menu = false;
     },
     // extractOrganizationId(path) {
     //   const regex = /\/org\/([^\/]+)/;

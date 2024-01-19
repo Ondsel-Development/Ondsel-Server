@@ -2,7 +2,6 @@
   <v-dialog
     v-model="dialog"
     width="auto"
-    persistent
     class="text-center"
   >
     <v-card width="600" max-height="800">
