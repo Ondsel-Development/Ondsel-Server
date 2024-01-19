@@ -39,7 +39,7 @@
     <v-row v-if="!(directory.files?.length && directory.directories)">
       <v-col>
         <div class="text-body-2 text-center" style="text-align: center; justify-content: center">
-          No item exist!
+          There are no files in this directory
         </div>
       </v-col>
     </v-row>
