@@ -1,12 +1,12 @@
 <template>
   <v-navigation-drawer rail location="right" permanent>
-    <v-btn icon flat @click="dialog = true">
+    <!-- <v-btn icon flat @click="dialog = true">
       <v-icon icon="mdi-file"></v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Open a file</v-tooltip>
-    </v-btn>
+    </v-btn> -->
     <v-btn icon flat @click="modelInfoDrawerClicked">
       <v-icon>mdi-information-outline</v-icon>
       <v-tooltip
@@ -15,7 +15,7 @@
       >Get Info</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
-      <v-icon>mdi-magnify</v-icon>
+      <v-icon>mdi-crop-free</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
@@ -29,7 +29,7 @@
       >See model attributes</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="sharedModelDrawerClicked">
-      <v-icon>mdi-format-list-checks</v-icon>
+      <v-icon>mdi-share-variant</v-icon>
       <v-tooltip
         activator="parent"
         location="start"

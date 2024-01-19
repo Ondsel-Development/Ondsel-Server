@@ -69,8 +69,8 @@ export default {
       }).then(() => {
         this.dialog = false;
       }).catch((e) => {
-        const msg = e.message;
-        console.log(msg);
+        this.snackerMsg = e.message;
+        this.showSnacker = true;
       });
       this.pendingPasswordEmail = false;
     }

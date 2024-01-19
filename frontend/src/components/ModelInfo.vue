@@ -2,7 +2,7 @@
   <v-card flat>
     <v-card-title style="text-align: center;">Model Information</v-card-title>
     <v-card-item style="justify-content: center;">
-      <v-table density="comfortable" style="width: 600px; text-align: center;">
+      <v-table density="comfortable" style="width: 600px; text-align: left;">
         <tbody>
           <tr v-if="fileObject">
             <td class="font-weight-medium">Date</td>
