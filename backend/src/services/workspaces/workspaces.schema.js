@@ -4,12 +4,12 @@ import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import {SubscriptionTypeMap, userSummarySchema} from '../users/users.subdocs.schema.js';
 import { groupSummary } from '../groups/groups.subdocs.schema.js';
 import { directorySummary } from '../directories/directories.subdocs.js';
 import {refNameHasher} from "../../refNameFunctions.js";
 import {BadRequest} from "@feathersjs/errors";
-import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
+import {organizationSummarySchema, OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
@@ -71,7 +71,7 @@ export const workspaceExternalResolver = resolve({})
 export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory'];
 
 // Schema for creating new entries
-export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'license', 'description', 'organizationId'], {
+export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
   $id: 'WorkspaceData'
 })
 export const workspaceDataValidator = getValidator(workspaceDataSchema, dataValidator)
@@ -100,9 +100,21 @@ export const workspaceDataResolver = resolve({
     const org = await orgService.get(orgId);
     return buildOrganizationSummary(org);
   },
-  public: async (_value, _message, _context) => {
-    // TODO: later this will return "true" for open org
-    return false;
+  open: async (value, message, context) => {
+    const orgService = context.app.service('organizations');
+    const org = await orgService.get(message.organizationId);
+    const user = context.params.user;
+    if (org.type === OrganizationTypeMap.private) {
+      return value || false;
+    }
+    if (org.type === OrganizationTypeMap.personal) {
+      if (user?.tier === SubscriptionTypeMap.unverified || user?.tier === SubscriptionTypeMap.solo) {
+        return value || true;
+      } else {
+        return value || false;
+      }
+    }
+    return true;
   }
 })
 
