@@ -182,7 +182,7 @@ const routes = [
     path: '/user/:slug/workspace/:wsname',
     component: WorkspaceHome,
     name: 'UserWorkspaceHome',
-    meta: { requiresAuth: true },
+    meta: { tryAuth: true },
   },
   {
     path: '/user/:slug/workspace/:wsname/edit',
@@ -221,7 +221,7 @@ const routes = [
     path: '/org/:slug/workspace/:wsname',
     component: WorkspaceHome,
     name: 'OrgWorkspaceHome',
-    meta: { requiresAuth: true },
+    meta: { tryAuth: true },
   },
   {
     path: '/org/:slug/workspace/:wsname/edit',

@@ -27,3 +27,24 @@ export function buildDirectorySummary(directory) {
 //             These routines are used by _other_ collections after creation/update/deletion
 //
 
+export async function updateWorkspaceSummaryToMatchingDirectories(context, wsSummary) {
+  const directoryService = context.app.service('directories');
+  const matchingDirectories = await directoryService.find({
+    query: {
+      "workspace._id": wsSummary._id
+    }
+  });
+  for (const dir of matchingDirectories.data) {
+    await updateWorkspaceSummaryToDirectory(context, dir._id, wsSummary);
+  }
+}
+
+export async function updateWorkspaceSummaryToDirectory(context, dirId, wsSummary) {
+  const directoryService = context.app.service('directories');
+  await directoryService.patch(
+    dirId,
+    {
+      workspace: wsSummary,
+    }
+  );
+}

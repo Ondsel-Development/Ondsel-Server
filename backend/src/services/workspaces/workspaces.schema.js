@@ -4,14 +4,15 @@ import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import {SubscriptionTypeMap, userSummarySchema} from '../users/users.subdocs.schema.js';
 import { groupSummary } from '../groups/groups.subdocs.schema.js';
 import { directorySummary } from '../directories/directories.subdocs.js';
 import {refNameHasher} from "../../refNameFunctions.js";
 import {BadRequest} from "@feathersjs/errors";
-import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
+import {organizationSummarySchema, OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
+import {LicenseType} from "./workspaces.subdocs.schema.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -28,7 +29,10 @@ export const workspaceSchema = Type.Object(
     name: Type.String(),
     refName: Type.String(),
     refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
+    open: Type.Boolean(),
+    license: Type.Optional(Type.Union([Type.Null(), LicenseType])),
     description: Type.String(),
+    long_description: Type.String(),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -64,7 +68,7 @@ export const workspaceResolver = resolve({
 
 export const workspaceExternalResolver = resolve({})
 
-export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName'];
+export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory'];
 
 // Schema for creating new entries
 export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
@@ -95,6 +99,22 @@ export const workspaceDataResolver = resolve({
     const orgId = message.organizationId;
     const org = await orgService.get(orgId);
     return buildOrganizationSummary(org);
+  },
+  open: async (value, message, context) => {
+    const orgService = context.app.service('organizations');
+    const org = await orgService.get(message.organizationId);
+    const user = context.params.user;
+    if (org.type === OrganizationTypeMap.private) {
+      return value || false;
+    }
+    if (org.type === OrganizationTypeMap.personal) {
+      if (user?.tier === SubscriptionTypeMap.unverified || user?.tier === SubscriptionTypeMap.solo) {
+        return value || true;
+      } else {
+        return value || false;
+      }
+    }
+    return true;
   }
 })
 
@@ -108,7 +128,10 @@ export const workspacePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const workspaceQueryProperties = Type.Pick(workspaceSchema, ['_id', 'name', 'refName', 'refNameHash', 'organizationId'])
+export const workspaceQueryProperties = Type.Pick(workspaceSchema, [
+  '_id', 'name', 'refName', 'open', 'license', 'description', 'long_description', 'refNameHash', 'organizationId',
+  'createdAt', 'rootDirectory'
+])
 export const workspaceQuerySchema = Type.Intersect(
   [
     querySyntax(workspaceQueryProperties),

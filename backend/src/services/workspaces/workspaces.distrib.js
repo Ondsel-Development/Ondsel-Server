@@ -10,12 +10,18 @@
 //
 
 import {workspace} from "./workspaces.js";
+import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
+import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
+import {updateWorkspaceSummaryToMatchingDirectories} from "../directories/directories.distrib.js";
+import {updateWorkspaceSummaryToMatchingFiles} from "../file/file.distrib.js";
+import {updateWorkspaceSummaryToMatchingGroups} from "../groups/groups.distrib.js";
 
 export function buildWorkspaceSummary(workspace) {
   return {
     _id: workspace._id,
     name: workspace.name,
     refName: workspace.refName,
+    open: workspace.open,
   };
 }
 
@@ -23,7 +29,48 @@ export function buildWorkspaceSummary(workspace) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
-// nothing
+export const copyWorkspaceBeforePatch = async (context) => {
+  // store a copy of the workspace in `context.beforePatchCopy` to help detect true changes
+  const workspaceService = context.app.service('workspaces');
+  const wsId = context.id;
+  context.beforePatchCopy = await workspaceService.get(wsId);
+  return context;
+}
+
+export const distributeWorkspaceSummaries = async (context) => {
+  // this function is for distributing changes from a PATCH
+  try {
+    const wsId = context.id;
+    if (wsId !== undefined) {
+      let summaryChangeSeen = false;
+      // `_id`, `refName` cannot change. Ever. So just look at the other summary fields.
+      if (context.beforePatchCopy.name !== context.result.name) {
+        summaryChangeSeen = true;
+      }
+      if (context.beforePatchCopy.open !== context.result.open) {
+        summaryChangeSeen = true;
+      }
+      if (summaryChangeSeen) {
+        const wsSummary = buildWorkspaceSummary(context.result);
+        //
+        // update Directories
+        //
+        await updateWorkspaceSummaryToMatchingDirectories(context, wsSummary);
+        //
+        // update Files
+        //
+        await updateWorkspaceSummaryToMatchingFiles(context, wsSummary);
+        //
+        // update Groups
+        //
+        await updateWorkspaceSummaryToMatchingGroups(context, wsSummary);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
 
 //
 // UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops

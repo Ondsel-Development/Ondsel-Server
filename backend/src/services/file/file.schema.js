@@ -52,8 +52,15 @@ export const fileResolver = resolve({
 
 export const fileExternalResolver = resolve({})
 
+export const filePublicFields = [ // not used so as to get the full list of fields
+  '_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace',
+  'relatedUserDetails', 'versions', 'relatedUserDetails'
+];
+
 // Schema for creating new entries
-export const fileDataSchema = Type.Pick(fileSchema, ['versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory', 'relatedUserDetails'], {
+export const fileDataSchema = Type.Pick(fileSchema, [
+  'versions', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'directory', 'relatedUserDetails'
+], {
   $id: 'FileData'
 })
 export const fileDataValidator = getValidator(fileDataSchema, dataValidator)
@@ -82,7 +89,10 @@ export const filePatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const fileQueryProperties = Type.Pick(fileSchema, ['_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace', 'relatedUserDetails', 'deleted'])
+export const fileQueryProperties = Type.Pick(fileSchema, [
+  '_id', 'userId', 'currentVersionId', 'modelId', 'isSystemGenerated', 'custFileName', 'workspace',
+  'relatedUserDetails', 'deleted', 'versions', 'relatedUserDetails'
+])
 export const fileQuerySchema = Type.Intersect(
   [
     querySyntax(fileQueryProperties, {

@@ -229,6 +229,7 @@ const createClone = async (context) => {
         `public/${model._id.toString()}_thumbnail.PNG`,
         `public/${newModel._id.toString()}_thumbnail.PNG`,
       );
+      context.data['isThumbnailGenerated'] = true;
     }
     context.data['dummyModelId'] = newModel._id.toString();
     return context;

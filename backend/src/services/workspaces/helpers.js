@@ -4,7 +4,10 @@ import {BadRequest} from "@feathersjs/errors";
 
 
 export const isUserBelongsToWorkspace = async context => {
-  if (!context.publicDataOnly && context.params.user) {
+  if (context.publicDataOnly) {
+    return context; // you do not need to be logged in to query public data
+  }
+  if (context.params.user) {
     // if user is owner of organization, then allow workspace
     if (context.method === 'get') {
       const workspace = await context.service.get(context.id);
@@ -75,5 +78,14 @@ export const createAndAssignRootDirectory = async context => {
     context.result._id,
     { rootDirectory: _.pick(directory, ['_id', 'name'])},
   )
+  return context;
+}
+
+export const limitPublicOnlyRequestsToOpenWorkspaces = async context => {
+  if (context.publicDataOnly) {
+    if (!context.params.query.open) {
+      context.params.query.open = true;
+    }
+  }
   return context;
 }

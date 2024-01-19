@@ -32,22 +32,24 @@
           class="mx-auto"
           width="344"
         >
-          <template v-if="sharedModel.thumbnailUrl">
-            <v-img
-              :src="sharedModel.thumbnailUrl"
-              height="200px"
-              cover
-            ></v-img>
-          </template>
-          <template v-else>
-            <v-sheet
-              color="#F4F4F4"
-              height="200px"
-              class="d-flex justify-center align-center"
-            >
-              <span style="color: #8D8D8D">?</span><br>
-            </v-sheet>
-          </template>
+          <router-link :to="{ name: 'Share', params: { id: sharedModel._id } }" style="text-decoration: none;">
+            <template v-if="sharedModel.thumbnailUrl">
+              <v-img
+                :src="sharedModel.thumbnailUrl"
+                height="200px"
+                cover
+              ></v-img>
+            </template>
+            <template v-else>
+              <v-sheet
+                color="#F4F4F4"
+                height="200px"
+                class="d-flex justify-center align-center"
+              >
+                <span style="color: #8D8D8D">?</span><br>
+              </v-sheet>
+            </template>
+          </router-link>
 
           <v-card-title>
             {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
@@ -179,8 +181,7 @@ export default {
   computed: {
     ...mapState('shared-models', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
-    // sharedModelsFiltered: () => SharedModel.findInStore({ query: { "model.isThumbnailGenerated": true , isSystemGenerated: true, isActive: true, $sort: { createdAt: -1 } }})
+    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isThumbnailGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
   },
   methods: {
     async fetchDataOnScroll() {
@@ -197,7 +198,7 @@ export default {
             },
             isSystemGenerated: true,
             isActive: true,
-            // "model.isThumbnailGenerated": true,
+            isThumbnailGenerated: true,
           }
         });
         this.pagination.skip = models.skip + this.pagination.limit;

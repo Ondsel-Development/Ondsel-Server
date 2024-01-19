@@ -28,6 +28,9 @@ export const sharedModelsSchema = Type.Object(
     canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
+    isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
+    thumbnailUrl: Type.String(),
+
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
 
@@ -67,17 +70,25 @@ export const sharedModelsResolver = resolve({
       }
     }
   }),
-  thumbnailUrl: virtual(async (message, context) => {
-    if (message.dummyModelId) {
-      const model = await context.app.service('models').get(message.dummyModelId, { query: { isSharedModel: true }, authentication: context.params.authentication });
-      return model.thumbnailUrl
+  thumbnailUrl: virtual(async(message, context) => {
+    const { app } = context;
+    if (message.isThumbnailGenerated) {
+      const r = await app.service('upload').get(`public/${message.dummyModelId.toString()}_thumbnail.PNG`);
+      return r.url
     }
     return '';
   }),
   cloneModel: virtual(async (message, context) => {
     const modelService = context.app.service('models');
-    const model = await modelService.get(message.cloneModelId);
-    return _.pick(model, ['file.custFileName', 'file._id', 'file.workspace', 'file.directory', 'file.userId', 'file.createdAt']);
+    try {
+      const model = await modelService.get(message.cloneModelId);
+      return _.pick(model, ['file.custFileName', 'file._id', 'file.workspace', 'file.directory', 'file.userId', 'file.createdAt']);
+    } catch (error) {
+      if (error instanceof NotFound) {
+        return {};
+      }
+      throw error;
+    }
   }),
 })
 
@@ -97,6 +108,7 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canDownloadDefaultModel',
   'dummyModelId',
   'isSystemGenerated',
+  'isThumbnailGenerated',
 ], {
   $id: 'SharedModelsData'
 })
@@ -170,6 +182,12 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsSchema.properties.isSystemGenerated.default
   },
+  isThumbnailGenerated: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsDataSchema.properties.isThumbnailGenerated.default;
+  },
 })
 
 // Schema for updating existing entries
@@ -182,12 +200,17 @@ export const sharedModelsPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const sharedModelsQueryProperties = Type.Pick(sharedModelsSchema, ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt'])
+export const sharedModelsQueryProperties = Type.Pick(
+  sharedModelsSchema,
+  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated']
+)
 export const sharedModelsQuerySchema = Type.Intersect(
   [
     querySyntax(sharedModelsQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      isThumbnailGenerated: Type.Union([Type.Boolean(), Type.Object({ $exists: Type.Boolean()}, { additionalProperties: false })]),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )

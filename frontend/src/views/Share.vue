@@ -1,12 +1,12 @@
 <template>
   <v-navigation-drawer rail location="right" permanent v-if="!isWindowLoadedInIframe">
-    <v-btn icon flat @click="dialog = true">
+    <!-- <v-btn icon flat @click="dialog = true">
       <v-icon icon="mdi-file"></v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >File info</v-tooltip>
-    </v-btn>
+    </v-btn> -->
     <v-btn icon flat @click="modelInfoDrawerClicked">
       <v-icon>mdi-information-outline</v-icon>
       <v-tooltip
@@ -15,7 +15,7 @@
       >Get Info</v-tooltip>
     </v-btn>
     <v-btn icon flat @click="fitModelToScreen">
-      <v-icon>mdi-magnify</v-icon>
+      <v-icon>mdi-crop-free</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
@@ -261,7 +261,8 @@ export default {
               model: {
                 _id: this.sharedModel.dummyModelId,
                 isThumbnailGenerated: true,
-              }
+              },
+              isThumbnailGenerated: true,
             }
           })
         });

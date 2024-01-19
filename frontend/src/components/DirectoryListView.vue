@@ -76,9 +76,7 @@
 </template>
 
 <script>
-import { models } from '@feathersjs/vuex';
-
-const { Directory } = models.api;
+import {mapActions} from "vuex";
 
 export default {
   name: 'DirectoryListView',
@@ -98,6 +96,9 @@ export default {
   computed: {
   },
   methods: {
+    ...mapActions('app', [
+      'getDirectoryByIdPublic',
+    ]),
     getItemPath(item) {
       return `${this.parentDirectoryPath}${item}`;
     },
@@ -107,8 +108,7 @@ export default {
         this.openDirectories.splice(index, 1);
         return;
       }
-      await Directory.get(directorySubdocs._id);
-      const directory = Directory.getFromStore(directorySubdocs._id);
+      const directory = await this.getDirectoryByIdPublic(directorySubdocs._id);
       this.openDirectories.push(directory);
     },
     toggleRootDirectory() {

@@ -1,4 +1,5 @@
 import { models } from '@feathersjs/vuex';
+import axios from "axios";
 
 
 const state = {
@@ -45,7 +46,7 @@ export default {
       // get the public details of any organization using _id or refName (slug)
       let result = undefined;
       let orgResult;
-      if (name.length === 24) {
+      if (isObjectId(name)) {
         orgResult = await models.api.Organization.find({
           query: {
             publicInfo: "true",
@@ -71,32 +72,51 @@ export default {
     getUserByIdOrNamePublic: async (context, name) => {
       // get the public details of any user using _id or username
 
-      // the following flat-out does not work for user; don't know WHY; so making it two direct queries instead
-      // not even non-$or queries work
+      // using direct axios query to bypass find/get bug
       //
-      const userResult = await models.api.User.find({
-        query: {
-          publicInfo: "true",
-          "$or": [
-            { username: name },
-            ...(isObjectId(name) ? [{_id: name}] : [])
-          ]
+      const base = import.meta.env.VITE_APP_API_URL;
+      let query = `${base}users?username=${name}&publicInfo=true`;
+      if (isObjectId(name)) {
+        query = `${base}users?_id=${name}&publicInfo=true`;
+      }
+      let response = await axios.get(query);
+      if (response.data) {
+        if (response.data.total === 1) {
+          return response.data.data[0];
         }
-      });
-      if (userResult.total) {
-        return userResult.data[0];
       }
       return undefined;
     },
     getWorkspaceByNamePrivate: async (context, detail) => {
       // get the private details of workspace via refName "slug"
-      // throws error if not found
 
       let result = undefined;
       let wsResult
       try {
         wsResult = await models.api.Workspace.find({
           query: {
+            refName: detail.wsName,
+            "organization.refName": detail.orgName
+          }
+        })
+      } catch (e) {
+        // console.log(`  >>> ERROR ${e}`);
+        // console.log(e);
+      }
+      if (wsResult?.total === 1) {
+        result = wsResult.data[0];
+      }
+      return result;
+    },
+    getWorkspaceByNamePublic: async (context, detail) => {
+      // get the public details of workspace via refName "slug"
+
+      let result = undefined;
+      let wsResult
+      try {
+        wsResult = await models.api.Workspace.find({
+          query: {
+            publicInfo: "true",
             refName: detail.wsName,
             "organization.refName": detail.orgName
           }
@@ -125,6 +145,36 @@ export default {
             }
           });
         return userResult;
+      } catch (e) {
+        return undefined;
+      }
+    },
+    getDirectoryByIdPublic: async (context, dirId) => {
+      // get the public details of any directory in an open workspace
+      try {
+        const dirResult = await models.api.Directory.get(
+          dirId,
+          {
+            query: {
+              publicInfo: "true",
+            }
+          });
+        return dirResult;
+      } catch (e) {
+        return undefined;
+      }
+    },
+    getFileByIdPublic: async (context, fileId) => {
+      // get the public details of any directory in an open workspace
+      try {
+        const fileResult = await models.api.File.get(
+          fileId,
+          {
+            query: {
+              publicInfo: "true",
+            }
+          });
+        return fileResult;
       } catch (e) {
         return undefined;
       }

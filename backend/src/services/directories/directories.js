@@ -18,7 +18,8 @@ import {
   directorySchema,
   directoryDataSchema,
   directoryPatchSchema,
-  directoryQuerySchema
+  directoryQuerySchema,
+  directoryPublicFields,
 } from './directories.schema.js'
 import { DirectoryService, getOptions } from './directories.class.js'
 import { directoryPath, directoryMethods } from './directories.shared.js'
@@ -32,6 +33,7 @@ import {
   removeFromParent,
   doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
 } from './helpers.js';
+import {authenticateJwtWhenPrivate, handlePublicOnlyQuery} from "../../hooks/handle-public-info-query.js";
 
 export * from './directories.class.js'
 export * from './directories.schema.js'
@@ -71,6 +73,15 @@ export const directory = (app) => {
                 },
                 "required": false,
               },
+              {
+                "description": "If provided and set to \"true\", only public data is returned IF the corresponding workspace is open",
+                "in": "query",
+                "name": "publicInfo",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
             ],
           },
         }
@@ -87,10 +98,16 @@ export const directory = (app) => {
     around: {
       all: [
         handleAddRelatedUserDetailsQuery(),
-        authenticate('jwt'),
+        handlePublicOnlyQuery(directoryPublicFields),
         schemaHooks.resolveExternal(directoryExternalResolver),
         schemaHooks.resolveResult(directoryResolver)
-      ]
+      ],
+      find: [authenticate('jwt')],
+      get: [authenticateJwtWhenPrivate(directoryPublicFields)],
+      create: [authenticate('jwt')],
+      update: [authenticate('jwt')],
+      patch: [authenticate('jwt')],
+      remove: [authenticate('jwt')],
     },
     before: {
       all: [

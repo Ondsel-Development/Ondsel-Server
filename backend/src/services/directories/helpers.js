@@ -4,15 +4,21 @@ import {buildDirectorySummary} from "./directories.distrib.js";
 
 export const canUserAccessDirectoryOrFileGetMethod = async context => {
   const directoryOrFile = await context.service.get(context.id);
-  try {
-    await context.app.service('workspaces').get(
-      directoryOrFile.workspace._id,
-      {
-        user: context.params.user
-      }
-    )
-  } catch (error) {
-    throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this directory or file'});
+  if (context.publicDataOnly === true) {
+    if (directoryOrFile.workspace.open !== true) {
+      throw new BadRequest({ type: 'PermissionError', msg: 'Not an open workspace'});
+    }
+  } else {
+    try {
+      await context.app.service('workspaces').get(
+        directoryOrFile.workspace._id,
+        {
+          user: context.params.user
+        }
+      )
+    } catch (error) {
+      throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this directory or file'});
+    }
   }
   return context;
 }
