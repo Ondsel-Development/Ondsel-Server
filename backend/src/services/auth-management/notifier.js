@@ -36,8 +36,8 @@ export const notifier = (app) => {
           from: 'contact@ondsel.com',
           to: user.email,
           subject: `[Ondsel] Please confirm your Ondsel account`,
-          text: "To verify your newly registered account with Ondsel, please click here: `
-            + " + getLink('verify-email', user.verifyToken, user._id, baseUrl)
+          text: `To verify your newly registered account with Ondsel, please click here: `
+            + getLink('verify-email', user.verifyToken, user._id, baseUrl)
             + `\n\nYours sincerely,\n`
             + `Team Ondsel`,
         });
