@@ -11,7 +11,7 @@
         <v-btn flat>Explore</v-btn>
       </a>
       <v-btn
-        :disabled="isFileDownloadInProgress"
+        :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
         flat
@@ -19,6 +19,7 @@
         Download Active
       </v-btn>
       <v-btn
+        v-if="!publicView"
         flat
         :disabled="!canUserWrite"
         @click="$refs.deleteFile.openDeleteFileDialog();"
@@ -26,6 +27,7 @@
         Delete File
       </v-btn>
       <v-btn
+        v-if="!publicView"
         flat
         :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
@@ -49,10 +51,10 @@
       </v-sheet>
     </v-row>
     <v-row>
-      <file-versions-table :file="file" :can-user-write="canUserWrite" />
+      <file-versions-table :file="file" :can-user-write="canUserWrite" :public-view="publicView" />
     </v-row>
-    <upload-new-version-file-dialog ref="uploadNewVersionFile" :file="file" />
-    <delete-file-dialog ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
+    <upload-new-version-file-dialog v-if="!publicView" ref="uploadNewVersionFile" :file="file" />
+    <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
   </v-container>
 </template>
 
@@ -61,7 +63,7 @@ import FileVersionsTable from '@/components/FileVersionsTable.vue';
 import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.vue';
 import DeleteFileDialog from "@/components/DeleteFileDialog.vue";
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
-import {mapActions} from "vuex";
+import {mapActions, mapState} from "vuex";
 
 export default {
   name: 'WorkspaceFileView',
@@ -73,11 +75,13 @@ export default {
       default: false,
     },
     fullPath: String,
+    publicView: Boolean,
   },
   emits: ['openDirectory'],
   mixins: [fileDownloadMixin],
   data: () => ({}),
   computed: {
+    ...mapState('auth', ['user']),
     fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
   },
   methods: {

@@ -75,3 +75,26 @@ export async function upsertUserSummaryToGroup(app, groupId, userSummary) {
     console.log(e);
   }
 }
+
+export async function updateWorkspaceSummaryToMatchingGroups(context, wsSummary) {
+  const groupService = context.app.service('groups');
+  const matchingGroups = await groupService.find({
+    query: {
+      "workspaces._id": wsSummary._id // alternative is: workspaces: { $elemMatch: { _id: wsSummary._id } }
+    }
+  });
+  for (const group of matchingGroups.data) {
+    let newList = group.workspaces;
+    newList.forEach((ws,index) => {
+      if (ws._id.toString() === wsSummary._id.toString()) {
+        newList[index] = wsSummary
+      }
+    })
+    await groupService.patch(
+      group._id,
+      {
+        workspaces: newList,
+      }
+    );
+  }
+}

@@ -9,11 +9,7 @@
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection
 //
 
-import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
-import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {forDirectoryRemoveFileSummary, forDirectoryUpdateFileSummary} from "../directories/helpers.js";
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {fileVersionSchema} from "./file.schema.js";
 
 export function buildFileSummary(file) {
   let summary = {
@@ -90,6 +86,28 @@ export async function applyModelSummaryToFile(app, fileId, modelSummary) {
     fileId,
     {
       model: modelSummary,
+    }
+  );
+}
+
+export async function updateWorkspaceSummaryToMatchingFiles(context, wsSummary) {
+  const fileService = context.app.service('file');
+  const matchingFiles = await fileService.find({
+    query: {
+      "workspace._id": wsSummary._id
+    }
+  });
+  for (const file of matchingFiles.data) {
+    await updateWorkspaceSummaryToFile(context, file._id, wsSummary);
+  }
+}
+
+export async function updateWorkspaceSummaryToFile(context, fileId, wsSummary) {
+  const fileService = context.app.service('file');
+  await fileService.patch(
+    fileId,
+    {
+      workspace: wsSummary,
     }
   );
 }

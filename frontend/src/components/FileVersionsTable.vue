@@ -22,14 +22,22 @@
     </template>
     <template v-slot:item.actions="{ item }">
       <v-icon
+        v-if="!publicView"
         size="small"
         @click="selectedFileVersion = item.value; $refs.fileInfoDialog.$data.dialog = true;"
       >
         mdi-pencil
       </v-icon>
+      <v-icon
+        v-if="publicView"
+        size="small"
+        @click="selectedFileVersion = item.value; $refs.fileInfoDialog.$data.dialog = true;"
+      >
+        mdi-eye
+      </v-icon>
     </template>
   </v-data-table-virtual>
-  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" />
+  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" />
 </template>
 
 <script>
@@ -44,12 +52,15 @@ export default {
     canUserWrite: {
       type: Boolean,
       default: false,
-    }
+    },
+    publicView: Boolean,
   },
   data: () => ({
     isFileInfoDialogActive: false,
     selectedFileVersion: null,
   }),
+  async created() {
+  },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
     headers: () => ([
@@ -66,7 +77,7 @@ export default {
         key: 'createdAt',
       },
       {
-        title: 'Who',
+        title: 'Committer',
         align: 'start',
         sortable: true,
         key: 'userRealName',
@@ -94,7 +105,7 @@ export default {
   methods: {
     dateFormat(number) {
       const date = new Date(number);
-      return date.toDateString();
+      return date.toLocaleString();
     },
     getUserLabel(userId, userSummaryList) {
       const cleanList = userSummaryList || [];

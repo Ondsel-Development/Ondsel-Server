@@ -2,9 +2,9 @@
   <v-container v-if="directory" class="mt-4">
     <v-row>
       <v-spacer />
-      <v-btn flat :disabled="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();">Add New File</v-btn>
-      <v-btn flat class="ml-1" :disabled="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;">Create Directory</v-btn>
-      <v-btn v-if="directory.name!=='/'" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.deleteDirectoryDialog.$data.dialog=true;">Delete Directory</v-btn>
+      <v-btn v-if="!publicView" flat :disabled="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();" >Add New File</v-btn>
+      <v-btn v-if="!publicView" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;" >Create Directory</v-btn>
+      <v-btn v-if="directory.name!=='/' && !publicView" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.deleteDirectoryDialog.$data.dialog=true;">Delete Directory</v-btn>
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
@@ -43,9 +43,9 @@
         </div>
       </v-col>
     </v-row>
-    <upload-file-dialog ref="uploadFileDialog" :directory="directory" />
-    <create-directory-dialog ref="createDirectoryDialog" @create-directory="createDirectory"/>
-    <delete-directory-dialog ref="deleteDirectoryDialog" :directory-name="directory.name" @delete-directory="deleteThisDirectory"/>
+    <upload-file-dialog v-if="!publicView" ref="uploadFileDialog" :directory="directory" />
+    <create-directory-dialog v-if="!publicView" ref="createDirectoryDialog" @create-directory="createDirectory" />
+    <delete-directory-dialog v-if="!publicView"  ref="deleteDirectoryDialog" :directory-name="directory.name" @delete-directory="deleteThisDirectory" />
   </v-container>
 </template>
 
@@ -66,7 +66,8 @@ export default {
     canUserWrite: {
       type: Boolean,
       default: false,
-    }
+    },
+    publicView: Boolean,
   },
   components: {DeleteDirectoryDialog, CreateDirectoryDialog, UploadFileDialog },
   data: () => ({
