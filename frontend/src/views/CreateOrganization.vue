@@ -9,12 +9,19 @@
         ></v-progress-linear>
       </template>
       <v-form v-model="isValid" ref="form" @submit.prevent="createOrganization">
+        <v-select
+          v-model="organization.type"
+          label="Select Type of Organization"
+          :rules="[rules.isRequired]"
+          :items="orgTypeProperties"
+          autofocus
+        >
+        </v-select>
         <v-text-field
           v-model="organization.name"
           label="Name"
           :rules="[rules.isRequired]"
           :disabled="false"
-          autofocus
         ></v-text-field>
         <v-text-field
           v-model="nameTemp"
@@ -22,7 +29,8 @@
           :rules="[rules.isRequired, rules.nameConforms]"
           :disabled="isCreatePending"
         ></v-text-field>
-        <v-card class="mx-auto" color="primary" variant="outlined">
+        <v-spacer class="v-col-1"></v-spacer>
+        <v-card class="w-100" color="primary" variant="outlined">
           <v-card-text v-if="organization.refName">
             <span class="font-weight-bold">{{organization.refName}}</span>
           </v-card-text>
@@ -30,7 +38,6 @@
             <span class="font-italic">no reference name yet</span>
           </v-card-text>
         </v-card>
-
         <v-card-actions>
           <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Create</v-btn>
         </v-card-actions>
@@ -59,6 +66,7 @@ export default {
       organization: new Organization(),
       nameTemp: '',
       lastBadRefName: '',
+      orgTypeProperties: [],
       isValid: false,
       rules: {
         isRequired: v => !!v || 'This field is required',
@@ -77,6 +85,20 @@ export default {
     if (!this.user.constraint.canCreatePrivateOrganization && !this.user.constraint.canCreateOpenOrganization) {
       this.$router.push({ name: 'PageNotFound' });
     }
+    if (this.user.constraint.canCreateOpenOrganization) {
+      this.orgTypeProperties.push({
+        title: `Open`,
+        value: `Open`,
+        props: { subtitle: `all workspaces, files, and activity are publicly visible` },
+      })
+    }
+    if (this.user.constraint.canCreatePrivateOrganization) {
+      this.orgTypeProperties.push({
+        title: `Private`,
+        value: `Private`,
+        props: { subtitle: `workspaces, files, and activity are private by default` },
+      })
+    }
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization']),
@@ -85,7 +107,7 @@ export default {
         .then(async () => {
           const orgId = this.organization._id;
           await this.setCurrentOrganization(Organization.getFromStore(orgId));
-          this.$router.push({ name: 'EditOrganization', params: { id: orgId } });
+          this.$router.push({ name: 'EditOrganization', params: { id: this.organization.refName } });
         })
         .catch((e) => {
           if (e.message === 'Invalid: reference name already taken') {

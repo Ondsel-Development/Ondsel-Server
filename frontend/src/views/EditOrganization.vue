@@ -7,11 +7,18 @@
         variant="plain"
         class="text-body-1 font-weight-bold pa-0"
         style="text-decoration: none;"
-        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization._id } })"
+        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } })"
       >
         {{ organization.name }}
       </v-btn>
     </v-row>
+    <v-card>
+      <v-card-text>
+        <p class="text-body-1">Nature: {{organization.type}}</p>
+        <p class="text-body-1">workspaces: <a :href="`${workspacesUrl}`">{{workspacesUrl}}</a></p>
+        <p class="text-body-1">public homepage: <a :href="`${homepageUrl}`">{{homepageUrl}}</a></p>
+      </v-card-text>
+    </v-card>
     <v-row v-if="isLoggedInUserAdminOfOrganization" class="mt-12">
       <v-btn
         variant="outlined"
@@ -21,11 +28,6 @@
       >
         Change Name
       </v-btn>
-      <OrgChangeNameDialog
-        :is-active="isOrgChangeNameDialogActive"
-        :org="organization"
-        ref="orgChangeNameDialog"
-      />
     </v-row>
     <v-row class="mt-12" v-if="userIsOwner">
       <v-btn
@@ -36,11 +38,6 @@
         Delete Organization
       </v-btn>
       <v-spacer></v-spacer>
-      <DeleteOrgDialog
-        :is-active="isDeleteOrgDialogActive"
-        :org="organization"
-        ref="deleteOrgDialog"
-      />
     </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
@@ -48,6 +45,16 @@
     <v-row class="mt-12">
       <organization-groups-table :organization="organization" />
     </v-row>
+    <OrgChangeNameDialog
+      :is-active="isOrgChangeNameDialogActive"
+      :org="organization"
+      ref="orgChangeNameDialog"
+    />
+    <DeleteOrgDialog
+      :is-active="isDeleteOrgDialogActive"
+      :org="organization"
+      ref="deleteOrgDialog"
+    />
   </v-container>
 </template>
 
@@ -70,6 +77,8 @@ export default {
     isOrgChangeNameDialogActive: false,
     isDeleteOrgDialogActive: false,
     userIsOwner: false,
+    workspacesUrl: 'tbd',
+    homepageUrl: 'tbd',
   }),
   async created() {
     try {
@@ -84,7 +93,8 @@ export default {
         console.log(e);
       }
     }
-
+    this.workspacesUrl = `/org/${this.orgSrc.refName}/workspaces`;
+    this.homepageUrl = `/org/${this.orgSrc.refName}`;
   },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
