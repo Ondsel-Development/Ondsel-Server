@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="user">
     <h1 class="text-h5 font-weight-bold mb-2">Account Settings</h1>
 
     <v-card
@@ -195,8 +195,7 @@ export default {
     SubscriptionTypeMap() {
       return SubscriptionTypeMap
     },
-    ...mapState('auth', { loggedInUser: 'payload' }),
-    ...mapState('auth', ['user']),
+    ...mapState('auth', { loggedInUser: 'payload', user: 'user' }),
   },
   async mounted() {
     await this.getRemainingFiles();

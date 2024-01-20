@@ -2,7 +2,6 @@
   <v-dialog
     v-model="dialog"
     width="auto"
-    persistent
   >
     <v-card width="500" max-height="800">
       <template v-slot:title>
@@ -21,21 +20,17 @@
             :key="i"
             variant="text"
             flat
+            :value="organization"
             :active="currentOrganization ? organization._id === currentOrganization._id : false"
+            @click.stop="goToOrganization(organization)"
           >
             <template #title>{{ organization.name }}</template>
             <template #append>
               <v-btn
-                icon="mdi-wrench"
+                icon="mdi-cog"
                 variant="text"
                 flat
-                @click="goToOrganizationEdit(organization)"
-              />
-              <v-btn
-                icon="mdi-arrow-right"
-                variant="text"
-                flat
-                @click="goToOrganization(organization)"
+                @click.stop="goToOrganizationEdit(organization)"
               />
             </template>
           </v-list-item>

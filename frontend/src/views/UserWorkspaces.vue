@@ -15,17 +15,21 @@
       >
         <v-card
           class="mx-auto"
-          variant="elevated"
+          link
+          @click.stop="goToWorkspaceHome(workspace)"
         >
           <template #title>
-            <div class="text-h6">{{ workspace.name }} <span class="text-body-2">({{ workspace.description }})</span></div>
+            <div class="text-h6">
+              {{ workspace.name }}
+              <span class="text-body-2">({{ workspace.description }})</span>
+              <v-icon v-if="workspace.open" class="text-body-2" icon="mdi-earth" flag />
+            </div>
           </template>
           <template #subtitle>
             <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
           </template>
           <template v-slot:append>
-            <v-btn icon="mdi-pencil" flat @click="goToWorkspaceEdit(workspace)"/>
-            <v-btn icon="mdi-arrow-right" flat @click="goToWorkspaceHome(workspace)"/>
+            <v-btn icon="mdi-cog" flat @click.stop="goToWorkspaceEdit(workspace)"/>
           </template>
         </v-card>
       </v-col>

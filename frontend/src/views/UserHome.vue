@@ -7,7 +7,7 @@
     <v-spacer />
   </v-container>
   <v-container>
-    <v-card>
+    <v-card elevation="0">
       <v-card-title>Public Workspaces</v-card-title>
       <v-card-text>
         <v-row class="mt-6">
@@ -19,15 +19,14 @@
             <v-card
               class="mx-auto"
               variant="elevated"
+              link
+              @click.stop="goToWorkspaceHome(workspace)"
             >
               <template #title>
                 <div class="text-h6">{{ workspace.name }} <span class="text-body-2">({{ workspace.description }})</span></div>
               </template>
               <template #subtitle>
                 <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
-              </template>
-              <template v-slot:append>
-                <v-btn icon="mdi-arrow-right" flat @click="goToWorkspaceHome(workspace)"/>
               </template>
             </v-card>
           </v-col>
