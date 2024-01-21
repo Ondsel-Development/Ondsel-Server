@@ -143,7 +143,6 @@ const routes = [
     path: '/public-models',
     component: PublicModels,
     name: 'PublicModels',
-    meta: { requiresAuth: true },
   },
   //
   // USER pages
