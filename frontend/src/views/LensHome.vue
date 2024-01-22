@@ -22,10 +22,14 @@ export default {
   data: () => ({
   }),
   async created() {
-    if (this.userCurrentOrganization && this.userCurrentOrganization.type === 'Personal') {
-      this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
+    if (this.userCurrentOrganization) {
+      if (this.userCurrentOrganization.type === 'Personal') {
+        this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
+      } else {
+        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.userCurrentOrganization.refName } });
+      }
     } else {
-      this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.userCurrentOrganization.refName } });
+      this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
     }
   },
   async mounted() {

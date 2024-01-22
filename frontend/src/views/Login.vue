@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import {mapState, mapActions, mapGetters} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import { resetStores } from '@/store';
 import ForgotPasswordDialog from "@/components/ForgotPasswordDialog.vue";
@@ -85,6 +85,7 @@ export default {
   computed: {
     User: () => models.api.User,
     ...mapState('auth', ['isAuthenticatePending']),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
   },
   mounted() {
     resetStores();
@@ -97,7 +98,15 @@ export default {
           strategy: 'local',
           ...this.user,
         }).then(({ user }) => {
-          this.$router.push({ name: 'UserWorkspaces', params: { id: user.username } });
+          if (this.userCurrentOrganization) {
+            if (this.userCurrentOrganization.type === 'Personal') {
+              this.$router.push({ name: 'UserWorkspaces', params: { id: user.username } });
+            } else {
+              this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.userCurrentOrganization.refName } });
+            }
+          } else {
+            this.$router.push({ name: 'UserWorkspaces', params: { id: user.username } });
+          }
         }).catch((e) => {
           this.showSnacker = true;
           this.snackerMsg = `Invalid login`;
