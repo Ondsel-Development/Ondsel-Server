@@ -137,7 +137,7 @@ const routes = [
     path: '/',
     component: LensHome,
     name: 'LensHome',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, nonAuthenticatedUsersPointsToUrl: 'PublicModels' },
   },
   {
     path: '/public-models',
@@ -264,7 +264,11 @@ router.beforeEach(async (to, from, next) => {
     try {
       await store.dispatch('auth/authenticate');
     } catch (err) {
-      next({ name: 'Login' });
+      if (to.meta.nonAuthenticatedUsersPointsToUrl) {
+        next({ name: to.meta.nonAuthenticatedUsersPointsToUrl });
+      } else {
+        next({ name: 'Login' });
+      }
       return;
     }
   }

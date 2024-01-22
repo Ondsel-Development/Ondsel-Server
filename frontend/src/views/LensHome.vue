@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import {mapGetters, mapState} from "vuex";
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'LensHome',
@@ -20,10 +22,21 @@ export default {
   data: () => ({
   }),
   async created() {
+    if (this.userCurrentOrganization) {
+      if (this.userCurrentOrganization.type === 'Personal') {
+        this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
+      } else {
+        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.userCurrentOrganization.refName } });
+      }
+    } else {
+      this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
+    }
   },
   async mounted() {
   },
   computed: {
+    ...mapState('auth', ['user']),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
   },
   methods: {
   }

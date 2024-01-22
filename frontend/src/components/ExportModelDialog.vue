@@ -21,7 +21,7 @@
           class="text-left"
           v-if="user && !constraints.canExportModel"
         >
-          Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the default model.
+          Please upgrade your plan in order to export model into all formats. In <b>Solo</b> tier, you are only allowed to download the original model file.
         </v-alert>
         <v-alert
           variant="outlined"
@@ -30,7 +30,7 @@
           class="text-left"
           v-if="!isAuthenticated"
         >
-          <span v-if="sharedModel && sharedModel.canDownloadDefaultModel">You can only export default model without Login.</span>
+          <span v-if="sharedModel && sharedModel.canDownloadDefaultModel">You can only export original model without Login.</span>
           <span v-else>Need to Login to export model.</span>
         </v-alert>
         <br>
@@ -49,7 +49,7 @@
         <v-btn
           color="primary"
           @click="runExportCmd"
-          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === 'Default model')) || (user && !constraints.canExportModel && !(format === 'Default model'))"
+          :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === exportDefaultModelLabel())) || (user && !constraints.canExportModel && !(format === exportDefaultModelLabel()))"
         >Download</v-btn>
       </v-card-actions>
     </v-card>
@@ -130,7 +130,7 @@ export default {
         return
       }
       this.isExportInProgress = true;
-      if (this.format === 'Default model') {
+      if (this.format === this.exportDefaultModelLabel()) {
         await this.downloadFile(this.model || this.sharedModel.model);
         return;
       }
@@ -174,7 +174,7 @@ export default {
       let fileEndpoint;
       let fileName;
       const custFileName = model.custFileName || model.file.custFileName;
-      if (this.format === 'Default model') {
+      if (this.format === this.exportDefaultModelLabel()) {
         fileEndpoint = `${uploadEndpoint}/${model.uniqueFileName}`;
         fileName = custFileName;
       } else {
