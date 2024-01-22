@@ -24,7 +24,10 @@
             :active="currentOrganization ? organization._id === currentOrganization._id : false"
             @click.stop="goToOrganization(organization)"
           >
-            <template #title>{{ organization.name }}</template>
+            <template #title>
+              {{ organization.name }}
+              <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+            </template>
             <template #append>
               <v-btn
                 icon="mdi-cog"
