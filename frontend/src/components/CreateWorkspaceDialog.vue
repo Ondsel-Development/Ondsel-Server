@@ -32,7 +32,7 @@
           ></v-text-field>
           <v-text-field
             v-model="nameTemp"
-            label="reference name"
+            label="Reference name"
             :rules="[rules.isRequired, rules.nameConforms]"
             :disabled="isCreatePending"
           ></v-text-field>
@@ -41,7 +41,7 @@
               <span class="font-weight-bold">{{workspace.refName}}</span>
             </v-card-text>
             <v-card-text v-else>
-              <span class="font-italic">no reference name yet</span>
+              <span class="font-italic">No reference name yet</span>
             </v-card-text>
           </v-card>
         </v-card-text>
