@@ -96,8 +96,8 @@ export default {
         await this.authenticate({
           strategy: 'local',
           ...this.user,
-        }).then(() => {
-          this.$router.push({ name: 'LensHome' });
+        }).then(({ user }) => {
+          this.$router.push({ name: 'UserWorkspaces', params: { id: user.username } });
         }).catch((e) => {
           this.showSnacker = true;
           this.snackerMsg = `Invalid login`;
