@@ -12,7 +12,7 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
-    <v-card>
+    <v-card flat class="my-2">
       <v-card-text>
         <p class="text-body-1">Nature: {{organization.type}}</p>
         <p class="text-body-1">workspaces: <a :href="`${workspacesUrl}`">{{workspacesUrl}}</a></p>
