@@ -41,7 +41,7 @@
       <v-progress-circular indeterminate></v-progress-circular>
     </template>
     <template v-else-if="workspaces.data?.length === 0">
-      <div class="text-grey-darken-1">No workspace exist!</div>
+      <div class="text-grey-darken-1">There are no workspaces here!</div>
     </template>
     <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
       <div class="text-grey-darken-1">You reached the end!</div>
