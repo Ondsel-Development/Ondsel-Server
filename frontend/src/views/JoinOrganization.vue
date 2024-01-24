@@ -42,10 +42,10 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 
-const { OrgInvite } = models.api;
+const { OrgInvite, Organization } = models.api;
 
 export default {
   name: "JoinOrganization",
@@ -58,6 +58,7 @@ export default {
     orgInvite: vm => OrgInvite.getFromStore(vm.$route.params.id),
   },
   methods: {
+    ...mapActions('app', ['setCurrentOrganization']),
     async acceptInvite() {
       await OrgInvite.patch(
         this.orgInvite._id,
@@ -69,7 +70,8 @@ export default {
           }
         }
       )
-      this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.orgInvite.organization._id } });
+      await this.setCurrentOrganization(Organization.getFromStore(this.orgInvite.organization._id));
+      this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.orgInvite.organization.refName } });
     },
     async rejectInvite() {
       await OrgInvite.patch(
