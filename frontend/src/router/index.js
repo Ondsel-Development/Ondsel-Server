@@ -267,7 +267,7 @@ router.beforeEach(async (to, from, next) => {
       if (to.meta.nonAuthenticatedUsersPointsToUrl) {
         next({ name: to.meta.nonAuthenticatedUsersPointsToUrl });
       } else {
-        next({ name: 'Login' });
+        next({ name: 'Login', query: { redirect_uri: window.location.origin + to.fullPath } });
       }
       return;
     }
