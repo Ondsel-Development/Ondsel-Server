@@ -29,6 +29,18 @@
     <template #item.isAdmin="{ item }">
       <div class="text-capitalize">
         {{ item.value.isAdmin }}
+        &nbsp; &nbsp;
+        <span v-if="item.value._id===organization.owner._id">
+          <v-icon size="small">
+              mdi-account-key
+          </v-icon>
+          <v-tooltip
+            text="Owner of organization"
+            activator="parent"
+            location="top"
+          >
+          </v-tooltip>
+        </span>
       </div>
     </template>
     <template v-slot:item.actions="{ item }">
