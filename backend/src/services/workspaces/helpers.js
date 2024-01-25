@@ -81,6 +81,31 @@ export const createAndAssignRootDirectory = async context => {
   return context;
 }
 
+export const addEveryoneGroupIfNeeded = async context => {
+  // for now, this is always done. In the future this behavior will be set on a per-org basis
+  // for now, this is fragile as there is no systemic way to identify the "Everyone" group,
+  //   so we simply look at the first entry and it's name
+  const orgService = await context.app.service('organizations');
+  const org = await orgService.get(context.result.organizationId);
+  console.log(JSON.stringify(org));
+  const groups = org.groups || [];
+  if (groups.length > 0) {
+    const everybodyGroup = groups[0];
+    if (everybodyGroup.name === `Everybody`) {
+      context.result = await context.service.patch(
+        context.result._id,
+        {
+          shouldAddGroupsOrUsersToWorkspace: true,
+          groupsOrUsersData: [
+            ['Group', 'write', everybodyGroup._id]
+          ],
+        },
+      )
+    }
+  }
+  return context;
+}
+
 export const limitPublicOnlyRequestsToOpenWorkspaces = async context => {
   if (context.publicDataOnly) {
     if (!context.params.query.open) {
