@@ -45,14 +45,6 @@
 
         <v-divider />
         <v-list-item>
-          <v-list-item-title>Slug</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspace.refName }}
-          </v-list-item-subtitle>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
           <v-list-item-title>Open to Public View</v-list-item-title>
           <v-list-item-subtitle>
             {{ workspace.open }}
@@ -129,6 +121,55 @@
                 :workspace="workspace"
                 ref="workspaceChangeNameDescDialog"
               />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Long Description</v-list-item-title>
+          <v-list-item-subtitle>
+            &nbsp;
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root directory of the workspace.</i>
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Tags</v-list-item-title>
+          <v-list-item-subtitle>
+            <v-chip-group v-for="(tag) in workspace.curation?.tags">
+              <v-chip>{{tag}}</v-chip>
+            </v-chip-group>
+            <span v-if="!workspace.curation?.tags"><i>None</i></span>
+          </v-list-item-subtitle>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
+          <v-list-item-subtitle>
+            <div v-if="workspace.curation?.representative_file">
+              <div v-if="workspace.curation.representative_file.thumbnailUrlCache">
+                <v-img
+                  :src="workspace.curation.representative_file.thumbnailUrlCache"
+                  height="200px"
+                  cover
+                ></v-img>
+              </div>
+              <div v-if="!workspace.curation.representative_file.thumbnailUrlCache">
+                <i>file <code>{{workspace.curation.representative_file.custFileName}}</code> is missing thumbnail</i>
+              </div>
+            </div>
+            <span v-if="!workspace.curation?.representative_file"><i>None</i></span>
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <i>To change this, visit the workspace, select the file, and click on the "Represent Workspace" button.</i>
             </v-list-item-action>
           </template>
         </v-list-item>

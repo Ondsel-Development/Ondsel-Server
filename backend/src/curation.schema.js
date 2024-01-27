@@ -15,7 +15,7 @@ export const curationSchema = Type.Object(
     description: Type.String(), // limited to 80 runes
     long_description_md: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
-    representative_file: fileSummary, // if applicable
+    representative_file: Type.Optional(fileSummary), // if applicable
     promoted_workspaces: Type.Array(workspaceSummary),
     promoted_shared_models: Type.Array(sharedModelsSummarySchema),
     keywordRefs: Type.Array(ObjectIdSchema()), // used for pre-emptive "cleanup" prior to recalculating keywords
