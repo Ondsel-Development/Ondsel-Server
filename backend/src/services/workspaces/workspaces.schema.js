@@ -13,6 +13,7 @@ import {organizationSummarySchema, OrganizationTypeMap} from "../organizations/o
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
+import {curationSchema} from "../../curation.schema.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -31,8 +32,7 @@ export const workspaceSchema = Type.Object(
     refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
     open: Type.Boolean(),
     license: Type.Optional(Type.Union([Type.Null(), LicenseType])),
-    description: Type.String(),
-    long_description: Type.String(),
+    description: Type.String(), // limited by UI to
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -40,6 +40,7 @@ export const workspaceSchema = Type.Object(
     organization: organizationSummarySchema,
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
+    curation: Type.Optional(curationSchema),
   },
   { $id: 'Workspace', additionalProperties: false }
 )
@@ -130,7 +131,7 @@ export const workspacePatchResolver = resolve({
 
 // Schema for allowed query properties
 export const workspaceQueryProperties = Type.Pick(workspaceSchema, [
-  '_id', 'name', 'refName', 'open', 'license', 'description', 'long_description', 'refNameHash', 'organizationId',
+  '_id', 'name', 'refName', 'open', 'license', 'description', 'refNameHash', 'organizationId',
   'createdAt', 'rootDirectory'
 ])
 export const workspaceQuerySchema = Type.Intersect(
