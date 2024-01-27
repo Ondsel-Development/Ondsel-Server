@@ -153,19 +153,31 @@
         <v-list-item>
           <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
           <v-list-item-subtitle>
-            <div v-if="workspace.curation?.representative_file">
-              <div v-if="workspace.curation.representative_file.thumbnailUrlCache">
+            <div v-if="workspace.curation?.representativeFile">
+              <div v-if="workspace.curation.representativeFile.thumbnailUrlCache">
                 <v-img
-                  :src="workspace.curation.representative_file.thumbnailUrlCache"
+                  :src="workspace.curation.representativeFile.thumbnailUrlCache"
                   height="200px"
                   cover
                 ></v-img>
               </div>
-              <div v-if="!workspace.curation.representative_file.thumbnailUrlCache">
-                <i>file <code>{{workspace.curation.representative_file.custFileName}}</code> is missing thumbnail</i>
+              <div v-if="!workspace.curation.representativeFile.thumbnailUrlCache">
+                <v-card
+                  max-width="10em"
+                  height="10em"
+                  flat
+                  variant="outlined"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar>
+                      <v-icon icon="mdi-file-outline" size="x-large"></v-icon>
+                    </v-avatar>
+                  </template>
+                  <span class="mx-6"><code>.{{workspace.curation.representativeFile.custFileName.split('.').pop()}}</code></span>
+                </v-card>
               </div>
             </div>
-            <span v-if="!workspace.curation?.representative_file"><i>None</i></span>
+            <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
           </v-list-item-subtitle>
           <template #append>
             <v-list-item-action>

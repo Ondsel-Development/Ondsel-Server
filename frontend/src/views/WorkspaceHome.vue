@@ -46,6 +46,7 @@
         <WorkspaceFileView
           v-if="activeFile"
           :file="activeFile"
+          :workspace="workspace"
           :full-path="activePath"
           :can-user-write="workspace.haveWriteAccess"
           :public-view="publicView"

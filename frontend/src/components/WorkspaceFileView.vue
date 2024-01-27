@@ -11,6 +11,20 @@
         <v-btn flat>Explore</v-btn>
       </a>
       <v-btn
+        v-if="workspace.curation?.representativeFile?._id !== file._id"
+        flat
+        :disabled="!canUserWrite"
+        @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"
+        icon="mdi-camera-off"
+      ></v-btn>
+      <v-btn
+        v-if="workspace.curation?.representativeFile?._id === file._id"
+        flat
+        :disabled="!canUserWrite"
+        @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"
+        icon="mdi-camera"
+      ></v-btn>
+      <v-btn
         :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
@@ -53,6 +67,7 @@
     <v-row>
       <file-versions-table :file="file" :can-user-write="canUserWrite" :public-view="publicView" />
     </v-row>
+    <represent-workspace-dialog v-if="!publicView" ref="representWorkspace" :file="file" :workspace="workspace" />
     <upload-new-version-file-dialog v-if="!publicView" ref="uploadNewVersionFile" :file="file" />
     <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="doneWithFile" />
   </v-container>
@@ -64,12 +79,14 @@ import UploadNewVersionFileDialog from '@/components/UploadNewVersionFileDialog.
 import DeleteFileDialog from "@/components/DeleteFileDialog.vue";
 import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 import {mapActions, mapState} from "vuex";
+import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue";
 
 export default {
   name: 'WorkspaceFileView',
-  components: {FileVersionsTable, UploadNewVersionFileDialog, DeleteFileDialog},
+  components: {RepresentWorkspaceDialog, FileVersionsTable, UploadNewVersionFileDialog, DeleteFileDialog},
   props: {
     file: Object,
+    workspace: Object,
     canUserWrite: {
       type: Boolean,
       default: false,

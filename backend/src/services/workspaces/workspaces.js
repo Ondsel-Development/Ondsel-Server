@@ -35,6 +35,7 @@ import {
   resolvePrivateResults
 } from '../../hooks/handle-public-info-query.js';
 import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
+import {representWorkspaceWithFile} from "./commands/representWorkspaceWithFile.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -174,6 +175,10 @@ export const workspace = (app) => {
         iff(
           context => context.data.shouldEditGroupOrUserOnWorkspace,
           editGroupOrUserOnWorkspace,
+        ),
+        iff(
+          context => context.data.shouldRepresentWorkspaceWithFile,
+          representWorkspaceWithFile,
         ),
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)

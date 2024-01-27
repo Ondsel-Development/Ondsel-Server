@@ -13,11 +13,11 @@ export const curationSchema = Type.Object(
     collection: Type.String(),
     name: Type.String(), // limited to 40 runes (unicode code points aka characters)
     description: Type.String(), // limited to 80 runes
-    long_description_md: Type.String(), // markdown expected
+    longDescription_md: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
-    representative_file: Type.Optional(fileSummary), // if applicable
-    promoted_workspaces: Type.Array(workspaceSummary),
-    promoted_shared_models: Type.Array(sharedModelsSummarySchema),
+    representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
+    promotedWorkspaces: Type.Array(workspaceSummary),
+    promotedSharedModels: Type.Array(sharedModelsSummarySchema),
     keywordRefs: Type.Array(ObjectIdSchema()), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
