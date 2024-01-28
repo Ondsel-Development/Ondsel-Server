@@ -87,7 +87,6 @@ export const addEveryoneGroupIfNeeded = async context => {
   //   so we simply look at the first entry and it's name
   const orgService = await context.app.service('organizations');
   const org = await orgService.get(context.result.organizationId);
-  console.log(JSON.stringify(org));
   const groups = org.groups || [];
   if (groups.length > 0) {
     const everybodyGroup = groups[0];
