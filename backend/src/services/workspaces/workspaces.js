@@ -27,7 +27,7 @@ import { editGroupOrUserOnWorkspace } from './commands/editGroupOrUserOnWorkspac
 import {
   isUserBelongsToWorkspace,
   createAndAssignRootDirectory,
-  limitPublicOnlyRequestsToOpenWorkspaces
+  limitPublicOnlyRequestsToOpenWorkspaces, addEveryoneGroupIfNeeded
 } from './helpers.js';
 import {
   authenticateJwtWhenPrivate,
@@ -193,6 +193,7 @@ export const workspace = (app) => {
       ],
       create: [
         createAndAssignRootDirectory,
+        addEveryoneGroupIfNeeded,
         afterCreateHandleCuration,
       ],
     },

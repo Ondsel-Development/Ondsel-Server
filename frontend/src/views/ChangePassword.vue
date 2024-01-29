@@ -27,7 +27,7 @@
           ></v-text-field>
 
           <v-card-actions>
-            <v-btn type="submit" block class="mt-2" :disabled="!isValid || pendingPasswordChange">Submit</v-btn>
+            <v-btn type="submit" block class="mt-2" :disabled="!isValid || pendingPasswordChange" :loading="pendingPasswordChange">Submit</v-btn>
           </v-card-actions>
         </v-form>
         <v-snackbar
@@ -82,6 +82,10 @@ export default {
     resetStores();
   },
   async created() {
+    if (this.loggedInUser) {
+      // always logout before change password, otherwise `resetPwdLong` not working.
+      await this.authLogout();
+    }
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
@@ -98,12 +102,14 @@ export default {
         notifierOptions: {},
       }).then(() => {
         this.verificationMsg = 'Password Changed!';
+        this.pendingPasswordChange = false;
         if (this.loggedInUser) {
           this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}});
         } else {
           this.$router.push({name: 'Login'});
         }
       }).catch((e) => {
+        this.pendingPasswordChange = false;
         const msg = e.message;
         console.log(msg);
         if (msg === 'User not found.') {
@@ -114,7 +120,6 @@ export default {
           this.verificationMsg = 'Unable to reset password.';
         }
       });
-      this.pendingPasswordChange = false;
     },
     async changePasswordFormHandler() {
       if (this.loggedInUser) {
