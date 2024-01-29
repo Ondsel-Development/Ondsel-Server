@@ -120,6 +120,8 @@ export default {
         };
         this.nameTemp = '';
         this.dialog = false;
+        // hard reloading so that user can join new created workspace channel
+        this.$router.go();
       })
       .catch((e) => {
         if (e.message === 'Invalid: reference name already taken') {

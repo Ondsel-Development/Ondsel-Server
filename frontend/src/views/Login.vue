@@ -98,6 +98,10 @@ export default {
           strategy: 'local',
           ...this.user,
         }).then(({ user }) => {
+          if (this.$route.query.redirect_uri) {
+            window.open(this.$route.query.redirect_uri, '_self');
+            return;
+          }
           if (this.userCurrentOrganization) {
             if (this.userCurrentOrganization.type === 'Personal') {
               this.$router.push({ name: 'UserWorkspaces', params: { id: user.username } });

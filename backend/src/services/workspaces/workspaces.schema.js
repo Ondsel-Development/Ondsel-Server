@@ -109,11 +109,12 @@ export const workspaceDataResolver = resolve({
     }
     if (org.type === OrganizationTypeMap.personal) {
       if (user?.tier === SubscriptionTypeMap.unverified || user?.tier === SubscriptionTypeMap.solo) {
-        return value || true;
+        return true; // if user isn't peer or greater, then a personal workspace is open no matter what
       } else {
         return value || false;
       }
     }
+    // else org.type === open, so force to true regardless of passed-in parameter
     return true;
   }
 })
