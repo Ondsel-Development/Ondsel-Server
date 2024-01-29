@@ -36,6 +36,7 @@ import {
 } from '../../hooks/handle-public-info-query.js';
 import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
 import {representWorkspaceWithFile} from "./commands/representWorkspaceWithFile.js";
+import {afterCreateHandleCuration} from "./workspaces.curation.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -192,6 +193,7 @@ export const workspace = (app) => {
       ],
       create: [
         createAndAssignRootDirectory,
+        afterCreateHandleCuration,
       ],
     },
     error: {

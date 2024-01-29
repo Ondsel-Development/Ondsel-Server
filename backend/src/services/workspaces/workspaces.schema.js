@@ -14,6 +14,7 @@ import {buildOrganizationSummary} from "../organizations/organizations.distrib.j
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
 import {curationSchema} from "../../curation.schema.js";
+import {buildNewCurationForWorkspace} from "./workspaces.curation.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -117,7 +118,7 @@ export const workspaceDataResolver = resolve({
     }
     // else org.type === open, so force to true regardless of passed-in parameter
     return true;
-  }
+  },
 })
 
 // Schema for updating existing entries
@@ -127,6 +128,13 @@ export const workspacePatchSchema = Type.Partial(workspaceSchema, {
 export const workspacePatchValidator = getValidator(workspacePatchSchema, dataValidator)
 export const workspacePatchResolver = resolve({
   updatedAt: async () => Date.now(),
+  curation: async(value, message, context) => {
+    if (!value || !value._id) {
+      const baseValue = buildNewCurationForWorkspace(context.beforePatchCopy)
+      return _.merge(baseValue, value); // anything currently in object overrides the base
+    }
+    return value;
+  }
 })
 
 // Schema for allowed query properties
