@@ -57,6 +57,7 @@ export default {
       default: false,
     }
   },
+  emits: ['saveTags'],
   created() {
     this.newTags = this.tagList;
   },
@@ -71,6 +72,7 @@ export default {
   },
   methods: {
     async doSaveTags() {
+      this.$emit('saveTags');
     },
   },
 }

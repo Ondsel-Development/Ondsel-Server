@@ -143,8 +143,8 @@
           <v-list-item-title>Tags</v-list-item-title>
           <v-list-item-subtitle>
             <div v-if="workspace.curation?.tags && workspace.curation?.tags?.length > 0">
-              <v-chip-group v-for="(tag) in workspace.curation?.tags">
-                <v-chip>{{tag}}</v-chip>
+              <v-chip-group>
+                <v-chip v-for="(tag) in workspace.curation?.tags">{{tag}}</v-chip>
               </v-chip-group>
             </div>
             <span v-else><i>None</i></span>
@@ -164,6 +164,7 @@
                 :is-active="isWorkspaceChangeNameDescDialogActive"
                 :tagList="workspace.curation?.tags || []"
                 ref="editTagsDialog"
+                @save-tags="saveTags"
               />
             </v-list-item-action>
           </template>
@@ -209,6 +210,10 @@ import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vu
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
 import ReprViewer from "@/components/ReprViewer.vue";
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import {models} from "@feathersjs/vuex";
+import _ from 'lodash';
+
+const { Workspace } = models.api;
 
 export default {
   name: "EditWorkspace",
@@ -313,6 +318,28 @@ export default {
       this.isEditTagsDialogActive = true;
       this.$refs.editTagsDialog.$data.dialog = true;
     },
+    async saveTags() {
+      this.$refs.editTagsDialog.$data.isPatchPending = true;
+      const tagList = this.$refs.editTagsDialog.$data.newTags;
+      const lowercaseTags = tagList.map(tag => tag.toLowerCase().trim());
+      const cleanTags = _.uniq(lowercaseTags);
+      let curation = this.workspace.curation;
+      curation.tags = cleanTags;
+      await Workspace.patch(
+        this.workspace._id,
+        {
+          curation: curation,
+        }
+      ).then(() => {
+        this.$refs.editTagsDialog.$data.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editTagsDialog.snackerMsg = e.message;
+        this.$refs.editTagsDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editTagsDialog.$data.isPatchPending = false;
+    }
   }
 }
 </script>

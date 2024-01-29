@@ -128,13 +128,6 @@ export const workspacePatchSchema = Type.Partial(workspaceSchema, {
 export const workspacePatchValidator = getValidator(workspacePatchSchema, dataValidator)
 export const workspacePatchResolver = resolve({
   updatedAt: async () => Date.now(),
-  curation: async(value, message, context) => {
-    if (!value || !value._id) {
-      const baseValue = buildNewCurationForWorkspace(context.beforePatchCopy)
-      return _.merge(baseValue, value); // anything currently in object overrides the base
-    }
-    return value;
-  }
 })
 
 // Schema for allowed query properties
