@@ -8,8 +8,7 @@ import {keywordMatchSchema} from "./keywords.subdocs.js";
 // Main data model schema
 export const keywordsSchema = Type.Object(
   {
-    _id: ObjectIdSchema(),
-    keyPhrase: Type.String(),
+    _id: Type.String(),  // _id contains the keyphrase
     // the sortedMatches array stores the top 200 but only serves the top 50. This is done to prevent an inflation attack
     sortedMatches: Type.Array(keywordMatchSchema),
   },

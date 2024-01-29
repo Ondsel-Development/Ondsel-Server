@@ -128,14 +128,17 @@
         <v-divider />
         <v-list-item>
           <v-list-item-title>Long Description</v-list-item-title>
-          <v-list-item-subtitle>
-            &nbsp;
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root directory of the workspace.</i>
-            </v-list-item-action>
-          </template>
+          <v-list-item-media>
+            <v-card>
+              <v-card-text>
+                {{workspace.curation.longDescriptionMd}}
+              </v-card-text>
+            </v-card>
+          </v-list-item-media>
+          <v-list-item-action>
+            <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root
+              directory of the workspace. The first 40 lines (or 2000 characters) are used for searching and display.</i>
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -174,11 +177,14 @@
         <v-list-item>
           <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
           <v-list-item-subtitle>
+            {{workspace.curation.representativeFile.custFileName}}
+          </v-list-item-subtitle>
+          <v-list-item-media>
             <div v-if="workspace.curation?.representativeFile">
               <repr-viewer :workspace="workspace"></repr-viewer>
             </div>
             <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
-          </v-list-item-subtitle>
+          </v-list-item-media>
           <template #append>
             <v-list-item-action>
               <i>To change this, visit the workspace, select the file, and click on the "Represent Workspace" button.</i>
