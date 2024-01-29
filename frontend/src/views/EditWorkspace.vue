@@ -154,28 +154,7 @@
           <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
           <v-list-item-subtitle>
             <div v-if="workspace.curation?.representativeFile">
-              <div v-if="workspace.curation.representativeFile.thumbnailUrlCache">
-                <v-img
-                  :src="workspace.curation.representativeFile.thumbnailUrlCache"
-                  height="200px"
-                  cover
-                ></v-img>
-              </div>
-              <div v-if="!workspace.curation.representativeFile.thumbnailUrlCache">
-                <v-card
-                  max-width="10em"
-                  height="10em"
-                  flat
-                  variant="outlined"
-                >
-                  <template v-slot:prepend>
-                    <v-avatar>
-                      <v-icon icon="mdi-file-outline" size="x-large"></v-icon>
-                    </v-avatar>
-                  </template>
-                  <span class="mx-6"><code>.{{workspace.curation.representativeFile.custFileName.split('.').pop()}}</code></span>
-                </v-card>
-              </div>
+              <repr-viewer :workspace="workspace"></repr-viewer>
             </div>
             <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
           </v-list-item-subtitle>
@@ -208,10 +187,12 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
 import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
+import ReprViewer from "@/components/ReprViewer.vue";
 
 export default {
   name: "EditWorkspace",
   components: {
+    ReprViewer,
     WorkspaceChangeLicenseDialog,
     WorkspaceOpenSelectDialog,
     WorkspaceChangeNameDescDialog, ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
