@@ -74,3 +74,46 @@ $ docker run -p 9000:8080 --name fc_worker fc-worker:latest
     - Frontend: https://lens.ondsel.com/
     - Backend API: https://lens-api.ondsel.com/
     - API docs: https://lens-api.ondsel.com/docs/
+
+
+## Deployment
+
+## Deployment to PROD
+
+1. Merge code to production branch.
+1. Now, create a zip file of backend and frontend source code. Run following commands:
+    1. `git fetch origin`
+    1. `git checkout origin/production`
+    1. `cd backend`
+    1. `zip -r ./od-backend.zip .`
+    1. `cd ../frontend`
+    1. `zip -r ./od-frontend.zip .`
+1. Login to AWS dashboard (https://console.aws.amazon.com/console/home).
+1. Open `Elastic Beanstalk` app (https://us-east-1.console.aws.amazon.com/elasticbeanstalk/home?region=us-east-1#/environments)
+1. Deploying backend service (https://lens-api.ondsel.com/).
+    1. Open `od-backend-prod-app-env` environment.
+    1. Click on `Upload and deploy` button.
+    1. This will open a dialog to upload ZIP.
+    1. Upload `od-backend.zip` file and in Version label put commit hash (i.e  `d7fb86244117efb679edd0bb41bedf230cb2fc19`)
+    1. This will deploy backend service (https://lens-api.ondsel.com/)
+1. Deploying frontend service (https://lens.ondsel.com/).
+    1. Open `od-frontend-prod-app-env` environment.
+    1. Click on `Upload and deploy` button.
+    1. This will open a dialog to upload ZIP.
+    1. Upload `od-frontend.zip` file and in Version label put commit hash (i.e  `d7fb86244117efb679edd0bb41bedf230cb2fc19`)
+
+
+## Running migration on PROD
+
+1. Login to AWS dashboard and open EC2 page.
+1. Open `od-backend-prod-app-env` instance page.
+1. Click on Connect to Instance button.
+```bash
+[root@ip-172-31-26-128 ~]# docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED       STATUS       PORTS      NAMES
+9987508aaaa4   9bd321c31a70   "docker-entrypoint.s…"   4 hours ago   Up 4 hours   3030/tcp   vigorous_dirac
+[root@ip-172-31-26-128 ~]# docker exec -it 9987508aaaa4 /bin/sh
+/app # npm run migration <migration_name> > <migration_name>.logs
+/app # exit
+[root@ip-172-31-26-128 ~]# exit
+```
