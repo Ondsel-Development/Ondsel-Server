@@ -142,11 +142,31 @@
         <v-list-item>
           <v-list-item-title>Tags</v-list-item-title>
           <v-list-item-subtitle>
-            <v-chip-group v-for="(tag) in workspace.curation?.tags">
-              <v-chip>{{tag}}</v-chip>
-            </v-chip-group>
-            <span v-if="!workspace.curation?.tags"><i>None</i></span>
+            <div v-if="workspace.curation?.tags && workspace.curation?.tags?.length > 0">
+              <v-chip-group v-for="(tag) in workspace.curation?.tags">
+                <v-chip>{{tag}}</v-chip>
+              </v-chip-group>
+            </div>
+            <span v-else><i>None</i></span>
           </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openEditTagsDialog()"
+              >
+                Edit Tags
+              </v-btn>
+              <v-spacer></v-spacer>
+              <EditTagsDialog
+                :is-active="isWorkspaceChangeNameDescDialogActive"
+                :tagList="workspace.curation?.tags || []"
+                ref="editTagsDialog"
+              />
+            </v-list-item-action>
+          </template>
         </v-list-item>
 
         <v-divider />
@@ -188,10 +208,12 @@ import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescD
 import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
 import ReprViewer from "@/components/ReprViewer.vue";
+import EditTagsDialog from "@/components/EditTagsDialog.vue";
 
 export default {
   name: "EditWorkspace",
   components: {
+    EditTagsDialog,
     ReprViewer,
     WorkspaceChangeLicenseDialog,
     WorkspaceOpenSelectDialog,
@@ -206,6 +228,7 @@ export default {
     forbidNameChangeReason: 'tbd',
     isWorkspaceOpenSelectDialogActive: false,
     isWorkspaceChangeLicenseDialogActive: false,
+    isEditTagsDialogActive: false,
   }),
   async created() {
     this.slug = this.$route.params.slug;
@@ -285,6 +308,10 @@ export default {
       this.isWorkspaceChangeLicenseDialogActive = true;
       this.$refs.workspaceChangeLicenseDialog.$data.newLicense = this.workspace.license || "null";
       this.$refs.workspaceChangeLicenseDialog.$data.dialog = true;
+    },
+    async openEditTagsDialog() {
+      this.isEditTagsDialogActive = true;
+      this.$refs.editTagsDialog.$data.dialog = true;
     },
   }
 }
