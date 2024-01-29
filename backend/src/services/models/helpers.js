@@ -17,6 +17,13 @@ export const canUserAccessModelGetMethod = async context => {
       }
     )
   } catch (error) {
+    const workspace = await context.app.service('workspaces').get(
+      file.workspace._id, { query: { $select: ['open']} }
+    )
+    if (workspace.open) {
+      context.$isModelBelongsToOpenWorkspace = workspace.open;
+      return context;
+    }
     throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this model'});
   }
   return context;

@@ -103,6 +103,9 @@ export const modelResolver = resolve({
       }
     }
   }),
+  haveWriteAccess: virtual(async (_message, context) => {
+    return !context.$isModelBelongsToOpenWorkspace;
+  })
 })
 
 export const modelExternalResolver = resolve({})
