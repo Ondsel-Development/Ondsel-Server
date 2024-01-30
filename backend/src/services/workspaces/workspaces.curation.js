@@ -10,8 +10,7 @@ export function buildNewCurationForWorkspace(workspace) {
     longDescriptionMd: '',
     tags: [],
     representativeFile: null,
-    promotedWorkspaces: [],
-    promotedSharedModels: [],
+    promoted: [],
     keywordRefs: [],
   };
   return curation;
@@ -43,16 +42,16 @@ export const afterPatchHandleCuration = async (context) => {
       needPatch = true;
       curation.description = context.result.description;
     }
-    if (context.beforePatchCopy.curation.longDescriptionMd !== curation?.longDescriptionMd) {
+    if (context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
       changeFound = true;
     }
-    if (context.beforePatchCopy.curation.tags !== curation?.tags) {
+    if (context.beforePatchCopy.curation?.tags !== curation?.tags) {
       changeFound = true;
     }
-    if (context.beforePatchCopy.curation.representativeFile !== curation?.representativeFile) {
+    if (context.beforePatchCopy.curation?.representativeFile !== curation?.representativeFile) {
       changeFound = true;
     }
-    // ignore promotedWorkspaces and promotedSharedModels on workspaces
+    // ignore `curation.promoted` on workspaces for now...
     if (needPatch) {
       await context.service.patch(
         context.result._id,

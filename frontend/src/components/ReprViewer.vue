@@ -1,25 +1,48 @@
 <template>
-  <div v-if="workspace.curation.representativeFile.thumbnailUrlCache">
-    <v-img
-      :src="workspace.curation.representativeFile.thumbnailUrlCache"
-      height="10em"
-      width="10em"
-    ></v-img>
-  </div>
-  <div v-if="!workspace.curation.representativeFile.thumbnailUrlCache">
+  <div v-if="!workspace.curation?.representativeFile">
     <v-card
-      max-width="10em"
-      height="10em"
+      width="8em"
+      height="8em"
       flat
       variant="outlined"
     >
       <template v-slot:prepend>
         <v-avatar>
-          <v-icon icon="mdi-file-outline" size="x-large"></v-icon>
+          <v-icon icon="mdi-crop-square" size="x-large"></v-icon>
         </v-avatar>
       </template>
-      <span class="mx-6"><code>.{{workspace.curation.representativeFile.custFileName.split('.').pop()}}</code></span>
     </v-card>
+  </div>
+  <div v-else>
+    <div v-if="workspace.curation?.representativeFile?.thumbnailUrlCache">
+      <v-card
+        width="8em"
+        height="8em"
+        flat
+        variant="outlined"
+      >
+        <v-img
+          :src="workspace.curation?.representativeFile?.thumbnailUrlCache"
+          height="7.8em"
+          width="7.8em"
+        ></v-img>
+      </v-card>
+    </div>
+    <div v-if="!workspace.curation?.representativeFile?.thumbnailUrlCache">
+      <v-card
+        width="8em"
+        height="8em"
+        flat
+        variant="outlined"
+      >
+        <template v-slot:prepend>
+          <v-avatar>
+            <v-icon icon="mdi-file-outline" size="x-large"></v-icon>
+          </v-avatar>
+        </template>
+        <span class="mx-6"><code>.{{workspace.curation?.representativeFile?.custFileName.split('.').pop()}}</code></span>
+      </v-card>
+    </div>
   </div>
 </template>
 

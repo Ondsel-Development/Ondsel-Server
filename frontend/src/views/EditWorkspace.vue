@@ -182,9 +182,7 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                <div v-if="workspace.curation?.representativeFile">
-                  <repr-viewer :workspace="workspace"></repr-viewer>
-                </div>
+                <repr-viewer :workspace="workspace"></repr-viewer>
                 <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
               </v-card-text>
             </v-card>
