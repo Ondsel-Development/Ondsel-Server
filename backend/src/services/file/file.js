@@ -12,7 +12,7 @@ import {
   addFileToDirectory,
   ensureUniqueCustFileName,
   buildRelatedUserDetails,
-  checkForReadme, checkForUpdatedReadme
+  checkForReadme, checkForUpdatedReadme, checkForDeletedReadme
 } from './helpers.js';
 import {
   fileDataValidator,
@@ -189,6 +189,7 @@ export const file = (app) => {
       ],
       remove: [
         distributeFileDeletion,
+        checkForDeletedReadme,
       ]
     },
     error: {

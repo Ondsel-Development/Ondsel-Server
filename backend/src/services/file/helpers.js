@@ -155,3 +155,24 @@ export const checkForUpdatedReadme = async context => {
   }
   return context;
 }
+
+export const checkForDeletedReadme = async context => {
+  const deletedFile = context.result;
+  if (deletedFile.custFileName === 'README.md' && deletedFile.directory.name === '/') {
+    try {
+      const workspaceService = context.app.service('workspaces');
+      const workspace = await workspaceService.get(deletedFile.workspace._id);
+      let curation = workspace.curation;
+      curation.longDescriptionMd = "";
+      await workspaceService.patch(
+        workspace._id,
+        {
+          curation: curation
+        }
+      )
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+  return context;
+}
