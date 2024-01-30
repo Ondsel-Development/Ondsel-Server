@@ -326,6 +326,7 @@ export default {
     },
     async openEditTagsDialog() {
       this.isEditTagsDialogActive = true;
+      this.$refs.editTagsDialog.$data.newTags = this.workspace.curation.tags;
       this.$refs.editTagsDialog.$data.dialog = true;
     },
     async saveTags() {

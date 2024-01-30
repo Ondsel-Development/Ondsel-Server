@@ -18,9 +18,9 @@
         <p>Do you want <b>{{ file.custFileName }}</b> to represent this workspace?</p>
       </v-card-text>
       <v-card-actions class="justify-center">
+        <v-btn :disabled="isPatchPending" @click="cancelRepresent">Cancel</v-btn>
         <v-btn color="primary" :loading="isPatchPending" @click="representAction(true)">Yes</v-btn>
         <v-btn color="primary" :loading="isPatchPending" @click="representAction(false)">No</v-btn>
-        <v-btn :disabled="isPatchPending" @click="cancelRepresent">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
