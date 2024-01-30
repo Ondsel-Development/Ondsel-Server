@@ -12,7 +12,7 @@ import {
   addFileToDirectory,
   ensureUniqueCustFileName,
   buildRelatedUserDetails,
-  checkForReadme
+  checkForReadme, checkForUpdatedReadme
 } from './helpers.js';
 import {
   fileDataValidator,
@@ -185,6 +185,7 @@ export const file = (app) => {
           context => context.$triggerLambda,
           triggerLambda
         ),
+        checkForUpdatedReadme,
       ],
       remove: [
         distributeFileDeletion,

@@ -104,20 +104,17 @@ export const ensureUniqueCustFileName = async context => {
 }
 
 export const checkForReadme = async context => {
-  // if a /README.md file is uploaded, then attempt to alter the workspaces curation.longDescriptionMd.
+  // if a /README.md file is uploaded (CREATE), then attempt to alter the workspaces curation.longDescriptionMd.
   // fail gracefully if the download fails
   const newFile = context.result;
   if (newFile.custFileName === 'README.md' && newFile.directory.name === '/') {
     try {
-      console.log("HERE");
-      console.log(JSON.stringify(newFile));
       const workspaceService = context.app.service('workspaces');
       const uploadService = context.app.service('upload');
       const currentVersion = newFile.versions.find((v) => v._id.equals(newFile.currentVersionId));
       const id = currentVersion.uniqueFileName;
       const detail = await uploadService.get(id);
       const url = detail.url;
-      console.log(url.toString());
       const client = url.toString().startsWith("https:") ? https : http;
       await client.get(url, (res) => {
         let rawContent = '';
@@ -134,7 +131,6 @@ export const checkForReadme = async context => {
           const workspace = await workspaceService.get(newFile.workspace._id);
           let curation = workspace.curation;
           curation.longDescriptionMd = markdown;
-          console.log(JSON.stringify(curation));
           await workspaceService.patch(
             workspace._id,
             {
@@ -146,6 +142,16 @@ export const checkForReadme = async context => {
     } catch (e) {
       console.log(e.message);
     }
+  }
+  return context;
+}
+
+export const checkForUpdatedReadme = async context => {
+  // if a /README.md file is updated (PATCH) with a new version, then attempt to alter the workspaces curation.longDescriptionMd.
+  if (!context.beforePatchCopy.currentVersionId.equals(context.result.currentVersionId)) {
+    // only trigger if the current version has changed; if so, then reuse the checkForReadme function as it already
+    // focuses on the current version.
+    return await checkForReadme(context);
   }
   return context;
 }
