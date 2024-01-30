@@ -62,10 +62,15 @@ export const model = (app) => {
   app.service(modelPath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
         schemaHooks.resolveExternal(modelExternalResolver),
         schemaHooks.resolveResult(modelResolver)
-      ]
+      ],
+      find: [authenticate('jwt')],
+      get: [],
+      create: [authenticate('jwt')],
+      update: [authenticate('jwt')],
+      patch: [authenticate('jwt')],
+      remove: [authenticate('jwt')],
     },
     before: {
       all: [

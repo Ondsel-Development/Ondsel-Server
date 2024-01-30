@@ -9,24 +9,25 @@ export const canUserAccessModelGetMethod = async context => {
 
   const { file } = await context.service.get(context.id, { query: {$select: ['fileId', 'file']}});
 
-  try {
-    await context.app.service('workspaces').get(
-      file.workspace._id,
-      {
-        user: context.params.user
-      }
-    )
-  } catch (error) {
-    const workspace = await context.app.service('workspaces').get(
-      file.workspace._id, { query: { $select: ['open']} }
-    )
-    if (workspace.open) {
-      context.$isModelBelongsToOpenWorkspace = workspace.open;
+  if (context.params.user) {
+    try {
+      await context.app.service('workspaces').get(
+        file.workspace._id,
+        {
+          user: context.params.user
+        }
+      );
       return context;
-    }
-    throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this model'});
+    } catch (error) {}
   }
-  return context;
+  const workspace = await context.app.service('workspaces').get(
+    file.workspace._id, { query: { $select: ['open']} }
+  )
+  if (workspace.open) {
+    context.$isModelBelongsToOpenWorkspace = workspace.open;
+    return context;
+  }
+  throw new BadRequest({ type: 'PermissionError', msg: 'You dont have access to this model'});
 }
 
 
