@@ -32,8 +32,8 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="doNameChange()" color="primary" :disabled="pendingChangeName">Change</v-btn>
         <v-btn @click="dialog = false">Cancel</v-btn>
+        <v-btn @click="doNameChange()" color="primary" :disabled="pendingChangeName">Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
