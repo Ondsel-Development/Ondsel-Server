@@ -209,7 +209,11 @@ export default {
       }
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserEditWorkspace', params: { slug: this.slug, wsname: workspace.refName } });
+      } else {
+        this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
+      }
     }
   },
 };

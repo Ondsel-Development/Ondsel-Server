@@ -131,7 +131,7 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                {{workspace.curation.longDescriptionMd}}
+                <div v-html="longDescriptionHtml"></div>
               </v-card-text>
             </v-card>
           </v-list-item-media>
@@ -177,19 +177,21 @@
         <v-list-item>
           <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
           <v-list-item-subtitle>
-            {{workspace.curation.representativeFile.custFileName}}
+            {{workspace.curation?.representativeFile?.custFileName}}
           </v-list-item-subtitle>
           <v-list-item-media>
-            <div v-if="workspace.curation?.representativeFile">
-              <repr-viewer :workspace="workspace"></repr-viewer>
-            </div>
-            <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
+            <v-card>
+              <v-card-text>
+                <div v-if="workspace.curation?.representativeFile">
+                  <repr-viewer :workspace="workspace"></repr-viewer>
+                </div>
+                <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
+              </v-card-text>
+            </v-card>
           </v-list-item-media>
-          <template #append>
-            <v-list-item-action>
-              <i>To change this, visit the workspace, select the file, and click on the "Represent Workspace" button.</i>
-            </v-list-item-action>
-          </template>
+          <v-list-item-action>
+            <i>To change this, visit the workspace, select the file, and click on the "Represent Workspace" button.</i>
+          </v-list-item-action>
         </v-list-item>
 
       </v-list>
@@ -218,6 +220,7 @@ import ReprViewer from "@/components/ReprViewer.vue";
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
 import {models} from "@feathersjs/vuex";
 import _ from 'lodash';
+import {marked} from "marked";
 
 const { Workspace } = models.api;
 
@@ -293,6 +296,7 @@ export default {
     workspaceRefName: vm => vm.$route.params.wsname,
     workspace: vm => vm.workspaceDetail,
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
+    longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || "*None*"),
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate', 'getUserByIdOrNamePublic']),

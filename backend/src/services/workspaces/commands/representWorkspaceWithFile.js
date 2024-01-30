@@ -6,11 +6,7 @@ export const representWorkspaceWithFile = async context => {
   const { data } = context;
 
   const workspace = await context.service.get(context.id);
-  if (!workspace.curation) {
-    context.data.curation = buildNewCurationForWorkspace(workspace);
-  } else {
-    context.data.curation = workspace.curation;
-  }
+  context.data.curation = workspace.curation;
   let fileId = context.data.representativeFileId || null;
   if (fileId === "") {
     fileId = null;

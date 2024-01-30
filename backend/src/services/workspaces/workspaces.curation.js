@@ -7,7 +7,7 @@ export function buildNewCurationForWorkspace(workspace) {
     collection: 'workspaces',
     name: workspace.name || "",
     description: workspace.description || "",
-    longDescription_md: '',
+    longDescriptionMd: '',
     tags: [],
     representativeFile: null,
     promotedWorkspaces: [],
