@@ -19,8 +19,8 @@
       all its share links.</p>
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn color="primary" @click="deleteObject">Delete</v-btn>
       <v-btn @click="cancelDelete">Cancel</v-btn>
+      <v-btn color="primary" @click="deleteObject">Delete</v-btn>
     </v-card-actions>
     </v-card>
   </v-dialog>

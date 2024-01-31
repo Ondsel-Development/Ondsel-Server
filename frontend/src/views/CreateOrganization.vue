@@ -38,8 +38,15 @@
             <span class="font-italic">no reference name yet</span>
           </v-card-text>
         </v-card>
-        <v-card-actions>
-          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2">Create</v-btn>
+        <v-card-actions class="justify-center">
+          <v-row no-gutters>
+            <v-col cols="6">
+              <v-btn :disabled="isCreatePending" block class="mt-2" @click="$router.go(-1)">Go Back</v-btn>
+            </v-col>
+            <v-col cols="6">
+              <v-btn type="submit" color="primary" :disabled="isCreatePending" block class="mt-2">Create</v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-form>
       <v-snackbar

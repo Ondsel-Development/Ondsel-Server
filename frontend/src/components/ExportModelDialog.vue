@@ -96,7 +96,10 @@ export default {
     },
     formats: (vm) => {
       if (vm.model) {
-        return [vm.exportDefaultModelLabel(), 'FCStd', 'STEP', 'STL', 'OBJ']
+        if (vm.model.haveWriteAccess) {
+          return [vm.exportDefaultModelLabel(), 'FCStd', 'STEP', 'STL', 'OBJ'];
+        }
+        return [vm.exportDefaultModelLabel()];
       }
       const outputFormats = []
       if (vm.sharedModel) {

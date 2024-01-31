@@ -28,14 +28,14 @@
         location="start"
       >See model attributes</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="sharedModelDrawerClicked">
+    <v-btn icon flat :disabled="model && !model.haveWriteAccess" @click="sharedModelDrawerClicked">
       <v-icon>mdi-share-variant</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Manage share link</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openExportModelDialog">
+    <v-btn icon flat :disabled="!user" @click="openExportModelDialog">
       <v-icon>mdi-file-export</v-icon>
       <v-tooltip
         activator="parent"
@@ -137,7 +137,7 @@
                   <div>
                     <v-checkbox
                       v-model="generatePublicLink"
-                      :disabled="!user.constraint.canDisableAutomaticGenerationOfPublicLink"
+                      :disabled="user && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
                       label="Generate public link automatically"
                       density="compact"
                       hide-details>
@@ -166,6 +166,7 @@
       :is-model-loaded="isModelLoaded"
       :can-have-write-access-to-workspace="canHaveWriteAccess"
       :organization-constraints="organization.constraint"
+      :can-update-model="model.haveWriteAccess"
       ref="attributeViewer"
       @update-model="updateModel"
     />
@@ -191,7 +192,7 @@
 <script>
 import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
-import { mapState } from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import { nextTick } from 'vue';
 
@@ -229,8 +230,12 @@ export default {
     if (modelId) {
       try {
         this.model = await Model.get(modelId, {query: {'isSharedModel': false}});
-        await Workspace.get(this.model.file.workspace._id);
-        await Organization.get(this.workspace.organizationId);
+        let query = {};
+        if (!this.user || this.model && !this.model.haveWriteAccess) {
+          query = { publicInfo: 'true' };
+        }
+        await Workspace.get(this.model.file.workspace._id, { query: query });
+        await Organization.get(this.workspace.organizationId, { query: query });
       } catch (error) {
         this.error = 'NotFound';
       }
@@ -246,6 +251,7 @@ export default {
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
+    ...mapGetters('auth', ['isAuthenticated']),
     canHaveWriteAccess: vm => vm.workspace ? vm.workspace.haveWriteAccess : false,
     workspace: vm => vm.model && vm.model.file && Workspace.getFromStore(vm.model.file.workspace._id),
     organization: vm => vm.workspace && Organization.getFromStore(vm.workspace.organizationId),
@@ -310,12 +316,14 @@ export default {
     generatePublicLink: {
       get() {
         if (this.generatePublicLinkValue == null) {
-          return this.user.constraint.defaultValueOfPublicLinkGeneration;
+          if (this.user) {
+            return this.user.constraint.defaultValueOfPublicLinkGeneration;
+          }
         }
         return this.generatePublicLinkValue;
       },
       set(val) {
-        if (this.user.constraint.canDisableAutomaticGenerationOfPublicLink){
+        if (this.user && this.user.constraint.canDisableAutomaticGenerationOfPublicLink){
           this.generatePublicLinkValue = val;
         }
       }
@@ -354,7 +362,7 @@ export default {
     },
     uploadThumbnail() {
 
-      if (this.model.isThumbnailGenerated) {
+      if (!this.isAuthenticated || this.model.isThumbnailGenerated) {
         return
       }
 
