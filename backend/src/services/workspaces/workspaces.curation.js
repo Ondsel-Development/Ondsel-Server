@@ -57,7 +57,7 @@ export const beforePatchHandleCuration = async (context) => {
     }
     // ignore `curation.promoted` on workspaces for now...
     if (needPatch || changeFound) {
-      const newKeywordRefs = generateAndApplyKeywords(context, curation);
+      const newKeywordRefs = await generateAndApplyKeywords(context, curation);
       if (!_.isEqual(newKeywordRefs, context.beforePatchCopy.curation?.keywordRefs)) {
         curation.keywordRefs = newKeywordRefs;
         needPatch = true;

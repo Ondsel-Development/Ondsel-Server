@@ -21,9 +21,43 @@ export const curationSchema = Type.Object(
   }
 )
 
-export function generateAndApplyKeywords(context, curation) {
-    const keywordRanks = determineKeywordsWithScore(curation);
-    return keywordRanks.map(item => item.keyword);
+export async function generateAndApplyKeywords(context, curation) {
+  const keywordService = context.app.service('keywords');
+  const keywordScores = determineKeywordsWithScore(curation);
+  const {keywordRefs: _, ...cleanCuration} = curation;
+  // apply the keywords to the collection
+  let keywordPromises = []  // there can easily be 100 of these, so send them all at once.
+  for (const item of keywordScores) {
+    keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
+  }
+  await Promise.all(keywordPromises);
+  // remove any keywords that are in the original list but not any longer
+  const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
+  for (const keyword of removedKeywords) {
+    await keywordService.patch(
+      keyword,
+      {
+        shouldRemoveScore: true,
+        curation: cleanCuration,
+      }
+    )
+  }
+  return keywordScores.map(item => item.keyword);
+}
+
+async function upsertScoreItem(keywordService, item, cleanCuration) {
+    try {
+        keywordService.patch(
+            item.keyword,
+            {
+                shouldUpsertScore: true,
+                score: item.score,
+                curation: cleanCuration,
+            }
+        )
+    } catch (e) {
+        console.log(item.keyword, e.message)
+    }
 }
 
 // Score constants. To be tweaked as we learn more.
