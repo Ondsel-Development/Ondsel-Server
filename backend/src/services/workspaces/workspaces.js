@@ -36,7 +36,7 @@ import {
 } from '../../hooks/handle-public-info-query.js';
 import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
 import {representWorkspaceWithFile} from "./commands/representWorkspaceWithFile.js";
-import {afterCreateHandleCuration, afterPatchHandleCuration} from "./workspaces.curation.js";
+import {afterCreateHandleCuration, beforePatchHandleCuration} from "./workspaces.curation.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -181,6 +181,7 @@ export const workspace = (app) => {
           context => context.data.shouldRepresentWorkspaceWithFile,
           representWorkspaceWithFile,
         ),
+        beforePatchHandleCuration,
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
       ],
@@ -190,7 +191,6 @@ export const workspace = (app) => {
       all: [],
       patch: [
         distributeWorkspaceSummaries,
-        afterPatchHandleCuration,
       ],
       create: [
         createAndAssignRootDirectory,

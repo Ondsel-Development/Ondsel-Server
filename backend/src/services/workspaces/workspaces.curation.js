@@ -2,6 +2,7 @@
 //
 
 import {generateAndApplyKeywords} from "../../curation.schema.js";
+import _ from "lodash";
 
 export function buildNewCurationForWorkspace(workspace) {
   let curation =   {
@@ -31,42 +32,42 @@ export const afterCreateHandleCuration = async (context) => {
   return context;
 }
 
-export const afterPatchHandleCuration = async (context) => {
+export const beforePatchHandleCuration = async (context) => {
   try {
     let changeFound = false;
     let needPatch = false; // if true, then ALSO needing changes applied to keywords
-    let curation = context.result.curation;
-    if (context.beforePatchCopy.name !== context.result.name) {
+    const patchCuration = context.data.curation || {};
+    const curation = {...context.beforePatchCopy.curation, ...patchCuration};
+    if (context.data.name && context.beforePatchCopy.name !== context.data.name) {
       needPatch = true;
-      curation.name = context.result.name;
+      curation.name = context.data.name;
     }
-    if (context.beforePatchCopy.description !== context.result.description) {
+    if (context.data.description && context.beforePatchCopy.description !== context.data.description) {
       needPatch = true;
-      curation.description = context.result.description;
+      curation.description = context.data.description;
     }
-    if (context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
+    if (context.data.curation?.longDescriptionMd && context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
       changeFound = true;
     }
-    if (context.beforePatchCopy.curation?.tags !== curation?.tags) {
+    if (context.data.curation?.tags && context.beforePatchCopy.curation?.tags !== curation?.tags) {
       changeFound = true;
     }
-    if (context.beforePatchCopy.curation?.representativeFile !== curation?.representativeFile) {
+    if (context.data.curation?.representativeFile && context.beforePatchCopy.curation?.representativeFile !== curation?.representativeFile) {
       changeFound = true;
     }
     // ignore `curation.promoted` on workspaces for now...
-    if (needPatch) {
-      await context.service.patch(
-        context.result._id,
-        {
-          curation: curation
-        }
-      )
-      context.result.curation = curation;
-    }
     if (needPatch || changeFound) {
-      generateAndApplyKeywords(context, curation);
+      const newKeywordRefs = generateAndApplyKeywords(context, curation);
+      if (!_.isEqual(newKeywordRefs, context.beforePatchCopy.curation?.keywordRefs)) {
+        curation.keywordRefs = newKeywordRefs;
+        needPatch = true;
+      }
+    }
+    if (needPatch) {
+      context.data.curation = curation;
     }
   } catch (e) {
     console.log(e);
   }
+  return context;
 }

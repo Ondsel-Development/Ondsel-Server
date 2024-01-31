@@ -1,6 +1,7 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
+import _ from "lodash";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -22,6 +23,7 @@ export const curationSchema = Type.Object(
 
 export function generateAndApplyKeywords(context, curation) {
     const keywordRanks = determineKeywordsWithScore(curation);
+    return keywordRanks.map(item => item.keyword);
 }
 
 // Score constants. To be tweaked as we learn more.
