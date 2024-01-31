@@ -1,6 +1,8 @@
 // A "curation" file is for visibly decorating an object and handling pre-emptive keyword indexing (for later searches.)
 //
 
+import {generateAndApplyKeywords} from "../../curation.schema.js";
+
 export function buildNewCurationForWorkspace(workspace) {
   let curation =   {
     _id: workspace._id,
@@ -59,9 +61,10 @@ export const afterPatchHandleCuration = async (context) => {
           curation: curation
         }
       )
+      context.result.curation = curation;
     }
     if (needPatch || changeFound) {
-      // TODO: generate keywords
+      generateAndApplyKeywords(context, curation);
     }
   } catch (e) {
     console.log(e);
