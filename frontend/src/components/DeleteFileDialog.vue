@@ -24,8 +24,8 @@
         </ul>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn color="primary" :loading="isRemovePending" @click="deleteObject">Delete</v-btn>
         <v-btn :disabled="isRemovePending" @click="cancelDelete">Cancel</v-btn>
+        <v-btn color="primary" :loading="isRemovePending" @click="deleteObject">Delete</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
