@@ -188,7 +188,7 @@
             </v-card>
           </v-list-item-media>
           <v-list-item-action>
-            <i>To change this, visit the workspace, select the file, and click on the "Represent Workspace" button.</i>
+            <i>To change this, visit the workspace, select the file, and click on the "camera" icon button.</i>
           </v-list-item-action>
         </v-list-item>
 
