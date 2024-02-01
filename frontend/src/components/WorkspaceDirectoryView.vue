@@ -9,7 +9,14 @@
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">
         <v-card class="mx-auto" height="220" @click="$emit('openFile', file, `${directoryPath}/${file.custFileName}`)">
+          <v-img
+            v-if="file.thumbnailUrlCache"
+            height="150"
+            :src="file.thumbnailUrlCache"
+            cover
+          ></v-img>
           <v-sheet
+            v-else
             color="#F4F4F4"
             height="150px"
             class="d-flex justify-center align-center"
