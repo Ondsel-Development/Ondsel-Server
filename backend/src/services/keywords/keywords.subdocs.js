@@ -1,9 +1,10 @@
 import {Type} from "@feathersjs/typebox";
+import {curationSchema} from "../../curation.schema.js";
 
 export const keywordMatchSchema = Type.Object(
   {
     score: Type.Integer(),
-    curation: Type.Any(),
+    curation: curationSchema,
   }
 )
 

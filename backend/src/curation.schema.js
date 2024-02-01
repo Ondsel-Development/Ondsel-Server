@@ -32,13 +32,12 @@ export function matchingCuration(curationA, curationB) {
 export async function generateAndApplyKeywords(context, curation) {
   const keywordService = context.app.service('keywords');
   const keywordScores = determineKeywordsWithScore(curation);
-  const {keywordRefs: _, ...cleanCuration} = curation;
+  let {keywordRefs: _, ...cleanCuration} = curation;
+  cleanCuration.keywordRefs = [];
   // apply the keywords to the collection
-  let keywordPromises = []  // there can easily be 100 of these, so send them all at once.
   for (const item of keywordScores) {
-    keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
+    await upsertScoreItem(keywordService, item, cleanCuration);
   }
-  await Promise.all(keywordPromises);
   // remove any keywords that are in the original list but not now
   const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
   for (const keyword of removedKeywords) {
@@ -53,6 +52,14 @@ export async function generateAndApplyKeywords(context, curation) {
 
   return keywordScores.map(item => item.keyword);
 }
+
+// TODO: the following is not reliable in volume such as migration tool. Why?
+// let keywordPromises = []  // there can easily be 100 of these, so send them all at once.
+// for (const item of keywordScores) {
+//   keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
+// }
+// await Promise.all(keywordPromises);
+
 
 async function upsertScoreItem(keywordService, item, cleanCuration) {
     try {

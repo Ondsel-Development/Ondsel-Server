@@ -46,7 +46,7 @@ export const beforePatchHandleCuration = async (context) => {
       needPatch = true;
       curation.description = context.data.description;
     }
-    if (context.data.curation?.longDescriptionMd && context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
+    if (context.data.curation?.longDescriptionMd !== undefined && context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
       changeFound = true;
     }
     if (context.data.curation?.tags && context.beforePatchCopy.curation?.tags !== curation?.tags) {
@@ -57,10 +57,12 @@ export const beforePatchHandleCuration = async (context) => {
     }
     // ignore `curation.promoted` on workspaces for now...
     if (needPatch || changeFound) {
-      const newKeywordRefs = await generateAndApplyKeywords(context, curation);
-      if (!_.isEqual(newKeywordRefs, context.beforePatchCopy.curation?.keywordRefs)) {
-        curation.keywordRefs = newKeywordRefs;
-        needPatch = true;
+      if (context.beforePatchCopy.open) {
+        const newKeywordRefs = await generateAndApplyKeywords(context, curation);
+        if (!_.isEqual(newKeywordRefs, context.beforePatchCopy.curation?.keywordRefs)) {
+          curation.keywordRefs = newKeywordRefs;
+          needPatch = true;
+        }
       }
     }
     if (needPatch) {
