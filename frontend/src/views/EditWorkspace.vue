@@ -149,12 +149,15 @@
 </template>
 
 <script>
+import { models } from '@feathersjs/vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import ManageWorkspaceUsersTable from '@/components/ManageWorkspaceUsersTable.vue';
 import ManageWorkspaceGroupsTable from '@/components/ManageWorkspaceGroupsTable.vue';
-import {mapActions, mapGetters, mapState} from 'vuex';
 import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
 import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
+
+const { Organization } = models.api;
 
 export default {
   name: "EditWorkspace",
@@ -218,12 +221,17 @@ export default {
         this.changableVisibility = true;
         break;
     }
+    if (!this.organization) {
+      // require for manage user and group of workspace
+      await Organization.get(this.workspace.organizationId);
+    }
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
     ...mapState('auth', ['user']),
     workspaceRefName: vm => vm.$route.params.wsname,
     workspace: vm => vm.workspaceDetail,
+    organization: vm => Organization.getFromStore(vm.workspace.organizationId),
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
   },
   methods: {
