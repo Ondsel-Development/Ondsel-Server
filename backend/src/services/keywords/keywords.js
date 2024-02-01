@@ -16,6 +16,7 @@ import { keywordsPath, keywordsMethods } from './keywords.shared.js'
 import {disallow, iff} from "feathers-hooks-common";
 import swagger from "feathers-swagger";
 import {upsertScore} from "./commands/upsertScore.js";
+import {removeScore} from "./commands/removeScore.js";
 
 export * from './keywords.class.js'
 export * from './keywords.schema.js'
@@ -79,6 +80,10 @@ export const keywords = (app) => {
         iff(
           context => context.data.shouldUpsertScore,
           upsertScore,
+        ),
+        iff(
+          context => context.data.shouldRemoveScore,
+          removeScore,
         ),
         schemaHooks.validateData(keywordsPatchValidator),
         schemaHooks.resolveData(keywordsPatchResolver)

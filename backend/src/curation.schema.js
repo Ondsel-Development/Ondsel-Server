@@ -1,7 +1,6 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
-import _ from "lodash";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -22,7 +21,7 @@ export const curationSchema = Type.Object(
 )
 
 export function matchingCuration(curationA, curationB) {
-  if (curationA?._id === curationB?._id) {
+  if (curationA?._id.equals(curationB?._id)) {
     if (curationA?.collection === curationB?.collection) {
       return true;
     }
@@ -40,19 +39,17 @@ export async function generateAndApplyKeywords(context, curation) {
     keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
   }
   await Promise.all(keywordPromises);
-  // remove any keywords that are in the original list but not any longer
-
-  // TODO:
-  // const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
-  // for (const keyword of removedKeywords) {
-  //   await keywordService.patch(
-  //     keyword,
-  //     {
-  //       shouldRemoveScore: true,
-  //       curation: cleanCuration,
-  //     }
-  //   )
-  // }
+  // remove any keywords that are in the original list but not now
+  const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
+  for (const keyword of removedKeywords) {
+    await keywordService.patch(
+      keyword,
+      {
+        shouldRemoveScore: true,
+        curation: cleanCuration,
+      }
+    )
+  }
 
   return keywordScores.map(item => item.keyword);
 }
@@ -68,7 +65,7 @@ async function upsertScoreItem(keywordService, item, cleanCuration) {
             }
         )
     } catch (e) {
-        // console.log(item.keyword, e.message)
+        console.log(item.keyword, e.message)
     }
 }
 

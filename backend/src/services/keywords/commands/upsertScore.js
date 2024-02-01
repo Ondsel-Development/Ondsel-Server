@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import {matchingCuration} from "../../../curation.schema.js";
 import {MAX_MATCHES_KEPT} from "../keywords.subdocs.js";
-import {agreementCategoryTypeMap} from "../../agreements/agreements.schema.js";
 
 
 export const upsertScore = async context => {
