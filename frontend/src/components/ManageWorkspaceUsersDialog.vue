@@ -79,6 +79,10 @@ export default {
         return this.selectedIds;
       },
       set(value) {
+        // hack to avoid delete workspace owner even if user disable checkbox.
+        if (!value.includes(this.workspace.createdBy)) {
+          value.push(this.workspace.createdBy);
+        }
         this.selectedIds = value;
       }
     },

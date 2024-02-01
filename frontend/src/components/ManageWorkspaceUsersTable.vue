@@ -38,7 +38,7 @@
         :items="['read', 'write']"
         variant="plain"
         append-icon="mdi-check"
-        :disabled="!isLoggedInUserAdmin(organization)"
+        :disabled="!isLoggedInUserAdmin(organization) || item.value.groupOrUser._id === workspace.createdBy"
         @click:append="updatePermission(item.value)"
       />
     </template>
