@@ -21,6 +21,15 @@ export const curationSchema = Type.Object(
   }
 )
 
+export function matchingCuration(curationA, curationB) {
+  if (curationA?._id === curationB?._id) {
+    if (curationA?.collection === curationB?.collection) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export async function generateAndApplyKeywords(context, curation) {
   const keywordService = context.app.service('keywords');
   const keywordScores = determineKeywordsWithScore(curation);
@@ -32,16 +41,19 @@ export async function generateAndApplyKeywords(context, curation) {
   }
   await Promise.all(keywordPromises);
   // remove any keywords that are in the original list but not any longer
-  const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
-  for (const keyword of removedKeywords) {
-    await keywordService.patch(
-      keyword,
-      {
-        shouldRemoveScore: true,
-        curation: cleanCuration,
-      }
-    )
-  }
+
+  // TODO:
+  // const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
+  // for (const keyword of removedKeywords) {
+  //   await keywordService.patch(
+  //     keyword,
+  //     {
+  //       shouldRemoveScore: true,
+  //       curation: cleanCuration,
+  //     }
+  //   )
+  // }
+
   return keywordScores.map(item => item.keyword);
 }
 
@@ -56,7 +68,7 @@ async function upsertScoreItem(keywordService, item, cleanCuration) {
             }
         )
     } catch (e) {
-        console.log(item.keyword, e.message)
+        // console.log(item.keyword, e.message)
     }
 }
 

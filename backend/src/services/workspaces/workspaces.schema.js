@@ -14,7 +14,6 @@ import {buildOrganizationSummary} from "../organizations/organizations.distrib.j
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
 import {curationSchema} from "../../curation.schema.js";
-import {buildNewCurationForWorkspace} from "./workspaces.curation.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -41,7 +40,7 @@ export const workspaceSchema = Type.Object(
     organization: organizationSummarySchema,
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
-    curation: Type.Optional(curationSchema),
+    curation: Type.Optional(Type.Any()), // a curationSchema but I'm getting a circular ref error if I use that directly
   },
   { $id: 'Workspace', additionalProperties: false }
 )

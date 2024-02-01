@@ -20,7 +20,7 @@ export const keywordsResolver = resolve({})
 export const keywordsExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const keywordsDataSchema = Type.Pick(keywordsSchema, ['text'], {
+export const keywordsDataSchema = Type.Pick(keywordsSchema, ['_id', 'sortedMatches'], {
   $id: 'KeywordsData'
 })
 export const keywordsDataValidator = getValidator(keywordsDataSchema, dataValidator)
@@ -34,7 +34,7 @@ export const keywordsPatchValidator = getValidator(keywordsPatchSchema, dataVali
 export const keywordsPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const keywordsQueryProperties = Type.Pick(keywordsSchema, ['_id', 'text'])
+export const keywordsQueryProperties = Type.Pick(keywordsSchema, ['_id', 'sortedMatches'])
 export const keywordsQuerySchema = Type.Intersect(
   [
     querySyntax(keywordsQueryProperties),

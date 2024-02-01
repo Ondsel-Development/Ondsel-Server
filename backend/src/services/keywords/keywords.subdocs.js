@@ -3,7 +3,8 @@ import {Type} from "@feathersjs/typebox";
 export const keywordMatchSchema = Type.Object(
   {
     score: Type.Integer(),
-    summary: Type.Any(),
+    curation: Type.Any(),
   }
 )
 
+export const MAX_MATCHES_KEPT = 200;
