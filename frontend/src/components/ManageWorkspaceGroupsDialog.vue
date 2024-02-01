@@ -52,7 +52,7 @@ export default {
   },
   data: (vm) => ({
     dialog: false,
-    selected: vm.workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'Group').map(groupOrUser => groupOrUser.groupOrUser._id) || [],
+    selectedIds: null,
     headers: [
       {
         title: 'Name',
@@ -65,6 +65,18 @@ export default {
   computed: {
     ...mapState('workspaces', ['isPatchPending']),
     workspaceUsers: vm => vm.workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'Group') || [],
+    selected: {
+      get() {
+        if (!this.selectedIds) {
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+          this.selectedIds = this.workspace.groupsOrUsers.filter(groupOrUser => groupOrUser.type === 'Group').map(groupOrUser => groupOrUser.groupOrUser._id) || [];
+        }
+        return this.selectedIds;
+      },
+      set(value) {
+        this.selectedIds = value;
+      }
+    },
   },
   methods: {
     async updateWorkspaceGroups(){
