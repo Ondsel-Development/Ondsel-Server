@@ -47,7 +47,7 @@ const routes = [
     path: '/model/:id?',
     component: Home,
     name: 'Home',
-    meta: { requiresAuth: true },
+    meta: { tryAuth: true },
   },
   {
     path: '/create_organization',
