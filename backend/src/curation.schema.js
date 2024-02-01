@@ -1,6 +1,7 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
+import _ from "lodash";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -21,7 +22,7 @@ export const curationSchema = Type.Object(
 )
 
 export function matchingCuration(curationA, curationB) {
-  if (curationA?._id.equals(curationB?._id)) {
+  if (curationA?._id.toString() === curationB?._id.toString()) {
     if (curationA?.collection === curationB?.collection) {
       return true;
     }
@@ -165,8 +166,8 @@ function accumulateScores(keywordScores, keywordList, scoreStart, scoreMax, orde
     for (const keyword of keywordList) {
         let score = scoreStart;
         score += orderCost * counter;
-        const wordCount = keyword.split(' ').length - 1;
-        score += wordCount * perWordPhraseBonus;
+        const wordCount = keyword.split(' ').length;
+        score += (wordCount - 1) * perWordPhraseBonus;
         if (score > scoreMax) {
             score = scoreMax;
         }

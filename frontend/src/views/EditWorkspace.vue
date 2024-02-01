@@ -324,7 +324,7 @@ export default {
     },
     async openEditTagsDialog() {
       this.isEditTagsDialogActive = true;
-      this.$refs.editTagsDialog.$data.newTags = this.workspace.curation.tags;
+      this.$refs.editTagsDialog.$data.newTags = this.workspace.curation?.tags || [];
       this.$refs.editTagsDialog.$data.dialog = true;
     },
     async saveTags() {
@@ -332,7 +332,7 @@ export default {
       const tagList = this.$refs.editTagsDialog.$data.newTags;
       const lowercaseTags = tagList.map(tag => tag.toLowerCase().trim());
       const cleanTags = _.uniq(lowercaseTags);
-      let curation = this.workspace.curation;
+      let curation = this.workspace.curation || {};
       curation.tags = cleanTags;
       await Workspace.patch(
         this.workspace._id,

@@ -22,13 +22,14 @@ export function buildNewCurationForWorkspace(workspace) {
 export const afterCreateHandleCuration = async (context) => {
   // first, set up the curation
   context.result.curation = buildNewCurationForWorkspace(context.result);
+  const newKeywordRefs = await generateAndApplyKeywords(context, context.result.curation);
+  context.result.curation.keywordRefs = newKeywordRefs;
   await context.service.patch(
     context.result._id,
     {
       curation: context.result.curation
     }
   )
-  // second, generate keywords (TODO)
   return context;
 }
 
@@ -36,37 +37,45 @@ export const beforePatchHandleCuration = async (context) => {
   try {
     let changeFound = false;
     let needPatch = false; // if true, then ALSO needing changes applied to keywords
+    const originalCuration = context.beforePatchCopy.curation || {};
     const patchCuration = context.data.curation || {};
-    const curation = {...context.beforePatchCopy.curation, ...patchCuration};
+    let newCuration = {...originalCuration, ...patchCuration};
+    if (!newCuration._id) {
+      // if the original curation _id is missing, then something failed to created it in the past. recreate it first.
+      const tempCuration = buildNewCurationForWorkspace(context.beforePatchCopy);
+      newCuration = {...tempCuration, ...patchCuration};
+      needPatch = true;
+      changeFound = true;
+    }
     if (context.data.name && context.beforePatchCopy.name !== context.data.name) {
       needPatch = true;
-      curation.name = context.data.name;
+      newCuration.name = context.data.name;
     }
     if (context.data.description && context.beforePatchCopy.description !== context.data.description) {
       needPatch = true;
-      curation.description = context.data.description;
+      newCuration.description = context.data.description;
     }
-    if (context.data.curation?.longDescriptionMd !== undefined && context.beforePatchCopy.curation?.longDescriptionMd !== curation?.longDescriptionMd) {
+    if (patchCuration.longDescriptionMd !== undefined && originalCuration.longDescriptionMd !== newCuration.longDescriptionMd) {
       changeFound = true;
     }
-    if (context.data.curation?.tags && context.beforePatchCopy.curation?.tags !== curation?.tags) {
+    if (patchCuration.tags && !_.isEqual(originalCuration.tags, newCuration.tags)) {
       changeFound = true;
     }
-    if (context.data.curation?.representativeFile && context.beforePatchCopy.curation?.representativeFile !== curation?.representativeFile) {
+    if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
       changeFound = true;
     }
     // ignore `curation.promoted` on workspaces for now...
     if (needPatch || changeFound) {
       if (context.beforePatchCopy.open) {
-        const newKeywordRefs = await generateAndApplyKeywords(context, curation);
-        if (!_.isEqual(newKeywordRefs, context.beforePatchCopy.curation?.keywordRefs)) {
-          curation.keywordRefs = newKeywordRefs;
+        const newKeywordRefs = await generateAndApplyKeywords(context, newCuration);
+        if (!_.isEqual(newKeywordRefs, originalCuration.keywordRefs)) {
+          newCuration.keywordRefs = newKeywordRefs;
           needPatch = true;
         }
       }
     }
     if (needPatch) {
-      context.data.curation = curation;
+      context.data.curation = newCuration;
     }
   } catch (e) {
     console.log(e);

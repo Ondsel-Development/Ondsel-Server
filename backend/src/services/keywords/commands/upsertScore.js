@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {matchingCuration} from "../../../curation.schema.js";
 import {MAX_MATCHES_KEPT} from "../keywords.subdocs.js";
+import {getOrInsertKeyword} from "../helpers.js";
 
 
 export const upsertScore = async context => {
@@ -8,20 +9,7 @@ export const upsertScore = async context => {
   const newScore = params.score;
   const newCuration = params.curation;
 
-  let keywordObj = null;
-  const keywordFindList = await context.service.find({
-    query: {
-      _id: context.id,
-    }
-  });
-  if (keywordFindList.total === 1) {
-    keywordObj = keywordFindList.data.find(item => item !== undefined);
-  } else {
-    keywordObj = await context.service.create({
-      _id: context.id,
-      sortedMatches: [],
-    });
-  }
+  const keywordObj = await getOrInsertKeyword(context);
 
   let sortedMatches = keywordObj.sortedMatches || [];
   let minScore = Math.min(...sortedMatches.map(item => item.score));
@@ -30,7 +18,7 @@ export const upsertScore = async context => {
   }
 
   let makeChange = false;
-  const index = sortedMatches.indexOf(match => matchingCuration(newCuration, match.curation));
+  const index = sortedMatches.findIndex(match => matchingCuration(newCuration, match.curation));
   if (index >= 0) { // match found
     makeChange = true;
     if (newScore < minScore && sortedMatches.length >= MAX_MATCHES_KEPT) {
