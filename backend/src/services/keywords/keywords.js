@@ -71,12 +71,12 @@ export const keywords = (app) => {
       ],
       get: [], // this is the only endpoint seen by the public
       create: [
-        disallow('external'),
+        // disallow('external'), // TODO: re-disallow after migration
         schemaHooks.validateData(keywordsDataValidator),
         schemaHooks.resolveData(keywordsDataResolver)
       ],
       patch: [
-        disallow('external'),
+        // disallow('external'), // TODO: re-disallow after migration
         iff(
           context => context.data.shouldUpsertScore,
           upsertScore,
