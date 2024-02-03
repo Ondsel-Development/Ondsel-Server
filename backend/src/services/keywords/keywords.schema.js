@@ -1,5 +1,5 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
-import { resolve } from '@feathersjs/schema'
+import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
@@ -15,12 +15,16 @@ export const keywordsSchema = Type.Object(
   { $id: 'Keywords', additionalProperties: false }
 )
 export const keywordsValidator = getValidator(keywordsSchema, dataValidator)
-export const keywordsResolver = resolve({})
+export const keywordsResolver = resolve({
+  sortedMatches: virtual(async (message, _context) => {
+    return message.sortedMatches || []
+  }),
+})
 
 export const keywordsExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const keywordsDataSchema = Type.Pick(keywordsSchema, ['_id', 'sortedMatches'], {
+export const keywordsDataSchema = Type.Pick(keywordsSchema, ['_id'], {
   $id: 'KeywordsData'
 })
 export const keywordsDataValidator = getValidator(keywordsDataSchema, dataValidator)

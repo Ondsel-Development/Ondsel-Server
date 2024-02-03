@@ -1,19 +1,35 @@
 import _ from 'lodash';
 import {matchingCuration} from "../../../curation.schema.js";
-import {MAX_MATCHES_KEPT} from "../keywords.subdocs.js";
-import {getOrInsertKeyword} from "../helpers.js";
+import {safelyGetKeyword} from "../helpers.js";
 
 
 export const removeScore = async context => {
   const params = context.data;
   const curationToRemove = params.curation;
+  const keyword = params._id;
+  const keywordsService = context.service;
+  const db = await keywordsService.options.Model;
 
-  let keywordObj = await getOrInsertKeyword(context);
+  // take action
+  await db.updateOne(
+    { _id: keyword },
+    {
+      $setOnInsert: { _id: keyword },
+      $pull: {
+        sortedMatches: {
+          'curation._id': curationToRemove._id,
+        }
+      },
+    },
+    { upsert: true }
+  )
+
+  // cleanup context
+  let keywordObj = await safelyGetKeyword(context, keyword);
   let sortedMatches = keywordObj.sortedMatches || [];
   sortedMatches = sortedMatches.filter(m => !matchingCuration(m.curation, curationToRemove))
-  sortedMatches.sort((a, b) => b.score - a.score) // shouldn't be needed, but good to be safe
-  sortedMatches = sortedMatches.slice(0, MAX_MATCHES_KEPT); // shouldn't be needed, but good to be safe
-  context.data.sortedMatches = sortedMatches; // update to a new type of patch
+  keywordObj.sortedMatches = sortedMatches
   context.data = _.omit(context.data, ['shouldRemoveScore', 'curation']);
+  context.result = keywordObj; // setting result tells the framework that the event has been completed
   return context;
 }

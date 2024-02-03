@@ -42,9 +42,9 @@ export async function generateAndApplyKeywords(context, curation) {
   // remove any keywords that are in the original list but not now
   const removedKeywords = curation.keywordRefs.filter(kw => !keywordScores.some(item => item.keyword === kw));
   for (const keyword of removedKeywords) {
-    await keywordService.patch(
-      keyword,
+    await keywordService.create(
       {
+        _id: keyword,
         shouldRemoveScore: true,
         curation: cleanCuration,
       }
@@ -64,9 +64,9 @@ export async function generateAndApplyKeywords(context, curation) {
 
 async function upsertScoreItem(keywordService, item, cleanCuration) {
     try {
-        keywordService.patch(
-            item.keyword,
+        keywordService.create(
             {
+                _id: item.keyword,
                 shouldUpsertScore: true,
                 score: item.score,
                 curation: cleanCuration,

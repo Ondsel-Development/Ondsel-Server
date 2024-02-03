@@ -1,19 +1,23 @@
 
 
-export async function getOrInsertKeyword(context){
-  let keywordObj = null;
+export async function safelyGetKeyword(context, keyword){
+  // returns an "empty" keyword object if not found
+  // does NOT use the GET method to avoid throwing exception
+  let keywordObj = {
+    _id: keyword,
+    sortedMatches: [],
+  };
   const keywordFindList = await context.service.find({
     query: {
-      _id: context.id,
+      _id: keyword,
     }
   });
-  if (keywordFindList.total === 1) {
+  if (keywordFindList.total !== 0) {
     keywordObj = keywordFindList.data.find(item => item !== undefined);
-  } else {
-    keywordObj = await context.service.create({
-      _id: context.id,
-      sortedMatches: [],
-    });
+  }
+  if (keywordFindList.total > 1) {
+    // the following should NEVER happen
+    console.log(`ADMIN ALERT! a duplicate key found in keywords collection: ${keyword}`);
   }
   return keywordObj;
 }
