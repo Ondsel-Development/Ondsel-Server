@@ -32,7 +32,7 @@
           ></v-text-field>
           <v-text-field
             v-model="nameTemp"
-            label="Reference name"
+            label="workspace slug name builder (type here)"
             :rules="[rules.isRequired, rules.nameConforms]"
             :disabled="isCreatePending"
           ></v-text-field>
@@ -41,7 +41,7 @@
               <span class="font-weight-bold">{{workspace.refName}}</span>
             </v-card-text>
             <v-card-text v-else>
-              <span class="font-italic">No reference name yet</span>
+              <span class="font-italic">no slug built yet</span>
             </v-card-text>
           </v-card>
         </v-card-text>
@@ -125,7 +125,7 @@ export default {
       })
       .catch((e) => {
         if (e.message === 'Invalid: reference name already taken') {
-          this.extraHintContent = `reference name ${this.workspace.refName} already taken at this org`;
+          this.extraHintContent = `slug name ${this.workspace.refName} already taken at this org`;
           this.lastBadRefName = this.workspace.refName;
         }
         console.log(e.message);
@@ -137,7 +137,7 @@ export default {
       const conformedName = conformRefName(rawName);
       this.workspace.refName = conformedName;
       if (conformedName.length < 4) {
-        return "requires at least 4 characters in derived username";
+        return "requires at least 4 characters in derived slug";
       }
       if (this.extraHintContent === '') {
         return true;
