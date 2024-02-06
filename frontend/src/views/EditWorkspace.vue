@@ -217,7 +217,6 @@ import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vu
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
 import ReprViewer from "@/components/ReprViewer.vue";
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
-import {models} from "@feathersjs/vuex";
 import _ from 'lodash';
 import {marked} from "marked";
 
