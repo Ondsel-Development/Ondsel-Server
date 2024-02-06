@@ -34,11 +34,17 @@
                 variant="outlined"
                 color="default"
                 size="small"
-                @click.stop="openWorkspaceChangeNameDescDialog()"
+                @click.stop="openWorkspaceChangeNameDialog()"
               >
                 Change Name
               </v-btn>
               <div v-if="forbidNameChange"><i>{{forbidNameChangeReason}}</i></div>
+              <v-spacer></v-spacer>
+              <WorkspaceChangeNameDialog
+                :is-active="isWorkspaceChangeNameDialogActive"
+                :workspace="workspace"
+                ref="workspaceChangeNameDialog"
+              />
             </v-list-item-action>
           </template>
         </v-list-item>
@@ -119,15 +125,15 @@
                 variant="outlined"
                 color="default"
                 size="small"
-                @click.stop="openWorkspaceChangeNameDescDialog()"
+                @click.stop="openWorkspaceChangeDescDialog()"
               >
                 Change Description
               </v-btn>
               <v-spacer></v-spacer>
-              <WorkspaceChangeNameDescDialog
-                :is-active="isWorkspaceChangeNameDescDialogActive"
+              <WorkspaceChangeDescDialog
+                :is-active="isWorkspaceChangeDescDialogActive"
                 :workspace="workspace"
-                ref="workspaceChangeNameDescDialog"
+                ref="workspaceChangeDescDialog"
               />
             </v-list-item-action>
           </template>
@@ -153,7 +159,8 @@ import { models } from '@feathersjs/vuex';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import ManageWorkspaceUsersTable from '@/components/ManageWorkspaceUsersTable.vue';
 import ManageWorkspaceGroupsTable from '@/components/ManageWorkspaceGroupsTable.vue';
-import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
+import WorkspaceChangeNameDialog from "@/components/WorkspaceChangeNameDialog.vue";
+import WorkspaceChangeDescDialog from "@/components/WorkspaceChangeDescDialog.vue";
 import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
 
@@ -164,13 +171,14 @@ export default {
   components: {
     WorkspaceChangeLicenseDialog,
     WorkspaceOpenSelectDialog,
-    WorkspaceChangeNameDescDialog, ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
+    WorkspaceChangeNameDialog, WorkspaceChangeDescDialog, ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
   data: () => ({
     workspaceDetail: {groupsOrUsers:[]},
     slug: '',
     changableVisibility: false,
     changableVisibilityReason: 'tbd',
-    isWorkspaceChangeNameDescDialogActive: false,
+    isWorkspaceChangeNameDialogActive: false,
+    isWorkspaceChangeDescDialogActive: false,
     forbidNameChange: true,
     forbidNameChangeReason: 'tbd',
     isWorkspaceOpenSelectDialogActive: false,
@@ -243,12 +251,16 @@ export default {
         this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.slug, wsname: this.workspace.refName } });
       }
     },
-    async openWorkspaceChangeNameDescDialog() {
-      this.isWorkspaceChangeNameDescDialogActive = true;
-      this.$refs.workspaceChangeNameDescDialog.$data.newWorkspaceName = this.workspace.name;
-      this.$refs.workspaceChangeNameDescDialog.$data.newWorkspaceDesc = this.workspace.description;
-      this.$refs.workspaceChangeNameDescDialog.$data.allowNameChange = !this.forbidNameChange;
-      this.$refs.workspaceChangeNameDescDialog.$data.dialog = true;
+    async openWorkspaceChangeNameDialog() {
+      this.isWorkspaceChangeNameDialogActive = true;
+      this.$refs.workspaceChangeNameDialog.$data.newWorkspaceName = this.workspace.name;
+      this.$refs.workspaceChangeNameDialog.$data.allowNameChange = !this.forbidNameChange;
+      this.$refs.workspaceChangeNameDialog.$data.dialog = true;
+    },
+    async openWorkspaceChangeDescDialog() {
+      this.isWorkspaceChangeDescDialogActive = true;
+      this.$refs.workspaceChangeDescDialog.$data.newWorkspaceDesc = this.workspace.description;
+      this.$refs.workspaceChangeDescDialog.$data.dialog = true;
     },
     async openWorkspaceOpenSelectDialog() {
       this.isWorkspaceOpenSelectDialogActive = true;
