@@ -16,6 +16,7 @@ import {BadRequest} from "@feathersjs/errors";
 import {refNameHasher} from "../../refNameFunctions.js";
 import { buildUserSummary } from '../users/users.distrib.js';
 import {OrganizationType, OrganizationTypeMap} from './organizations.subdocs.schema.js';
+import {curationSchema} from "../../curation.schema.js";
 
 const userDataSchema = Type.Intersect(
   [
@@ -38,6 +39,7 @@ export const organizationSchema = Type.Object(
     groups: Type.Array(groupSummary),
     owner: userSummarySchema,
     type: Type.Optional(OrganizationType),
+    curation: Type.Optional(curationSchema),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },

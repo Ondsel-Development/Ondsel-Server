@@ -2,6 +2,7 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
 import _ from "lodash";
+import {userSummarySchema} from "./services/users/users.subdocs.schema.js";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -16,10 +17,37 @@ export const curationSchema = Type.Object(
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
     representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
-    promoted: Type.Array(), // an array of curations
+    promoted: Type.Array(promotionSchema), // an array of promotions
     keywordRefs: Type.Array(Type.String()), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
+
+export const notationSchema = Type.Object(
+  {
+    updatedAt: Type.Number(), // date/time when last updated
+    historicUser: userSummarySchema, // user who posted the notation/comment; stored for diagnostics; does not need live update ("historic")
+    message: Type.String(), // the public comment made about the promotion
+  }
+)
+
+export const promotionSchema = Type.Object(
+  {
+    notation: notationSchema, // a 'notational comment' added by the promoter
+    curation: curationSchema, // use 'curationSummaryOfCuration` method to shorten
+  }
+)
+
+const MAX_LONG_DESC_SUM = 60;
+export function curationSummaryOfCuration(curation) {
+  // a smaller "summary" of fields for embedding
+  let curationSum = curation;
+  const longDesc = curation.longDescriptionMd;
+  curationSum.longDescriptionMd = longDesc.length > MAX_LONG_DESC_SUM ?
+    longDesc.substring(0, MAX_LONG_DESC_SUM - 3) + "..." : longDesc;
+  curationSum.promoted = [];
+  curationSum.keywordRefs = [];
+  return curationSum;
+}
 
 export function matchingCuration(curationA, curationB) {
   if (curationA?._id.toString() === curationB?._id.toString()) {

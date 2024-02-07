@@ -23,6 +23,7 @@ import {addEmptyDirectoriesFieldToDirectoryCommand} from "./add_empty_directorie
 import {updateWorkspaceSummariesEverywhereCommand} from "./update-workspace-summaries-everywhere.command.js";
 import {addIsThumbnailGeneratedFieldToSharedModelsCommand} from "./add-isThumbnailGenerated-field-to-shared-models.js";
 import {addCurationToAllWorkspacesCommand} from "./add-curation-to-all-workspaces.command.js";
+import {addCurationToAllOrganizationsCommand} from "./add-curation-to-all-organizations.command.js";
 
 
 async function runMigration() {
@@ -103,6 +104,9 @@ async function runMigration() {
       break;
     case 'addCurationToAllWorkspaces':
       await addCurationToAllWorkspacesCommand(app);
+      break;
+    case 'addCurationToAllOrganizations':
+      await addCurationToAllOrganizationsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
