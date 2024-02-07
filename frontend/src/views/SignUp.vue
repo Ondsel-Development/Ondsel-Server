@@ -42,7 +42,7 @@
 
         <v-text-field
           v-model="usernameTemp"
-          label="Username"
+          label="username builder (type here)"
           :rules="[rules.isRequired, rules.nameConforms, rules.extraHint]"
           :disabled="isCreatePending"
         ></v-text-field>
@@ -52,7 +52,7 @@
             <span class="font-weight-bold">{{user.username}}</span>
           </v-card-text>
           <v-card-text v-else>
-            <span class="font-italic">no username yet</span>
+            <span class="font-italic">no username built yet</span>
           </v-card-text>
         </v-card>
 
