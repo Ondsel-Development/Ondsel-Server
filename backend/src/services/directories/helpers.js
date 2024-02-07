@@ -6,7 +6,17 @@ export const canUserAccessDirectoryOrFileGetMethod = async context => {
   const directoryOrFile = await context.service.get(context.id);
   if (context.publicDataOnly === true) {
     if (directoryOrFile.workspace.open !== true) {
-      throw new BadRequest({ type: 'PermissionError', msg: 'Not an open workspace'});
+      // if user pass publicDataOnly flag and workspace is not open but user have access to workspace by `groupsOrUsers`
+      try {
+        await context.app.service('workspaces').get(
+          directoryOrFile.workspace._id,
+          {
+            user: context.params.user
+          }
+        )
+      } catch (error) {
+        throw new BadRequest({ type: 'PermissionError', msg: 'Not an open workspace'});
+      }
     }
   } else {
     try {
