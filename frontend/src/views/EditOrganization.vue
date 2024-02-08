@@ -12,33 +12,102 @@
         {{ organization.name }}
       </v-btn>
     </v-row>
+
+    <v-card
+      variant="flat"
+      :border="true"
+      class="mx-auto my-6"
+    >
+      <v-list lines="three">
+        <v-list-subheader class="mb-2">General Details</v-list-subheader>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Name</v-list-item-title>
+          <v-list-item-subtitle>
+            {{ organization.name }}
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                v-if="isLoggedInUserAdminOfOrganization"
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openOrgChangeNameDialog()"
+              >
+                Change Name
+              </v-btn>
+              <div v-else>
+                <i>not admin</i>
+              </div>
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Nature</v-list-item-title>
+          <v-list-item-subtitle>
+            {{organization.type}}
+          </v-list-item-subtitle>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Short Description</v-list-item-title>
+          <v-list-item-subtitle>
+            <div v-if="organization.description">
+              {{ organization.description }}
+            </div>
+            <div v-else>
+              <i>none supplied</i>
+            </div>
+          </v-list-item-subtitle>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Long Description</v-list-item-title>
+          <v-list-item-media>
+            <v-card>
+              <v-card-text>
+                <div v-html="longDescriptionHtml"></div>
+              </v-card-text>
+            </v-card>
+          </v-list-item-media>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Tags</v-list-item-title>
+          <v-list-item-subtitle>
+            <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
+              <v-chip-group>
+                <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
+              </v-chip-group>
+            </div>
+            <span v-else><i>None</i></span>
+          </v-list-item-subtitle>
+        </v-list-item>
+
+      </v-list>
+    </v-card>
+
     <v-card flat class="my-2">
       <v-card-text>
-        <p class="text-body-1">Nature: {{organization.type}}</p>
         <p class="text-body-1">workspaces: <a :href="`${workspacesUrl}`">{{workspacesUrl}}</a></p>
         <p class="text-body-1">public homepage: <a :href="`${homepageUrl}`">{{homepageUrl}}</a></p>
+        <v-btn
+          v-if="userIsOwner"
+          variant="outlined"
+          size="small"
+          @click.stop="openDeleteOrgDialog()"
+        >
+          Delete Organization
+        </v-btn>
       </v-card-text>
     </v-card>
-    <v-row v-if="isLoggedInUserAdminOfOrganization" class="mt-12">
-      <v-btn
-        variant="outlined"
-        size="small"
-        :hidden="!isLoggedInUserAdminOfOrganization"
-        @click.stop="openOrgChangeNameDialog()"
-      >
-        Change Name
-      </v-btn>
-    </v-row>
-    <v-row class="mt-12" v-if="userIsOwner">
-      <v-btn
-        variant="outlined"
-        size="small"
-        @click.stop="openDeleteOrgDialog()"
-      >
-        Delete Organization
-      </v-btn>
-      <v-spacer></v-spacer>
-    </v-row>
     <v-row class="mt-12">
       <organization-users-table :organization="organization" />
     </v-row>
@@ -65,12 +134,17 @@ import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
 import OrgChangeNameDialog from "@/components/OrgChangeNameDialog.vue";
 import DeleteOrgDialog from "@/components/DeleteOrgDialog.vue";
+import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
+import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
+import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
+import EditTagsDialog from "@/components/EditTagsDialog.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
-  components: {OrgChangeNameDialog, DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
+  components: {
+    OrgChangeNameDialog, DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,
     orgDetail: null,
@@ -79,6 +153,7 @@ export default {
     userIsOwner: false,
     workspacesUrl: 'tbd',
     homepageUrl: 'tbd',
+    longDescriptionHtml: 'tbd',
   }),
   async created() {
     try {
