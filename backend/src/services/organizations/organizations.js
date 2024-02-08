@@ -41,6 +41,9 @@ import {
 import {userPublicFields, userResolver} from "../users/users.schema.js";
 import {BadRequest} from "@feathersjs/errors";
 import {OrganizationTypeMap} from "./organizations.subdocs.schema.js";
+import {afterCreateHandleOrganizationCuration, buildNewCurationForOrganization} from "./organizations.curation.js";
+import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -154,15 +157,6 @@ export const organization = (app) => {
     },
     before: {
       all: [
-        // softDelete({
-        //   deletedQuery: async context => {
-        //     // Allow only owner to delete organization
-        //     if ( context.method === 'remove' && context.params.user ) {
-        //       return { createdBy: context.params.user._id, deleted: { $ne: true } }
-        //     }
-        //     return { deleted: { $ne: true } };
-        //   }
-        // }),
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
@@ -203,6 +197,7 @@ export const organization = (app) => {
           context => context.data.shouldAddGroupsToOrganization,
           addGroupsToOrganization,
         ),
+        beforePatchHandleGenericCuration(buildNewCurationForOrganization),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)
       ],
@@ -219,9 +214,10 @@ export const organization = (app) => {
       create: [
         assignOrganizationIdToUser,
         createDefaultEveryoneGroup,
+        afterCreateHandleOrganizationCuration,
       ],
       patch: [
-        distributeOrganizationSummaries
+        distributeOrganizationSummaries,
       ]
     },
     error: {

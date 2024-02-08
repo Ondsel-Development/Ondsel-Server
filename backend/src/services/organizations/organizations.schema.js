@@ -35,6 +35,7 @@ export const organizationSchema = Type.Object(
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    description: Type.String(),
     users: Type.Array(userDataSchema),
     groups: Type.Array(groupSummary),
     owner: userSummarySchema,
@@ -76,6 +77,9 @@ export const organizationDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  description: async (_value, message, _context) => {
+    return message.description || '';
+  },
   users: async (_value, _message, context) => {
     return [
       {
@@ -92,7 +96,7 @@ export const organizationDataResolver = resolve({
   },
 })
 
-export const organizationPublicFields = ['_id', 'name', 'refName', 'type', 'createdAt', 'owner'];
+export const organizationPublicFields = ['_id', 'name', 'refName', 'description', 'type', 'createdAt', 'owner'];
 
 // Schema for updating existing entries
 export const organizationPatchSchema = Type.Partial(organizationSchema, {
@@ -104,7 +108,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'description', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'deleted'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),

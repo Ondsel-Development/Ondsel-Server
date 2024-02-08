@@ -17,7 +17,7 @@ export const curationSchema = Type.Object(
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
     representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
-    promoted: Type.Array(promotionSchema), // an array of promotions
+    promoted: Type.Array(Type.Any()), // an array of promotionSchema
     keywordRefs: Type.Array(Type.String()), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
@@ -213,4 +213,86 @@ function accumulateScores(keywordScores, keywordList, scoreStart, scoreMax, orde
         }
         counter++;
     }
+}
+
+export const beforePatchHandleGenericCuration = (buildFunction) => {
+  return async (context) => {
+    try {
+      //
+      // setup
+      //
+      let changeFound = false;
+      let needPatch = false; // if true, then ALSO needing changes applied to keywords
+      const originalCuration = context.beforePatchCopy.curation || {};
+      const patchCuration = context.data.curation || {};
+      let newCuration = {...originalCuration, ...patchCuration};
+      if (!newCuration._id) {
+        // if the original curation _id is missing, then something failed to created it in the past. recreate it first.
+        const tempCuration = buildFunction(context.beforePatchCopy);
+        newCuration = {...tempCuration, ...patchCuration};
+        needPatch = true;
+        changeFound = true;
+      }
+      //
+      // name (pulled from parent)
+      //
+      if (context.data.name && context.beforePatchCopy.name !== context.data.name) {
+        needPatch = true;
+        newCuration.name = context.data.name;
+      }
+      //
+      // description (pulled from parent)
+      //
+      if (context.data.description && context.beforePatchCopy.description !== context.data.description) {
+        needPatch = true;
+        newCuration.description = context.data.description;
+      }
+      //
+      // long description
+      //
+      if (patchCuration.longDescriptionMd !== undefined && originalCuration.longDescriptionMd !== newCuration.longDescriptionMd) {
+        changeFound = true;
+      }
+      //
+      // tags
+      //
+      if (patchCuration.tags && !_.isEqual(originalCuration.tags, newCuration.tags)) {
+        changeFound = true;
+      }
+      //
+      // representative file
+      //
+      if (newCuration.collection === 'workspaces') {
+        if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
+          changeFound = true;
+        }
+      } else {
+        if (newCuration.representativeFile) {
+          newCuration.representativeFile = null;
+          console.log("MINOR ERROR: a `representativeFile` was set for a non-workspace curation. setting to null.");
+        }
+      }
+      //
+      // handle keyword generation
+      //
+      if (needPatch || changeFound) {
+        if (context.beforePatchCopy.open) {
+          const newKeywordRefs = await generateAndApplyKeywords(context, newCuration);
+          if (!_.isEqual(newKeywordRefs, originalCuration.keywordRefs)) {
+            newCuration.keywordRefs = newKeywordRefs;
+            needPatch = true;
+          }
+        }
+      }
+      //
+      // set the new proper patch
+      //
+      if (needPatch) {
+        context.data.curation = newCuration;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    return context;
+  }
 }

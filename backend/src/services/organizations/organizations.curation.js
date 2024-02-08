@@ -1,3 +1,6 @@
+import {generateAndApplyKeywords} from "../../curation.schema.js";
+import _ from "lodash";
+import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
 
 export function buildNewCurationForOrganization(org) {
   let curation =   {
@@ -14,3 +17,16 @@ export function buildNewCurationForOrganization(org) {
   return curation;
 }
 
+export const afterCreateHandleOrganizationCuration = async (context) => {
+  // first, set up the curation
+  context.result.curation = buildNewCurationForOrganization(context.result);
+  const newKeywordRefs = await generateAndApplyKeywords(context, context.result.curation);
+  context.result.curation.keywordRefs = newKeywordRefs;
+  await context.service.patch(
+    context.result._id,
+    {
+      curation: context.result.curation
+    }
+  )
+  return context;
+}
