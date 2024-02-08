@@ -114,6 +114,9 @@
     <v-row class="mt-12">
       <organization-groups-table :organization="organization" />
     </v-row>
+    <v-row class="mt-12">
+      <organization-promotions-table :organization="organization" />
+    </v-row>
     <OrgChangeNameDialog
       :is-active="isOrgChangeNameDialogActive"
       :org="organization"
@@ -134,16 +137,14 @@ import OrganizationUsersTable from '@/components/OrganizationUsersTable.vue';
 import OrganizationGroupsTable from '@/components/OrganizationGroupsTable.vue';
 import OrgChangeNameDialog from "@/components/OrgChangeNameDialog.vue";
 import DeleteOrgDialog from "@/components/DeleteOrgDialog.vue";
-import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
-import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
-import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
-import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
   components: {
+    OrganizationPromotionsTable,
     OrgChangeNameDialog, DeleteOrgDialog, OrganizationUsersTable, OrganizationGroupsTable },
   data: () => ({
     orgSrc: null,

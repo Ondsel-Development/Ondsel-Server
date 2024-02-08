@@ -1,14 +1,25 @@
 <template>
   <v-container>
     <v-row class="pl-4 pr-4">
-      <div class="text-h5">Organization {{ organization.name }}</div>
-      <v-spacer />
+      <v-col cols="12">
+        <v-card class="mx-auto">
+          <v-card-title>
+            Organization {{ organization.name }}
+          </v-card-title>
+          <v-card-subtitle>
+            <p v-if="organization.description">Description: <b>{{ organization.description }}</b></p>
+            <p>Nature: <code>{{organization.type}}</code></p>
+          </v-card-subtitle>
+          <template v-slot:append>
+            <v-icon
+              size="small"
+              @click.stop="openEditPromotionDialog()"
+            >mdi-bullhorn</v-icon>
+          </template>
+        </v-card>
+      </v-col>
     </v-row>
     <v-spacer />
-  </v-container>
-  <v-container>
-    <p>Full Name: <b>{{ organization.name }}</b></p>
-    <p>Nature: <code>{{organization.type}}</code></p>
   </v-container>
   <v-container>
     <v-card elevation="0">
@@ -41,18 +52,20 @@
       </v-card-text>
     </v-card>
   </v-container>
+  <edit-promotion-dialog ref="editPromotionDialog" collection="organizations" :item-id="organization._id" :item-name="organization.name"></edit-promotion-dialog>
 </template>
 
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import ReprViewer from "@/components/ReprViewer.vue";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {ReprViewer},
+  components: {EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
@@ -88,6 +101,9 @@ export default {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.organization.refName, wsname: workspace.refName } });
+    },
+    async openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
     },
   },
   watch: {

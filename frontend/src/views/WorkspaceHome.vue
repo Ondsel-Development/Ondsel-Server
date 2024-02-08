@@ -11,6 +11,10 @@
         <span class="text-body-2">workspace &nbsp;</span>
         <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
         <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
+        <v-icon
+          size="small"
+          @click.stop="openEditPromotionDialog()"
+        >mdi-bullhorn</v-icon>
       </v-col>
       <v-col cols="3">
         <div v-if="workspace.curation?.representativeFile">
@@ -72,6 +76,7 @@
       </v-col>
     </v-row>
   </v-container>
+  <edit-promotion-dialog ref="editPromotionDialog" collection="workspaces" :item-id="workspace._id" :item-name="workspace.name"></edit-promotion-dialog>
 </template>
 
 <script>
@@ -83,12 +88,13 @@ import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 import {marked} from "marked";
 import ReprViewer from "@/components/ReprViewer.vue";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
-  components: {ReprViewer, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
+  components: {EditPromotionDialog, ReprViewer, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
   data() {
     return {
       activeFile: null,
@@ -225,7 +231,10 @@ export default {
       } else {
         this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
       }
-    }
+    },
+    async openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
+    },
   },
 };
 </script>
