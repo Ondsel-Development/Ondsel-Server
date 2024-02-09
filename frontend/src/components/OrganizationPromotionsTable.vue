@@ -26,7 +26,7 @@
       </v-icon>
     </template>
   </v-data-table>
-  <div v-if="isLoggedInUserAdmin"><i>To add a promotion, visit the public web page of the workspace/person/org/etc and choose "promote".</i></div>
+  <div v-if="isLoggedInUserAdmin"><i>To add a promotion, visit the public web page of the workspace/person/org/etc and click on the bullhorn <v-icon size="small">mdi-bullhorn</v-icon> icon.</i></div>
 </template>
 
 <script>
@@ -47,7 +47,7 @@ export default {
         title: 'Public Comment',
         align: 'start',
         sortable: true,
-        key: 'notation.comment',
+        key: 'notation.message',
       },
       {
         title: 'Type',
