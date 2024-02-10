@@ -8,6 +8,10 @@
       <template v-slot:title>
         <div class="text-center">Should {{promoterName}} promote "{{itemName}}"</div>
       </template>
+      <v-card-subtitle>
+        <span v-if="decisionToPromote">Currently promoting.</span>
+        <span v-else>Not currently promoting.</span>
+      </v-card-subtitle>
       <v-progress-linear
         :active="isPatchPending"
         indeterminate
@@ -15,11 +19,15 @@
         bottom
       ></v-progress-linear>
       <v-form ref="editTagsDialogForm" @submit.prevent="isPatchPending">
-        <v-text-field
-          v-model.trim="comment"
-          label="Optional Comment (seen publicly)"
-          hint="Enter optional public comment"
-        ></v-text-field>
+        <v-card>
+          <v-card-text>
+            <v-text-field
+              v-model.trim="comment"
+              label="Optional Comment (seen publicly)"
+              hint="Enter optional public comment"
+            ></v-text-field>
+          </v-card-text>
+        </v-card>
       </v-form>
       <v-snackbar
         :timeout="2000"
@@ -51,14 +59,16 @@ export default {
     itemName: String,
   },
   async created() {
+    const org = await Organization.get(this.userCurrentOrganization._id);
     this.promoterType = 'organizations'; // only this for now; later adding "Ondsel" and possibly other promoters
-    this.promoterId = this.userCurrentOrganization._id.toString();
-    this.promoterObj = this.userCurrentOrganization;
+    this.promoterId = org._id.toString();
+    this.promoterObj = org;
     if (this.userCurrentOrganization.type === 'Personal') {
       this.promoterName = `user ${this.user.name}`;
     } else {
-      this.promoterName = `organization ${this.userCurrentOrganization.name}`;
+      this.promoterName = `organization ${org.name}`;
     }
+    await this.reCalc();
   },
   data: () => ({
     dialog: false,
@@ -75,9 +85,22 @@ export default {
   computed: {
     ...mapState('auth', ['user']),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
+    // dummy: vm => vm.itemId + (vm.reCalc() || ''),
   },
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
+    async reCalc() {
+      const promoted = this.promoterObj.curation?.promoted || [];
+      const pr = promoted.find(pr => pr.curation._id.toString() === this.itemId);
+      if (pr) {
+        this.decisionToPromote = true;
+        if (this.comment === '') {
+          this.comment = pr.notation.message;
+        }
+      } else {
+        this.decisionToPromote = false;
+      }
+    },
     async editPromotion(decision) {
       let obj;
       let curation;
@@ -161,6 +184,13 @@ export default {
       }
     }
   },
+  watch: {
+    async dialog(newValue){
+      if (newValue) {
+        await this.reCalc();
+      }
+    }
+  }
 }
 </script>
 <style scoped>
