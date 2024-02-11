@@ -1,11 +1,13 @@
 import { ImporterBrep } from '@/threejs/libs/import/importerbrep';
 import { ImporterObj } from '@/threejs/libs/import/importerobj';
+import { ImporterFcstd } from '@/threejs/libs/import/importerfcstd';
 
 export class Importer {
   constructor() {
     this.importers = [
       new ImporterBrep(),
       new ImporterObj(),
+      new ImporterFcstd(),
     ];
     this.activeImporter = null;
   }
