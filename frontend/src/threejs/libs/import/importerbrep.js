@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
+import { Model } from '@/threejs/libs/model/model';
+import { ModelObject3D } from '@/threejs/libs/model/object';
 
 export class ImporterBrep {
 
   constructor() {
+    this.model = new Model ();
     this.file = null;
     this.worker = null;
     this.objects = [];
@@ -37,6 +40,7 @@ export class ImporterBrep {
     this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
 
     this.worker.addEventListener ('message', (ev) => {
+      let object3d = new ModelObject3D ();
       let mainObject = new THREE.Object3D();
       for (let resultMesh of ev.data.meshes) {
         let geometry = new THREE.BufferGeometry();
@@ -51,8 +55,10 @@ export class ImporterBrep {
         const mesh = new THREE.Mesh (geometry, material);
         mainObject.add(mesh);
       }
-      this.objects.push(mainObject);
-      onFinish(this.objects);
+
+      object3d.SetObject3d(mainObject);
+      this.model.AddObject(object3d);
+      onFinish(this.model);
     });
 
     this.worker.addEventListener ('error', (ev) => {
