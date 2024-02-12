@@ -104,6 +104,7 @@ async function runMigration() {
       break;
     case 'addCurationToAllWorkspaces':
       await addCurationToAllWorkspacesCommand(app);
+      break;
     case 'upgradeUserTier':
       await upgradeUserTierCommand(app);
       break;
