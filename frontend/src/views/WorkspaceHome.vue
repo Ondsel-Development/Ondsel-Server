@@ -1,28 +1,36 @@
 <template>
   <v-container v-if="workspace">
     <v-row class="align-center">
-      <v-btn
-        flat
-        size="small"
-        icon="mdi-arrow-left"
-        @click="goHome()"
-      />
-      <div class="text-body-1">Workspace &nbsp;</div>
-      <div class="text-body-1 font-weight-bold">{{ workspace.name }}</div>
-      <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
-<!--      <v-spacer />-->
-<!--      <div class="align-end">-->
-<!--        <v-btn flat icon="mdi-pencil"></v-btn>-->
-<!--      </div>-->
+      <v-col cols="9">
+        <v-btn
+          flat
+          size="small"
+          icon="mdi-arrow-left"
+          @click="goHome()"
+        />
+        <span class="text-body-2">workspace &nbsp;</span>
+        <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
+        <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
+      </v-col>
+      <v-col cols="3">
+        <div v-if="workspace.curation?.representativeFile">
+          <repr-viewer :workspace="workspace"></repr-viewer>
+        </div>
+      </v-col>
     </v-row>
     <v-row class="mt-10">
-      <p>"{{workspace.description}}"</p>
-    </v-row>
-    <v-row class="mt-10">
-      <p>Owned by {{ownerText}}</p>
-    </v-row>
-    <v-row class="mt-10">
-      <p><i>{{openMessage}}</i></p>
+      <v-col cols="5">
+        <p>"{{workspace.description}}"</p>
+        <p>Owned by {{ownerText}}</p>
+        <p><i>{{openMessage}}</i></p>
+      </v-col>
+      <v-col cols="7">
+        <v-card max-height="200" overflow-y-visible>
+          <v-card-text>
+            <div v-html="longDescriptionHtml"></div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
     <v-row class="mt-10">
       <v-text-field
@@ -46,6 +54,7 @@
         <WorkspaceFileView
           v-if="activeFile"
           :file="activeFile"
+          :workspace="workspace"
           :full-path="activePath"
           :can-user-write="workspace.haveWriteAccess"
           :public-view="publicView"
@@ -72,12 +81,14 @@ import { models } from '@feathersjs/vuex';
 import DirectoryListView from '@/components/DirectoryListView.vue';
 import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
+import {marked} from "marked";
+import ReprViewer from "@/components/ReprViewer.vue";
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
-  components: { DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
+  components: {ReprViewer, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
   data() {
     return {
       activeFile: null,
@@ -160,6 +171,7 @@ export default {
     organization: vm => vm.organizationDetail,
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     publicView: vm => vm.publicViewDetail,
+    longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || ""),
   },
   methods: {
     ...mapActions('app', [
@@ -208,7 +220,11 @@ export default {
       }
     },
     async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserEditWorkspace', params: { slug: this.slug, wsname: workspace.refName } });
+      } else {
+        this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
+      }
     }
   },
 };

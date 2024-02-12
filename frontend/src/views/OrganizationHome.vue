@@ -32,6 +32,9 @@
               <template #subtitle>
                 <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
               </template>
+              <template v-slot:prepend>
+                <repr-viewer :workspace="workspace"/>
+              </template>
             </v-card>
           </v-col>
         </v-row>
@@ -43,12 +46,13 @@
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
+import ReprViewer from "@/components/ReprViewer.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: { },
+  components: {ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
