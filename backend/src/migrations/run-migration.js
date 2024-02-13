@@ -24,7 +24,7 @@ import {updateWorkspaceSummariesEverywhereCommand} from "./update-workspace-summ
 import {addIsThumbnailGeneratedFieldToSharedModelsCommand} from "./add-isThumbnailGenerated-field-to-shared-models.js";
 import {addCurationToAllWorkspacesCommand} from "./add-curation-to-all-workspaces.command.js";
 import {addCurationToAllOrganizationsCommand} from "./add-curation-to-all-organizations.command.js";
-
+import { upgradeUserTierCommand } from './upgrade_user_tier.js';
 
 async function runMigration() {
   console.log('Migration start');
@@ -104,6 +104,9 @@ async function runMigration() {
       break;
     case 'addCurationToAllWorkspaces':
       await addCurationToAllWorkspacesCommand(app);
+      break;
+    case 'upgradeUserTier':
+      await upgradeUserTierCommand(app);
       break;
     case 'addCurationToAllOrganizations':
       await addCurationToAllOrganizationsCommand(app);
