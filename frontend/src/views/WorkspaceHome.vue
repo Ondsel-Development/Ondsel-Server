@@ -18,7 +18,7 @@
           @click.stop="goToWorkspaceEdit(workspace)"
         ></v-btn>
         <v-btn
-          :disabled="publicView"
+          :disabled="!currentOrganization"
           icon="mdi-bullhorn"
           size="small"
           flat
@@ -85,7 +85,7 @@
       </v-col>
     </v-row>
   </v-container>
-  <edit-promotion-dialog ref="editPromotionDialog" collection="workspaces" :item-id="workspace._id" :item-name="workspace.name"></edit-promotion-dialog>
+  <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="workspaces" :item-id="workspace?._id" :item-name="workspace?.name"></edit-promotion-dialog>
 </template>
 
 <script>

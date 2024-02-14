@@ -4,6 +4,7 @@
       <v-col cols="5">
         Organization {{ organization.name }}
         <v-icon
+          v-if="userCurrentOrganization"
           size="small"
           @click.stop="openEditPromotionDialog()"
         >mdi-bullhorn</v-icon>
@@ -61,7 +62,7 @@
       </v-card-text>
     </v-card>
   </v-container>
-  <edit-promotion-dialog ref="editPromotionDialog" collection="organizations" :item-id="organization._id" :item-name="organization.name"></edit-promotion-dialog>
+  <edit-promotion-dialog v-if="userCurrentOrganization" ref="editPromotionDialog" collection="organizations" :item-id="organization._id" :item-name="organization.name"></edit-promotion-dialog>
 </template>
 
 <script>
@@ -70,14 +71,13 @@ import {models} from "@feathersjs/vuex";
 import ReprViewer from "@/components/ReprViewer.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {marked} from "marked";
-import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {PromotionsViewer, OrganizationPromotionsTable, EditPromotionDialog, ReprViewer},
+  components: {PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
@@ -116,7 +116,7 @@ export default {
     iAmThisOrg: vm => (vm.userCurrentOrganization !== undefined) && (vm.userCurrentOrganization?.refName === vm.targetOrgName),
     promotedItems: vm => vm.promotedItemsDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
-    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || "*None*"),
+    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),

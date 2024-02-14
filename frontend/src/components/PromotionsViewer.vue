@@ -19,11 +19,12 @@
         </v-card-subtitle>
         <v-card-text>
           <v-row>
-            <v-col cols="3">
+            <v-col cols="4">
               <repr-viewer :curation="entry.curation"/>
             </v-col>
-            <v-col cols="9">
-              <div class="text-h6">{{ entry.curation.name }} <span class="text-body-2">{{ entry.curation.description }}</span></div>
+            <v-col cols="8">
+              <p class="text-h6">{{ entry.curation.name }}</p>
+              <span class="text-body-2">{{ entry.curation.description }}</span>
             </v-col>
           </v-row>
         </v-card-text>
@@ -59,8 +60,7 @@ export default {
           workspace = await this.getWorkspaceByIdPublic(curation._id);
           org = await this.getOrgByIdOrNamePublic(workspace.organizationId);
           if (org.type === 'Personal') {
-            let userSum = await this.getUserByIdOrNamePublic(org.refName);
-            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: userSum.username, wsname: workspace.refName } });
+            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: org.owner.username, wsname: workspace.refName } });
           } else {
             this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
           }
