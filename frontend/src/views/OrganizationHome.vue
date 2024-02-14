@@ -1,27 +1,33 @@
 <template>
   <v-container>
-    <v-row class="pl-4 pr-4">
-      <v-col cols="12">
-        <v-card class="mx-auto">
-          <v-card-title>
-            Organization {{ organization.name }}
-          </v-card-title>
-          <v-card-subtitle>
-            <p v-if="organization.description">Description: <b>{{ organization.description }}</b></p>
-            <p>Nature: <code>{{organization.type}}</code></p>
-          </v-card-subtitle>
-          <template v-slot:append>
-            <v-icon
-              size="small"
-              @click.stop="openEditPromotionDialog()"
-            >mdi-bullhorn</v-icon>
-          </template>
+    <v-row class="align-center">
+      <v-col cols="5">
+        Organization {{ organization.name }}
+        <v-icon
+          size="small"
+          @click.stop="openEditPromotionDialog()"
+        >mdi-bullhorn</v-icon>
+        <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
+        <p class="text-sm-body-2"><i>{{natureDetails}}</i></p>
+      </v-col>
+      <v-col cols="7">
+        <v-card max-height="200" overflow-y-visible>
+          <v-card-text>
+            <div v-html="longDescriptionHtml"></div>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
     <v-spacer />
   </v-container>
   <v-container>
+    <v-card elevation="0" v-if="(organization.curation?.promoted || []).length > 0">
+      <v-card-title>Items we think you would like</v-card-title>
+      <v-card-text>
+        <promotions-viewer :promoted="organization.curation.promoted" />
+      </v-card-text>
+    </v-card>
+
     <v-card elevation="0">
       <v-card-title>Public Workspaces</v-card-title>
       <v-card-text>
@@ -44,10 +50,13 @@
                 <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
               </template>
               <template v-slot:prepend>
-                <repr-viewer :workspace="workspace"/>
+                <repr-viewer :curation="workspace.curation"/>
               </template>
             </v-card>
           </v-col>
+        </v-row>
+        <v-row v-if="!publicWorkspaces || publicWorkspaces.length === 0">
+          <i>no public workspaces</i>
         </v-row>
       </v-card-text>
     </v-card>
@@ -60,15 +69,20 @@ import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import ReprViewer from "@/components/ReprViewer.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import {marked} from "marked";
+import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
+import PromotionsViewer from "@/components/PromotionsViewer.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {EditPromotionDialog, ReprViewer},
+  components: {PromotionsViewer, OrganizationPromotionsTable, EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
+    natureDetails: 'tbd',
+    promotedItemsDetail: [],
   }),
   async mounted() {
     this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
@@ -87,6 +101,11 @@ export default {
       }
     })
     this.publicWorkspacesDetail = wsList.data;
+    if (this.targetOrgDetail.type==='Open') {
+      this.natureDetails = `An open organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+    } else {
+      this.natureDetails = `A private organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+    }
   },
   computed: {
     ...mapState('auth', ['user']),
@@ -95,7 +114,9 @@ export default {
     targetOrgName: vm => vm.$route.params.slug,
     organization: vm => vm.targetOrgDetail,
     iAmThisOrg: vm => (vm.userCurrentOrganization !== undefined) && (vm.userCurrentOrganization?.refName === vm.targetOrgName),
+    promotedItems: vm => vm.promotedItemsDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
+    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || "*None*"),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
@@ -104,6 +125,10 @@ export default {
     },
     async openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
+    },
+    dateFormat(number) {
+      const date = new Date(number);
+      return date.toDateString();
     },
   },
   watch: {

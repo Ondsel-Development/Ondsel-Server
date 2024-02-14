@@ -29,7 +29,7 @@
                 <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
               </template>
               <template v-slot:prepend>
-                <repr-viewer :workspace="workspace"/>
+                <repr-viewer :curation="workspace.curation"/>
               </template>
             </v-card>
           </v-col>

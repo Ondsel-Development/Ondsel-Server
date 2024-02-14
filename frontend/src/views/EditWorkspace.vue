@@ -188,7 +188,7 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                <repr-viewer :workspace="workspace"></repr-viewer>
+                <repr-viewer :curation="workspace.curation"></repr-viewer>
                 <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
               </v-card-text>
             </v-card>

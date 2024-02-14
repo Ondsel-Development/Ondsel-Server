@@ -27,7 +27,7 @@
       </v-col>
       <v-col cols="3">
         <div v-if="workspace.curation?.representativeFile">
-          <repr-viewer :workspace="workspace"></repr-viewer>
+          <repr-viewer :curation="workspace.curation"></repr-viewer>
         </div>
       </v-col>
     </v-row>
@@ -167,12 +167,19 @@ export default {
     }
     if (!this.publicViewDetail) {
       if (this.organization._id !== this.currentOrganization._id) {
-        if (this.organization.type !== 'Open') {
-          if (this.userRouteFlag) {
-            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
-          } else {
-            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
-          }
+        switch (this.organization.type) {
+          case 'Private':
+          case 'Personal':
+            if (this.workspaceDetail.open !== true) {
+              if (this.userRouteFlag) {
+                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+              } else {
+                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+              }
+            }
+            break;
+          case 'Open':
+            break;
         }
       }
     }
