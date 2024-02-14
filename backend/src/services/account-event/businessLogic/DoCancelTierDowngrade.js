@@ -1,5 +1,6 @@
 import {addTransactionToUserAndSummarize, makeEmptyJournalTransaction, verifyBalanced} from "../../../accounting.js";
 import {SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
+import { sendNotificationToSlack } from '../../../slack-notifications.js';
 
 
 export async function DoCancelTierDowngrade(context, user) {
@@ -38,6 +39,10 @@ export async function DoCancelTierDowngrade(context, user) {
   //
   context.data.success = true;
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
+  await sendNotificationToSlack(
+    context,
+    `🎉 Cancel Tier Downgrade request! 🎉\n\nUser (name: *${user.name}*, email: *${user.email}*) user just cancel tier downgrade request!\nPlan: *${user.tier}*`
+  )
 }
 
 function SubscriptionTierDowngradeVerification(context, user) {
