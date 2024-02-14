@@ -10,11 +10,20 @@
         />
         <span class="text-body-2">workspace &nbsp;</span>
         <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
-        <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
-        <v-icon
+        <v-btn
+          :disabled="publicView"
+          icon="mdi-cog"
           size="small"
+          flat
+          @click.stop="goToWorkspaceEdit(workspace)"
+        ></v-btn>
+        <v-btn
+          :disabled="publicView"
+          icon="mdi-bullhorn"
+          size="small"
+          flat
           @click.stop="openEditPromotionDialog()"
-        >mdi-bullhorn</v-icon>
+        ></v-btn>
       </v-col>
       <v-col cols="3">
         <div v-if="workspace.curation?.representativeFile">
