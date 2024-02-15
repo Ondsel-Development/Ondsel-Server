@@ -1,12 +1,34 @@
 <template>
   <v-container>
-    <v-row class="pl-4 pr-4">
-      <div class="text-h5">User {{ userSum.name }}</div>
-      <v-spacer />
+    <v-row class="align-center">
+      <v-col cols="5">
+        <div class="text-h6">User {{ userSum.name }}</div>
+        <v-icon
+          v-if="userCurrentOrganization"
+          size="small"
+          @click.stop="openEditPromotionDialog()"
+        >mdi-bullhorn</v-icon>
+        <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
+      </v-col>
+      <v-col cols="7">
+        <v-card max-height="200" overflow-y-visible>
+          <v-card-text>
+            <div v-html="longDescriptionHtml"></div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
     <v-spacer />
   </v-container>
+
   <v-container>
+    <v-card elevation="0" v-if="(organization.curation?.promoted || []).length > 0">
+      <v-card-title>Items {{userSum.name}} thinks you would like</v-card-title>
+      <v-card-text>
+        <promotions-viewer :promoted="organization.curation.promoted" />
+      </v-card-text>
+    </v-card>
+
     <v-card elevation="0">
       <v-card-title>Public Workspaces</v-card-title>
       <v-card-text>
@@ -37,53 +59,68 @@
       </v-card-text>
     </v-card>
   </v-container>
+  <edit-promotion-dialog v-if="userCurrentOrganization" ref="editPromotionDialog" collection="users" :item-id="userSum._id" :item-name="userSum.name"></edit-promotion-dialog>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import ReprViewer from "@/components/ReprViewer.vue";
+import {marked} from "marked";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import PromotionsViewer from "@/components/PromotionsViewer.vue";
 
 const { Workspace } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'UserHome',
-  components: {ReprViewer},
+  components: {PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     userSumDetail: {name: 'locating...', username: ''},
+    organizationDetail: {},
     publicWorkspacesDetail: [],
   }),
   async mounted() {
-    this.userSumDetail = await this.getUserByIdOrNamePublic(this.targetUsername);
-    if (!this.userSumDetail) {
-      this.$router.push({ name: 'PageNotFound' });
-    }
-    const wsList = await Workspace.find({
-      query: {
-        "organization.refName": this.userSumDetail._id.toString(),
-        publicInfo: 'true',
-      }
-    })
-    this.publicWorkspacesDetail = wsList.data;
+    await this.refresh();
   },
   computed: {
     ...mapState('auth', ['user']),
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     targetUsername: vm => vm.$route.params.slug,
     userSum: vm => vm.userSumDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
     iAmThisUser: vm => vm.loggedInUser?.user?.username === vm.$route.params.slug,
+    organization: vm => vm.organizationDetail,
+    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),
   },
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getOrgByIdOrNamePublic']),
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'UserWorkspaceHome', params: { slug: this.userSum.username, wsname: workspace.refName } });
     },
+    async openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
+    },
+    async refresh() {
+      this.userSumDetail = await this.getUserByIdOrNamePublic(this.targetUsername);
+      if (!this.userSumDetail) {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+      this.organizationDetail = await this.getOrgByIdOrNamePublic(this.userSumDetail._id.toString());
+      const wsList = await Workspace.find({
+        query: {
+          "organization.refName": this.userSumDetail._id.toString(),
+          publicInfo: 'true',
+        }
+      })
+      this.publicWorkspacesDetail = wsList.data;
+    }
   },
   watch: {
     async '$route'(to, from) {
       if (to.name === 'UserHome') {
-        this.userSumDetail = await this.getUserByIdOrNamePublic(this.targetUsername);
+        await this.refresh();
       }
     }
   }

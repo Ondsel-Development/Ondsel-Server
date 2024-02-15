@@ -264,6 +264,9 @@
 
       </v-list>
     </v-card>
+    <v-row class="mt-12">
+      <organization-promotions-table :organization="organization" />
+    </v-row>
   </v-container>
 </template>
 
@@ -280,12 +283,14 @@ import {marked} from "marked";
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
 import _ from "lodash";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
+import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 
 const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    OrganizationPromotionsTable,
     EditDescriptionDialog,
     EditTagsDialog, EditLongDescriptionMdDialog, UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},
   data() {

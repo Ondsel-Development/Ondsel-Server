@@ -55,17 +55,20 @@ export default {
     async goToPromoted(curation) {
       let workspace;
       let org;
+      let user;
       switch (curation.collection) {
         case 'workspaces':
           workspace = await this.getWorkspaceByIdPublic(curation._id);
           org = await this.getOrgByIdOrNamePublic(workspace.organizationId);
-          if (org.type === 'Personal') {
-            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: org.owner.username, wsname: workspace.refName } });
-          } else {
-            this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
-          }
+          this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
           break;
         case 'organizations':
+          org = await this.getOrgByIdOrNamePublic(curation._id);
+          this.$router.push({ name: 'OrganizationHome', params: { slug: org.refName } });
+          break;
+        case 'users':
+          user = await this.getUserByIdOrNamePublic(curation._id);
+          this.$router.push({ name: 'UserHome', params: { slug: user.username } });
           break;
       }
     },
@@ -77,6 +80,9 @@ export default {
           break;
         case 'organizations':
           tr = 'an organization';
+          break;
+        case 'users':
+          tr = 'an individual user';
           break;
       }
       return tr;

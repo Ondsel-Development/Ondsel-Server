@@ -7,8 +7,8 @@
       variant="outlined"
     >
       <template v-slot:prepend>
-        <v-avatar>
-          <v-icon icon="mdi-crop-square" size="x-large"></v-icon>
+        <v-avatar size="5.6em">
+          <v-icon :icon="defaultIconForCollection(curation?.collection)" size="5em"></v-icon>
         </v-avatar>
       </template>
     </v-card>
@@ -36,8 +36,8 @@
         variant="outlined"
       >
         <template v-slot:prepend>
-          <v-avatar>
-            <v-icon icon="mdi-file-outline" size="x-large"></v-icon>
+          <v-avatar size="5em">
+            <v-icon icon="mdi-file-outline" size="4em"></v-icon>
           </v-avatar>
         </template>
         <span class="mx-6"><code>.{{curation?.representativeFile?.custFileName.split('.').pop()}}</code></span>
@@ -64,6 +64,24 @@ export default {
   created() {
   },
   methods: {
+    defaultIconForCollection(collection) {
+      let mdiIcon = 'mdi-help-circle';
+      switch (collection) {
+        case 'workspaces':
+          mdiIcon = 'mdi-file-outline';
+          break;
+        case 'organizations':
+          mdiIcon = 'mdi-account-group';
+          break;
+        case 'users':
+          mdiIcon = 'mdi-account';
+          break;
+        default:
+          console.log("notice: " + collection);
+          break;
+      }
+      return mdiIcon;
+    }
   }
 }
 </script>
