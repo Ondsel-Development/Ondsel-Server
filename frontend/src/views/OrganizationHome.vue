@@ -56,10 +56,44 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row v-if="!publicWorkspaces || publicWorkspaces.length === 0">
-          <i>no public workspaces</i>
+      </v-card-text>
+    </v-card>
+    <v-card v-if="!publicWorkspaces || publicWorkspaces.length === 0">
+      <v-card-subtitle>
+        no public workspaces yet
+      </v-card-subtitle>
+    </v-card>
+
+    <v-card elevation="0" v-if="organization.type === 'Open'">
+      <v-card-title>Membership</v-card-title>
+      <v-card-text>
+        <v-row class="mt-6">
+          <v-col
+            cols="6"
+            v-for="member in organization.users"
+            :key="member._id"
+          >
+            <v-card
+              class="mx-auto"
+              variant="elevated"
+              link
+              @click.stop="goToUserHome(member)"
+            >
+              <template #title>
+                <div class="text-h6">{{ member.name }} <span class="text-body-2"></span></div>
+              </template>
+              <template v-slot:prepend>
+                <repr-viewer :curation="member.curation"/>
+              </template>
+            </v-card>
+          </v-col>
         </v-row>
       </v-card-text>
+    </v-card>
+    <v-card v-if="organization.type === 'Private'">
+      <v-card-subtitle>
+        membership not visible in Private organizations
+      </v-card-subtitle>
     </v-card>
   </v-container>
   <edit-promotion-dialog v-if="userCurrentOrganization" ref="editPromotionDialog" collection="organizations" :item-id="organization._id" :item-name="organization.name"></edit-promotion-dialog>
@@ -85,27 +119,7 @@ export default {
     promotedItemsDetail: [],
   }),
   async mounted() {
-    this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
-    if (!this.targetOrgDetail) {
-      this.$router.push({ name: 'PageNotFound' });
-    }
-    if (this.targetOrgDetail.type === 'Personal') {
-      // if using viewing a 'personal' org, this is the wrong place. Send to the user home page which shows the personal org instead.
-      this.$router.push({ name: 'UserHome', params: { slug: this.targetOrgDetail.owner.username } });
-      return;
-    }
-    const wsList = await Workspace.find({
-      query: {
-        "organization.refName": this.organization.refName,
-        publicInfo: 'true',
-      }
-    })
-    this.publicWorkspacesDetail = wsList.data;
-    if (this.targetOrgDetail.type==='Open') {
-      this.natureDetails = `An open organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
-    } else {
-      this.natureDetails = `A private organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
-    }
+    await this.refresh();
   },
   computed: {
     ...mapState('auth', ['user']),
@@ -123,6 +137,9 @@ export default {
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.organization.refName, wsname: workspace.refName } });
     },
+    async goToUserHome(member) {
+      this.$router.push({ name: 'UserHome', params: { slug: member.username } });
+    },
     async openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
@@ -130,11 +147,43 @@ export default {
       const date = new Date(number);
       return date.toDateString();
     },
+    async refresh() {
+      this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
+      if (!this.targetOrgDetail) {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+      if (this.targetOrgDetail.type === 'Personal') {
+        // if using viewing a 'personal' org, this is the wrong place. Send to the user home page which shows the personal org instead.
+        this.$router.push({ name: 'UserHome', params: { slug: this.targetOrgDetail.owner.username } });
+        return;
+      }
+      const wsList = await Workspace.find({
+        query: {
+          "organization.refName": this.organization.refName,
+          publicInfo: 'true',
+        }
+      })
+      this.publicWorkspacesDetail = wsList.data;
+      if (this.targetOrgDetail.type==='Open') {
+        this.natureDetails = `An open organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+      } else {
+        this.natureDetails = `A private organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+      }
+      // mimic a list of curations for the membership for easier display
+      for (const index in this.targetOrgDetail.users) {
+        const fakeCuration = {
+          _id: this.targetOrgDetail.users[index]._id,
+          collection: 'users',
+          representativeFile: null,
+        }
+        this.targetOrgDetail.users[index].curation = fakeCuration
+      }
+    }
   },
   watch: {
     async '$route'(to, from) {
       if (to.name === 'OrganizationHome') {
-        this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
+        await this.refresh();
       }
     }
   }

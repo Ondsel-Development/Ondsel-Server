@@ -210,6 +210,7 @@ export const organization = (app) => {
     after: {
       all: [
       ],
+      find: [removeUsersOnPublicQueryOnPrivateOrg],
       get: [iff(isProvider('external'), isUserMemberOfOrganization)],
       create: [
         assignOrganizationIdToUser,
@@ -248,6 +249,21 @@ const detectOrgRefNameInId = async context => {
   }
   return context;
 }
+
+const removeUsersOnPublicQueryOnPrivateOrg = async context => {
+  // called in AFTER on FIND
+  if (context.publicDataOnly) {
+    for (const index in context.result.data) {
+      const item = context.result.data[index];
+      if (item.type !== OrganizationTypeMap.open) {
+        if (item.users) {
+          context.result.data[index].users = [];
+        }
+      }
+    }
+  }
+}
+
 
 const isOrganizationReadyToDelete = async context => {
   const organization = await context.service.get(context.id);
