@@ -349,7 +349,6 @@ export default {
     },
     async openEditLongDescriptionMdDialog() {
       this.isOrgChangeLongDescriptionMdDialogActive = true;
-      this.$refs.editLongDescriptionMdDialog.$data.newTags = this.organization.curation?.tags || [];
       this.$refs.editLongDescriptionMdDialog.$data.dialog = true;
     },
     async saveLongDescriptionMdDialog() {
