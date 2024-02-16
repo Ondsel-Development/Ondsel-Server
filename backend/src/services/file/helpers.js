@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import {BadRequest} from "@feathersjs/errors";
 import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
+import * as http from "http";
+import * as https from "https";
 
 export const feedWorkspaceAndDirectory = async context => {
   const { data, params } = context;
@@ -96,6 +98,80 @@ export const ensureUniqueCustFileName = async context => {
       if (result) {
         throw new BadRequest(`filename "${proposedCustFileName}" already found in directory [${result._id.toString()}]`)
       }
+    }
+  }
+  return context;
+}
+
+export const checkForReadme = async context => {
+  // if a /README.md file is uploaded (CREATE), then attempt to alter the workspaces curation.longDescriptionMd.
+  // fail gracefully if the download fails
+  const newFile = context.result;
+  if (newFile.custFileName === 'README.md' && newFile.directory.name === '/') {
+    try {
+      const workspaceService = context.app.service('workspaces');
+      const uploadService = context.app.service('upload');
+      const currentVersion = newFile.versions.find((v) => v._id.equals(newFile.currentVersionId));
+      const id = currentVersion.uniqueFileName;
+      const detail = await uploadService.get(id);
+      const url = detail.url;
+      const client = url.toString().startsWith("https:") ? https : http;
+      await client.get(url, (res) => {
+        let rawContent = '';
+        res.on('data', (chunk) => {
+          if (rawContent.length < 3000) {
+            rawContent += chunk;
+          }
+        });
+        res.on('end', async () => {
+          let markdown = rawContent.toString().trim();
+          if (markdown.length > 2000) {
+            markdown = markdown.substring(0, 2000) + "...";
+          }
+          const workspace = await workspaceService.get(newFile.workspace._id);
+          let curation = workspace.curation;
+          curation.longDescriptionMd = markdown;
+          await workspaceService.patch(
+            workspace._id,
+            {
+              curation: curation
+            }
+          )
+        });
+      });
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+  return context;
+}
+
+export const checkForUpdatedReadme = async context => {
+  // if a /README.md file is updated (PATCH) with a new version, then attempt to alter the workspaces curation.longDescriptionMd.
+  if (!context.beforePatchCopy.currentVersionId.equals(context.result.currentVersionId)) {
+    // only trigger if the current version has changed; if so, then reuse the checkForReadme function as it already
+    // focuses on the current version.
+    return await checkForReadme(context);
+  }
+  return context;
+}
+
+export const checkForDeletedReadme = async context => {
+  const deletedFile = context.result;
+  if (deletedFile.custFileName === 'README.md' && deletedFile.directory.name === '/') {
+    try {
+      const workspaceService = context.app.service('workspaces');
+      const workspace = await workspaceService.get(deletedFile.workspace._id);
+      let curation = workspace.curation;
+      curation.longDescriptionMd = "";
+      await workspaceService.patch(
+        workspace._id,
+        {
+          curation: curation
+        }
+      )
+    } catch (e) {
+      console.log(e.message);
     }
   }
   return context;

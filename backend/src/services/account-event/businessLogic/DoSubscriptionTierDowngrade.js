@@ -6,6 +6,7 @@ import {
   verifyBalanced
 } from "../../../accounting.js";
 import {LedgerMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
+import { sendNotificationToSlack } from '../../../slack-notifications.js';
 
 
 export async function DoSubscriptionTierDowngrade(context, user) {
@@ -43,6 +44,10 @@ export async function DoSubscriptionTierDowngrade(context, user) {
   //
   context.data.success = true;
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
+  await sendNotificationToSlack(
+    context,
+    `🚨 Tier Downgrade Alert! 🚨\n\nUh-oh! 🙊 User (user: *${user.name}*, email: *${user.email}*) user downgrade tier from *${user.tier}* to *${detail.newTier}*`
+  )
 }
 
 function SubscriptionTierDowngradeVerification(context, user) {

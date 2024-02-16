@@ -1,9 +1,9 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import axios from 'axios';
 import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
+import { sendCreateAccountNotificationToSlack } from '../../slack-notifications.js';
 import {
   userDataValidator,
   userPatchValidator,
@@ -190,7 +190,7 @@ export const user = (app) => {
         removeVerification(),
         createDefaultOrganization,
         createSampleModels,
-        sendNotificationToSlack,
+        sendCreateAccountNotificationToSlack,
       ],
       patch: [
         distributeUserSummariesHook
@@ -302,23 +302,6 @@ const createDefaultOrganization = async context => {
   return context;
 }
 
-
-const sendNotificationToSlack = async context => {
-  const webhookUrl = context.app.get('slackWebhookUrl');
-  if (webhookUrl) {
-    axios({
-      method: 'post',
-      url: webhookUrl,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        text: `🎉 New User Alert! 🎉\n\nName: *${context.result.name}*\nEmail: *${context.result.email}*`
-      }
-    });
-  }
-  return context;
-}
 
 const detectUsernameInId = async context => {
   const id = context.id.toString();
