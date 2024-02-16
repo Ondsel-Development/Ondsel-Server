@@ -51,7 +51,7 @@ export async function DoInitialSubscriptionPurchase(context, user) {
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
   await sendNotificationToSlack(
     context,
-    `🎉 New Paid Customer Alert! 🎉\n\nUser (name: *${user.name}*, email: *${user.email}*) user just upgraded to a paid plan!\nPlan: *${detail.newTier}*`
+    `🌟 Exciting News! New Paying Member Alert! 🌟\n\nUser (name: *${user.name}*, email: *${user.email}*) user just upgraded to a paid plan!\nPlan: *${detail.newTier}*`
   )
 }
 

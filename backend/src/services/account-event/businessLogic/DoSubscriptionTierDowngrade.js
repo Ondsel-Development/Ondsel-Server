@@ -46,7 +46,7 @@ export async function DoSubscriptionTierDowngrade(context, user) {
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
   await sendNotificationToSlack(
     context,
-    `🎉 Subscription downgrade Alert! 🎉\n\nUser (user: *${user.name}*, email: *${user.email}*) user downgrade tier from *${user.tier}* to *${detail.newTier}*`
+    `🚨 Tier Downgrade Alert! 🚨\n\nUh-oh! 🙊 User (user: *${user.name}*, email: *${user.email}*) user downgrade tier from *${user.tier}* to *${detail.newTier}*`
   )
 }
 
