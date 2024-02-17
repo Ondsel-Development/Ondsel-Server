@@ -170,7 +170,7 @@
               </v-btn>
               <v-spacer></v-spacer>
               <EditTagsDialog
-                :is-active="isWorkspaceChangeNameDescDialogActive"
+                :is-active="isEditTagsDialogActive"
                 :tagList="workspace.curation?.tags || []"
                 ref="editTagsDialog"
                 @save-tags="saveTags"

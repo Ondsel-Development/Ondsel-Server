@@ -45,7 +45,11 @@ export default {
         case 'workspaces':
           workspace = await this.getWorkspaceByIdPublic(curation._id);
           org = await this.getOrgByIdOrNamePublic(workspace.organizationId);
-          this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
+          if (org.type === 'Personal') {
+            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: org.owner.username, wsname: workspace.refName } });
+          } else {
+            this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
+          }
           break;
         case 'organizations':
           org = await this.getOrgByIdOrNamePublic(curation._id);

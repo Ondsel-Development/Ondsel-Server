@@ -283,6 +283,9 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         case 'organizations':
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
+        case 'users':
+          isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
+          break;
         case 'shared-models':
           isOpenEnoughForKeywords = context.beforePatchCopy.canViewModel && !context.beforePatchCopy.isSystemGenerated; // TODO: correct?
           break;

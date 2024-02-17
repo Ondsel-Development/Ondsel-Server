@@ -77,7 +77,6 @@ export default {
           mdiIcon = 'mdi-account';
           break;
         default:
-          console.log("notice: " + collection);
           break;
       }
       return mdiIcon;
