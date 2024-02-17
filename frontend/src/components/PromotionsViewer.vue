@@ -5,42 +5,27 @@
       v-for="entry in promoted"
       :key="entry.curation._id"
     >
-      <v-card
+      <v-sheet
         class="mx-auto"
-        variant="elevated"
         link
         @click.stop="goToPromoted(entry.curation)"
       >
-        <v-card-title>
-          <p class="text-blue-accent-1">{{entry.notation.message}}</p>
-        </v-card-title>
-        <v-card-subtitle>
-          {{translateCollection(entry.curation.collection)}}
-        </v-card-subtitle>
         <v-card-text>
-          <v-row>
-            <v-col cols="4">
-              <repr-viewer :curation="entry.curation"/>
-            </v-col>
-            <v-col cols="8">
-              <p class="text-h6">{{ entry.curation.name }}</p>
-              <span class="text-body-2">{{ entry.curation.description }}</span>
-            </v-col>
-          </v-row>
+          <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
         </v-card-text>
-      </v-card>
+      </v-sheet>
     </v-col>
   </v-row>
 </template>
 
 <script>
 
-import ReprViewer from "@/components/ReprViewer.vue";
 import {mapActions} from "vuex";
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 
 export default {
   name: "PromotionsViewer",
-  components: {ReprViewer},
+  components: {OnePromotionSheet},
   props: {
     promoted: Array,
   },
@@ -72,21 +57,6 @@ export default {
           break;
       }
     },
-    translateCollection(collection) {
-      let tr = '';
-      switch (collection) {
-        case 'workspaces':
-          tr = 'an open workspace';
-          break;
-        case 'organizations':
-          tr = 'an organization';
-          break;
-        case 'users':
-          tr = 'an individual user';
-          break;
-      }
-      return tr;
-    }
   },
 }
 </script>

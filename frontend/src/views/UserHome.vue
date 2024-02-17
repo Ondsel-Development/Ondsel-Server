@@ -38,22 +38,13 @@
             v-for="workspace in publicWorkspaces"
             :key="workspace._id"
           >
-            <v-card
+            <v-sheet
               class="mx-auto"
-              variant="elevated"
               link
               @click.stop="goToWorkspaceHome(workspace)"
             >
-              <template #title>
-                <div class="text-h6">{{ workspace.name }} <span class="text-body-2">({{ workspace.description }})</span></div>
-              </template>
-              <template #subtitle>
-                <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
-              </template>
-              <template v-slot:prepend>
-                <repr-viewer :curation="workspace.curation"/>
-              </template>
-            </v-card>
+              <one-promotion-sheet :curation="workspace.curation" />
+            </v-sheet>
           </v-col>
         </v-row>
       </v-card-text>
@@ -69,12 +60,13 @@ import ReprViewer from "@/components/ReprViewer.vue";
 import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 
 const { Workspace } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'UserHome',
-  components: {PromotionsViewer, EditPromotionDialog, ReprViewer},
+  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     userSumDetail: {name: 'locating...', username: ''},
     organizationDetail: {},

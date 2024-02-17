@@ -38,22 +38,13 @@
             v-for="workspace in publicWorkspaces"
             :key="workspace._id"
           >
-            <v-card
+            <v-sheet
               class="mx-auto"
-              variant="elevated"
               link
               @click.stop="goToWorkspaceHome(workspace)"
             >
-              <template #title>
-                <div class="text-h6">{{ workspace.name }} <span class="text-body-2">({{ workspace.description }})</span></div>
-              </template>
-              <template #subtitle>
-                <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
-              </template>
-              <template v-slot:prepend>
-                <repr-viewer :curation="workspace.curation"/>
-              </template>
-            </v-card>
+              <one-promotion-sheet :curation="workspace.curation"></one-promotion-sheet>
+            </v-sheet>
           </v-col>
         </v-row>
       </v-card-text>
@@ -73,19 +64,14 @@
             v-for="member in organization.users"
             :key="member._id"
           >
-            <v-card
+            <v-sheet
               class="mx-auto"
               variant="elevated"
               link
               @click.stop="goToUserHome(member)"
             >
-              <template #title>
-                <div class="text-h6">{{ member.name }} <span class="text-body-2"></span></div>
-              </template>
-              <template v-slot:prepend>
-                <repr-viewer :curation="member.curation"/>
-              </template>
-            </v-card>
+              <one-promotion-sheet :curation="member.curation"></one-promotion-sheet>
+            </v-sheet>
           </v-col>
         </v-row>
       </v-card-text>
@@ -106,12 +92,13 @@ import ReprViewer from "@/components/ReprViewer.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {PromotionsViewer, EditPromotionDialog, ReprViewer},
+  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
@@ -171,9 +158,13 @@ export default {
       }
       // mimic a list of curations for the membership for easier display
       for (const index in this.targetOrgDetail.users) {
+        const user = this.targetOrgDetail.users[index];
+        let description = user.isAdmin ? 'administrator' : 'member';
         const fakeCuration = {
-          _id: this.targetOrgDetail.users[index]._id,
+          _id: user._id,
           collection: 'users',
+          name: user.name,
+          description: description,
           representativeFile: null,
         }
         this.targetOrgDetail.users[index].curation = fakeCuration
