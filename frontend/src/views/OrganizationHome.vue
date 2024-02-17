@@ -2,12 +2,32 @@
   <v-container>
     <v-row class="align-center">
       <v-col cols="5">
-        Organization {{ organization.name }}
-        <v-icon
-          v-if="userCurrentOrganization"
-          size="small"
-          @click.stop="openEditPromotionDialog()"
-        >mdi-bullhorn</v-icon>
+        <span class="text-h6">Organization {{ organization.name }} &nbsp;</span>
+        <span v-if="promotionPossible">
+          <v-icon
+            size="small"
+            @click.stop="openEditPromotionDialog()"
+            id="promotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            activator="#promotionButton"
+          >should {{selfPronoun}} promote this organization</v-tooltip>
+        </span>
+        <span v-else>
+          <v-icon
+            size="small"
+            color="grey"
+            id="disabledPromotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            v-if="!userCurrentOrganization"
+            activator="#disabledPromotionButton"
+          >must be logged in to promote anything</v-tooltip>
+          <v-tooltip
+            v-if="iAmThisOrg"
+            activator="#disabledPromotionButton"
+          >{{selfPronoun}} cannot self-promote {{selfName}}</v-tooltip>
+        </span>
         <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
         <p class="text-sm-body-2"><i>{{natureDetails}}</i></p>
       </v-col>
@@ -112,9 +132,11 @@ export default {
     ...mapState('auth', ['user']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
+    ...mapGetters('app', ['selfPronoun', 'selfName']),
     targetOrgName: vm => vm.$route.params.slug,
     organization: vm => vm.targetOrgDetail,
     iAmThisOrg: vm => (vm.userCurrentOrganization !== undefined) && (vm.userCurrentOrganization?.refName === vm.targetOrgName),
+    promotionPossible: vm => vm.userCurrentOrganization && !vm.iAmThisOrg,
     promotedItems: vm => vm.promotedItemsDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
     longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),

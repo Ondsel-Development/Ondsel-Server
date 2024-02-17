@@ -102,7 +102,7 @@ export default {
     targetUsername: vm => vm.$route.params.slug,
     userSum: vm => vm.userSumDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
-    iAmThisUser: vm => vm.loggedInUser?.user?.username === vm.$route.params.slug,
+    iAmThisUser: vm => vm.userCurrentOrganization?.type === 'Personal' && vm.loggedInUser?.user?.username === vm.$route.params.slug,
     promotionPossible: vm => vm.userCurrentOrganization && !vm.iAmThisUser,
     organization: vm => vm.organizationDetail,
     longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),
