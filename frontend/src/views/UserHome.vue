@@ -2,12 +2,32 @@
   <v-container>
     <v-row class="align-center">
       <v-col cols="5">
-        <div class="text-h6">User {{ userSum.name }}</div>
-        <v-icon
-          v-if="userCurrentOrganization"
-          size="small"
-          @click.stop="openEditPromotionDialog()"
-        >mdi-bullhorn</v-icon>
+        <span class="text-h6">User {{ userSum.name }} &nbsp;</span>
+        <span v-if="promotionPossible">
+          <v-icon
+            size="small"
+            @click.stop="openEditPromotionDialog()"
+            id="promotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            activator="#promotionButton"
+          >should {{selfPronoun}} promote this user</v-tooltip>
+        </span>
+        <span v-else>
+          <v-icon
+            size="small"
+            color="grey"
+            id="disabledPromotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            v-if="!userCurrentOrganization"
+            activator="#disabledPromotionButton"
+          >must be logged in to promote anything</v-tooltip>
+          <v-tooltip
+            v-if="iAmThisUser"
+            activator="#disabledPromotionButton"
+          >cannot promote oneself</v-tooltip>
+        </span>
         <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
       </v-col>
       <v-col cols="7">
@@ -56,7 +76,6 @@
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
-import ReprViewer from "@/components/ReprViewer.vue";
 import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
@@ -66,7 +85,7 @@ const { Workspace } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'UserHome',
-  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
+  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog},
   data: () => ({
     userSumDetail: {name: 'locating...', username: ''},
     organizationDetail: {},
@@ -79,10 +98,12 @@ export default {
     ...mapState('auth', ['user']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
+    ...mapGetters('app', ['selfPronoun', 'selfName']),
     targetUsername: vm => vm.$route.params.slug,
     userSum: vm => vm.userSumDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
     iAmThisUser: vm => vm.loggedInUser?.user?.username === vm.$route.params.slug,
+    promotionPossible: vm => vm.userCurrentOrganization && !vm.iAmThisUser,
     organization: vm => vm.organizationDetail,
     longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),
   },

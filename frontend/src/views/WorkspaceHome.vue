@@ -62,11 +62,11 @@
         <v-tooltip
           v-if="!currentOrganization"
           activator="#disabledPromotionButton"
-        >Must be logged in to promote anything.</v-tooltip>
+        >must be logged in to promote anything</v-tooltip>
         <v-tooltip
           v-if="defaultWorkspaceFlag"
           activator="#disabledPromotionButton"
-        >Cannot promote a default workspace.</v-tooltip>
+        >cannot promote a default workspace</v-tooltip>
       </span>
     </span>
     <v-row class="mt-10">
