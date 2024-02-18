@@ -192,6 +192,18 @@ export const model = (app) => {
 const startObjGeneration = async (context) => {
   await canUserUpdateModel(context);
 
+  const model = await context.service.get(context.id);
+  if (!model.isObjGenerated) {
+    if (model.file.currentVersion.uniqueFileName.split('.').pop().toUpperCase() === 'FCSTD') {
+      await context.app.service('upload').copy(model.file.currentVersion.uniqueFileName, `${model._id.toString()}_generated.FCSTD`);
+      context.data.shouldStartObjGeneration = false;
+      context.data.latestLogErrorIdForObjGenerationCommand = null;
+      context.data.isObjGenerationInProgress = false;
+      context.data.isObjGenerated = true;
+      return context;
+    }
+  }
+
   const { data, params } = context;
   let fileName = null
 
