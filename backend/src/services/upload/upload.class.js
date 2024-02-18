@@ -7,7 +7,7 @@ import { GetObjectCommand, S3Client, HeadObjectCommand, CopyObjectCommand } from
 import { BadRequest } from '@feathersjs/errors'
 
 const customerFileNameRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.([a-z]+)$/i;
-const generatedObjRegex = /^[0-9a-fA-F]{24}_generated\.(:?OBJ|BREP)$/;
+const generatedObjRegex = /^[0-9a-fA-F]{24}_generated\.(:?OBJ|BREP|FCSTD)$/;
 const generatedThumbnailRegex = /^[0-9a-fA-F]{24}_thumbnail\.PNG$/;
 const exportedFileRegex = /^[0-9a-fA-F]{24}_export\.(?:fcstd|obj|step|stl)$/i;
 
