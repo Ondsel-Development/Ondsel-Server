@@ -5,7 +5,8 @@ export const PropertyType =
     Number : 3,
     Boolean : 4,
     Percent : 5,
-    Color : 6
+    Color : 6,
+    Angle: 7
 };
 
 export class Property
@@ -58,5 +59,26 @@ export class PropertyGroup
             cloned.AddProperty (property.Clone ());
         }
         return cloned;
+    }
+
+    ConvertPropertiesWrtToApi()
+    {
+        const data = {};
+        for (let prp of this.properties) {
+            let unit = '';
+            let type = '';
+            if (prp.type === PropertyType.Number) {
+                type = 'length';
+                unit = 'mm';
+            } else if (prp.type === PropertyType.Angle) {
+                type = 'angle';
+                unit = 'deg';
+            }
+            data[prp.name] = {
+                value: prp.value,
+                unit: unit
+            }
+        }
+        return data;
     }
 }

@@ -8,6 +8,7 @@ export class Model extends ModelObject3D
     {
         super ();
         this.objects = [];
+        this.propertyBagObject = null;
     }
 
     AddObject(object) {

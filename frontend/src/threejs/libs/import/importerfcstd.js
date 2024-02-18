@@ -8,10 +8,10 @@ import { Property, PropertyGroup, PropertyType } from '../model/property.js';
 import * as fflate from 'fflate';
 
 const DocumentInitResult =
-{
-    Success : 0,
-    NoDocumentXml : 1
-};
+  {
+      Success : 0,
+      NoDocumentXml : 1
+  };
 
 
 class FreeCadObject
@@ -80,8 +80,11 @@ class FreeCadDocument
         return objectList;
     }
 
-    IsSupportedType (type)
+    IsSupportedType (type, name)
     {
+        if (name === 'PropertyBag') {
+            return true;
+        }
         if (!type.startsWith ('Part::') && !type.startsWith ('PartDesign::')) {
             return false;
         }
@@ -119,7 +122,7 @@ class FreeCadDocument
             for (let objectElement of objectElements) {
                 let name = objectElement.getAttribute ('name');
                 let type = objectElement.getAttribute ('type');
-                if (!this.IsSupportedType (type)) {
+                if (!this.IsSupportedType (type, name)) {
                     continue;
                 }
                 let object = new FreeCadObject (name, type);
@@ -231,6 +234,11 @@ class FreeCadDocument
                 if (propertyValue !== null && propertyValue.length > 0) {
                     property = new Property (PropertyType.Boolean, propertyName, propertyValue === 'true');
                 }
+            } else if (propertyType === 'App::PropertyAngle') {
+                let propertyValue = this.GetFirstChildValue (propertyElement, 'Float', 'value');
+                if (propertyValue !== null && propertyValue.length > 0) {
+                    property = new Property (PropertyType.Angle, propertyName, parseInt (propertyValue));
+                }
             } else if (propertyType === 'App::PropertyInteger') {
                 let propertyValue = this.GetFirstChildValue (propertyElement, 'Integer', 'value');
                 if (propertyValue !== null && propertyValue.length > 0) {
@@ -277,6 +285,13 @@ class FreeCadDocument
         }
         return childObjects[0].getAttribute (childAttribute);
     }
+
+    GetPropertyBagObject() {
+        for (let [key, value] of this.objectData) {
+            if (key === 'PropertyBag') return value
+        }
+        return null;
+    }
 }
 
 export class ImporterFcstd
@@ -290,12 +305,12 @@ export class ImporterFcstd
     }
 
     SetError(error) {
-      console.log(error);
+        console.log(error);
     }
 
     CanImportExtension (extension)
     {
-      return extension.toUpperCase() === 'FCSTD';
+        return extension.toUpperCase() === 'FCSTD';
     }
 
     GetUpDirection ()
@@ -303,14 +318,14 @@ export class ImporterFcstd
         // return Direction.Z;
     }
 
-	ClearContent ()
-	{
+    ClearContent ()
+    {
         if (this.worker !== null) {
             this.worker.terminate ();
             this.worker = null;
         }
         this.document = null;
-	}
+    }
 
     ResetContent ()
     {
@@ -319,13 +334,13 @@ export class ImporterFcstd
     }
 
     LoadFile(fileUrl, callback) {
-      this.file = fileUrl;
-      this.ResetContent();
-      fetch(fileUrl).then(async response => {
-        let buffer = await response.arrayBuffer ();
-        let fileBuffer = new Uint8Array (buffer);
-        this.ImportContent(fileBuffer, callback);
-      });
+        this.file = fileUrl;
+        this.ResetContent();
+        fetch(fileUrl).then(async response => {
+            let buffer = await response.arrayBuffer ();
+            let fileBuffer = new Uint8Array (buffer);
+            this.ImportContent(fileBuffer, callback);
+        });
     }
 
     ImportContent (fileContent, onFinish)
@@ -344,10 +359,11 @@ export class ImporterFcstd
         let objectsToConvert = this.document.GetObjectListToConvert ();
         if (objectsToConvert.length === 0) {
             this.SetError ('No importable object found.');
-            onFinish ();
+            onFinish (this.model);
             return;
         }
 
+        this.model.propertyBagObject = this.document.GetPropertyBagObject();
         this.ConvertObjects (objectsToConvert, onFinish);
     }
 
@@ -412,18 +428,18 @@ export class ImporterFcstd
 
         let mainObject = new THREE.Object3D();
         for (let resultMesh of resultContent.meshes) {
-          let geometry = new THREE.BufferGeometry();
+            let geometry = new THREE.BufferGeometry();
 
-          geometry.setAttribute('position', new THREE.Float32BufferAttribute(resultMesh.attributes.position.array, 3));
-          if (resultMesh.attributes.normal) {
-            geometry.setAttribute('normal', new THREE.Float32BufferAttribute(resultMesh.attributes.normal.array, 3));
-          }
-          const index = Uint32Array.from(resultMesh.index.array);
-          geometry.setIndex(new THREE.BufferAttribute(index, 1));
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(resultMesh.attributes.position.array, 3));
+            if (resultMesh.attributes.normal) {
+                geometry.setAttribute('normal', new THREE.Float32BufferAttribute(resultMesh.attributes.normal.array, 3));
+            }
+            const index = Uint32Array.from(resultMesh.index.array);
+            geometry.setIndex(new THREE.BufferAttribute(index, 1));
 
-          let material = new THREE.MeshPhongMaterial({color: object.color})
-          const mesh = new THREE.Mesh (geometry, material);
-          mainObject.add(mesh);
+            let material = new THREE.MeshPhongMaterial({color: object.color})
+            const mesh = new THREE.Mesh (geometry, material);
+            mainObject.add(mesh);
         }
         object3d.SetObject3d(mainObject);
 
