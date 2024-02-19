@@ -196,7 +196,16 @@ const startObjGeneration = async (context) => {
   const model = await context.service.get(modelId);
   if (!model.isObjGenerated) {
     if (model.file.currentVersion.uniqueFileName.split('.').pop().toUpperCase() === 'FCSTD') {
-      await context.app.service('upload').copy(model.file.currentVersion.uniqueFileName, `${model._id.toString()}_generated.FCSTD`);
+      const destFileName = `${model._id.toString()}_generated.FCSTD`;
+      try {
+        await context.app.service('upload').copy(model.file.currentVersion.uniqueFileName, destFileName);
+      } catch(e) {
+        if (e.name === 'BadRequest' && e.message.includes("already exists")) {
+          console.log(`minor log: file ${destFileName} already uploaded`);
+        } else {
+          throw e;
+        }
+      }
       context.data.shouldStartObjGeneration = false;
       context.data.latestLogErrorIdForObjGenerationCommand = null;
       context.data.isObjGenerationInProgress = false;
