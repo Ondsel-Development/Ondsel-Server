@@ -192,7 +192,8 @@ export const model = (app) => {
 const startObjGeneration = async (context) => {
   await canUserUpdateModel(context);
 
-  const model = await context.service.get(context.id);
+  const modelId = context.id ? context.id : context.result._id; // context.id for PATCH, context.result._id for CREATE
+  const model = await context.service.get(modelId);
   if (!model.isObjGenerated) {
     if (model.file.currentVersion.uniqueFileName.split('.').pop().toUpperCase() === 'FCSTD') {
       await context.app.service('upload').copy(model.file.currentVersion.uniqueFileName, `${model._id.toString()}_generated.FCSTD`);
@@ -212,8 +213,8 @@ const startObjGeneration = async (context) => {
   } else if (context.data.fileId) {
     const file = await context.app.service('file').get(context.data.fileId);
     fileName = file.currentVersion.uniqueFileName;
-  } else if (context.id && !context.data.uniqueFileName) {
-    const result = await context.service.get(context.id);
+  } else if (modelId && !context.data.uniqueFileName) {
+    const result = await context.service.get(modelId);
     fileName = result.uniqueFileName;
   } else {
     throw new BadRequest('Not able to find filename')
@@ -225,7 +226,7 @@ const startObjGeneration = async (context) => {
       'Content-Type': 'application/json'
     },
     data: {
-      id: context.id || context.result._id.toString(),
+      id: modelId || context.result._id.toString(),
       fileName: fileName,
       command: 'CONFIGURE_MODEL',
       accessToken: params.authentication?.accessToken || params.accessToken,
