@@ -171,7 +171,7 @@ export default {
       'getFileByIdPublic',
     ]),
     async clickedFile(fileSubDocs, filePath) {
-      let file = await this.getFileByIdPublic(fileSubDocs._id);
+      let file = this.publicView ? await this.getFileByIdPublic(fileSubDocs._id) : null;
       if (!file) {
         await File.get(fileSubDocs._id);
         file = File.getFromStore(fileSubDocs._id);
