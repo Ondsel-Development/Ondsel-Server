@@ -19,6 +19,10 @@ export function buildNewCurationForOrganization(org) {
 
 export const afterCreateHandleOrganizationCuration = async (context) => {
   // first, set up the curation
+  if (context.result.curation) {
+    // this will happen for a Personal type org
+    return context;
+  }
   context.result.curation = buildNewCurationForOrganization(context.result);
   const newKeywordRefs = await generateAndApplyKeywords(context, context.result.curation);
   context.result.curation.keywordRefs = newKeywordRefs;

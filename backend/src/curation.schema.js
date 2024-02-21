@@ -234,11 +234,14 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         changeFound = true;
       }
       //
-      // name (pulled from parent)
+      // name (pulled from parent except for personal orgs)
       //
-      if (context.data.name && context.beforePatchCopy.name !== context.data.name) {
+      if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
         needPatch = true;
         newCuration.name = context.data.name;
+      }
+      if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
+        needPatch = true;
       }
       //
       // description (pulled from parent, usually)

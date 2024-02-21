@@ -50,10 +50,13 @@ export const organizationValidator = getValidator(organizationSchema, dataValida
 export const organizationResolver = resolve({
   constraint: virtual(async (message, _context) => {
     if (message.owner) {
-      const user = await _context.app.service('users').get(
-        message.owner._id,
-      );
-      return getConstraint(user);
+      try {
+        const user = await _context.app.service('users').get(
+          message.owner._id,
+        );
+        return getConstraint(user);
+      } catch (error) {
+      }
     }
     return _.get(subscriptionConstraintMap, SubscriptionTypeMap.unverified)
   })
@@ -62,7 +65,7 @@ export const organizationResolver = resolve({
 export const organizationExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type'], {
+export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type', 'curation'], {
   $id: 'OrganizationData'
 })
 export const organizationDataValidator = getValidator(organizationDataSchema, dataValidator)

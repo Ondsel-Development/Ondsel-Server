@@ -31,6 +31,7 @@ import {
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
 import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
+import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -176,6 +177,7 @@ export const user = (app) => {
             "verifyShortToken",
             "verifyToken",
           ),
+          specialUserOrgCurationHandler,
           schemaHooks.validateData(userPatchValidator),
           uniqueUserPatchValidator,
         ),
@@ -288,7 +290,12 @@ const createDefaultOrganization = async context => {
   const organizationService = context.app.service('organizations');
   const workspaceService = context.app.service('workspaces');
   const organization = await organizationService.create(
-    { name: 'Personal', refName: context.result._id.toString(), type: OrganizationTypeMap.personal },
+    {
+      name: 'Personal',
+      refName: context.result._id.toString(),
+      type: OrganizationTypeMap.personal,
+      curation: buildNewCurationForUser(context.result),
+    },
     { user: context.result }
   );
   const workspace = await workspaceService.create(
