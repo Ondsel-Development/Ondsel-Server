@@ -42,6 +42,14 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="openEditPromotionDialog()">
+      <v-icon>mdi-bullhorn</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Should {{selfPronoun}} promote this shared link</v-tooltip>
+    </v-btn>
+
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded"/>
   <div class="text-center">
@@ -149,7 +157,7 @@
   >
     <ModelInfo ref="modelInfoDrawer" :shared-model="sharedModel"/>
   </v-navigation-drawer>
-
+  <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="shared-models" :item-id="sharedModel?._id" :item-name="name"></edit-promotion-dialog>
 </template>
 
 <script>
@@ -161,12 +169,13 @@ import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
 import ModelInfo from '@/components/ModelInfo.vue';
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: {ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo },
+  components: {EditPromotionDialog, ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo },
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -179,6 +188,7 @@ export default {
     error: '',
     isShareLinkDialogActive: false,
     isDrawerOpen: false,
+    name: '',
   }),
   async created() {
     const shareModelId = this.$route.params.id;
@@ -204,11 +214,13 @@ export default {
       } else {
         this.model = this.sharedModel.model;
       }
+      this.name = this.model.file?.custFileName || '';
     }
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
     ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('app', ['selfPronoun', 'selfName', 'currentOrganization']),
     isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
   },
   methods: {
@@ -287,6 +299,9 @@ export default {
     async modelInfoDrawerClicked() {
       this.isDrawerOpen = !this.isDrawerOpen;
       await this.$refs.modelInfoDrawer.fetchData();
+    },
+    openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
     },
   },
   watch: {

@@ -49,7 +49,7 @@
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 
-const { Organization } = models.api;
+const { Organization, SharedModel } = models.api;
 
 export default {
   name: 'EditPromotionDialog',
@@ -132,6 +132,16 @@ export default {
             _id: this.itemId,
             collection: this.collection,
             name: obj.name,
+            description: obj.description || '',
+          };
+          await this.applyChange(decision, curation);
+          break;
+        case 'shared-models':
+          obj = await SharedModel.get(this.itemId);
+          curation = {
+            _id: this.itemId,
+            collection: this.collection,
+            name: this.itemName || obj.description || '',
             description: obj.description || '',
           };
           await this.applyChange(decision, curation);
