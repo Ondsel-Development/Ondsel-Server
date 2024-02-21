@@ -247,9 +247,9 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         needPatch = true;
         newCuration.description = context.data.description;
       }
-      if (context.data.curation.description && context.beforePatchCopy.curation.description !== newCuration.description) { // direct set
+      if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
         needPatch = true;
-        newCuration.description = context.data.curation.description;
+        newCuration.description = context.data.curation?.description || '';
       }
       //
       // long description
@@ -260,7 +260,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // tags
       //
-      if (patchCuration.tags && !_.isEqual(originalCuration.tags, newCuration.tags)) {
+      if (!_.isEqual(originalCuration.tags, newCuration.tags)) {
         changeFound = true;
       }
       //

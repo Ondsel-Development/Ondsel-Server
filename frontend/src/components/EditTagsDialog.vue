@@ -54,7 +54,7 @@ export default {
   props: {
     tagList: {
       Type: Array,
-      default: false,
+      default: [],
     }
   },
   emits: ['saveTags'],
