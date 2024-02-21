@@ -16,7 +16,7 @@ export async function addCurationToAllOrganizationsCommand(app) {
     if (org.curation && overwriteAnywayWithNull === false) {
       console.log(`  >>> org ${org.refName} ${org._id} is GOOD already`)
     } else {
-      let newCuration = buildNewCurationForOrganization(ws);
+      let newCuration = buildNewCurationForOrganization(org);
       if (overwriteAnywayWithNull) {
         newCuration = null
       }
