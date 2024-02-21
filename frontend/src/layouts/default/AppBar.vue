@@ -28,6 +28,13 @@
       Login
     </v-btn>
 
+    <v-btn
+      icon
+      @click="$refs.searchPopupDialog.$data.dialog = true;"
+    >
+      <v-icon>mdi-magnify</v-icon>
+    </v-btn>
+
     <v-menu
       v-if="loggedInUser"
       v-model="menu"
@@ -74,37 +81,40 @@
       </v-card>
     </v-menu>
 
-    </v-app-bar>
+  </v-app-bar>
 
-    <v-navigation-drawer
-      v-model="drawer"
-      location="left"
-      temporary
-    >
-      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type !== 'Personal'">
-        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'OrganizationHome', params: {slug: currentOrganization.refName}}">Public view of {{ currentOrganization.name }}</v-list-item>
-      </v-list>
-      <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type === 'Personal'">
-        <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'UserHome', params: {slug: user.username}}">Public View of Me</v-list-item>
-      </v-list>
-      <v-list density="compact" nav v-if="user">
-        <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models', params: {slug: user?.username}}"></v-list-item>
-      </v-list>
-      <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
+  <v-navigation-drawer
+    v-model="drawer"
+    location="left"
+    temporary
+  >
+    <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type !== 'Personal'">
+      <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'OrganizationHome', params: {slug: currentOrganization.refName}}">Public view of {{ currentOrganization.name }}</v-list-item>
+    </v-list>
+    <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type === 'Personal'">
+      <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'UserHome', params: {slug: user.username}}">Public View of Me</v-list-item>
+    </v-list>
+    <v-list density="compact" nav v-if="user">
+      <v-list-item prepend-icon="mdi-view-dashboard" title="My Models" :to="{ name: 'Models', params: {slug: user?.username}}"></v-list-item>
+    </v-list>
+    <v-list density="compact" nav>
+      <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
+    </v-list>
+  </v-navigation-drawer>
+
+  <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
+  <search-popup-dialog ref="searchPopupDialog"></search-popup-dialog>
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import SelectOrganization from '@/components/SelectOrganization';
+import SearchPopupDialog from "@/components/SearchPopupDialog.vue";
 
 export default {
   name: 'AppBar',
 
-  components: { SelectOrganization },
+  components: {SearchPopupDialog, SelectOrganization },
   data: () => ({
     menu: false,
     drawer: false,
@@ -115,17 +125,11 @@ export default {
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization() {
-      // const currentOrganizationId = this.extractOrganizationId(this.$route.fullPath);
-      // if (currentOrganizationId) {
-      //   const [organization] = this.user.organizations.filter(org => org._id === this.$route.params.id);
-      //   return organization;
-      // }
       return this.userCurrentOrganization;
     },
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
-    // ...mapActions('app', ['setCurrentOrganization']),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Login' }));
       this.menu = false;
@@ -134,15 +138,6 @@ export default {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
       this.menu = false;
     },
-    // extractOrganizationId(path) {
-    //   const regex = /\/org\/([^\/]+)/;
-    //   const match = path.match(regex);
-    //   if (match && match[1]) {
-    //     return match[1];
-    //   } else {
-    //     return null;
-    //   }
-    // }
   },
 }
 </script>
