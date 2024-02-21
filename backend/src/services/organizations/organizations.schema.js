@@ -65,7 +65,7 @@ export const organizationResolver = resolve({
 export const organizationExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type'], {
+export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type', 'curation'], {
   $id: 'OrganizationData'
 })
 export const organizationDataValidator = getValidator(organizationDataSchema, dataValidator)

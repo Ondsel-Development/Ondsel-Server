@@ -234,18 +234,25 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         changeFound = true;
       }
       //
-      // name (pulled from parent)
+      // name (pulled from parent except for personal orgs)
       //
-      if (context.data.name && context.beforePatchCopy.name !== context.data.name) {
+      if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
         needPatch = true;
         newCuration.name = context.data.name;
       }
+      if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
+        needPatch = true;
+      }
       //
-      // description (pulled from parent)
+      // description (pulled from parent except when not)
       //
-      if (context.data.description && context.beforePatchCopy.description !== context.data.description) {
+      if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
         needPatch = true;
         newCuration.description = context.data.description;
+      }
+      if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
+        needPatch = true;
+        newCuration.description = context.data.curation?.description || '';
       }
       //
       // long description

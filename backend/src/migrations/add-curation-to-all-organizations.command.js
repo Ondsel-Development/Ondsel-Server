@@ -1,11 +1,14 @@
 import {buildNewCurationForOrganization} from "../services/organizations/organizations.curation.js";
+import {OrganizationTypeMap} from "../services/organizations/organizations.subdocs.schema.js";
+import {buildNewCurationForUser} from "../services/users/users.curation.js";
 
-const overwriteAnywayWithNull = false;
+const overwriteAnyway = false;
 
 export async function addCurationToAllOrganizationsCommand(app) {
   // bluntly update directories, files, and groups with new Workspace summary
   // update workspaces to `open` field if missing
   const orgService = app.service('organizations');
+  const userService = app.service('users');
 
   console.log('>>> getting all organizations');
   const orgList = await orgService.find({
@@ -13,12 +16,15 @@ export async function addCurationToAllOrganizationsCommand(app) {
   });
   console.log(`>>> qty found: ${orgList.length}`);
   for (const org of orgList) {
-    if (org.curation && overwriteAnywayWithNull === false) {
+    if (org.curation && overwriteAnyway === false) {
       console.log(`  >>> org ${org.refName} ${org._id} is GOOD already`)
     } else {
-      let newCuration = buildNewCurationForOrganization(org);
-      if (overwriteAnywayWithNull) {
-        newCuration = null
+      let newCuration;
+      if (org.type === OrganizationTypeMap.personal) {
+        const user = await userService.get(org.owner._id);
+        newCuration = buildNewCurationForUser(user)
+      } else {
+        newCuration = buildNewCurationForOrganization(org);
       }
       await orgService.patch(
         org._id,
