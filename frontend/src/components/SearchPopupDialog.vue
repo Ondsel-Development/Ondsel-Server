@@ -17,6 +17,7 @@
       <v-card-actions class="justify-end">
         <v-btn
           flat
+          @click="doSearch()"
         >Find</v-btn>
         <v-btn
           flat
@@ -28,7 +29,7 @@
 </template>
 
 <script>
-  
+
 export default {
   name: 'searchPopupDialog',
   props: {
@@ -42,6 +43,10 @@ export default {
   computed: {
   },
   methods: {
+    doSearch() {
+      this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
+      this.dialog = false;
+    }
   },
 }
 </script>

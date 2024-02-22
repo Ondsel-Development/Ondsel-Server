@@ -69,6 +69,9 @@ export default {
         case 'users':
           tr = 'individual user';
           break;
+        case 'shared-models':
+          tr = 'shared CAD model';
+          break;
       }
       return tr;
     }
