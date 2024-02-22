@@ -6,6 +6,12 @@
         <v-row class="mt-12">
           <v-col
             cols="12"
+            v-if="results.length===0"
+          >
+            <i>No results found.</i>
+          </v-col>
+          <v-col
+            cols="12"
             v-for="entry in results"
           >
             <v-sheet
@@ -55,12 +61,16 @@ export default {
       this.results = [];
       let tempResults = null;
       try {
-        tempResults = await Keywords.get(this.searchText);
+        tempResults = await Keywords.find({
+          query: {
+            text: this.searchText,
+          },
+        });
       } catch (e) {
         console.log(e.message);
       }
-      if (tempResults) {
-        for (const match of tempResults.sortedMatches) {
+      if (tempResults && tempResults.total > 0) {
+        for (const match of tempResults.data[0].sortedMatches) {
           const fakePromo = {
             notation: {
               updatedAt: Date.now(), // not used

@@ -1,6 +1,6 @@
 export const keywordsPath = 'keywords'
 
-export const keywordsMethods = ['get']
+export const keywordsMethods = ['get', 'find']
 
 export const keywordsClient = (client) => {
   const connection = client.get('connection')
