@@ -41,7 +41,7 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doSaveTags()" color="primary" :disabled="isPatchPending">Save</v-btn>
+        <v-btn @click="doSaveTags()" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -54,7 +54,7 @@ export default {
   props: {
     tagList: {
       Type: Array,
-      default: false,
+      default: [],
     }
   },
   emits: ['saveTags'],

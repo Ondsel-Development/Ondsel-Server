@@ -43,7 +43,9 @@ export const keywordsQuerySchema = Type.Intersect(
   [
     querySyntax(keywordsQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      text: Type.Optional(Type.String()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )

@@ -25,6 +25,7 @@ import {addIsThumbnailGeneratedFieldToSharedModelsCommand} from "./add-isThumbna
 import {addCurationToAllWorkspacesCommand} from "./add-curation-to-all-workspaces.command.js";
 import {addCurationToAllOrganizationsCommand} from "./add-curation-to-all-organizations.command.js";
 import { upgradeUserTierCommand } from './upgrade_user_tier.js';
+import {addCurationToAllSharedModelsCommand} from "./add-curation-to-all-shared-models.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -110,6 +111,9 @@ async function runMigration() {
       break;
     case 'addCurationToAllOrganizations':
       await addCurationToAllOrganizationsCommand(app);
+      break;
+    case 'addCurationToAllSharedModels':
+      await addCurationToAllSharedModelsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

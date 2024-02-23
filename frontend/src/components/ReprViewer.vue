@@ -76,6 +76,9 @@ export default {
         case 'users':
           mdiIcon = 'mdi-account';
           break;
+        case 'shared-models':
+          mdiIcon = 'mdi-shape';
+          break;
         default:
           break;
       }

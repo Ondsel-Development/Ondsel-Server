@@ -6,6 +6,7 @@ import { ObjectIdSchema } from '@feathersjs/typebox'
 import { NotFound } from '@feathersjs/errors';
 import { dataValidator, queryValidator } from '../../validators.js'
 import { modelSchema} from '../models/models.schema.js';
+import {curationSchema} from "../../curation.schema.js";
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -30,6 +31,7 @@ export const sharedModelsSchema = Type.Object(
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    curation: Type.Optional(curationSchema),
 
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -202,7 +204,7 @@ export const sharedModelsPatchResolver = resolve({
 // Schema for allowed query properties
 export const sharedModelsQueryProperties = Type.Pick(
   sharedModelsSchema,
-  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated']
+  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated', 'curation']
 )
 export const sharedModelsQuerySchema = Type.Intersect(
   [

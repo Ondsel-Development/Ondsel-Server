@@ -24,6 +24,10 @@ import {
 import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
+import {afterCreateHandleSharedModelCuration, buildNewCurationForSharedModel} from "./shared-models.curation.js";
+import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
+import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -119,6 +123,7 @@ export const sharedModels = (app) => {
         schemaHooks.resolveData(sharedModelsDataResolver)
       ],
       patch: [
+        copySharedModelBeforePatch,
         iff(
           async context => {
             const sharedModel = await context.service.get(context.id);
@@ -156,6 +161,7 @@ export const sharedModels = (app) => {
           context => context.data.model,
           patchModel,
         ),
+        beforePatchHandleGenericCuration(buildNewCurationForSharedModel),
         schemaHooks.validateData(sharedModelsPatchValidator),
         schemaHooks.resolveData(sharedModelsPatchResolver)
       ],
@@ -168,6 +174,7 @@ export const sharedModels = (app) => {
           context => context.data.cloneModelId,
           createClone,
         ),
+        afterCreateHandleSharedModelCuration,
       ],
     },
     error: {

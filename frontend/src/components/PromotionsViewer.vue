@@ -59,6 +59,9 @@ export default {
           user = await this.getUserByIdOrNamePublic(curation._id);
           this.$router.push({ name: 'UserHome', params: { slug: user.username } });
           break;
+        case 'shared-models':
+          this.$router.push({ name: 'Share', params: { id: curation._id.toString() } })
+          break;
       }
     },
   },

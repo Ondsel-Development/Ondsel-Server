@@ -1,6 +1,4 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {modelSchema} from "../models/models.schema.js";
-import {modelSummarySchema} from "../models/models.distrib.js";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
@@ -14,3 +12,12 @@ export const sharedModelsSummarySchema = Type.Object(
     thumbnailUrl: Type.String(),
   },
 )
+
+
+export const copySharedModelBeforePatch = async (context) => {
+    // store a copy of the Org in `context.beforePatchCopy` to help detect true changes
+    const smService = context.app.service('shared-models');
+    const smId = context.id;
+    context.beforePatchCopy = await smService.get(smId);
+    return context;
+}

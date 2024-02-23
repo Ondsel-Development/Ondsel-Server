@@ -166,7 +166,7 @@ export function determineKeywordsWithScore(curation) {
     return keywordScores;
 }
 
-function useRake(str) {
+export function useRake(str) {
     // use rake to pull out keywords and phrases
     const {NodeRakeV2} = pkg;
 
@@ -244,7 +244,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         needPatch = true;
       }
       //
-      // description (pulled from parent except when not)
+      // description (pulled from parent, usually)
       //
       if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
         needPatch = true;
@@ -263,7 +263,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // tags
       //
-      if (patchCuration.tags && !_.isEqual(originalCuration.tags, newCuration.tags)) {
+      if (!_.isEqual(originalCuration.tags, newCuration.tags)) {
         changeFound = true;
       }
       //
@@ -294,7 +294,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
         case 'shared-models':
-          isOpenEnoughForKeywords = context.beforePatchCopy.canViewModel && !context.beforePatchCopy.isSystemGenerated; // TODO: correct?
+          isOpenEnoughForKeywords = context.beforePatchCopy.isSystemGenerated;
           break;
         case 'ondsel':
           isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search

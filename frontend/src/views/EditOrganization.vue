@@ -326,7 +326,6 @@ export default {
     },
     async openEditDescriptionDialog() {
       this.isOrgChangeDescriptionDialogActive = true;
-      this.$refs.editDescriptionDialog.$data.newTags = this.organization.curation?.tags || [];
       this.$refs.editDescriptionDialog.$data.dialog = true;
     },
     async saveDescriptionDialog() {
