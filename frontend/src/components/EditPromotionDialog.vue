@@ -37,8 +37,8 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="editPromotion(true)" color="primary" :disabled="isPatchPending">Yes</v-btn>
-        <v-btn @click="editPromotion(false)" color="primary" :disabled="isPatchPending">No</v-btn>
+        <v-btn @click="editPromotion(true)" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Yes</v-btn>
+        <v-btn @click="editPromotion(false)" color="primary" :disabled="isPatchPending" :loading="isPatchPending">No</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -103,6 +103,7 @@ export default {
       }
     },
     async editPromotion(decision) {
+      this.isPatchPending = true;
       let obj;
       let curation;
       switch (this.collection) {
@@ -140,9 +141,13 @@ export default {
           console.log(`unknown collection ${this.collection}`); // should not happen
           break;
       }
+      this.isPatchPending = false;
       this.dialog = false;
     },
     async applyChange(decision, curation) {
+      if (!this.promoterObj.curation) {
+        this.promoterObj.curation = { promoted: [] };
+      }
       let promoterCuration = this.promoterObj.curation;
       let promoted = promoterCuration.promoted || [];
       if (decision === true) {
