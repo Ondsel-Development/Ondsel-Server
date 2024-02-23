@@ -10,8 +10,8 @@ export async function addCurationToAllSharedModelsCommand(app) {
   console.log('>>> getting all shared-models');
   const smList = await smService.find({
     paginate: false,
-    query: {   // the system is smart enough to not generate keywords on 'isSystemGenerated: true' but we are skipping those anyway
-      isSystemGenerated: false,
+    query: {
+      isSystemGenerated: true,
     },
     pipeline: [
       {

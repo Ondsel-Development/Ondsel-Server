@@ -294,7 +294,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
         case 'shared-models':
-          isOpenEnoughForKeywords = context.beforePatchCopy.canViewModel && !context.beforePatchCopy.isSystemGenerated;
+          isOpenEnoughForKeywords = context.beforePatchCopy.isSystemGenerated;
           break;
         case 'ondsel':
           isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search
