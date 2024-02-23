@@ -23,8 +23,9 @@ import {addEmptyDirectoriesFieldToDirectoryCommand} from "./add_empty_directorie
 import {updateWorkspaceSummariesEverywhereCommand} from "./update-workspace-summaries-everywhere.command.js";
 import {addIsThumbnailGeneratedFieldToSharedModelsCommand} from "./add-isThumbnailGenerated-field-to-shared-models.js";
 import {addCurationToAllWorkspacesCommand} from "./add-curation-to-all-workspaces.command.js";
+import {addCurationToAllOrganizationsCommand} from "./add-curation-to-all-organizations.command.js";
 import { upgradeUserTierCommand } from './upgrade_user_tier.js';
-
+import {addCurationToAllSharedModelsCommand} from "./add-curation-to-all-shared-models.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -107,6 +108,12 @@ async function runMigration() {
       break;
     case 'upgradeUserTier':
       await upgradeUserTierCommand(app);
+      break;
+    case 'addCurationToAllOrganizations':
+      await addCurationToAllOrganizationsCommand(app);
+      break;
+    case 'addCurationToAllSharedModels':
+      await addCurationToAllSharedModelsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

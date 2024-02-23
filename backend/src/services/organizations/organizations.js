@@ -41,6 +41,9 @@ import {
 import {userPublicFields, userResolver} from "../users/users.schema.js";
 import {BadRequest} from "@feathersjs/errors";
 import {OrganizationTypeMap} from "./organizations.subdocs.schema.js";
+import {afterCreateHandleOrganizationCuration, buildNewCurationForOrganization} from "./organizations.curation.js";
+import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -154,15 +157,6 @@ export const organization = (app) => {
     },
     before: {
       all: [
-        // softDelete({
-        //   deletedQuery: async context => {
-        //     // Allow only owner to delete organization
-        //     if ( context.method === 'remove' && context.params.user ) {
-        //       return { createdBy: context.params.user._id, deleted: { $ne: true } }
-        //     }
-        //     return { deleted: { $ne: true } };
-        //   }
-        // }),
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
@@ -203,6 +197,7 @@ export const organization = (app) => {
           context => context.data.shouldAddGroupsToOrganization,
           addGroupsToOrganization,
         ),
+        beforePatchHandleGenericCuration(buildNewCurationForOrganization),
         schemaHooks.validateData(organizationPatchValidator),
         schemaHooks.resolveData(organizationPatchResolver)
       ],
@@ -215,13 +210,15 @@ export const organization = (app) => {
     after: {
       all: [
       ],
+      find: [removeUsersOnPublicQueryOnPrivateOrg],
       get: [iff(isProvider('external'), isUserMemberOfOrganization)],
       create: [
         assignOrganizationIdToUser,
         createDefaultEveryoneGroup,
+        afterCreateHandleOrganizationCuration,
       ],
       patch: [
-        distributeOrganizationSummaries
+        distributeOrganizationSummaries,
       ]
     },
     error: {
@@ -252,6 +249,21 @@ const detectOrgRefNameInId = async context => {
   }
   return context;
 }
+
+const removeUsersOnPublicQueryOnPrivateOrg = async context => {
+  // called in AFTER on FIND
+  if (context.publicDataOnly) {
+    for (const index in context.result.data) {
+      const item = context.result.data[index];
+      if (item.type !== OrganizationTypeMap.open) {
+        if (item.users) {
+          context.result.data[index].users = [];
+        }
+      }
+    }
+  }
+}
+
 
 const isOrganizationReadyToDelete = async context => {
   const organization = await context.service.get(context.id);

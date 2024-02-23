@@ -6,7 +6,7 @@
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Edit Tags</div>
+        <div class="text-center">Edit Long Description (Markdown)</div>
       </template>
       <v-progress-linear
         :active="isPatchPending"
@@ -14,23 +14,15 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editTagsDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editLongDescriptionMdDialogForm" @submit.prevent="isPatchPending">
         <v-card-text>
-          <p>Press enter to add a new tag. To delete a tag, use arrow keys to highlight and press Delete on keyboard.</p>
-          <v-combobox
-            v-model="newTags"
-            chips
-            multiple
-            filled
-            append-icon=""
-          >
-              <v-chip
-                small
-                close
-              >
-                {{ item }}
-              </v-chip>
-          </v-combobox>
+          <p>Enter a longer description. You can use Markdown formatting and multiple lines. Limited to 4096 characters.</p>
+          <v-textarea
+            counter
+            flat
+            size="4096"
+            v-model="newLongDescriptionMd"
+          ></v-textarea>
         </v-card-text>
       </v-form>
       <v-snackbar
@@ -41,7 +33,7 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doSaveTags()" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Save</v-btn>
+        <v-btn @click="doSaveLongDescriptionMd()" color="primary" :disabled="isPatchPending">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -50,29 +42,29 @@
 <script>
 
 export default {
-  name: 'EditTagsDialog',
+  name: 'EditLongDescriptionMdDialog',
   props: {
-    tagList: {
-      Type: Array,
-      default: [],
+    longDescriptionMd: {
+      Type: Text,
+      default: '',
     }
   },
-  emits: ['saveTags'],
+  emits: ['saveLongDescriptionMd'],
   created() {
-    this.newTags = this.tagList;
+    this.newLongDescriptionMd = this.longDescriptionMd;
   },
   data: () => ({
     dialog: false,
     snackerMsg: '',
     showSnacker: false,
-    newTags: [],
+    newLongDescriptionMd: '',
     isPatchPending: false,
   }),
   computed: {
   },
   methods: {
-    async doSaveTags() {
-      this.$emit('saveTags');
+    async doSaveLongDescriptionMd() {
+      this.$emit('saveLongDescriptionMd');
     },
   },
 }

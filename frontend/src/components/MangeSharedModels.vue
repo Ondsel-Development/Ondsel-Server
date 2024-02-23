@@ -153,6 +153,32 @@
             >Update Permissions</v-btn>
           </v-col>
         </v-row>
+        <v-divider/>
+        <v-row>
+          <v-col cols="3" class="text-right">
+            <span>Search tags:</span>
+          </v-col>
+          <v-col cols="9" class="text-left">
+            <div v-if="item.raw.curation?.tags && item.raw.curation?.tags?.length > 0">
+              <v-chip-group>
+                <v-chip v-for="(tag) in item.raw.curation?.tags">{{tag}}</v-chip>
+              </v-chip-group>
+            </div>
+            <span v-else><i>None</i></span>
+          </v-col>
+          <v-col cols="9">
+          </v-col>
+          <v-col cols="3" class="text-right">
+            <v-btn
+              flag
+              class="mt-2"
+              :disabled="!item.raw.isActive || !item.raw.curation"
+              @click.stop="openEditTagsDialog(item.raw._id, item.raw.curation)"
+            >
+              Update Tags
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-container>
     </td>
     </template>
@@ -170,6 +196,12 @@
     :shared-model-id="activeShareModelId"
     ref="shareLinkDialog"
   />
+  <EditTagsDialog
+    :is-active="isEditTagsDialogActive"
+    ref="editTagsDialog"
+    @save-tags="saveTags"
+  />
+
 </template>
 
 <script>
@@ -178,12 +210,14 @@ import { models } from '@feathersjs/vuex';
 
 import ShareModelDialog from '@/components/ShareModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
+import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import _ from "lodash";
 
-const { Model, SharedModel } = models.api;
+const { SharedModel } = models.api;
 
 export default {
   name: 'MangeSharedModels',
-  components: { ShareModelDialog, ShareLinkDialog },
+  components: {EditTagsDialog, ShareModelDialog, ShareLinkDialog },
   props: {
     model: Object,
   },
@@ -204,7 +238,9 @@ export default {
       ],
       isShareModelDialogActive: false,
       isShareLinkDialogActive: false,
+      isEditTagsDialogActive: false,
       activeShareModelId: '',
+      activeCuration: {},
     }
   },
   computed: {
@@ -250,7 +286,35 @@ export default {
       this.isShareLinkDialogActive = true;
       this.activeShareModelId = sharedModelId;
       this.$refs.shareLinkDialog.$data.dialog = true;
-    }
+    },
+    openEditTagsDialog(sharedModelId, curation) {
+      this.isEditTagsDialogActive = true;
+      this.activeCuration = curation;
+      this.$refs.editTagsDialog.$data.dialog = true;
+      this.$refs.editTagsDialog.$data.newTags = curation.tags || [];
+    },
+    async saveTags() {
+      this.$refs.editTagsDialog.$data.isPatchPending = true;
+      const tagList = this.$refs.editTagsDialog.$data.newTags;
+      const lowercaseTags = tagList.map(tag => tag.toLowerCase().trim());
+      const cleanTags = _.uniq(lowercaseTags);
+      let curation = this.activeCuration;
+      curation.tags = cleanTags;
+      await SharedModel.patch(
+        this.activeCuration._id,
+        {
+          'curation': curation,
+        }
+      ).then(() => {
+        this.$refs.editTagsDialog.$data.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editTagsDialog.snackerMsg = e.message;
+        this.$refs.editTagsDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editTagsDialog.$data.isPatchPending = false;
+    },
   },
 }
 </script>
@@ -258,3 +322,5 @@ export default {
 <style scoped>
 
 </style>
+<script setup>
+</script>

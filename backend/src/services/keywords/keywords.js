@@ -17,6 +17,8 @@ import {disallow, iff} from "feathers-hooks-common";
 import swagger from "feathers-swagger";
 import {upsertScore} from "./commands/upsertScore.js";
 import {removeScore} from "./commands/removeScore.js";
+import {organizationPublicFields} from "../organizations/organizations.schema.js";
+import {useRake} from "../../curation.schema.js";
 
 export * from './keywords.class.js'
 export * from './keywords.schema.js'
@@ -67,7 +69,7 @@ export const keywords = (app) => {
         schemaHooks.resolveQuery(keywordsQueryResolver)
       ],
       find: [
-        disallow('external'),
+        expandSearchUsingAlgorithms,
       ],
       get: [], // this is the only endpoint seen by the public
       create: [
@@ -99,4 +101,39 @@ export const keywords = (app) => {
       all: []
     }
   })
+}
+
+const expandSearchUsingAlgorithms = async context => {
+  const rawText = context.params.query?.text || '';
+  const rakeList = useRake(rawText);
+  let allFound = [];
+  for (const keyphrase of rakeList) {
+    try {
+      const newItem = await context.service.get(keyphrase);
+      allFound.push(...newItem.sortedMatches);
+    } catch (e) {
+      if (e.name !== 'NotFound') {
+        console.log('keyword get problem: ' + e.message);
+      }
+    }
+  }
+  // sort first, so that the best rise to the top; this includes finding the best duplicate
+  allFound.sort((a, b) => b.score - a.score);
+  // remove the duplicates retaining order, always retaining the top duplicate
+  let noDuplicates = allFound.filter((match, index) => {
+    return index === allFound.findIndex(m => match.curation._id.toString() === m.curation._id.toString());
+  });
+  // now shrink the list for transmission
+  noDuplicates.splice(100); // show only the top 100
+  context.result = {
+    total: 1,
+    skip: 0,
+    data: [
+      {
+        _id: rawText,
+        sortedMatches: noDuplicates,
+      }
+    ]
+  }
+  return context;
 }
