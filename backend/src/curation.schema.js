@@ -166,7 +166,7 @@ export function determineKeywordsWithScore(curation) {
     return keywordScores;
 }
 
-function useRake(str) {
+export function useRake(str) {
     // use rake to pull out keywords and phrases
     const {NodeRakeV2} = pkg;
 
