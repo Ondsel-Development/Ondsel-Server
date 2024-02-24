@@ -10,6 +10,7 @@
         <v-card-text>
           <v-text-field
             v-model="searchText"
+            autofocus
             label="Search text"
           ></v-text-field>
         </v-card-text>
