@@ -8,9 +8,6 @@
     <v-container>
       <v-container>
         <div class="d-flex justify-lg-space-between">
-          <v-sheet max-width="80em">
-            <span class="text-blue-accent-1">{{message}}</span>
-          </v-sheet>
           <v-sheet max-width="38em">
             {{translateCollection(curation.collection)}}
           </v-sheet>
