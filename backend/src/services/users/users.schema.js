@@ -126,7 +126,7 @@ export const userDataResolver = resolve({
     }
   },
 })
-export const userPublicFields = ['_id', 'name', 'username', 'tier', 'createdAt'];
+export const userPublicFields = ['_id', 'name', 'username', 'tier', 'createdAt', 'defaultWorkspaceId'];
 
 // Schema for updating existing entries
 export const userPatchSchema = Type.Partial(userSchema, {
@@ -159,6 +159,7 @@ export const userQueryProperties = Type.Pick(userSchema, [
   'resetAttempts',
   'constraint',
   'createdAt',
+  'defaultWorkspaceId',
 ])
 export const userQuerySchema = Type.Intersect(
   [

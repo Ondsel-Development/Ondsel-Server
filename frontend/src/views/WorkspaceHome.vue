@@ -1,33 +1,83 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <v-container v-if="workspace">
-    <v-row class="align-center">
-      <v-col cols="9">
+    <v-btn
+      flat
+      size="small"
+      icon="mdi-arrow-left"
+      @click="goHome()"
+    />
+    <span class="text-body-2">workspace &nbsp;</span>
+    <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
+    <span v-if="!publicView">
+      <v-btn
+        icon="mdi-cog"
+        size="small"
+        flat
+        @click.stop="goToWorkspaceEdit(workspace)"
+        id="editWorkspaceButton"
+      ></v-btn>
+      <v-tooltip
+        activator="#editWorkspaceButton"
+      >edit this workspace's settings</v-tooltip>
+    </span>
+    <span v-else>
+      <v-btn
+        icon="mdi-cog"
+        size="small"
+        flat
+        color="grey"
+        id="disabledEditWorkspaceButton"
+      ></v-btn>
+      <v-tooltip
+        v-if="!currentOrganization"
+        activator="#disabledEditWorkspaceButton"
+      >you cannot edit anything when not logged in</v-tooltip>
+      <v-tooltip
+        v-if="currentOrganization && currentOrganization._id !== workspace?.organization?._id"
+        activator="#disabledEditWorkspaceButton"
+      >you are currently representing {{selfName}} and not {{ownerDescription}}</v-tooltip>
+    </span>
+    <span v-if="workspace.open === true">
+      <span v-if="promotionPossible">
         <v-btn
-          flat
+          icon="mdi-bullhorn"
           size="small"
-          icon="mdi-arrow-left"
-          @click="goHome()"
-        />
-        <span class="text-body-2">workspace &nbsp;</span>
-        <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
-        <v-btn icon="mdi-cog" size="small" flat @click.stop="goToWorkspaceEdit(workspace)"/>
-      </v-col>
-      <v-col cols="3">
-        <div v-if="workspace.curation?.representativeFile">
-          <repr-viewer :workspace="workspace"></repr-viewer>
-        </div>
-      </v-col>
-    </v-row>
+          flat
+          @click.stop="openEditPromotionDialog()"
+          id="promotionButton"
+        ></v-btn>
+        <v-tooltip
+          activator="#promotionButton"
+        >should {{selfPronoun}} promote this workspace</v-tooltip>
+      </span>
+      <span v-else>
+        <v-btn
+          size="small"
+          icon="mdi-bullhorn"
+          flat
+          color="grey"
+          id="disabledPromotionButton"
+        >
+        </v-btn>
+        <v-tooltip
+          v-if="!currentOrganization"
+          activator="#disabledPromotionButton"
+        >must be logged in to promote anything</v-tooltip>
+        <v-tooltip
+          v-if="defaultWorkspaceFlag"
+          activator="#disabledPromotionButton"
+        >cannot promote a default workspace</v-tooltip>
+      </span>
+    </span>
     <v-row class="mt-10">
-      <v-col cols="5">
-        <p>"{{workspace.description}}"</p>
-        <p>Owned by {{ownerText}}</p>
-        <p><i>{{openMessage}}</i></p>
+      <v-col cols="6">
+        <one-promotion-sheet :curation="workspace.curation" :message="generalDescription"></one-promotion-sheet>
       </v-col>
-      <v-col cols="7">
-        <v-card max-height="200" overflow-y-visible>
-          <v-card-text>
-            <div v-html="longDescriptionHtml"></div>
+      <v-col cols="6">
+        <v-card max-height="15em" min-height="8em">
+          <v-card-text  class="overflow-auto">
+            <div v-if="longDescriptionHtml" v-html="longDescriptionHtml"></div>
+            <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -72,6 +122,7 @@
       </v-col>
     </v-row>
   </v-container>
+  <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="workspaces" :item-id="workspace?._id" :item-name="workspace?.name"></edit-promotion-dialog>
 </template>
 
 <script>
@@ -82,13 +133,16 @@ import DirectoryListView from '@/components/DirectoryListView.vue';
 import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 import {marked} from "marked";
-import ReprViewer from "@/components/ReprViewer.vue";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
-  components: {ReprViewer, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
+  components: {
+    OnePromotionSheet,
+    EditPromotionDialog, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
   data() {
     return {
       activeFile: null,
@@ -98,9 +152,10 @@ export default {
       directoryDetail: {},
       organizationDetail: undefined,
       slug: '',
-      openMessage: '',
+      generalDescription: '',
+      ownerDescription: 'unknown',
       publicViewDetail: false,
-      ownerText: 'tbd',
+      defaultWorkspaceFlag: false,
     };
   },
   async created() {
@@ -108,8 +163,9 @@ export default {
     const wsName = this.$route.params.wsname;
     let orgRefName = '';
     let ownerRealName = '';
+    let userDetail = null;
     if (this.userRouteFlag) {
-      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
+      userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
         console.log(`No such user for ${this.slug}`);
         this.$router.push({ name: 'PageNotFound' });
@@ -121,7 +177,13 @@ export default {
       orgRefName = this.slug;
     }
     this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
-    if (!this.workspaceDetail) {
+    if (this.workspaceDetail) {
+      if (this.workspaceDetail.organization._id !== this.currentOrganization._id) {
+        // if the user has private access to the ws generically, but isn't actually representing that org, then
+        // set the publicView flag anyway
+        this.publicViewDetail = true;
+      }
+    } else {
       this.publicViewDetail = true;
       this.workspaceDetail = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: orgRefName} );
     }
@@ -131,10 +193,9 @@ export default {
       this.$router.push({ name: 'PageNotFound' });
       return;
     }
-    if (this.workspaceDetail.open) {
-      this.openMessage = "Open (shared with public)"
-      if (this.workspace.license) {
-        this.openMessage += " under license " + this.workspace.license;
+    if (this.userRouteFlag && userDetail) {
+      if (userDetail.defaultWorkspaceId.toString() === this.workspaceDetail._id.toString()) {
+        this.defaultWorkspaceFlag = true;
       }
     }
     this.directoryDetail = this.publicViewDetail
@@ -145,26 +206,44 @@ export default {
         ? await this.getOrgByIdOrNamePublic(this.workspace.organizationId)
         : await Organization.get(this.workspace.organizationId);
     }
+
     if (this.userRouteFlag) {
-      this.ownerText = `user ${ownerRealName}`;
+      this.ownerDescription = `user ${ownerRealName}`;
     } else {
-      this.ownerText = `organization ${this.organizationDetail.name}`;
+      this.ownerDescription = `organization ${this.organizationDetail.name}`;
     }
+    if (this.workspaceDetail.open) {
+      this.generalDescription = "An open (shared with public) workspace"
+      if (this.workspace.license) {
+        this.generalDescription += " under license " + this.workspace.license;
+      }
+    } else {
+      this.generalDescription = "A proprietary workspace"
+    }
+    this.generalDescription += ` owned by ${this.ownerDescription}`
+
     if (!this.publicViewDetail) {
       if (this.organization._id !== this.currentOrganization._id) {
-        if (this.organization.type !== 'Open') {
-          if (this.userRouteFlag) {
-            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
-          } else {
-            this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
-          }
+        switch (this.organization.type) {
+          case 'Private':
+          case 'Personal':
+            if (this.workspaceDetail.open !== true) {
+              if (this.userRouteFlag) {
+                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+              } else {
+                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+              }
+            }
+            break;
+          case 'Open':
+            break;
         }
       }
     }
     this.activePath = this.directory.name;
   },
   computed: {
-    ...mapGetters('app', ['currentOrganization']),
+    ...mapGetters('app', ['currentOrganization', 'selfPronoun', 'selfName']),
     directory: vm => vm.directoryDetail,
     workspaceRefName: vm => vm.$route.params.wsname,
     workspace: vm => vm.workspaceDetail,
@@ -172,6 +251,7 @@ export default {
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     publicView: vm => vm.publicViewDetail,
     longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || ""),
+    promotionPossible: vm => vm.currentOrganization && !vm.defaultWorkspaceFlag,
   },
   methods: {
     ...mapActions('app', [
@@ -225,7 +305,10 @@ export default {
       } else {
         this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
       }
-    }
+    },
+    async openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
+    },
   },
 };
 </script>

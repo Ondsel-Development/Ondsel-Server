@@ -12,6 +12,18 @@
             <td class="font-weight-medium">Name</td>
             <td>{{ fileObject.custFileName }}</td>
           </tr>
+          <tr v-if="sharedModel && sharedModel.description">
+            <td class="font-weight-medium">Description</td>
+            <td><b>{{ sharedModel.description }}</b></td>
+          </tr>
+          <tr v-if="sharedModel && sharedModel.curation?.tags">
+            <td class="font-weight-medium">Tags</td>
+            <td>
+              <v-chip-group>
+                <v-chip v-for="(tag) in sharedModel.curation.tags">{{tag}}</v-chip>
+              </v-chip-group>
+            </td>
+          </tr>
           <tr v-if="user">
             <td class="font-weight-medium">Created By</td>
             <td>

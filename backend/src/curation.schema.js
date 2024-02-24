@@ -2,6 +2,7 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
 import _ from "lodash";
+import {userSummarySchema} from "./services/users/users.subdocs.schema.js";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -16,10 +17,37 @@ export const curationSchema = Type.Object(
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
     representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
-    promoted: Type.Array(), // an array of curations
+    promoted: Type.Array(Type.Any()), // an array of promotionSchema
     keywordRefs: Type.Array(Type.String()), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
+
+export const notationSchema = Type.Object(
+  {
+    updatedAt: Type.Number(), // date/time when last updated
+    historicUser: userSummarySchema, // user who posted the notation/comment; stored for diagnostics; does not need live update ("historic")
+    message: Type.String(), // the public comment made about the promotion
+  }
+)
+
+export const promotionSchema = Type.Object(
+  {
+    notation: notationSchema, // a 'notational comment' added by the promoter
+    curation: curationSchema, // use 'curationSummaryOfCuration` method to shorten
+  }
+)
+
+const MAX_LONG_DESC_SUM = 60;
+export function curationSummaryOfCuration(curation) {
+  // a smaller "summary" of fields for embedding
+  let curationSum = curation;
+  const longDesc = curation.longDescriptionMd;
+  curationSum.longDescriptionMd = longDesc.length > MAX_LONG_DESC_SUM ?
+    longDesc.substring(0, MAX_LONG_DESC_SUM - 3) + "..." : longDesc;
+  curationSum.promoted = [];
+  curationSum.keywordRefs = [];
+  return curationSum;
+}
 
 export function matchingCuration(curationA, curationB) {
   if (curationA?._id.toString() === curationB?._id.toString()) {
@@ -138,7 +166,7 @@ export function determineKeywordsWithScore(curation) {
     return keywordScores;
 }
 
-function useRake(str) {
+export function useRake(str) {
     // use rake to pull out keywords and phrases
     const {NodeRakeV2} = pkg;
 
@@ -185,4 +213,111 @@ function accumulateScores(keywordScores, keywordList, scoreStart, scoreMax, orde
         }
         counter++;
     }
+}
+
+export const beforePatchHandleGenericCuration = (buildFunction) => {
+  return async (context) => {
+    try {
+      //
+      // setup
+      //
+      let changeFound = false;
+      let needPatch = false; // if true, then ALSO needing changes applied to keywords
+      const originalCuration = context.beforePatchCopy.curation || {};
+      const patchCuration = context.data.curation || {};
+      let newCuration = {...originalCuration, ...patchCuration};
+      if (!newCuration._id) {
+        // if the original curation _id is missing, then something failed to created it in the past. recreate it first.
+        const tempCuration = buildFunction(context.beforePatchCopy);
+        newCuration = {...tempCuration, ...patchCuration};
+        needPatch = true;
+        changeFound = true;
+      }
+      //
+      // name (pulled from parent except for personal orgs)
+      //
+      if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
+        needPatch = true;
+        newCuration.name = context.data.name;
+      }
+      if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
+        needPatch = true;
+      }
+      //
+      // description (pulled from parent, usually)
+      //
+      if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
+        needPatch = true;
+        newCuration.description = context.data.description;
+      }
+      if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
+        needPatch = true;
+        newCuration.description = context.data.curation?.description || '';
+      }
+      //
+      // long description
+      //
+      if (patchCuration.longDescriptionMd !== undefined && originalCuration.longDescriptionMd !== newCuration.longDescriptionMd) {
+        changeFound = true;
+      }
+      //
+      // tags
+      //
+      if (!_.isEqual(originalCuration.tags, newCuration.tags)) {
+        changeFound = true;
+      }
+      //
+      // representative file
+      //
+      if (newCuration.collection === 'workspaces') {
+        if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
+          changeFound = true;
+        }
+      } else {
+        if (newCuration.representativeFile) {
+          newCuration.representativeFile = null;
+          console.log("MINOR ERROR: a `representativeFile` was set for a non-workspace curation. setting to null.");
+        }
+      }
+      //
+      // handle keyword generation
+      //
+      let isOpenEnoughForKeywords = false;
+      switch (newCuration.collection) {
+        case 'workspaces':
+          isOpenEnoughForKeywords = context.beforePatchCopy.open;
+          break;
+        case 'organizations':
+          isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
+          break;
+        case 'users':
+          isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
+          break;
+        case 'shared-models':
+          isOpenEnoughForKeywords = context.beforePatchCopy.isSystemGenerated;
+          break;
+        case 'ondsel':
+          isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search
+          break;
+      }
+      if (needPatch || changeFound) {
+        if (isOpenEnoughForKeywords) {
+          const newKeywordRefs = await generateAndApplyKeywords(context, newCuration);
+          if (!_.isEqual(newKeywordRefs, originalCuration.keywordRefs)) {
+            newCuration.keywordRefs = newKeywordRefs;
+            needPatch = true;
+          }
+        }
+      }
+      //
+      // set the new proper patch
+      //
+      if (needPatch) {
+        context.data.curation = newCuration;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    return context;
+  }
 }

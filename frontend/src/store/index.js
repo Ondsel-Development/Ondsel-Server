@@ -14,6 +14,7 @@ import group from '@/store/services/groups';
 import orgInvite from '@/store/services/orgInvites';
 import directory from '@/store/services/directories';
 import workspace from '@/store/services/workspaces';
+import keywords from "@/store/services/keywords";
 
 const store =  new Vuex.Store({
   state: {},
@@ -37,6 +38,7 @@ const store =  new Vuex.Store({
     orgInvite,
     directory,
     workspace,
+    keywords,
   ]
 })
 

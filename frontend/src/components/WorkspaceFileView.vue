@@ -11,14 +11,14 @@
         <v-btn flat>Explore</v-btn>
       </a>
       <v-btn
-        v-if="workspace.curation?.representativeFile?._id !== file._id"
+        v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
         flat
         :disabled="!canUserWrite"
         @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"
         icon="mdi-camera-off"
       ></v-btn>
       <v-btn
-        v-if="workspace.curation?.representativeFile?._id === file._id"
+        v-if="!publicView && workspace.curation?.representativeFile?._id === file._id"
         flat
         :disabled="!canUserWrite"
         @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"

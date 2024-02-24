@@ -1,15 +1,13 @@
-// A "curation" file is for visibly decorating an object and handling pre-emptive keyword indexing (for later searches.)
-//
-
 import {generateAndApplyKeywords} from "../../curation.schema.js";
 import _ from "lodash";
+import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
 
-export function buildNewCurationForWorkspace(workspace) {
+export function buildNewCurationForOrganization(org) {
   let curation =   {
-    _id: workspace._id,
-    collection: 'workspaces',
-    name: workspace.name || "",
-    description: workspace.description || "",
+    _id: org._id,
+    collection: 'organizations',
+    name: org.name || '',
+    description: '',
     longDescriptionMd: '',
     tags: [],
     representativeFile: null,
@@ -19,9 +17,13 @@ export function buildNewCurationForWorkspace(workspace) {
   return curation;
 }
 
-export const afterCreateHandleWorkspaceCuration = async (context) => {
+export const afterCreateHandleOrganizationCuration = async (context) => {
   // first, set up the curation
-  context.result.curation = buildNewCurationForWorkspace(context.result);
+  if (context.result.curation) {
+    // this will happen for a Personal type org
+    return context;
+  }
+  context.result.curation = buildNewCurationForOrganization(context.result);
   const newKeywordRefs = await generateAndApplyKeywords(context, context.result.curation);
   context.result.curation.keywordRefs = newKeywordRefs;
   await context.service.patch(

@@ -28,7 +28,47 @@ export default {
         return organization;
       }
       return null;
-    }
+    },
+    selfName (state, getters, rootState, rootGetters) {
+      let org = null;
+      if (state.currentOrganization) {
+        org = state.currentOrganization;
+      } else {
+        const user = rootGetters['auth/user'];
+        if (user && user.currentOrganizationId) {
+          const [organization] = user.organizations.filter(org => org._id === user.currentOrganizationId);
+          org = organization;
+        }
+      }
+      if (org) {
+        if (org.type === 'Personal') {
+          return "yourself";
+        } else {
+          return "organization " + org.name;
+        }
+      }
+      return "nobody";
+    },
+    selfPronoun (state, getters, rootState, rootGetters) {
+      let org = null;
+      if (state.currentOrganization) {
+        org = state.currentOrganization;
+      } else {
+        const user = rootGetters['auth/user'];
+        if (user && user.currentOrganizationId) {
+          const [organization] = user.organizations.filter(org => org._id === user.currentOrganizationId);
+          org = organization;
+        }
+      }
+      if (org) {
+        if (org.type === 'Personal') {
+          return "you";
+        } else {
+          return "organization " + org.name;
+        }
+      }
+      return "nobody";
+    },
   },
   mutations: {
     SET_CURRENT_ORGANIZATION: (stateIn, organization) => {

@@ -16,6 +16,7 @@ import {BadRequest} from "@feathersjs/errors";
 import {refNameHasher} from "../../refNameFunctions.js";
 import { buildUserSummary } from '../users/users.distrib.js';
 import {OrganizationType, OrganizationTypeMap} from './organizations.subdocs.schema.js';
+import {curationSchema} from "../../curation.schema.js";
 
 const userDataSchema = Type.Intersect(
   [
@@ -34,10 +35,12 @@ export const organizationSchema = Type.Object(
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    description: Type.String(),
     users: Type.Array(userDataSchema),
     groups: Type.Array(groupSummary),
     owner: userSummarySchema,
     type: Type.Optional(OrganizationType),
+    curation: Type.Optional(curationSchema),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -47,10 +50,13 @@ export const organizationValidator = getValidator(organizationSchema, dataValida
 export const organizationResolver = resolve({
   constraint: virtual(async (message, _context) => {
     if (message.owner) {
-      const user = await _context.app.service('users').get(
-        message.owner._id,
-      );
-      return getConstraint(user);
+      try {
+        const user = await _context.app.service('users').get(
+          message.owner._id,
+        );
+        return getConstraint(user);
+      } catch (error) {
+      }
     }
     return _.get(subscriptionConstraintMap, SubscriptionTypeMap.unverified)
   })
@@ -59,7 +65,7 @@ export const organizationResolver = resolve({
 export const organizationExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type'], {
+export const organizationDataSchema = Type.Pick(organizationSchema, ['name', 'refName', 'type', 'curation'], {
   $id: 'OrganizationData'
 })
 export const organizationDataValidator = getValidator(organizationDataSchema, dataValidator)
@@ -74,6 +80,9 @@ export const organizationDataResolver = resolve({
   },
   createdAt: async () => Date.now(),
   updatedAt: async () => Date.now(),
+  description: async (_value, message, _context) => {
+    return message.description || '';
+  },
   users: async (_value, _message, context) => {
     return [
       {
@@ -90,7 +99,7 @@ export const organizationDataResolver = resolve({
   },
 })
 
-export const organizationPublicFields = ['_id', 'name', 'refName', 'type', 'createdAt', 'owner'];
+export const organizationPublicFields = ['_id', 'name', 'refName', 'description', 'type', 'createdAt', 'curation', 'users', 'owner'];
 
 // Schema for updating existing entries
 export const organizationPatchSchema = Type.Partial(organizationSchema, {
@@ -102,7 +111,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'description', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'curation', 'users', 'deleted'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),

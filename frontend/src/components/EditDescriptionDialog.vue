@@ -6,7 +6,7 @@
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Edit Tags</div>
+        <div class="text-center">Edit Description</div>
       </template>
       <v-progress-linear
         :active="isPatchPending"
@@ -14,23 +14,16 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editTagsDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editDescriptionDialogForm" @submit.prevent="isPatchPending">
         <v-card-text>
-          <p>Press enter to add a new tag. To delete a tag, use arrow keys to highlight and press Delete on keyboard.</p>
-          <v-combobox
-            v-model="newTags"
-            chips
-            multiple
-            filled
-            append-icon=""
-          >
-              <v-chip
-                small
-                close
-              >
-                {{ item }}
-              </v-chip>
-          </v-combobox>
+          <v-text-field
+            v-model.trim="newDescription"
+            label="Description"
+            hint="Enter a short description"
+            maxlength="80"
+            :disabled="isPatchPending"
+          ></v-text-field>
+          <small>Short description limited to a single line and 80 characters.</small>
         </v-card-text>
       </v-form>
       <v-snackbar
@@ -41,7 +34,7 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doSaveTags()" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Save</v-btn>
+        <v-btn @click="doSaveDescription()" color="primary" :disabled="isPatchPending">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -50,29 +43,29 @@
 <script>
 
 export default {
-  name: 'EditTagsDialog',
+  name: 'EditDescriptionDialog',
   props: {
-    tagList: {
-      Type: Array,
-      default: [],
+    description: {
+      Type: Text,
+      default: '',
     }
   },
-  emits: ['saveTags'],
+  emits: ['saveDescription'],
   created() {
-    this.newTags = this.tagList;
+    this.newDescription = this.description;
   },
   data: () => ({
     dialog: false,
     snackerMsg: '',
     showSnacker: false,
-    newTags: [],
+    newDescription: '',
     isPatchPending: false,
   }),
   computed: {
   },
   methods: {
-    async doSaveTags() {
-      this.$emit('saveTags');
+    async doSaveDescription() {
+      this.$emit('saveDescription');
     },
   },
 }

@@ -1,16 +1,54 @@
 <template>
   <v-container>
-    <v-row class="pl-4 pr-4">
-      <div class="text-h5">Organization {{ organization.name }}</div>
-      <v-spacer />
+    <v-row class="align-center">
+      <v-col cols="5">
+        <span class="text-h6">Organization {{ organization.name }} &nbsp;</span>
+        <span v-if="promotionPossible">
+          <v-icon
+            size="small"
+            @click.stop="openEditPromotionDialog()"
+            id="promotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            activator="#promotionButton"
+          >should {{selfPronoun}} promote this organization</v-tooltip>
+        </span>
+        <span v-else>
+          <v-icon
+            size="small"
+            color="grey"
+            id="disabledPromotionButton"
+          >mdi-bullhorn</v-icon>
+          <v-tooltip
+            v-if="!userCurrentOrganization"
+            activator="#disabledPromotionButton"
+          >must be logged in to promote anything</v-tooltip>
+          <v-tooltip
+            v-if="iAmThisOrg"
+            activator="#disabledPromotionButton"
+          >{{selfPronoun}} cannot self-promote {{selfName}}</v-tooltip>
+        </span>
+        <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
+        <p class="text-sm-body-2"><i>{{natureDetails}}</i></p>
+      </v-col>
+      <v-col cols="7">
+        <v-card max-height="200" overflow-y-visible>
+          <v-card-text>
+            <div v-html="longDescriptionHtml"></div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
     <v-spacer />
   </v-container>
   <v-container>
-    <p>Full Name: <b>{{ organization.name }}</b></p>
-    <p>Nature: <code>{{organization.type}}</code></p>
-  </v-container>
-  <v-container>
+    <v-card elevation="0" v-if="(organization.curation?.promoted || []).length > 0">
+      <v-card-title>Items we think you would like</v-card-title>
+      <v-card-text>
+        <promotions-viewer :promoted="organization.curation.promoted" />
+      </v-card-text>
+    </v-card>
+
     <v-card elevation="0">
       <v-card-title>Public Workspaces</v-card-title>
       <v-card-text>
@@ -20,80 +58,145 @@
             v-for="workspace in publicWorkspaces"
             :key="workspace._id"
           >
-            <v-card
+            <v-sheet
               class="mx-auto"
-              variant="elevated"
               link
               @click.stop="goToWorkspaceHome(workspace)"
             >
-              <template #title>
-                <div class="text-h6">{{ workspace.name }} <span class="text-body-2">({{ workspace.description }})</span></div>
-              </template>
-              <template #subtitle>
-                <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
-              </template>
-              <template v-slot:prepend>
-                <repr-viewer :workspace="workspace"/>
-              </template>
-            </v-card>
+              <one-promotion-sheet :curation="workspace.curation"></one-promotion-sheet>
+            </v-sheet>
           </v-col>
         </v-row>
       </v-card-text>
     </v-card>
+    <v-card v-if="!publicWorkspaces || publicWorkspaces.length === 0">
+      <v-card-subtitle>
+        no public workspaces yet
+      </v-card-subtitle>
+    </v-card>
+
+    <v-card elevation="0" v-if="organization.type === 'Open'">
+      <v-card-title>Membership</v-card-title>
+      <v-card-text>
+        <v-row class="mt-6">
+          <v-col
+            cols="6"
+            v-for="member in organization.users"
+            :key="member._id"
+          >
+            <v-sheet
+              class="mx-auto"
+              variant="elevated"
+              link
+              @click.stop="goToUserHome(member)"
+            >
+              <one-promotion-sheet :curation="member.curation"></one-promotion-sheet>
+            </v-sheet>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+    <v-card v-if="organization.type === 'Private'">
+      <v-card-subtitle>
+        membership not visible in Private organizations
+      </v-card-subtitle>
+    </v-card>
   </v-container>
+  <edit-promotion-dialog v-if="userCurrentOrganization" ref="editPromotionDialog" collection="organizations" :item-id="organization._id" :item-name="organization.name"></edit-promotion-dialog>
 </template>
 
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import ReprViewer from "@/components/ReprViewer.vue";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import {marked} from "marked";
+import PromotionsViewer from "@/components/PromotionsViewer.vue";
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {ReprViewer},
+  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],
+    natureDetails: 'tbd',
+    promotedItemsDetail: [],
   }),
   async mounted() {
-    this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
-    if (!this.targetOrgDetail) {
-      this.$router.push({ name: 'PageNotFound' });
-    }
-    if (this.targetOrgDetail.type === 'Personal') {
-      // if using viewing a 'personal' org, this is the wrong place. Send to the user home page which shows the personal org instead.
-      this.$router.push({ name: 'UserHome', params: { slug: this.targetOrgDetail.owner.username } });
-      return;
-    }
-    const wsList = await Workspace.find({
-      query: {
-        "organization.refName": this.organization.refName,
-        publicInfo: 'true',
-      }
-    })
-    this.publicWorkspacesDetail = wsList.data;
+    await this.refresh();
   },
   computed: {
     ...mapState('auth', ['user']),
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
+    ...mapGetters('app', ['selfPronoun', 'selfName']),
     targetOrgName: vm => vm.$route.params.slug,
     organization: vm => vm.targetOrgDetail,
     iAmThisOrg: vm => (vm.userCurrentOrganization !== undefined) && (vm.userCurrentOrganization?.refName === vm.targetOrgName),
+    promotionPossible: vm => vm.userCurrentOrganization && !vm.iAmThisOrg,
+    promotedItems: vm => vm.promotedItemsDetail,
     publicWorkspaces: vm => vm.publicWorkspacesDetail,
+    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || ""),
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.organization.refName, wsname: workspace.refName } });
     },
+    async goToUserHome(member) {
+      this.$router.push({ name: 'UserHome', params: { slug: member.username } });
+    },
+    async openEditPromotionDialog() {
+      this.$refs.editPromotionDialog.$data.dialog = true;
+    },
+    dateFormat(number) {
+      const date = new Date(number);
+      return date.toDateString();
+    },
+    async refresh() {
+      this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
+      if (!this.targetOrgDetail) {
+        this.$router.push({ name: 'PageNotFound' });
+      }
+      if (this.targetOrgDetail.type === 'Personal') {
+        // if using viewing a 'personal' org, this is the wrong place. Send to the user home page which shows the personal org instead.
+        this.$router.push({ name: 'UserHome', params: { slug: this.targetOrgDetail.owner.username } });
+        return;
+      }
+      const wsList = await Workspace.find({
+        query: {
+          "organization.refName": this.organization.refName,
+          publicInfo: 'true',
+        }
+      })
+      this.publicWorkspacesDetail = wsList.data;
+      if (this.targetOrgDetail.type==='Open') {
+        this.natureDetails = `An open organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+      } else {
+        this.natureDetails = `A private organization created on ${this.dateFormat(this.targetOrgDetail.createdAt)}.`
+      }
+      // mimic a list of curations for the membership for easier display
+      for (const index in this.targetOrgDetail.users) {
+        const user = this.targetOrgDetail.users[index];
+        let description = user.isAdmin ? 'administrator' : 'member';
+        const fakeCuration = {
+          _id: user._id,
+          collection: 'users',
+          name: user.name,
+          description: description,
+          representativeFile: null,
+        }
+        this.targetOrgDetail.users[index].curation = fakeCuration
+      }
+    }
   },
   watch: {
     async '$route'(to, from) {
       if (to.name === 'OrganizationHome') {
-        this.targetOrgDetail = await this.getOrgByIdOrNamePublic(this.targetOrgName);
+        await this.refresh();
       }
     }
   }
