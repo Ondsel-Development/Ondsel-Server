@@ -6,6 +6,7 @@ import { ArrayBufferToUtf8String } from '../utils/bufferutils.js';
 import { Property, PropertyGroup, PropertyType } from '../model/property.js';
 
 import * as fflate from 'fflate';
+import { OBJ_COLOR } from '@/threejs/libs/constants';
 
 const DocumentInitResult =
   {
@@ -41,6 +42,15 @@ class FreeCadObject
             return false;
         }
         return true;
+    }
+
+    GetColor() {
+      if (this.color) {
+        return this.color;
+      }
+
+      return new THREE.Color(OBJ_COLOR);
+
     }
 }
 
@@ -122,7 +132,8 @@ class FreeCadDocument
             for (let objectElement of objectElements) {
                 let name = objectElement.getAttribute ('name');
                 let type = objectElement.getAttribute ('type');
-                if (!this.IsSupportedType (type, name)) {
+                let fileName = `ondsel_${name}.brp`
+                if (!(this.IsSupportedType (type, name) || this.HasFile(fileName))) {
                     continue;
                 }
                 let object = new FreeCadObject (name, type);
@@ -149,6 +160,7 @@ class FreeCadDocument
                 }
 
                 let propertyElements = objectElement.getElementsByTagName ('Property');
+                let hasShapePrp = false;
                 for (let propertyElement of propertyElements) {
                     let propertyName = propertyElement.getAttribute ('name');
                     if (propertyName === 'Label') {
@@ -170,7 +182,21 @@ class FreeCadDocument
                         }
                         object.fileName = fileName;
                         object.fileContent = this.files[fileName];
+                        hasShapePrp = true;
                     }
+                }
+
+                if (!hasShapePrp) {
+                  let fileName = `ondsel_${name}.brp`
+                  if (!this.HasFile (fileName)) {
+                      continue;
+                  }
+                  let extension = GetFileExtension (fileName);
+                  if (extension !== 'brp' && extension !== 'brep') {
+                      continue;
+                  }
+                  object.fileName = fileName;
+                  object.fileContent = this.files[fileName];
                 }
 
                 let linkElements = objectElement.getElementsByTagName ('Link');
@@ -437,7 +463,8 @@ export class ImporterFcstd
             const index = Uint32Array.from(resultMesh.index.array);
             geometry.setIndex(new THREE.BufferAttribute(index, 1));
 
-            let material = new THREE.MeshPhongMaterial({color: object.color})
+            console.log(object)
+            let material = new THREE.MeshPhongMaterial({color: object.GetColor()})
             const mesh = new THREE.Mesh (geometry, material);
             mainObject.add(mesh);
         }
