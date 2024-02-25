@@ -28,6 +28,9 @@
           <template #subtitle>
             <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
           </template>
+          <template v-slot:prepend>
+            <repr-viewer :curation="workspace.curation"/>
+          </template>
           <template v-slot:append>
             <v-btn icon="mdi-cog" flat @click.stop="goToWorkspaceEdit(workspace)"/>
           </template>
@@ -57,12 +60,13 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
+import ReprViewer from "@/components/ReprViewer.vue";
 
 const { Organization, Workspace } = models.api;
 
 export default {
   name: 'UserWorkspaces',
-  components: { CreateWorkspaceDialog },
+  components: {ReprViewer, CreateWorkspaceDialog },
   mixins: [scrollListenerMixin],
   data: () => ({
     paginationData: {},

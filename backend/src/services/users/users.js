@@ -1,9 +1,9 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import axios from 'axios';
 import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
+import { sendCreateAccountNotificationToSlack } from '../../slack-notifications.js';
 import {
   userDataValidator,
   userPatchValidator,
@@ -31,6 +31,7 @@ import {
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
 import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
+import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -176,6 +177,7 @@ export const user = (app) => {
             "verifyShortToken",
             "verifyToken",
           ),
+          specialUserOrgCurationHandler,
           schemaHooks.validateData(userPatchValidator),
           uniqueUserPatchValidator,
         ),
@@ -190,7 +192,7 @@ export const user = (app) => {
         removeVerification(),
         createDefaultOrganization,
         createSampleModels,
-        sendNotificationToSlack,
+        sendCreateAccountNotificationToSlack,
       ],
       patch: [
         distributeUserSummariesHook
@@ -288,7 +290,12 @@ const createDefaultOrganization = async context => {
   const organizationService = context.app.service('organizations');
   const workspaceService = context.app.service('workspaces');
   const organization = await organizationService.create(
-    { name: 'Personal', refName: context.result._id.toString(), type: OrganizationTypeMap.personal },
+    {
+      name: 'Personal',
+      refName: context.result._id.toString(),
+      type: OrganizationTypeMap.personal,
+      curation: buildNewCurationForUser(context.result),
+    },
     { user: context.result }
   );
   const workspace = await workspaceService.create(
@@ -302,23 +309,6 @@ const createDefaultOrganization = async context => {
   return context;
 }
 
-
-const sendNotificationToSlack = async context => {
-  const webhookUrl = context.app.get('slackWebhookUrl');
-  if (webhookUrl) {
-    axios({
-      method: 'post',
-      url: webhookUrl,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        text: `🎉 New User Alert! 🎉\n\nName: *${context.result.name}*\nEmail: *${context.result.email}*`
-      }
-    });
-  }
-  return context;
-}
 
 const detectUsernameInId = async context => {
   const id = context.id.toString();

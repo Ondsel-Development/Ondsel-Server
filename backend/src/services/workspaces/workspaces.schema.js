@@ -13,6 +13,7 @@ import {organizationSummarySchema, OrganizationTypeMap} from "../organizations/o
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
+import {curationSchema} from "../../curation.schema.js";
 
 const groupsOrUsers = Type.Object(
   {
@@ -31,8 +32,7 @@ export const workspaceSchema = Type.Object(
     refNameHash: Type.Number(), // later indexed, used for finding case-insensitive duplicates
     open: Type.Boolean(),
     license: Type.Optional(Type.Union([Type.Null(), LicenseType])),
-    description: Type.String(),
-    long_description: Type.String(),
+    description: Type.String(), // limited by UI to
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
@@ -40,6 +40,7 @@ export const workspaceSchema = Type.Object(
     organization: organizationSummarySchema,
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
+    curation: Type.Optional(Type.Any()), // a curationSchema but I'm getting a circular ref error if I use that directly
   },
   { $id: 'Workspace', additionalProperties: false }
 )
@@ -68,7 +69,7 @@ export const workspaceResolver = resolve({
 
 export const workspaceExternalResolver = resolve({})
 
-export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory'];
+export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory', 'curation'];
 
 // Schema for creating new entries
 export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
@@ -116,7 +117,7 @@ export const workspaceDataResolver = resolve({
     }
     // else org.type === open, so force to true regardless of passed-in parameter
     return true;
-  }
+  },
 })
 
 // Schema for updating existing entries
@@ -130,8 +131,8 @@ export const workspacePatchResolver = resolve({
 
 // Schema for allowed query properties
 export const workspaceQueryProperties = Type.Pick(workspaceSchema, [
-  '_id', 'name', 'refName', 'open', 'license', 'description', 'long_description', 'refNameHash', 'organizationId',
-  'createdAt', 'rootDirectory'
+  '_id', 'name', 'refName', 'open', 'license', 'description', 'refNameHash', 'organizationId',
+  'createdAt', 'rootDirectory', 'curation',
 ])
 export const workspaceQuerySchema = Type.Intersect(
   [

@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { keywordsClient } from './services/keywords/keywords.shared.js'
+
 import { orgInvitesClient } from './services/org-invites/org-invites.shared.js'
 
 import { directoryClient } from './services/directories/directories.shared.js'
@@ -79,6 +81,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(authManagementClient)
 
   client.configure(orgInvitesClient)
+
+  client.configure(keywordsClient)
 
   return client
 }

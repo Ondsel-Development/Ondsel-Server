@@ -6,6 +6,7 @@ import {
   verifyBalanced
 } from "../../../accounting.js";
 import {LedgerMap, SubscriptionStateMap, SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
+import { sendNotificationToSlack } from '../../../slack-notifications.js';
 
 export async function DoRecurringSubscriptionPurchase(context, user) {
   // it is presumed that the processor has a confirmed charge at this point
@@ -46,6 +47,10 @@ export async function DoRecurringSubscriptionPurchase(context, user) {
   //
   context.data.success = true;
   context.data.resultMsg = "SUCCESS: " +  detail.desc;
+  await sendNotificationToSlack(
+    context,
+    `🎉 Recurring Subscription Alert! 🎉\n\nUser (name: *${user.name}*, email: *${user.email}*) user recurring subscription plan!\nPlan: *${user.tier}*`
+  )
 }
 
 function RecurringSubscriptionPurchaseVerification(context, user) {

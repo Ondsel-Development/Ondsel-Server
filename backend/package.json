@@ -73,6 +73,7 @@
     "lodash": "^4.17.21",
     "mongodb": "^5.1.0",
     "multer": "^1.4.5-lts.1",
+    "node-rake-v2": "^0.0.3",
     "nodemailer": "^6.9.5",
     "nodemailer-smtp-transport": "^2.7.4",
     "s3-blob-store": "^4.1.1",

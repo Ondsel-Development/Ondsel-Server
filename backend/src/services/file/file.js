@@ -7,7 +7,13 @@ import mongodb from 'mongodb'
 import swagger from 'feathers-swagger';
 import { hooks as schemaHooks } from '@feathersjs/schema';
 
-import {feedWorkspaceAndDirectory, addFileToDirectory, ensureUniqueCustFileName, buildRelatedUserDetails} from './helpers.js';
+import {
+  feedWorkspaceAndDirectory,
+  addFileToDirectory,
+  ensureUniqueCustFileName,
+  buildRelatedUserDetails,
+  checkForReadme, checkForUpdatedReadme, checkForDeletedReadme
+} from './helpers.js';
 import {
   fileDataValidator,
   filePatchValidator,
@@ -171,6 +177,7 @@ export const file = (app) => {
       all: [],
       create: [
         addFileToDirectory,
+        checkForReadme,
       ],
       patch: [
         distributeFileSummaries,
@@ -178,9 +185,11 @@ export const file = (app) => {
           context => context.$triggerLambda,
           triggerLambda
         ),
+        checkForUpdatedReadme,
       ],
       remove: [
         distributeFileDeletion,
+        checkForDeletedReadme,
       ]
     },
     error: {

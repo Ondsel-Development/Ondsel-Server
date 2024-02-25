@@ -34,21 +34,19 @@
                 variant="outlined"
                 color="default"
                 size="small"
-                @click.stop="openWorkspaceChangeNameDescDialog()"
+                @click.stop="openWorkspaceChangeNameDialog()"
               >
                 Change Name
               </v-btn>
               <div v-if="forbidNameChange"><i>{{forbidNameChangeReason}}</i></div>
+              <v-spacer></v-spacer>
+              <WorkspaceChangeNameDialog
+                :is-active="isWorkspaceChangeNameDialogActive"
+                :workspace="workspace"
+                ref="workspaceChangeNameDialog"
+              />
             </v-list-item-action>
           </template>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Slug</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspace.refName }}
-          </v-list-item-subtitle>
         </v-list-item>
 
         <v-divider />
@@ -119,18 +117,85 @@
                 variant="outlined"
                 color="default"
                 size="small"
-                @click.stop="openWorkspaceChangeNameDescDialog()"
+                @click.stop="openWorkspaceChangeDescDialog()"
               >
                 Change Description
               </v-btn>
               <v-spacer></v-spacer>
-              <WorkspaceChangeNameDescDialog
-                :is-active="isWorkspaceChangeNameDescDialogActive"
+              <WorkspaceChangeDescDialog
+                :is-active="isWorkspaceChangeDescDialogActive"
                 :workspace="workspace"
-                ref="workspaceChangeNameDescDialog"
+                ref="workspaceChangeDescDialog"
               />
             </v-list-item-action>
           </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Long Description</v-list-item-title>
+          <v-list-item-media>
+            <v-card>
+              <v-card-text>
+                <div v-html="longDescriptionHtml"></div>
+              </v-card-text>
+            </v-card>
+          </v-list-item-media>
+          <v-list-item-action>
+            <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root
+              directory of the workspace. The first 40 lines (or 2000 characters) are used for searching and display.</i>
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Tags</v-list-item-title>
+          <v-list-item-subtitle>
+            <div v-if="workspace.curation?.tags && workspace.curation?.tags?.length > 0">
+              <v-chip-group>
+                <v-chip v-for="(tag) in workspace.curation?.tags">{{tag}}</v-chip>
+              </v-chip-group>
+            </div>
+            <span v-else><i>None</i></span>
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openEditTagsDialog()"
+              >
+                Edit Tags
+              </v-btn>
+              <v-spacer></v-spacer>
+              <EditTagsDialog
+                :is-active="isEditTagsDialogActive"
+                :tagList="workspace.curation?.tags || []"
+                ref="editTagsDialog"
+                @save-tags="saveTags"
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
+          <v-list-item-subtitle>
+            {{workspace.curation?.representativeFile?.custFileName}}
+          </v-list-item-subtitle>
+          <v-list-item-media>
+            <v-card>
+              <v-card-text>
+                <repr-viewer :curation="workspace.curation"></repr-viewer>
+                <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
+              </v-card-text>
+            </v-card>
+          </v-list-item-media>
+          <v-list-item-action>
+            <i>To change this, visit the workspace, select the file, and click on the "camera" icon button.</i>
+          </v-list-item-action>
         </v-list-item>
 
       </v-list>
@@ -153,28 +218,39 @@ import { models } from '@feathersjs/vuex';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import ManageWorkspaceUsersTable from '@/components/ManageWorkspaceUsersTable.vue';
 import ManageWorkspaceGroupsTable from '@/components/ManageWorkspaceGroupsTable.vue';
-import WorkspaceChangeNameDescDialog from "@/components/WorkspaceChangeNameDescDialog.vue";
+import WorkspaceChangeNameDialog from "@/components/WorkspaceChangeNameDialog.vue";
+import WorkspaceChangeDescDialog from "@/components/WorkspaceChangeDescDialog.vue";
 import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vue";
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
+import ReprViewer from "@/components/ReprViewer.vue";
+import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import _ from 'lodash';
+import {marked} from "marked";
+
+const { Workspace } = models.api;
 
 const { Organization } = models.api;
 
 export default {
   name: "EditWorkspace",
   components: {
+    EditTagsDialog,
+    ReprViewer,
     WorkspaceChangeLicenseDialog,
     WorkspaceOpenSelectDialog,
-    WorkspaceChangeNameDescDialog, ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
+    WorkspaceChangeNameDialog, WorkspaceChangeDescDialog, ManageWorkspaceGroupsTable, ManageWorkspaceUsersTable },
   data: () => ({
     workspaceDetail: {groupsOrUsers:[]},
     slug: '',
     changableVisibility: false,
     changableVisibilityReason: 'tbd',
-    isWorkspaceChangeNameDescDialogActive: false,
+    isWorkspaceChangeNameDialogActive: false,
+    isWorkspaceChangeDescDialogActive: false,
     forbidNameChange: true,
     forbidNameChangeReason: 'tbd',
     isWorkspaceOpenSelectDialogActive: false,
     isWorkspaceChangeLicenseDialogActive: false,
+    isEditTagsDialogActive: false,
   }),
   async created() {
     this.slug = this.$route.params.slug;
@@ -233,6 +309,7 @@ export default {
     workspace: vm => vm.workspaceDetail,
     organization: vm => Organization.getFromStore(vm.workspace.organizationId),
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
+    longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || "*None*"),
   },
   methods: {
     ...mapActions('app', ['setCurrentOrganization', 'getWorkspaceByNamePrivate', 'getUserByIdOrNamePublic']),
@@ -243,12 +320,16 @@ export default {
         this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.slug, wsname: this.workspace.refName } });
       }
     },
-    async openWorkspaceChangeNameDescDialog() {
-      this.isWorkspaceChangeNameDescDialogActive = true;
-      this.$refs.workspaceChangeNameDescDialog.$data.newWorkspaceName = this.workspace.name;
-      this.$refs.workspaceChangeNameDescDialog.$data.newWorkspaceDesc = this.workspace.description;
-      this.$refs.workspaceChangeNameDescDialog.$data.allowNameChange = !this.forbidNameChange;
-      this.$refs.workspaceChangeNameDescDialog.$data.dialog = true;
+    async openWorkspaceChangeNameDialog() {
+      this.isWorkspaceChangeNameDialogActive = true;
+      this.$refs.workspaceChangeNameDialog.$data.newWorkspaceName = this.workspace.name;
+      this.$refs.workspaceChangeNameDialog.$data.allowNameChange = !this.forbidNameChange;
+      this.$refs.workspaceChangeNameDialog.$data.dialog = true;
+    },
+    async openWorkspaceChangeDescDialog() {
+      this.isWorkspaceChangeDescDialogActive = true;
+      this.$refs.workspaceChangeDescDialog.$data.newWorkspaceDesc = this.workspace.description;
+      this.$refs.workspaceChangeDescDialog.$data.dialog = true;
     },
     async openWorkspaceOpenSelectDialog() {
       this.isWorkspaceOpenSelectDialogActive = true;
@@ -260,6 +341,33 @@ export default {
       this.$refs.workspaceChangeLicenseDialog.$data.newLicense = this.workspace.license || "null";
       this.$refs.workspaceChangeLicenseDialog.$data.dialog = true;
     },
+    async openEditTagsDialog() {
+      this.isEditTagsDialogActive = true;
+      this.$refs.editTagsDialog.$data.newTags = this.workspace.curation?.tags || [];
+      this.$refs.editTagsDialog.$data.dialog = true;
+    },
+    async saveTags() {
+      this.$refs.editTagsDialog.$data.isPatchPending = true;
+      const tagList = this.$refs.editTagsDialog.$data.newTags;
+      const lowercaseTags = tagList.map(tag => tag.toLowerCase().trim());
+      const cleanTags = _.uniq(lowercaseTags);
+      let curation = this.workspace.curation || {};
+      curation.tags = cleanTags;
+      await Workspace.patch(
+        this.workspace._id,
+        {
+          curation: curation,
+        }
+      ).then(() => {
+        this.$refs.editTagsDialog.$data.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editTagsDialog.snackerMsg = e.message;
+        this.$refs.editTagsDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editTagsDialog.$data.isPatchPending = false;
+    }
   }
 }
 </script>

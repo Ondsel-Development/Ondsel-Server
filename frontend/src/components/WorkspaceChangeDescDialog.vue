@@ -6,7 +6,7 @@
   >
     <v-card width="600" max-height="800">
       <template v-slot:title>
-        <div class="text-center">Change Name and Description</div>
+        <div class="text-center">Change Short Description</div>
       </template>
       <v-progress-linear
         :active="isPatchPending"
@@ -14,23 +14,8 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceDescDialogForm" @submit.prevent="isPatchPending">
         <v-card-text>
-          <v-text-field
-            v-if="allowNameChange"
-            v-model.trim="newWorkspaceName"
-            label="Name"
-            hint="Enter the workspace's name"
-            maxlength="48"
-            :rules="[rules.isRequired]"
-            :disabled="isPatchPending"
-          ></v-text-field>
-          <v-text-field
-            v-if="!allowNameChange"
-            v-model.trim="newWorkspaceName"
-            label="Name"
-            disabled
-          ></v-text-field>
           <v-text-field
             v-model.trim="newWorkspaceDesc"
             label="Description"
@@ -39,6 +24,7 @@
             :rules="[rules.isRequired]"
             :disabled="isPatchPending"
           ></v-text-field>
+          <small>Short description limited to a single line and 80 characters.</small>
         </v-card-text>
       </v-form>
       <v-snackbar
@@ -49,7 +35,7 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doNameDescChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
+        <v-btn @click="doDescChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -63,7 +49,7 @@ import { mapState } from 'vuex';
 const { Workspace } = models.api;
 
 export default {
-  name: 'workspaceChangeNameDescDialog',
+  name: 'workspaceChangeDescDialog',
   props: {
     workspace: {}
   },
@@ -76,7 +62,6 @@ export default {
     },
     snackerMsg: '',
     showSnacker: false,
-    newWorkspaceName: '',
     allowNameChange: true,
     newWorkspaceDesc: '',
   }),
@@ -84,17 +69,15 @@ export default {
     ...mapState('workspaces', ['isPatchPending']),
   },
   methods: {
-    async doNameDescChange() {
-      this.newWorkspaceName = this.newWorkspaceName.trim();
+    async doDescChange() {
       this.newWorkspaceDesc = this.newWorkspaceDesc.trim();
-      const { valid } = await this.$refs.workspaceNameDescDialogForm.validate();
+      const { valid } = await this.$refs.workspaceDescDialogForm.validate();
       if (!valid) {
         return;
       }
       await Workspace.patch(
         this.workspace._id,
         {
-          name: this.newWorkspaceName,
           description: this.newWorkspaceDesc,
         }
       ).then(() => {

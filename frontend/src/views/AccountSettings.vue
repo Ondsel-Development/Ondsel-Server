@@ -46,9 +46,104 @@
 
         <v-divider />
         <v-list-item>
-          <v-list-item-title>Public Page</v-list-item-title>
+          <v-list-item-title>Short Description</v-list-item-title>
           <v-list-item-subtitle>
-            <a :href="userHomeUrl">User {{user.name}}</a>
+            <div v-if="organization.description">
+              {{ organization.description }}
+            </div>
+            <div v-else>
+              <i>none supplied</i>
+            </div>
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openEditDescriptionDialog()"
+              >
+                Edit Description
+              </v-btn>
+              <v-spacer></v-spacer>
+              <EditDescriptionDialog
+                :is-active="isChangeDescriptionDialogActive"
+                :long-description-md="organization.description || ''"
+                ref="editDescriptionDialog"
+                @save-description="saveDescriptionDialog"
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Long Description</v-list-item-title>
+          <v-list-item-media>
+            <v-card>
+              <v-card-text>
+                <div v-html="longDescriptionHtml"></div>
+              </v-card-text>
+            </v-card>
+          </v-list-item-media>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openEditLongDescriptionMdDialog()"
+              >
+                Edit Long Description
+              </v-btn>
+              <v-spacer></v-spacer>
+              <EditLongDescriptionMdDialog
+                :is-active="isOrgChangeLongDescriptionMdDialogActive"
+                :long-description-md="organization.curation?.longDescriptionMd || ''"
+                ref="editLongDescriptionMdDialog"
+                @save-long-description-md="saveLongDescriptionMd"
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Tags</v-list-item-title>
+          <v-list-item-subtitle>
+            <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
+              <v-chip-group>
+                <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
+              </v-chip-group>
+            </div>
+            <span v-else><i>None</i></span>
+          </v-list-item-subtitle>
+          <template #append>
+            <v-list-item-action>
+              <v-btn
+                variant="outlined"
+                color="default"
+                size="small"
+                @click.stop="openEditTagsDialog()"
+              >
+                Edit Tags
+              </v-btn>
+              <v-spacer></v-spacer>
+              <EditTagsDialog
+                :is-active="isEditTagsDialogActive"
+                :tagList="organization.curation?.tags || []"
+                ref="editTagsDialog"
+                @save-tags="saveTags"
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Links</v-list-item-title>
+          <v-list-item-subtitle>
+            Public Summary: <a :href="userHomeUrl">{{userHomeUrl}}</a>
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>
@@ -116,6 +211,13 @@
           </template>
         </v-list-item>
 
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Links</v-list-item-title>
+          <v-list-item-subtitle>
+            Workspace Management: <a :href="userWorkspaceUrl">{{userWorkspaceUrl}}</a>
+          </v-list-item-subtitle>
+        </v-list-item>
       </v-list>
     </v-card>
     <v-card
@@ -162,6 +264,9 @@
 
       </v-list>
     </v-card>
+    <v-row class="mt-12">
+      <organization-promotions-table :organization="organization" />
+    </v-row>
   </v-container>
 </template>
 
@@ -173,33 +278,47 @@ import {SubscriptionTypeMap} from "@/store/services/users";
 import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
 import VerifyEmailDialog from "@/components/VerifyEmailDialog.vue";
 import UserChangeNameDialog from "@/components/UserChangeNameDialog.vue";
+import EditLongDescriptionMdDialog from "@/components/EditLongDescriptionMdDialog.vue";
+import {marked} from "marked";
+import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import _ from "lodash";
+import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
+import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 
-const { Model } = models.api;
+const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
-  components: {UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},
+  components: {
+    OrganizationPromotionsTable,
+    EditDescriptionDialog,
+    EditTagsDialog, EditLongDescriptionMdDialog, UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},
   data() {
     return {
       isResetPasswordDialogActive: false,
       isVerifyEmailDialogActive: false,
       isUserChangeNameDialogActive: false,
+      isChangeDescriptionDialogActive: false,
+      isEditTagsDialogActive: false,
+      isOrgChangeLongDescriptionMdDialogActive: false,
       remainingFiles: "processing...",
       userHomeUrl: 'tbd',
+      userWorkspaceUrl: 'tbd',
+      organization: {},
     }
   },
   computed: {
-    // resetPassword() {
-    //   return resetPassword
-    // },
     SubscriptionTypeMap() {
       return SubscriptionTypeMap
     },
+    longDescriptionHtml: vm => marked(vm.organization?.curation?.longDescriptionMd || "*None*"),
     ...mapState('auth', { loggedInUser: 'payload', user: 'user' }),
   },
   async mounted() {
     await this.getRemainingFiles();
     this.userHomeUrl = `/user/${this.user.username}/`;
+    this.userWorkspaceUrl = `/user/${this.user.username}/workspaces`
+    this.organization = await Organization.get(this.user.personalOrganization._id)
   },
   methods: {
     gotoChooseTier() {
@@ -209,8 +328,13 @@ export default {
       this.$router.push({name: 'AccountHistory', params: {slug: this.user.username}});
     },
     async getRemainingFiles() {
-      const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
-      this.remainingFiles = this.user.calculateRemainingModels(models.data.length);
+      try {
+        const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
+        this.remainingFiles = this.user.calculateRemainingModels(models.data.length);
+      } catch(e) {
+        console.log('during model count query: ' + e.message);
+        this.remainingFiles = 'unknown at moment'; // this can happen during a network hiccup because of S3 dependency
+      }
     },
     openResetPasswordDialog() {
       this.isResetPasswordDialogActive = true;
@@ -223,7 +347,83 @@ export default {
     openUserChangeNameDialog() {
       this.isUserChangeNameDialogActive = true;
       this.$refs.userChangeNameDialog.$data.dialog = true;
-    }
+    },
+    async openEditDescriptionDialog() {
+      this.isChangeDescriptionDialogActive = true;
+      this.$refs.editDescriptionDialog.$data.newTags = this.organization.curation?.tags || [];
+      this.$refs.editDescriptionDialog.$data.dialog = true;
+    },
+    async saveDescriptionDialog() {
+      this.$refs.editDescriptionDialog.$data.isPatchPending = true;
+      const description = this.$refs.editDescriptionDialog.$data.newDescription;
+      await Organization.patch(
+        this.organization._id,
+        {
+          description: description,
+        }
+      ).then(() => {
+        this.$refs.editDescriptionDialog.$data.dialog = false;
+        this.isChangeDescriptionDialogActive = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editDescriptionDialog.snackerMsg = e.message;
+        this.$refs.editDescriptionDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editDescriptionDialog.$data.isPatchPending = false;
+    },
+    async openEditLongDescriptionMdDialog() {
+      this.isOrgChangeLongDescriptionMdDialogActive = true;
+      this.$refs.editLongDescriptionMdDialog.$data.dialog = true;
+    },
+    async saveLongDescriptionMd() {
+      this.$refs.editLongDescriptionMdDialog.$data.isPatchPending = true;
+      const longDescriptionMd = this.$refs.editLongDescriptionMdDialog.$data.newLongDescriptionMd;
+      let curation = this.organization.curation || {};
+      curation.longDescriptionMd = longDescriptionMd;
+      await Organization.patch(
+        this.organization._id,
+        {
+          curation: curation,
+        }
+      ).then(() => {
+        this.$refs.editLongDescriptionMdDialog.$data.dialog = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editLongDescriptionMdDialog.snackerMsg = e.message;
+        this.$refs.editLongDescriptionMdDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editLongDescriptionMdDialog.$data.isPatchPending = false;
+    },
+    async openEditTagsDialog() {
+      this.isEditTagsDialogActive = true;
+      this.$refs.editTagsDialog.$data.newTags = this.organization.curation?.tags || [];
+      this.$refs.editTagsDialog.$data.dialog = true;
+    },
+    async saveTags() {
+      this.$refs.editTagsDialog.$data.isPatchPending = true;
+      const tagList = this.$refs.editTagsDialog.$data.newTags;
+      const lowercaseTags = tagList.map(tag => tag.toLowerCase().trim());
+      const cleanTags = _.uniq(lowercaseTags);
+      let curation = this.organization.curation || {};
+      curation.tags = cleanTags;
+      await Organization.patch(
+        this.organization._id,
+        {
+          curation: curation,
+        }
+      ).then(() => {
+        this.$refs.editTagsDialog.$data.dialog = false;
+        this.isEditTagsDialogActive = false;
+      }).catch((e) => {
+        const msg = e.message;
+        this.$refs.editTagsDialog.snackerMsg = e.message;
+        this.$refs.editTagsDialog.showSnacker = true;
+        console.log(msg);
+      });
+      this.$refs.editTagsDialog.$data.isPatchPending = false;
+    },
   }
 }
 </script>
