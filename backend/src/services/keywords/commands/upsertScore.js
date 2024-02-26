@@ -24,7 +24,18 @@ export const upsertScore = async context => {
     curation: newCuration,
   }
   let keywordObj = await safelyGetKeyword(context, keyword);
-  let sortedMatches = keywordObj.sortedMatches || [];
+  let originalMatches = keywordObj.sortedMatches || [];
+  // remove any legacy duplicates while maintaining order
+  let sortedMatches = originalMatches.filter((match, index) => {
+    return index === originalMatches.findIndex(m => match.curation._id.toString() === m.curation._id.toString());
+  });
+  let duplicatesFound = sortedMatches.length !== originalMatches.length;
+  if (duplicatesFound) {
+    console.log(`note: duplicates found in keyword \"${keyword}\"`);
+  } else {
+    // be paranoid and point "sortedMatches" to the original
+    sortedMatches = originalMatches
+  }
 
   // make decision and modify sortedMatches (even if not replacing)
   let actionToTake = ACT_DO_NOTHING;
@@ -53,50 +64,63 @@ export const upsertScore = async context => {
 
   // take action
 
-  switch(actionToTake) {
-    case ACT_DO_NOTHING:
-      await db.updateOne(
-        { _id: keyword },
-        {
-          $setOnInsert: { _id: keyword },
-        },
-        { upsert: true }
-      )
-      break;
-    case ACT_APPEND:
-      await db.updateOne(
-        { _id: keyword },
-        {
-          $setOnInsert: { _id: keyword },
-          $push: { sortedMatches: newItem },
-        },
-        { upsert: true }
-      )
-      break;
-    case ACT_REPLACE:
-      await db.updateOne(
-        { _id: keyword },
-        {
-          $setOnInsert: { _id: keyword },
-          $set: { sortedMatches: sortedMatches }, // there is probably a fancier way with $[]
-        },
-        { upsert: true }
-      )
-      break;
-    case ACT_REMOVE:
-      await db.updateOne(
-        { _id: keyword },
-        {
-          $setOnInsert: { _id: keyword },
-          $pull: {
-            sortedMatches: {
-              'curation._id': newItem.curation._id,
-            }
+  if (duplicatesFound) {
+    // if a duplicate was found, replace the entire list
+    await db.updateOne(
+      { _id: keyword },
+      {
+        $setOnInsert: { _id: keyword },
+        $set: { sortedMatches: sortedMatches },
+      },
+      { upsert: true }
+    )
+  } else {
+    // otherwise be more careful
+    switch(actionToTake) {
+      case ACT_DO_NOTHING:
+        await db.updateOne(
+          { _id: keyword },
+          {
+            $setOnInsert: { _id: keyword },
           },
-        },
-        { upsert: true }
-      )
-      break;
+          { upsert: true }
+        )
+        break;
+      case ACT_APPEND:
+        await db.updateOne(
+          { _id: keyword },
+          {
+            $setOnInsert: { _id: keyword },
+            $push: { sortedMatches: newItem },
+          },
+          { upsert: true }
+        )
+        break;
+      case ACT_REPLACE:
+        await db.updateOne(
+          { _id: keyword },
+          {
+            $setOnInsert: { _id: keyword },
+            $set: { sortedMatches: sortedMatches }, // there is probably a fancier way with $[]
+          },
+          { upsert: true }
+        )
+        break;
+      case ACT_REMOVE:
+        await db.updateOne(
+          { _id: keyword },
+          {
+            $setOnInsert: { _id: keyword },
+            $pull: {
+              sortedMatches: {
+                'curation._id': newItem.curation._id,
+              }
+            },
+          },
+          { upsert: true }
+        )
+        break;
+    }
   }
 
   // cleanup context
