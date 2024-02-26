@@ -60,7 +60,10 @@ export const modelResolver = resolve({
   objUrl: virtual(async(message, context) => {
     const { app } = context;
     if (message.isObjGenerated) {
-      let r = await app.service('upload').get(`${message._id.toString()}_generated.BREP`);
+      let r = await app.service('upload').get(`${message._id.toString()}_generated.FCSTD`);
+      if (!r.url) {
+        r = await app.service('upload').get(`${message._id.toString()}_generated.BREP`);
+      }
       if (!r.url) {
         r = await app.service('upload').get(`${message._id.toString()}_generated.OBJ`);
       }

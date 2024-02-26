@@ -106,22 +106,24 @@ export class Viewer {
     this.importer.LoadFile(this.url, this.onFileConverted.bind(this));
   }
 
-  onFileConverted(objs) {
-    this.obj = objs[0];
+  onFileConverted(model) {
+    this.obj = model.GetCompoundObject();
+    this.scene.add(this.obj)
     this.lineSegments = new THREE.Group()
-    for (let child of this.obj.children) {
-      if (child instanceof THREE.Mesh) {
-        if (child.geometry !== undefined) {
-          const edges = new THREE.EdgesGeometry(child.geometry);
-          const line = new THREE.LineSegments(
-            edges,
-            new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-          );
-          this.lineSegments.add(line);
+    for (let obj of this.obj.children) {
+      for (let child of obj.children) {
+        if (child instanceof THREE.Mesh) {
+          if (child.geometry !== undefined) {
+            const edges = new THREE.EdgesGeometry(child.geometry);
+            const line = new THREE.LineSegments(
+              edges,
+              new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+            );
+            this.lineSegments.add(line);
+          }
         }
       }
     }
-    this.scene.add(this.obj);
     if (ViewerConfig.showEdges) {
       this.scene.add(this.lineSegments);
     }
