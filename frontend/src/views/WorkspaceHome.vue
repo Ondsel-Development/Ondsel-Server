@@ -69,19 +69,15 @@
         >cannot promote a default workspace</v-tooltip>
       </span>
     </span>
-    <v-row class="mt-10">
-      <v-col cols="6">
-        <one-promotion-sheet :curation="workspace.curation" :message="generalDescription"></one-promotion-sheet>
-      </v-col>
-      <v-col cols="6">
-        <v-card max-height="15em" min-height="8em">
-          <v-card-text  class="overflow-auto">
-            <div v-if="longDescriptionHtml" v-html="longDescriptionHtml"></div>
-            <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <v-container class="d-flex flex-wrap">
+      <one-promotion-sheet class="ma-2" max-width="30em" :curation="workspace.curation" :message="generalDescription"></one-promotion-sheet>
+      <v-card class="ma-2 flex-md-grow-1" min-width="22em" max-height="15em">
+        <v-card-text class="overflow-auto">
+          <div v-if="longDescriptionHtml" v-html="longDescriptionHtml"></div>
+          <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
+        </v-card-text>
+      </v-card>
+    </v-container>
     <v-row class="mt-10">
       <v-text-field
         v-model="activePath"
