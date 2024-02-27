@@ -64,6 +64,14 @@
               account settings
             </v-btn>
           </v-list-item>
+          <v-list-item>
+            <v-btn
+              variant="text"
+              @click="gotoDownloadAndExplore()"
+            >
+              download & explore
+            </v-btn>
+          </v-list-item>
         </v-list>
 
         <v-divider></v-divider>
@@ -136,6 +144,10 @@ export default {
     },
     gotoAccountSettings() {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
+      this.menu = false;
+    },
+    gotoDownloadAndExplore() {
+      this.$router.push({name: 'DownloadAndExplore'});
       this.menu = false;
     },
   },

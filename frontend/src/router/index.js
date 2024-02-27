@@ -32,6 +32,7 @@ import OrganizationHome from "@/views/OrganizationHome.vue";
 import PermissionError from "@/views/PermissionError.vue";
 import UserHome from "@/views/UserHome.vue";
 import SearchResults from "@/views/SearchResults.vue";
+import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -136,6 +137,12 @@ const routes = [
     component: SearchResults,
     name: 'SearchResults',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/download-and-explore',
+    component: DownloadAndExplore,
+    name: 'DownloadAndExplore',
+    meta: { requiresAuth: true },
   },
   //
   // ONDSEL pages

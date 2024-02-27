@@ -1,5 +1,27 @@
 <template>
   <v-container fluid class="fill-height">
+    <v-timeline v-if="postSignUp" direction="horizontal">
+      <v-timeline-item
+        dot-color="green"
+      >
+        <v-card-title>Sign Up</v-card-title>
+        <v-card-subtitle>complete</v-card-subtitle>
+      </v-timeline-item>
+      <v-timeline-item
+        dot-color="green"
+      >
+        <v-card-title>Verify Email</v-card-title>
+      </v-timeline-item>
+      <v-timeline-item
+        dot-color="blue"
+      >
+        <v-card-title><i>Choose Tier</i></v-card-title>
+        <v-card-subtitle>choose below</v-card-subtitle>
+      </v-timeline-item>
+      <v-timeline-item>
+        <v-card-title>Download / Explore</v-card-title>
+      </v-timeline-item>
+    </v-timeline>
     <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" width="896" flat>
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container>
@@ -132,6 +154,7 @@ export default {
     return {
       result: {},
       stripePurchasePeerUrl: import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL,
+      postSignUp: false,
     }
   },
   computed: {
@@ -146,10 +169,15 @@ export default {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
       await this.goHome();
     }
+    this.postSignUp = this.$route.query.psu;
   },
   methods: {
     async goHome() {
-      this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}})
+      if (this.postSignUp) {
+        this.$router.push({name: 'DownloadAndExplore', query: {psu: true}})
+      } else {
+        this.$router.push({name: 'Models', params: {slug: this.loggedInUser.user.username}})
+      }
     },
     async downgradeToSolo() {
       this.$router.push({name: 'DowngradeToSolo'})

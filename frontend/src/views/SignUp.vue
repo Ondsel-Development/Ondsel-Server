@@ -1,5 +1,21 @@
 <template>
   <v-container fluid class="fill-height">
+    <v-timeline direction="horizontal">
+      <v-timeline-item
+        dot-color="blue"
+      >
+        <v-card-title><i>Sign Up</i></v-card-title>
+      </v-timeline-item>
+      <v-timeline-item>
+        <v-card-title>Verify Email</v-card-title>
+      </v-timeline-item>
+      <v-timeline-item>
+        <v-card-title>Choose Tier</v-card-title>
+      </v-timeline-item>
+      <v-timeline-item>
+        <v-card-title>Download / Explore</v-card-title>
+      </v-timeline-item>
+    </v-timeline>
     <v-card title="Sign Up to Ondsel" class="mx-auto" width="400" flat>
       <template v-slot:loader="{  }">
         <v-progress-linear
