@@ -20,7 +20,7 @@
             <td class="font-weight-medium">Tags</td>
             <td>
               <v-chip-group>
-                <v-chip v-for="(tag) in sharedModel.curation.tags">{{tag}}</v-chip>
+                <v-chip v-for="(tag) in sharedModel.curation.tags" :key="tag">{{tag}}</v-chip>
               </v-chip-group>
             </td>
           </tr>
@@ -61,6 +61,28 @@
               </v-btn>
             </td>
           </tr>
+          <tr v-if="organization && fileObject && fileObject.workspace?.open === true">
+            <td class="font-weight-medium">Workspace</td>
+            <td>
+              <v-btn
+                flat
+                variant="plain"
+                append-icon="mdi-open-in-new"
+                class="text-body-1 font-weight-medium pa-0"
+                style="text-decoration: none;"
+                @click.stop="gotoWorkspace()"
+                target="_blank"
+              >
+                {{ fileObject.workspace.name }}
+                <span v-if="organization.type === 'Personal' && user">
+                   of {{ user.name }} (Personal)
+                </span>
+                <span v-else>
+                  of {{ organization.name }}
+                </span>
+              </v-btn>
+            </td>
+          </tr>
         </tbody>
       </v-table>
     </v-card-item>
@@ -96,6 +118,7 @@ export default {
       if (this.sharedModel) {
         return this.sharedModel.cloneModel.file;
       }
+      return null;
     }
   },
   methods: {
@@ -112,7 +135,20 @@ export default {
         this.organization = await this.getOrgByIdOrNamePublic(this.workspace.organizationId);
       }
       this.isDataFetchingInProgress = false;
-    }
+    },
+    async gotoWorkspace() {
+      if (this.organization.type === 'Personal') {
+        this.$router.push({
+          name: 'UserWorkspaceHome',
+          params: {slug: this.user.username, wsname: this.fileObject.workspace.refName}
+        });
+      } else {
+        this.$router.push({
+          name: 'OrgWorkspaceHome',
+          params: {slug: this.organization.refName, wsname: this.fileObject.workspace.refName}
+        });
+      }
+    },
   }
 }
 </script>
