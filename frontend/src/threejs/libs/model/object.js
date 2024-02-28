@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { OBJ_COLOR } from '@/threejs/libs/constants';
+
 export class ModelObject3D
 {
     constructor() {
@@ -69,4 +72,10 @@ export class ModelObject3D
         return this.color;
     }
 
+    GetColor() {
+        if (this.color) {
+            return this.color;
+        }
+        return new THREE.Color(OBJ_COLOR);
+    }
 }

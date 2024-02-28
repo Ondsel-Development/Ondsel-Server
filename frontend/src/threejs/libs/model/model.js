@@ -27,4 +27,13 @@ export class Model extends ModelObject3D
         }
         return object;
     }
+
+    findObjectByUuid(uuid) {
+        for (let obj of this.objects) {
+            if (obj.object3d.uuid === uuid) {
+                return obj;
+            }
+        }
+        return null;
+    }
 }
