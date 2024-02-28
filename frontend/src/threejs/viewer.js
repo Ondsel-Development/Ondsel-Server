@@ -33,6 +33,7 @@ export class Viewer {
     this.selectedObjs = []
     this.onLoadCallback = onLoadCallback;
     this.importer = new Importer();
+    this.model = null;
 
     this.initViewer();
   }
@@ -107,6 +108,7 @@ export class Viewer {
   }
 
   onFileConverted(model) {
+    this.model = model;
     this.obj = model.GetCompoundObject();
     this.scene.add(this.obj)
     this.lineSegments = new THREE.Group()
@@ -164,15 +166,19 @@ export class Viewer {
     this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     const selectedObj = getSelectedObject(this.raycaster, this.camera, this.pointer, this.obj);
+    const modelObject3d = this.model.findObjectByUuid(selectedObj.parent?.uuid);
     if (selectedObj) {
       const objColorStr = selectedObj.material.color.getHexString();
-      if (parseInt(objColorStr, 16) === parseInt(OBJ_COLOR)) {
+      const color = selectedObj ? parseInt(modelObject3d.GetColor().getHexString(), 16) : parseInt(OBJ_COLOR);
+
+      if (parseInt(objColorStr, 16) === color) {
         selectedObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
         if (!this.selectedObjs.includes(selectedObj)) {
           this.selectedObjs.push(selectedObj);
         }
       } else {
-        selectedObj.material.color.set(OBJ_COLOR);
+        const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
+        selectedObj.material.color.set(color);
         const index = this.selectedObjs.indexOf(selectedObj);
         if (index > -1) {
           this.selectedObjs.splice(index, 1);
