@@ -292,9 +292,13 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
             }
           }
           if (newCuration.representativeFile.thumbnailUrlCache === null) {
-            const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
-            newCuration.representativeFile.thumbnailUrlCache = r.url || null;
-            needPatch = true;
+            try {
+              const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
+              newCuration.representativeFile.thumbnailUrlCache = r.url || null;
+              needPatch = true;
+            } catch (e) {
+              console.log(`Error while getting url for shared-models curation with id ${context.beforePatchCopy._id} : ` + e.message);
+            }
           }
           break;
         default:

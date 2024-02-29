@@ -73,12 +73,12 @@
                 @click.stop="gotoWorkspace()"
                 target="_blank"
               >
-                {{ fileObject.workspace.name }}
+                {{ fileObject.workspace.name }}&nbsp;
                 <span v-if="organization.type === 'Personal' && user">
-                   of {{ user.name }} (Personal)
+                   of user {{ user.name }}
                 </span>
                 <span v-else>
-                  of {{ organization.name }}
+                  of org {{ organization.name }}
                 </span>
               </v-btn>
             </td>
