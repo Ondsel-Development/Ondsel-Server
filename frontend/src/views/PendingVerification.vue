@@ -8,7 +8,7 @@
         <v-card-subtitle>complete</v-card-subtitle>
       </v-timeline-item>
       <v-timeline-item
-        dot-color="blue"
+        dot-color="orange"
       >
         <v-card-title><i>Verify Email</i></v-card-title>
         <v-card-subtitle>link sent to your email</v-card-subtitle>

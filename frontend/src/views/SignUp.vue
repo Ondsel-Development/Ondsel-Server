@@ -2,7 +2,7 @@
   <v-container fluid class="fill-height">
     <v-timeline direction="horizontal">
       <v-timeline-item
-        dot-color="blue"
+        dot-color="orange"
       >
         <v-card-title><i>Sign Up</i></v-card-title>
       </v-timeline-item>

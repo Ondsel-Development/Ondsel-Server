@@ -13,7 +13,7 @@
         <v-card-title>Verify Email</v-card-title>
       </v-timeline-item>
       <v-timeline-item
-        dot-color="blue"
+        dot-color="orange"
       >
         <v-card-title><i>Choose Tier</i></v-card-title>
         <v-card-subtitle>choose below</v-card-subtitle>
