@@ -38,7 +38,7 @@ export default {
         this.viewerHeight,
         this.viewport3d,
         window,
-        () => this.$emit('model:loaded')
+        () => this.$emit('model:loaded', this.viewer)
       )
       this.viewport3d.appendChild(this.viewer.renderer.domElement);
     },

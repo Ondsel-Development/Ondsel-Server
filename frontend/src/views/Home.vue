@@ -44,6 +44,7 @@
     </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded"/>
+  <ObjectsListView v-if="viewer" :viewer="viewer" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -201,12 +202,13 @@ import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import MangeSharedModels from '@/components/MangeSharedModels';
 import ModelInfo from '@/components/ModelInfo.vue';
+import ObjectsListView from '@/components/ObjectsListView.vue';
 
 const { Model, SharedModel, Workspace, Organization } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog, ModelInfo },
+  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog, ModelInfo, ObjectsListView },
   data: () => ({
     dialog: true,
     model: null,
@@ -221,6 +223,7 @@ export default {
     isDrawerOpen: false,
     drawerActiveWindow: null,
     generatePublicLinkValue: null,
+    viewer: null,
   }),
   mounted() {
     new Dropzone(this.$refs.dropzone, this.dropzoneOptions);
@@ -412,7 +415,7 @@ export default {
       await nextTick();
       await this.$refs.modelInfoDrawer.fetchData();
     },
-    modelLoaded() {
+    modelLoaded(viewer) {
       if (this.isReloadingOBJ) {
         this.$refs.attributeViewer.$data.dialog = false;
         this.isReloadingOBJ = false;
@@ -420,6 +423,7 @@ export default {
         this.dialog = false;
       }
       this.isModelLoaded = true;
+      this.viewer = viewer;
       setTimeout(() => this.uploadThumbnail(), 500);
     },
   },
