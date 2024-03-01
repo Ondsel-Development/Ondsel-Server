@@ -144,6 +144,19 @@ const routes = [
     name: 'DownloadAndExplore',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/payment-processor-redirect/:prefilled_email/:utm_content',
+    redirect: to => {
+      let stripePurchasePeerUrl = import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL;
+      let prefilled_email = to.params.prefilled_email;
+      let utm_content = to.params.utm_content;
+      let url = `${stripePurchasePeerUrl}?prefilled_email=${prefilled_email}&utm_content=${utm_content}`;
+      window.open(url, "_blank");
+      return { path: ''} // don't actually go anywhere internally
+    },
+    name: 'PaymentProcessorForPeerSubscription',
+    meta: { requiresAuth: true },
+  },
   //
   // ONDSEL pages
   //
