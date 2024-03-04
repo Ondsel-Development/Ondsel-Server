@@ -1,5 +1,12 @@
 <template>
-  <v-list v-model:opened="open" width="250" height="400" style="position: absolute; top: 70px">
+  <v-list
+    v-model:opened="open"
+    v-model:selected="active"
+    width="250"
+    height="90%"
+    select-strategy="independent"
+    style="position: absolute; top: 70px; background: transparent;"
+  >
     <v-list-group value="Objects">
       <template v-slot:activator="{ props }">
         <v-list-item
@@ -10,6 +17,8 @@
       <v-list-item
         v-for="object3d of objects3d"
         :title="object3d.name"
+        :value="object3d"
+        @click.stop="objectSelected(object3d)"
       >
         <template #append>
           <v-btn
@@ -33,11 +42,25 @@ export default {
     viewer: Object,
   },
   data: () => ({
-    open: [],
+    open: ['Objects'],
+    active: [],
   }),
   computed: {
     objects3d: vm => _.get(vm.viewer, 'model.objects', [])
   },
+  methods: {
+    objectSelected(object3d) {
+      this.viewer.selectGivenObject(object3d);
+    },
+    selectListItem(object3d) {
+      const index = this.active.indexOf(object3d);
+      if (index > -1) {
+        this.active.splice(index, 1);
+      } else {
+        this.active.push(object3d);
+      }
+    }
+  }
 }
 
 </script>

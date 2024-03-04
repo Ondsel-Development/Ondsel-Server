@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
 import { Importer } from '@/threejs/libs/import/importer';
 import { OBJ_COLOR, OBJ_HIGHLIGHTED_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
+import { getObject3dFromScene } from '@/threejs/libs/utils/sceneutils';
 
 
 const ViewerConfig = {
@@ -14,7 +15,7 @@ const ViewerConfig = {
 
 export class Viewer {
 
-  constructor(url, width, height, viewport, window, onLoadCallback) {
+  constructor(url, width, height, viewport, window, onLoadCallback, onModelClickCallback=null) {
     this.url = url;
     this.width = width;
     this.height = height;
@@ -32,6 +33,7 @@ export class Viewer {
     this.raycaster = new THREE.Raycaster();
     this.selectedObjs = []
     this.onLoadCallback = onLoadCallback;
+    this.onModelClickCallback = onModelClickCallback;
     this.importer = new Importer();
     this.model = null;
 
@@ -155,7 +157,7 @@ export class Viewer {
 
   fitCameraToObjects() {
     if (this.selectedObjs.length > 0) {
-      fitCameraToSelection(this.camera, this.controls, this.selectedObjs);
+      fitCameraToSelection(this.camera, this.controls, this.selectedObjs.map(o => o.object3d));
     } else {
       fitCameraToSelection(this.camera, this.controls, this.obj);
     }
@@ -166,24 +168,29 @@ export class Viewer {
     this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     const selectedObj = getSelectedObject(this.raycaster, this.camera, this.pointer, this.obj);
-    const modelObject3d = this.model.findObjectByUuid(selectedObj.parent?.uuid);
     if (selectedObj) {
-      const objColorStr = selectedObj.material.color.getHexString();
-      const color = selectedObj ? parseInt(modelObject3d.GetColor().getHexString(), 16) : parseInt(OBJ_COLOR);
-
-      if (parseInt(objColorStr, 16) === color) {
-        selectedObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
-        if (!this.selectedObjs.includes(selectedObj)) {
-          this.selectedObjs.push(selectedObj);
-        }
-      } else {
-        const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
-        selectedObj.material.color.set(color);
-        const index = this.selectedObjs.indexOf(selectedObj);
-        if (index > -1) {
-          this.selectedObjs.splice(index, 1);
-        }
+      const modelObject3d = this.model.findObjectByUuid(selectedObj.parent?.uuid);
+      if (modelObject3d) {
+        this.selectGivenObject(modelObject3d, true);
       }
+    }
+  }
+
+  selectGivenObject(modelObject3d, triggerObjectClickEvent=false) {
+    const meshObj = getObject3dFromScene(this.scene, modelObject3d);
+    if (!this.selectedObjs.includes(modelObject3d)) {
+      meshObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
+      this.selectedObjs.push(modelObject3d);
+    } else {
+      const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
+      meshObj.material.color.set(color);
+      const index = this.selectedObjs.indexOf(modelObject3d);
+      if (index > -1) {
+        this.selectedObjs.splice(index, 1);
+      }
+    }
+    if (triggerObjectClickEvent && this.onModelClickCallback) {
+      this.onModelClickCallback(modelObject3d);
     }
   }
 

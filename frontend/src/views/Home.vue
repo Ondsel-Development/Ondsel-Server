@@ -43,8 +43,8 @@
       >Export model</v-tooltip>
     </v-btn>
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" @model:loaded="modelLoaded"/>
-  <ObjectsListView v-if="viewer" :viewer="viewer" />
+  <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
+  <ObjectsListView v-if="viewer" ref="objectListView" :viewer="viewer" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -426,6 +426,9 @@ export default {
       this.viewer = viewer;
       setTimeout(() => this.uploadThumbnail(), 500);
     },
+    objectClicked(object3d) {
+      this.$refs.objectListView.selectListItem(object3d);
+    }
   },
   watch: {
     'model.isObjGenerated'(v) {

@@ -463,7 +463,6 @@ export class ImporterFcstd
             const index = Uint32Array.from(resultMesh.index.array);
             geometry.setIndex(new THREE.BufferAttribute(index, 1));
 
-            console.log(object)
             let material = new THREE.MeshPhongMaterial({color: object.GetColor()})
             const mesh = new THREE.Mesh (geometry, material);
             mainObject.add(mesh);

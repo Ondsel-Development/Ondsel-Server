@@ -14,7 +14,7 @@ export default {
       default: false,
     },
   },
-  emits: ['model:loaded'],
+  emits: ['model:loaded', 'object:clicked'],
   data: () => ({
     obj: null,
     objUrl: '',
@@ -38,7 +38,8 @@ export default {
         this.viewerHeight,
         this.viewport3d,
         window,
-        () => this.$emit('model:loaded', this.viewer)
+        () => this.$emit('model:loaded', this.viewer),
+        object3d => this.$emit('object:clicked', object3d)
       )
       this.viewport3d.appendChild(this.viewer.renderer.domElement);
     },
