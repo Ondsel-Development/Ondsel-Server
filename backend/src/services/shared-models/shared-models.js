@@ -221,11 +221,22 @@ const createClone = async (context) => {
     });
 
     if (isObjGenerated) {
-      const isBrepExists = await uploadService.checkFileExists(
+      const isFcstdExists = await uploadService.checkFileExists(
         context.app.get('awsClientModelBucket'),
-        `${model._id.toString()}_generated.BREP`
+        `${model._id.toString()}_generated.FCSTD`
       )
-      const extension = isBrepExists ? 'BREP' : 'OBJ';
+      let extension = 'OBJ';
+      if (isFcstdExists) {
+        extension = 'FCSTD';
+      } else {
+        const isBrepExists = await uploadService.checkFileExists(
+          context.app.get('awsClientModelBucket'),
+          `${model._id.toString()}_generated.BREP`
+        )
+        if (isBrepExists) {
+          extension = 'BREP';
+        }
+      }
       await uploadService.copy(
         `${model._id.toString()}_generated.${extension}`,
         `${newModel._id.toString()}_generated.${extension}`,
