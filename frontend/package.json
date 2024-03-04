@@ -17,6 +17,7 @@
     "core-js": "^3.8.3",
     "dropzone": "^6.0.0-beta.2",
     "feathers-hooks-common": "^7.0.1",
+    "fflate": "^0.8.1",
     "marked": "^7.0.5",
     "occt-import-js": "^0.0.21",
     "roboto-fontface": "*",

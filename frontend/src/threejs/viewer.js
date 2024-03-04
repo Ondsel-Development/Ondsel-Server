@@ -33,6 +33,7 @@ export class Viewer {
     this.selectedObjs = []
     this.onLoadCallback = onLoadCallback;
     this.importer = new Importer();
+    this.model = null;
 
     this.initViewer();
   }
@@ -106,22 +107,25 @@ export class Viewer {
     this.importer.LoadFile(this.url, this.onFileConverted.bind(this));
   }
 
-  onFileConverted(objs) {
-    this.obj = objs[0];
+  onFileConverted(model) {
+    this.model = model;
+    this.obj = model.GetCompoundObject();
+    this.scene.add(this.obj)
     this.lineSegments = new THREE.Group()
-    for (let child of this.obj.children) {
-      if (child instanceof THREE.Mesh) {
-        if (child.geometry !== undefined) {
-          const edges = new THREE.EdgesGeometry(child.geometry);
-          const line = new THREE.LineSegments(
-            edges,
-            new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
-          );
-          this.lineSegments.add(line);
+    for (let obj of this.obj.children) {
+      for (let child of obj.children) {
+        if (child instanceof THREE.Mesh) {
+          if (child.geometry !== undefined) {
+            const edges = new THREE.EdgesGeometry(child.geometry);
+            const line = new THREE.LineSegments(
+              edges,
+              new THREE.LineBasicMaterial({ color: EDGE_COLOR, linewidth: 1}),
+            );
+            this.lineSegments.add(line);
+          }
         }
       }
     }
-    this.scene.add(this.obj);
     if (ViewerConfig.showEdges) {
       this.scene.add(this.lineSegments);
     }
@@ -162,15 +166,19 @@ export class Viewer {
     this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     const selectedObj = getSelectedObject(this.raycaster, this.camera, this.pointer, this.obj);
+    const modelObject3d = this.model.findObjectByUuid(selectedObj.parent?.uuid);
     if (selectedObj) {
       const objColorStr = selectedObj.material.color.getHexString();
-      if (parseInt(objColorStr, 16) === parseInt(OBJ_COLOR)) {
+      const color = selectedObj ? parseInt(modelObject3d.GetColor().getHexString(), 16) : parseInt(OBJ_COLOR);
+
+      if (parseInt(objColorStr, 16) === color) {
         selectedObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
         if (!this.selectedObjs.includes(selectedObj)) {
           this.selectedObjs.push(selectedObj);
         }
       } else {
-        selectedObj.material.color.set(OBJ_COLOR);
+        const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
+        selectedObj.material.color.set(color);
         const index = this.selectedObjs.indexOf(selectedObj);
         if (index > -1) {
           this.selectedObjs.splice(index, 1);

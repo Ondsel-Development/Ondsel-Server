@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {BadRequest} from "@feathersjs/errors";
 import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
+import {buildUserSummary} from "../users/users.distrib.js";
 import * as http from "http";
 import * as https from "https";
 

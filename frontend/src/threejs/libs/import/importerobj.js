@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OBJ_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
+import { ModelObject3D } from '@/threejs/libs/model/object';
+import { Model } from '@/threejs/libs/model/model';
 
 export class ImporterObj {
 
   constructor() {
+    this.model = new Model ();
     this.file = null;
     this.objLoader = new OBJLoader();
     this.objects = [];
@@ -27,6 +30,7 @@ export class ImporterObj {
       fileUrl,
       // called when resource is loaded
       (object) => {
+        let object3d = new ModelObject3D ();
         object.traverse((child) => {
           if ( child instanceof THREE.Mesh ) {
             child.material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})
@@ -39,8 +43,9 @@ export class ImporterObj {
           }
         })
         object.add(lineSegments);
-        this.objects.push(object);
-        callback(this.objects);
+        object3d.SetObject3d(object);
+        this.model.AddObject(object3d);
+        callback(this.model);
       },
       // called when loading is in progresses
       function (xhr) {
