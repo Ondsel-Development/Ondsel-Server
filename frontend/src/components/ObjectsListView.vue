@@ -16,7 +16,7 @@
       </template>
       <v-list-item
         v-for="object3d of objects3d"
-        :title="object3d.name"
+        :title="object3d.name || 'Default'"
         :value="object3d"
         @click.stop="objectSelected(object3d)"
       >
