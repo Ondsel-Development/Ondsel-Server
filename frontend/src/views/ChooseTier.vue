@@ -1,99 +1,70 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-timeline v-if="postSignUp" direction="horizontal">
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Sign Up</v-card-title>
-        <v-card-subtitle>complete</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Verify Email</v-card-title>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="orange"
-      >
-        <v-card-title><i>Choose Tier</i></v-card-title>
-        <v-card-subtitle>choose below</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item>
-        <v-card-title>Download / Explore</v-card-title>
-      </v-timeline-item>
-    </v-timeline>
-    <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" width="896" flat>
+  <v-container>
+    <signup-progress-bar step="2" msg="choose below"></signup-progress-bar>
+    <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" flat>
       <v-card-title>Select Subscription Tier</v-card-title>
-      <v-container>
-        <v-row align="stretch">
-          <v-col cols="4">
-            <v-card class="fill-height d-flex flex-column" variant="tonal" @click="soloClicked()">
-              <v-card-title>Solo</v-card-title>
-              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
-              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
-              <v-card-text>
-                <v-list>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Full 3D CAD design suite for the desktop</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 1GB to the online vault. open models only</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Version history</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Multiple open workspaces</v-list-item>
-                </v-list>
-              </v-card-text>
-              <v-spacer></v-spacer>
-              <v-card-actions>
-                <v-btn
-                  variant="outlined"
-                >{{soloOptions.text}}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-          <v-col cols="4">
-            <v-card class="fill-height d-flex flex-column" variant="tonal" @click="peerClicked()">
-              <v-card-title>Peer</v-card-title>
-              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
-              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
-              <v-card-text>
-                <v-list>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Solo</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 10GB to the online vault. 100 compute minutes</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Open organizations for team management</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private workspaces and models for personal work</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Control what viewers can download from the vault</v-list-item>
-                </v-list>
-              </v-card-text>
-              <v-spacer></v-spacer>
-              <v-card-actions>
-                <v-btn
-                  variant="outlined"
-                >{{peerOptions.text}}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-          <v-col cols="4">
-            <v-card class="fill-height d-flex flex-column" variant="tonal" @click="enterpriseClicked()">
-              <v-card-title>Enterprise</v-card-title>
-              <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
-              <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
-              <v-card-text>
-                <v-list>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Peer</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 50GB to the online vault. 500 compute minutes</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private and open organizations for team management</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Organization workspaces</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Outside collaborators</v-list-item>
-                  <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Ability to run custom scripts</v-list-item>
-                </v-list>
-              </v-card-text>
-              <v-spacer></v-spacer>
-              <v-card-actions>
-                <v-btn
-                  variant="outlined"
-                  disabled
-                >{{enterpriseOptions.text}}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-container class="d-flex flex-wrap">
+        <v-card class="ma-2" width="22em" variant="tonal" @click="soloClicked()">
+          <v-card-title>Solo</v-card-title>
+          <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
+          <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-text>
+            <v-list>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Full 3D CAD design suite for the desktop</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 1GB to the online vault. open models only</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Version history</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Multiple open workspaces</v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-spacer></v-spacer>
+          <v-card-actions>
+            <v-btn
+              variant="outlined"
+            >{{soloOptions.text}}</v-btn>
+          </v-card-actions>
+        </v-card>
+        <v-card class="ma-2" width="22em" variant="tonal" @click="peerClicked()">
+          <v-card-title>Peer</v-card-title>
+          <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
+          <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-text>
+            <v-list>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Solo</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 10GB to the online vault. 100 compute minutes</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Open organizations for team management</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private workspaces and models for personal work</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Control what viewers can download from the vault</v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-spacer></v-spacer>
+          <v-card-actions>
+            <v-btn
+              variant="outlined"
+            >{{peerOptions.text}}</v-btn>
+          </v-card-actions>
+        </v-card>
+        <v-card class="ma-2" width="22em" variant="tonal" @click="enterpriseClicked()">
+          <v-card-title>Enterprise</v-card-title>
+          <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
+          <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-text>
+            <v-list>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Peer</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 50GB to the online vault. 500 compute minutes</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Private and open organizations for team management</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Organization workspaces</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Outside collaborators</v-list-item>
+              <v-list-item><template v-slot:prepend><v-icon icon="mdi-clock-outline"/>&nbsp;</template>Ability to run custom scripts</v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-spacer></v-spacer>
+          <v-card-actions>
+            <v-btn
+              variant="outlined"
+              disabled
+            >{{enterpriseOptions.text}}</v-btn>
+          </v-card-actions>
+        </v-card>
       </v-container>
     </v-card>
   </v-container>
@@ -104,9 +75,11 @@
 import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
+import SignupProgressBar from "@/components/SignupProgressBar.vue";
 
 export default {
   name: 'ChooseTier',
+  components: {SignupProgressBar},
   data() {
     return {
       result: {},

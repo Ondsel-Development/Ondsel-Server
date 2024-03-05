@@ -1,32 +1,6 @@
 <template>
   <v-container class="d-flex flex-wrap">
-    <v-timeline v-if="postSignUp" direction="horizontal">
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Sign Up</v-card-title>
-        <v-card-subtitle>complete</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Verify Email</v-card-title>
-        <v-card-subtitle>complete</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Choose Tier</v-card-title>
-        <v-card-subtitle>complete</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="orange"
-      >
-        <v-card-title><i>Download / Explore</i></v-card-title>
-        <v-card-subtitle>recommend downloading Ondsel SE next</v-card-subtitle>
-      </v-timeline-item>
-    </v-timeline>
-
+    <signup-progress-bar step="3" msg="recommend downloading Ondsel SE next"></signup-progress-bar>
     <v-card flat>
       <v-card-title>Download</v-card-title>
       <v-card-text>
@@ -35,10 +9,10 @@
           <v-card-subtitle>v 2024.1.0</v-card-subtitle>
           <v-card-text>
             <v-container class="d-flex flex-row">
-              <v-container max-width="10em" class="d-flex justify-end">
-                <v-avatar width="9em" rounded="0">
+              <v-container max-width="8em" class="d-flex justify-end">
+                <v-avatar width="7em" rounded="0">
                   <v-img
-                    width="8em"
+                    width="6em"
                     alt="Linux"
                     src="https://ondsel.com/img/os_linux.svg"
                   />
@@ -72,10 +46,10 @@
             </v-container>
             <p/>
             <v-container class="d-flex flex-row">
-              <v-container max-width="10em" class="d-flex justify-end">
-                <v-avatar width="9em" rounded="0">
+              <v-container max-width="8em" class="d-flex justify-end">
+                <v-avatar width="7em" rounded="0">
                   <v-img
-                    width="8em"
+                    width="6em"
                     alt="Mac"
                     src="https://ondsel.com/img/os_mac.svg"
                   />
@@ -108,10 +82,10 @@
               </v-container>
             </v-container>
             <v-container class="d-flex flex-row mt-4">
-              <v-container width="10em" class="d-flex justify-end">
-                <v-avatar width="9em" rounded="0">
+              <v-container width="8em" class="d-flex justify-end">
+                <v-avatar width="7em" rounded="0">
                   <v-img
-                    width="8em"
+                    width="6em"
                     alt="Windows"
                     src="https://ondsel.com/img/os_windows.svg"
                   />
@@ -165,9 +139,11 @@
 
 import {mapState} from "vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
+import SignupProgressBar from "@/components/SignupProgressBar.vue";
 
 export default {
   name: 'DownloadAndExplore',
+  components: {SignupProgressBar},
   data() {
     return {
       postSignUp: false,

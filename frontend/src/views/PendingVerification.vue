@@ -1,26 +1,7 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-timeline direction="horizontal">
-      <v-timeline-item
-        dot-color="green"
-      >
-        <v-card-title>Sign Up</v-card-title>
-        <v-card-subtitle>complete</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item
-        dot-color="orange"
-      >
-        <v-card-title><i>Verify Email</i></v-card-title>
-        <v-card-subtitle>link sent to your email</v-card-subtitle>
-      </v-timeline-item>
-      <v-timeline-item>
-        <v-card-title>Choose Tier</v-card-title>
-      </v-timeline-item>
-      <v-timeline-item>
-        <v-card-title>Download / Explore</v-card-title>
-      </v-timeline-item>
-    </v-timeline>
-    <v-card class="mx-auto" width="896" flat>
+  <v-container fluid>
+    <signup-progress-bar step="1" msg="a link was sent to your email"></signup-progress-bar>
+    <v-card class="mx-auto mt-8" width="22em" border flat>
       <v-card-title>Pending Verification</v-card-title>
       <v-card-text>
         <p>
@@ -37,9 +18,11 @@
 <script>
 
 import {mapState} from "vuex";
+import SignupProgressBar from "@/components/SignupProgressBar.vue";
 
 export default {
   name: 'PendingVerification',
+  components: {SignupProgressBar},
   data() {
     return {
       result: {},
