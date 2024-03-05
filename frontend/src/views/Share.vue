@@ -51,7 +51,8 @@
     </v-btn>
 
   </v-navigation-drawer>
-  <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded"/>
+  <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
+  <ObjectsListView v-if="viewer" ref="objectListView" :viewer="viewer" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -170,12 +171,13 @@ import ExportModelDialog from '@/components/ExportModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
 import ModelInfo from '@/components/ModelInfo.vue';
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import ObjectsListView from '@/components/ObjectsListView.vue';
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: {EditPromotionDialog, ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo },
+  components: {EditPromotionDialog, ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo, ObjectsListView},
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -189,6 +191,7 @@ export default {
     isShareLinkDialogActive: false,
     isDrawerOpen: false,
     name: '',
+    viewer: null,
   }),
   async created() {
     const shareModelId = this.$route.params.id;
@@ -286,7 +289,7 @@ export default {
       this.isShareLinkDialogActive = true;
       this.$refs.shareLinkDialog.$data.dialog = true;
     },
-    modelLoaded() {
+    modelLoaded(viewer) {
       if (this.isReloadingOBJ) {
         this.$refs.attributeViewer.$data.dialog = false;
         this.isReloadingOBJ = false;
@@ -294,6 +297,7 @@ export default {
         this.dialog = false;
       }
       this.isModelLoaded = true;
+      this.viewer = viewer;
       setTimeout(() => this.uploadThumbnail(), 500);
     },
     async modelInfoDrawerClicked() {
@@ -303,6 +307,9 @@ export default {
     openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
+    objectClicked(object3d) {
+      this.$refs.objectListView.selectListItem(object3d);
+    }
   },
   watch: {
     async 'model.isObjGenerated'(v) {
