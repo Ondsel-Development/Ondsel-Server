@@ -5,15 +5,13 @@
     max-width="120em"
     rounded="lg"
   >
-    <v-container>
-      <v-container>
-        <div class="d-flex justify-lg-space-between">
-          <v-sheet max-width="38em">
-            {{translateCollection(curation.collection)}}
-          </v-sheet>
-        </div>
-      </v-container>
-      <div class="d-flex justify-start">
+    <v-container class="flex-column">
+      <div class="d-flex justify-end">
+        <v-sheet max-width="38em">
+          {{translateCollection(curation.collection)}}
+        </v-sheet>
+      </div>
+      <div class="d-flex flex-wrap justify-start">
         <v-sheet width="10em">
           <repr-viewer :curation="curation"/>
         </v-sheet>

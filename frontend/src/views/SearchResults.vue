@@ -1,9 +1,10 @@
 <template>
-  <v-card class="mx-auto" width="896" flat>
+  <v-card class="mx-auto" max-width="896" flat>
     <v-card-title>Search Results</v-card-title>
     <v-card-subtitle>{{searchText}}</v-card-subtitle>
     <v-card-text>
-        <v-row class="mt-12">
+      <v-container class="flex-column">
+        <v-row>
           <v-col
             cols="12"
             v-if="results.length===0"
@@ -25,6 +26,7 @@
             </v-sheet>
           </v-col>
         </v-row>
+      </v-container>
     </v-card-text>
   </v-card>
 </template>
