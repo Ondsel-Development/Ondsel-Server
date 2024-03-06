@@ -217,7 +217,7 @@ export default {
             await this.acceptAgreement.create();
             await this.sleep(200);  // wait for mongodb to distribute
             await this.login(); // now use the new db data
-            this.$router.push({name: 'PendingVerification'}).then(() => { this.$router.go() })
+            this.$router.push({name: 'RedirectToPendingVerification'}); //.then(() => { this.$router.go() })
           })
           .catch((e) => {
             if (e.message === 'Invalid: Username already taken') {

@@ -1,6 +1,6 @@
 <template>
-  <v-card width="100%" class="mb-2">
-    <v-timeline v-if="showProgressBar" direction="horizontal" border>
+  <v-card class="mb-2">
+    <v-timeline v-if="showProgressBar" direction="horizontal" class="overflow-y-auto" border>
 
       <v-timeline-item :dot-color="itemDotColor[0]">
         <v-card-title :class="itemTitleClass[0]">Sign Up</v-card-title>

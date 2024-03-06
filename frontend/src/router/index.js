@@ -92,6 +92,17 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    // this strange pattern is used to later "auto-close" the pending verification page after 30 seconds.
+    // Without the "open" replacing "_self", the page is not controlled by the script. Then you would get a
+    // "Scripts may close only the windows that were opened by it." error message when attempting to `window.close()`.
+    path: '/redirect-to-pending-verification',
+    redirect: to => {
+      window.open('/pending-verification', "_self");
+      return { path: ''}
+    },
+    name: 'RedirectToPendingVerification',
+  },
+  {
     path: '/pending-verification',
     component: PendingVerification,
     name: 'PendingVerification',

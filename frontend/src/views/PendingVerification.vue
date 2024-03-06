@@ -28,10 +28,23 @@ export default {
       result: {},
     }
   },
+  mounted: function () {
+    window.setInterval(() => {
+      close();
+    }, 30000)  // close this windows after 30 seconds
+  },
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
   },
   methods: {
+  },
+  watch: {
+  //   async '$route'(to) {
+  //     console.log(to.name);
+  //     if (to.name === 'ChooseTier') {
+  //       this.$router.push({name: 'LensHome'});
+  //     }
+  //   }
   }
 }
 </script>
