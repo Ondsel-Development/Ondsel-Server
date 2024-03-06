@@ -3,6 +3,7 @@ import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
 import _ from "lodash";
 import {userSummarySchema} from "./services/users/users.subdocs.schema.js";
+import {buildFileSummary} from "./services/file/file.distrib.js";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -243,6 +244,14 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
         needPatch = true;
       }
+      if (newCuration.collection === 'shared-models') {
+        if (!newCuration.name) {
+          if (newCuration.representativeFile) {
+            newCuration.name = newCuration.representativeFile.custFileName;
+            needPatch = true;
+          }
+        }
+      }
       //
       // description (pulled from parent, usually)
       //
@@ -269,15 +278,35 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // representative file
       //
-      if (newCuration.collection === 'workspaces') {
-        if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
-          changeFound = true;
-        }
-      } else {
-        if (newCuration.representativeFile) {
-          newCuration.representativeFile = null;
-          console.log("MINOR ERROR: a `representativeFile` was set for a non-workspace curation. setting to null.");
-        }
+      switch (newCuration.collection) {
+        case 'workspaces':
+          if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
+            changeFound = true;
+          }
+          break;
+        case 'shared-models':
+          if (!newCuration.representativeFile) {
+            if (context.beforePatchCopy.model.file) {
+              newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
+              needPatch = true;
+            }
+          }
+          if (newCuration.representativeFile.thumbnailUrlCache === null) {
+            try {
+              const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
+              newCuration.representativeFile.thumbnailUrlCache = r.url || null;
+              needPatch = true;
+            } catch (e) {
+              console.log(`Error while getting url for shared-models curation with id ${context.beforePatchCopy._id} : ` + e.message);
+            }
+          }
+          break;
+        default:
+          if (newCuration.representativeFile) {
+            newCuration.representativeFile = null;
+            console.log("MINOR ERROR: a `representativeFile` was set for a non-workspace curation. setting to null.");
+          }
+          break;
       }
       //
       // handle keyword generation
