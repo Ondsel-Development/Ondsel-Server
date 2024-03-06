@@ -1,7 +1,7 @@
 <template>
   <v-container class="d-flex flex-column justify-center">
     <signup-progress-bar step="3" msg="recommend downloading Ondsel SE next"></signup-progress-bar>
-    <v-container class="d-flex flex-wrap">
+    <v-container class="d-flex flex-wrap justify-center">
       <v-card flat>
         <v-card-title>Download</v-card-title>
         <v-card-text>
@@ -104,6 +104,126 @@
                     x86_64.7z
                   </v-btn>
                   <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Windows-x86_64.7z-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                </v-container>
+              </v-container>
+            </v-card-text>
+          </v-card>
+
+          <v-card class="mt-4">
+            <v-card-title>Pre-Releases</v-card-title>
+            <v-card-text class="overflow-y-auto" >
+              <b>The latest pre-release version of Ondsel ES was built on 2024-02-23T21:43:46Z</b>
+              <p>
+                ⚠️ These are intended for testing purposes only. Please don't use them for regular work. ⚠️
+              </p>
+              <v-container class="d-flex flex-row">
+                <v-container max-width="8em" class="d-flex justify-end">
+                  <v-avatar width="7em" rounded="0">
+                    <v-img
+                      width="6em"
+                      alt="Linux"
+                      src="https://ondsel.com/img/os_linux.svg"
+                    />
+                  </v-avatar>
+                </v-container>
+                <v-container style="border-left: 4px solid black;">
+                  <v-expansion-panels>
+                    <v-expansion-panel title="for testing">
+                      <v-expansion-panel-text>
+                        <v-btn
+                          prepend-icon="mdi-download-box"
+                          size="large"
+                          variant="outlined"
+                          class="text-none justify-start"
+                          min-width="16em"
+                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Linux-aarch64.AppImage"
+                        >
+                          aarch.AppImage
+                        </v-btn>
+                        <p/>
+                        <v-btn
+                          prepend-icon="mdi-download-box"
+                          size="large"
+                          variant="outlined"
+                          class="text-none justify-start mt-6"
+                          min-width="16em"
+                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Linux-x86_64.AppImage"
+                        >
+                          x86_64.AppImage
+                        </v-btn>
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </v-container>
+              </v-container>
+              <p/>
+              <v-container class="d-flex flex-row">
+                <v-container max-width="8em" class="d-flex justify-end">
+                  <v-avatar width="7em" rounded="0">
+                    <v-img
+                      width="6em"
+                      alt="Mac"
+                      src="https://ondsel.com/img/os_mac.svg"
+                    />
+                  </v-avatar>
+                </v-container>
+                <v-container style="border-left: 4px solid black;">
+                  <v-expansion-panels>
+                    <v-expansion-panel title="for testing">
+                      <v-expansion-panel-text>
+                        <v-btn
+                          prepend-icon="mdi-download-box"
+                          size="large"
+                          variant="outlined"
+                          class="text-none justify-start"
+                          min-width="16em"
+                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-macOS-apple-silicon-arm64.dmg"
+                        >
+                          arm64.dmg
+                        </v-btn>
+                        <p/>
+                        <v-btn
+                          prepend-icon="mdi-download-box"
+                          size="large"
+                          variant="outlined"
+                          class="text-none justify-start mt-6"
+                          min-width="16em"
+                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-macOS-intel-x86_64.dmg"
+                        >
+                          x86_64.dmg
+                        </v-btn>
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </v-container>
+              </v-container>
+              <v-container class="d-flex flex-row mt-4">
+                <v-container width="8em" class="d-flex justify-end">
+                  <v-avatar width="7em" rounded="0">
+                    <v-img
+                      width="6em"
+                      alt="Windows"
+                      src="https://ondsel.com/img/os_windows.svg"
+                    />
+                  </v-avatar>
+                </v-container>
+                <v-container style="border-left: 4px solid black;">
+                  <v-expansion-panels>
+                    <v-expansion-panel title="for testing">
+                      <v-expansion-panel-text>
+                        <v-btn
+                          prepend-icon="mdi-download-box"
+                          size="large"
+                          variant="outlined"
+                          class="text-none justify-start mt-4"
+                          min-width="16em"
+                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Windows-x86_64.7z"
+                        >
+                          x86_64.7z
+                        </v-btn>
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
                 </v-container>
               </v-container>
             </v-card-text>
