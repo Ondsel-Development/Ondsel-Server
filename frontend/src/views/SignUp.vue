@@ -1,6 +1,7 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-card title="Sign Up to Ondsel" class="mx-auto" width="400" flat>
+  <v-container fluid>
+    <signup-progress-bar step="0" msg="start with the form"></signup-progress-bar>
+    <v-card title="Sign Up to Ondsel" class="mx-auto mt-8" width="22em" flat>
       <template v-slot:loader="{  }">
         <v-progress-linear
           :active="isCreatePending"
@@ -122,7 +123,6 @@
     </v-snackbar>
     <v-dialog
       v-model="tosDialog"
-      width="auto"
     >
       <v-card>
         <v-card-title>{{ tosDoc.current.title }}</v-card-title>
@@ -137,7 +137,6 @@
     </v-dialog>
     <v-dialog
       v-model="ppDialog"
-      width="auto"
     >
       <v-card>
         <v-card-title>{{ ppDoc.current.title }}</v-card-title>
@@ -159,10 +158,11 @@ import {mapActions, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
 import {conformRefName} from "@/refNameFunctions";
+import SignupProgressBar from "@/components/SignupProgressBar.vue";
 
 export default {
   name: 'SignUp',
-  components: { },
+  components: {SignupProgressBar},
   data() {
     return {
       result: {},
@@ -217,7 +217,7 @@ export default {
             await this.acceptAgreement.create();
             await this.sleep(200);  // wait for mongodb to distribute
             await this.login(); // now use the new db data
-            this.$router.push({name: 'PendingVerification'}).then(() => { this.$router.go() })
+            this.$router.push({name: 'RedirectToPendingVerification'}); //.then(() => { this.$router.go() })
           })
           .catch((e) => {
             if (e.message === 'Invalid: Username already taken') {

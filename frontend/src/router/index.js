@@ -32,6 +32,7 @@ import OrganizationHome from "@/views/OrganizationHome.vue";
 import PermissionError from "@/views/PermissionError.vue";
 import UserHome from "@/views/UserHome.vue";
 import SearchResults from "@/views/SearchResults.vue";
+import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -91,6 +92,17 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    // this strange pattern is used to later "auto-close" the pending verification page after 30 seconds.
+    // Without the "open" replacing "_self", the page is not controlled by the script. Then you would get a
+    // "Scripts may close only the windows that were opened by it." error message when attempting to `window.close()`.
+    path: '/redirect-to-pending-verification',
+    redirect: to => {
+      window.open('/pending-verification', "_self");
+      return { path: ''}
+    },
+    name: 'RedirectToPendingVerification',
+  },
+  {
     path: '/pending-verification',
     component: PendingVerification,
     name: 'PendingVerification',
@@ -136,6 +148,25 @@ const routes = [
     component: SearchResults,
     name: 'SearchResults',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/download-and-explore',
+    component: DownloadAndExplore,
+    name: 'DownloadAndExplore',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payment-processor-redirect/:prefilled_email/:utm_content',
+    redirect: to => {
+      let stripePurchasePeerUrl = import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL;
+      let prefilled_email = to.params.prefilled_email;
+      let utm_content = to.params.utm_content;
+      let url = `${stripePurchasePeerUrl}?prefilled_email=${prefilled_email}&utm_content=${utm_content}`;
+      window.open(url, "_blank");
+      return { path: ''} // don't actually go anywhere internally
+    },
+    name: 'PaymentProcessorForPeerSubscription',
+    meta: { requiresAuth: true },
   },
   //
   // ONDSEL pages
