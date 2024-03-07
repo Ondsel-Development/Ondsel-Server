@@ -1,18 +1,18 @@
 <template>
   <v-app-bar flat>
     <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-img
+      src="https://ondsel.com/img/Logo_LightBG.svg"
+      max-width="12em"
+      @click="gotoHome()"
+    ></v-img>
 
-    <v-img src="/ondsel_logo.svg" max-width="40" max-height="40" class="ml-2 mr-n3"></v-img>
-    <v-app-bar-title>
-      <router-link to="/" style="text-decoration: none; color: inherit;">
-        ONDSEL
-      </router-link>
-    </v-app-bar-title>
+    <v-spacer></v-spacer>
 
     <v-btn
       v-if="loggedInUser"
       variant="plain"
-      class="text-h6 text-decoration-underline"
+      class="text-h6 text-decoration-underline align-self-center"
       flat
       @click="$refs.selectedOrganization.$data.dialog = true;"
     >
@@ -62,6 +62,14 @@
               @click="gotoAccountSettings()"
             >
               account settings
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn
+              variant="text"
+              @click="gotoDownloadAndExplore()"
+            >
+              download & explore
             </v-btn>
           </v-list-item>
         </v-list>
@@ -138,6 +146,13 @@ export default {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
       this.menu = false;
     },
+    gotoDownloadAndExplore() {
+      this.$router.push({name: 'DownloadAndExplore'});
+      this.menu = false;
+    },
+    gotoHome() {
+      this.$router.push({name: 'LensHome'});
+    }
   },
 }
 </script>

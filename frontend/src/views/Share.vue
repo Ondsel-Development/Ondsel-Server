@@ -52,7 +52,7 @@
 
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
-  <ObjectsListView v-if="viewer" ref="objectListView" :viewer="viewer" />
+  <ObjectsListView v-if="!isWindowLoadedInIframe && viewer" ref="objectListView" :viewer="viewer" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
