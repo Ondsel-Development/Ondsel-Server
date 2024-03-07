@@ -4,7 +4,7 @@
     <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" flat>
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container class="d-flex flex-wrap">
-        <v-card class="ma-2" width="22em" variant="tonal" @click="soloClicked()">
+        <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="soloClicked()">
           <v-card-title>Solo</v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
@@ -23,7 +23,7 @@
             >{{soloOptions.text}}</v-btn>
           </v-card-actions>
         </v-card>
-        <v-card class="ma-2" width="22em" variant="tonal" @click="peerClicked()">
+        <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="peerClicked()">
           <v-card-title>Peer</v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
@@ -43,7 +43,7 @@
             >{{peerOptions.text}}</v-btn>
           </v-card-actions>
         </v-card>
-        <v-card class="ma-2" width="22em" variant="tonal" @click="enterpriseClicked()">
+        <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="enterpriseClicked()">
           <v-card-title>Enterprise</v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
