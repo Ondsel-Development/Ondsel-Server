@@ -5,9 +5,9 @@
       <v-card flat>
         <v-card-title>Download</v-card-title>
         <v-card-text>
-          <v-card>
+          <v-card width="30em">
             <v-card-title>Ondsel ES</v-card-title>
-            <v-card-subtitle>v 2024.1.0</v-card-subtitle>
+            <v-card-subtitle>v {{ondselSeVersionTxt}}</v-card-subtitle>
             <v-card-text class="overflow-y-auto" >
               <v-container class="d-flex flex-row">
                 <v-container max-width="8em" class="d-flex justify-end">
@@ -21,28 +21,36 @@
                 </v-container>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
-                    prepend-icon="mdi-download-box"
                     size="large"
                     variant="outlined"
                     class="text-none justify-start"
-                    min-width="16em"
-                    href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Linux-aarch64.AppImage"
+                    min-width="12em"
+                    :href="ondselSeDownload['Linux-aarch64.AppImage']?.browser_download_url"
                   >
                     aarch.AppImage
                   </v-btn>
-                  <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Linux-aarch64.AppImage-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                  <v-btn
+                    :href="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']?.browser_download_url"
+                    flat
+                    size="x-small"
+                    class="text-caption text-red"
+                  >SHA256</v-btn>
                   <p/>
                   <v-btn
-                    prepend-icon="mdi-download-box"
                     size="large"
                     variant="outlined"
                     class="text-none justify-start mt-6"
-                    min-width="16em"
-                    href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Linux-x86_64.AppImage"
+                    min-width="12em"
+                    :href="ondselSeDownload['Linux-x86_64.AppImage']?.browser_download_url"
                   >
                     x86_64.AppImage
                   </v-btn>
-                  <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Linux-x86_64.AppImage-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                  <v-btn
+                    :href="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']?.browser_download_url"
+                    flat
+                    size="x-small"
+                    class="text-caption text-red"
+                  >SHA256</v-btn>
                 </v-container>
               </v-container>
               <p/>
@@ -58,28 +66,36 @@
                 </v-container>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
-                    prepend-icon="mdi-download-box"
                     size="large"
                     variant="outlined"
                     class="text-none justify-start"
-                    min-width="16em"
-                    href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-macOS-apple-silicon-arm64.dmg"
+                    min-width="12em"
+                    :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                   >
                     arm64.dmg
                   </v-btn>
-                  <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-macOS-apple-silicon-arm64.dmg-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                  <v-btn
+                    :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']?.browser_download_url"
+                    flat
+                    size="x-small"
+                    class="text-caption text-red"
+                  >SHA256</v-btn>
                   <p/>
                   <v-btn
-                    prepend-icon="mdi-download-box"
                     size="large"
                     variant="outlined"
                     class="text-none justify-start mt-6"
-                    min-width="16em"
-                    href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-macOS-intel-x86_64.dmg"
+                    min-width="12em"
+                    :href="ondselSeDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                   >
                     x86_64.dmg
                   </v-btn>
-                  <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-macOS-intel-x86_64.dmg-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                  <v-btn
+                    :href="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']?.browser_download_url"
+                    flat
+                    size="x-small"
+                    class="text-caption text-red"
+                  >SHA256</v-btn>
                 </v-container>
               </v-container>
               <v-container class="d-flex flex-row mt-4">
@@ -94,25 +110,29 @@
                 </v-container>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
-                    prepend-icon="mdi-download-box"
                     size="large"
                     variant="outlined"
                     class="text-none justify-start mt-4"
-                    min-width="16em"
-                    href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Windows-x86_64.7z"
+                    min-width="12em"
+                    :href="ondselSeDownload['Windows-x86_64.7z']?.browser_download_url"
                   >
                     x86_64.7z
                   </v-btn>
-                  <v-btn href="https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.1.0/Ondsel_ES_2024.1.0.35694-Windows-x86_64.7z-SHA256.txt" flat size="x-small" class="text-caption text-red">SHA256</v-btn>
+                  <v-btn
+                    :href="ondselSeDownload['Windows-x86_64.7z-SHA256.txt']?.browser_download_url"
+                    flat
+                    size="x-small"
+                    class="text-caption text-red"
+                  >SHA256</v-btn>
                 </v-container>
               </v-container>
             </v-card-text>
           </v-card>
 
-          <v-card class="mt-4">
+          <v-card class="mt-4" width="30em">
             <v-card-title>Pre-Releases</v-card-title>
             <v-card-text class="overflow-y-auto" >
-              <b>The latest pre-release version of Ondsel ES was built on 2024-02-23T21:43:46Z</b>
+              <b>The latest pre-release version of Ondsel ES was built on {{weeklyBuildDate}}</b>
               <p>
                 ⚠️ These are intended for testing purposes only. Please don't use them for regular work. ⚠️
               </p>
@@ -131,23 +151,21 @@
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
                         <v-btn
-                          prepend-icon="mdi-download-box"
                           size="large"
                           variant="outlined"
                           class="text-none justify-start"
-                          min-width="16em"
-                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Linux-aarch64.AppImage"
+                          min-width="12em"
+                          :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
                           aarch.AppImage
                         </v-btn>
                         <p/>
                         <v-btn
-                          prepend-icon="mdi-download-box"
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-6"
-                          min-width="16em"
-                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Linux-x86_64.AppImage"
+                          min-width="12em"
+                          :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
                           x86_64.AppImage
                         </v-btn>
@@ -172,23 +190,21 @@
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
                         <v-btn
-                          prepend-icon="mdi-download-box"
                           size="large"
                           variant="outlined"
                           class="text-none justify-start"
-                          min-width="16em"
-                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-macOS-apple-silicon-arm64.dmg"
+                          min-width="12em"
+                          :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
                           arm64.dmg
                         </v-btn>
                         <p/>
                         <v-btn
-                          prepend-icon="mdi-download-box"
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-6"
-                          min-width="16em"
-                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-macOS-intel-x86_64.dmg"
+                          min-width="12em"
+                          :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
                           x86_64.dmg
                         </v-btn>
@@ -212,12 +228,11 @@
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
                         <v-btn
-                          prepend-icon="mdi-download-box"
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-4"
-                          min-width="16em"
-                          href="https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-36189-Windows-x86_64.7z"
+                          min-width="12em"
+                          :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
                           x86_64.7z
                         </v-btn>
@@ -262,14 +277,17 @@
 import {mapState} from "vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
+import axios from "axios";
 
 export default {
   name: 'DownloadAndExplore',
   components: {SignupProgressBar},
-  data() {
-    return {
-    }
-  },
+  data: () => ({
+    ondselSeDownload: {},
+    ondselSeVersionTxt: 'tbd',
+    weeklyDownload: {},
+    weeklyBuildDate: 'tbd',
+  }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
@@ -278,6 +296,45 @@ export default {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
       await this.goHome();
     }
+    let wd = {};
+    let osVer = 'unknown';
+    let buildDate = 'unknown';
+    let osd = {};
+    await axios.get('https://api.github.com/repos/Ondsel-Development/FreeCAD/releases')
+      .then(function (response) {
+        const tagsFound = response.data.map(build => build.tag_name);
+        const semverExp = new RegExp('^\\d{4}.'); // must start with four digits and a dot
+        let semverTags = tagsFound.filter(tag => semverExp.test(tag));
+        semverTags.sort();
+        osVer = semverTags.pop();
+        const ondselSeBuild = response.data.find(build => build.tag_name === osVer);
+        let assets = ondselSeBuild.assets || []
+        osd['Linux-aarch64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage'));
+        osd['Linux-aarch64.AppImage-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage-SHA256.txt'));
+        osd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
+        osd['Linux-x86_64.AppImage-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage-SHA256.txt'));
+        osd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
+        osd['macOS-apple-silicon-arm64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg-SHA256.txt'));
+        osd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
+        osd['macOS-intel-x86_64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg-SHA256.txt'));
+        osd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
+        osd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
+        const testingBuild = response.data.find(build => build.tag_name === 'weekly-builds');
+        buildDate = testingBuild.created_at;
+        assets = testingBuild.assets || []
+        wd['Linux-aarch64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage'));
+        wd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
+        wd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
+        wd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
+        wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    this.ondselSeDownload = osd;
+    this.ondselSeVersionTxt = osVer;
+    this.weeklyDownload = wd;
+    this.weeklyBuildDate = buildDate;
   },
   methods: {
     async goHome() {
