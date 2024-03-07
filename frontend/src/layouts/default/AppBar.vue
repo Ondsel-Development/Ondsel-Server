@@ -3,7 +3,7 @@
     <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
     <v-img
       src="https://ondsel.com/img/Logo_LightBG.svg"
-      max-width="10em"
+      max-width="12em"
       @click="gotoHome()"
     ></v-img>
 

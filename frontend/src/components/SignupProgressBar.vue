@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mb-2">
+  <v-card class="mb-2" flat>
     <v-timeline v-if="showProgressBar" direction="horizontal" class="overflow-y-auto" border>
 
       <v-timeline-item :dot-color="itemDotColor[0]">
