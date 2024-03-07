@@ -44,35 +44,49 @@ export default {
       itemDotColor: ['white', 'white', 'white', 'white'],
       itemSubtitle: ['', '', '', ''],
       itemTitleClass: ['', '', '', ''],
+      messageToDisplay: '',
     }
   },
   computed: {
   },
   async created() {
-    let step = parseInt(this.step);
-    if (step < 2) {
-      this.showProgressBar = true;
-    } else {
-      this.showProgressBar = this.$route.query.psu;
-    }
-    for (let i = 0; i < 4; i++) {
-      if (i < step) {
-        this.itemDotColor[i] = 'green';
-        this.itemSubtitle[i] = '';
-        this.itemTitleClass[i] = 'text-disabled';
-      } else if (i === step) {
-        this.itemDotColor[i] = 'orange';
-        this.itemSubtitle[i] = this.msg;
-        this.itemTitleClass[i] = 'text-high-emphasis';
+    this.messageToDisplay = this.msg;
+    await this.updateElements();
+  },
+  methods: {
+    async updateElements() {
+      let step = parseInt(this.step);
+      if (step < 2) {
+        this.showProgressBar = true;
       } else {
-        this.itemDotColor[i] = 'dark-grey';
-        this.itemSubtitle[i] = '';
-        this.itemTitleClass[i] = 'text-medium-emphasis';
+        this.showProgressBar = this.$route.query.psu;
+        if (step === 2 && this.$route.name === 'InitialPurchaseForPeer') {
+          this.showProgressBar = true;
+        }
+      }
+      for (let i = 0; i < 4; i++) {
+        if (i < step) {
+          this.itemDotColor[i] = 'green';
+          this.itemSubtitle[i] = '';
+          this.itemTitleClass[i] = 'text-disabled';
+        } else if (i === step) {
+          this.itemDotColor[i] = 'orange';
+          this.itemSubtitle[i] = this.messageToDisplay;
+          this.itemTitleClass[i] = 'text-high-emphasis';
+        } else {
+          this.itemDotColor[i] = 'dark-grey';
+          this.itemSubtitle[i] = '';
+          this.itemTitleClass[i] = 'text-medium-emphasis';
+        }
       }
     }
   },
-  methods: {
+  watch: {
+    async messageToDisplay(to, from) {
+      await this.updateElements();
+    }
   }
+
 }
 </script>
 
