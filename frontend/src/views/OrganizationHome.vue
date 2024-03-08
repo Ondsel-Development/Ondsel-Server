@@ -1,5 +1,5 @@
 <template>
-  <v-container class="d-flex flex-wrap" width="100%">
+  <v-container class="d-flex flex-wrap">
     <v-sheet class="ma-1">
       <span class="text-h6">Organization {{ organization.name }} &nbsp;</span>
       <span v-if="promotionPossible" class="ms-2">
