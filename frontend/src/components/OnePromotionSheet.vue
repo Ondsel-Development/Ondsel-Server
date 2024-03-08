@@ -1,13 +1,14 @@
 <template>
   <v-sheet
-    width="100%"
     elevation="8"
-    max-width="120em"
     rounded="lg"
   >
-    <v-container class="flex-column">
-      <div class="d-flex justify-end">
-        <v-sheet max-width="38em">
+    <v-container class="d-flex flex-column">
+      <div class="d-flex justify-space-between">
+        <v-sheet max-width="22em" class="align-self-start mb-1">
+          <span style="color: blue;">{{message}}</span>
+        </v-sheet>
+        <v-sheet max-width="22em" class="align-self-end">
           {{translateCollection(curation.collection)}}
         </v-sheet>
       </div>
