@@ -286,12 +286,12 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           break;
         case 'shared-models':
           if (!newCuration.representativeFile) {
-            if (context.beforePatchCopy.model.file) {
+            if (context.beforePatchCopy.model?.file) {
               newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
               needPatch = true;
             }
           }
-          if (newCuration.representativeFile.thumbnailUrlCache === null) {
+          if (newCuration.representativeFile && newCuration.representativeFile.thumbnailUrlCache === null) {
             try {
               const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
               newCuration.representativeFile.thumbnailUrlCache = r.url || null;

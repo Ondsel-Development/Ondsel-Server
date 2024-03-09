@@ -26,6 +26,7 @@ import {addCurationToAllWorkspacesCommand} from "./add-curation-to-all-workspace
 import {addCurationToAllOrganizationsCommand} from "./add-curation-to-all-organizations.command.js";
 import { upgradeUserTierCommand } from './upgrade_user_tier.js';
 import {addCurationToAllSharedModelsCommand} from "./add-curation-to-all-shared-models.command.js";
+import {fixSharedModelCurationsAndKeywordsCommand} from "./fix-shared-model-curations-and-keywords.command.js";
 
 async function runMigration() {
   console.log('Migration start');
@@ -114,6 +115,9 @@ async function runMigration() {
       break;
     case 'addCurationToAllSharedModels':
       await addCurationToAllSharedModelsCommand(app);
+      break;
+    case 'fixSharedModelCurationsAndKeywords':
+      await fixSharedModelCurationsAndKeywordsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
