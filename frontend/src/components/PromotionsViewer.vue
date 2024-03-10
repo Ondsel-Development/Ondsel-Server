@@ -1,21 +1,20 @@
 <template>
-  <v-row class="mt-6">
-    <v-col
-      cols="6"
+  <v-sheet class="d-flex flex-wrap">
+    <v-sheet
       v-for="entry in promoted"
       :key="entry.curation._id"
     >
       <v-sheet
-        class="mx-auto"
+        min-width="22em"
+        max-width="40em"
+        class="ma-2 align-self-stretch"
         link
         @click.stop="goToPromoted(entry.curation)"
       >
-        <v-card-text>
-          <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
-        </v-card-text>
+        <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
       </v-sheet>
-    </v-col>
-  </v-row>
+    </v-sheet>
+  </v-sheet>
 </template>
 
 <script>

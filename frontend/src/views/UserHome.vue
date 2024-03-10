@@ -1,44 +1,41 @@
 <template>
-  <v-container>
-    <v-row class="align-center">
-      <v-col cols="5">
-        <span class="text-h6">User {{ userSum.name }} &nbsp;</span>
-        <span v-if="promotionPossible">
-          <v-icon
-            size="small"
-            @click.stop="openEditPromotionDialog()"
-            id="promotionButton"
-          >mdi-bullhorn</v-icon>
-          <v-tooltip
-            activator="#promotionButton"
-          >should {{selfPronoun}} promote this user</v-tooltip>
-        </span>
-        <span v-else>
-          <v-icon
-            size="small"
-            color="grey"
-            id="disabledPromotionButton"
-          >mdi-bullhorn</v-icon>
-          <v-tooltip
-            v-if="!userCurrentOrganization"
-            activator="#disabledPromotionButton"
-          >must be logged in to promote anything</v-tooltip>
-          <v-tooltip
-            v-if="iAmThisUser"
-            activator="#disabledPromotionButton"
-          >cannot promote oneself</v-tooltip>
-        </span>
-        <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
-      </v-col>
-      <v-col cols="7">
-        <v-card max-height="200" overflow-y-visible>
-          <v-card-text>
-            <div v-html="longDescriptionHtml"></div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-spacer />
+  <v-container class="d-flex flex-wrap" width="100%">
+    <v-sheet class="ma-1">
+      <span class="text-h6">User {{ userSum.name }}</span>
+      <span v-if="promotionPossible" class="ms-2">
+        <v-icon
+          size="small"
+          @click.stop="openEditPromotionDialog()"
+          id="promotionButton"
+        >mdi-bullhorn</v-icon>
+        <v-tooltip
+          activator="#promotionButton"
+        >should {{selfPronoun}} promote this user</v-tooltip>
+      </span>
+      <span v-else class="ms-2">
+        <v-icon
+          size="small"
+          color="grey"
+          id="disabledPromotionButton"
+        >mdi-bullhorn</v-icon>
+        <v-tooltip
+          v-if="!userCurrentOrganization"
+          activator="#disabledPromotionButton"
+        >must be logged in to promote anything</v-tooltip>
+        <v-tooltip
+          v-if="iAmThisUser"
+          activator="#disabledPromotionButton"
+        >cannot promote oneself</v-tooltip>
+      </span>
+      <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
+    </v-sheet>
+    <v-sheet class="ma-1" v-if="longDescriptionHtml">
+      <v-card min-width="22em" max-height="200" overflow-y-visible>
+        <v-card-text>
+          <div v-html="longDescriptionHtml"></div>
+        </v-card-text>
+      </v-card>
+    </v-sheet>
   </v-container>
 
   <v-container>

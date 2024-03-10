@@ -1,6 +1,7 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-card class="mx-auto" width="800" flat>
+  <v-container fluid class="d-flex flex-column">
+    <signup-progress-bar step="2" msg="..." ref="progressBar"></signup-progress-bar>
+    <v-card class="mx-auto" width="26em" flat>
       <v-card-title>Payment Complete</v-card-title>
       <v-card-text>
         <div v-if="transactionRecorded">
@@ -9,7 +10,7 @@
           </p>
           &nbsp;
           <p>
-            Click on "Continue" below to refresh your browser's cache.
+            Click on "Continue" below to refresh your browser's cache and go to the download/explore page.
           </p>
         </div>
         <div v-else>
@@ -33,7 +34,7 @@
       <v-card-actions>
         <v-btn v-if="transactionRecorded">
           <v-btn v-if="transactionRecorded">
-            <a href="/">continue</a>
+            <a href="/download-and-explore">continue</a>
           </v-btn>
         </v-btn>
         <v-btn v-else
@@ -52,6 +53,7 @@ import {mapActions, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
 import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
+import SignupProgressBar from "@/components/SignupProgressBar.vue";
 
 //
 // This page is ONLY reached via a return call from a Stripe Purchase Page.
@@ -60,18 +62,17 @@ import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/use
 
 export default {
   name: 'InitialPurchaseForPeer',
-  data() {
-    return {
-      result: {},
-      accountEvent: new models.api.AccountEvent(),
-      user: {
-        email: '',
-        password: '',
-        tier: '',
-      },
-      transactionRecorded: false,
-    }
-  },
+  components: {SignupProgressBar},
+  data: () => ({
+    result: {},
+    accountEvent: new models.api.AccountEvent(),
+    user: {
+      email: '',
+      password: '',
+      tier: '',
+    },
+    transactionRecorded: false,
+  }),
   computed: {
     User: () => models.api.User,
     ...mapState('auth', { loggedInUser: 'payload' }),
@@ -91,18 +92,22 @@ export default {
         ...this.$route.params,
         ...this.$route.query,
       };
+      let newMsg = '...'
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
+          newMsg = "completed";
         })
         .catch((e) => {
+          newMsg = 'attempted, please retry';
           console.log(e);
           console.log(e.message);
         });
+      this.$refs.progressBar.$data.messageToDisplay = newMsg;
     }
   },
-  created() {
-    this.applySubscription();
+  async created() {
+    await this.applySubscription();
   }
 }
 </script>

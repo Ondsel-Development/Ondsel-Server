@@ -294,7 +294,7 @@ export default {
   },
   async created() {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
-      await this.goHome();
+      this.$router.push({name: 'PendingVerification'})
     }
     let wd = {};
     let osVer = 'unknown';
@@ -337,9 +337,6 @@ export default {
     this.weeklyBuildDate = buildDate;
   },
   methods: {
-    async goHome() {
-      this.$router.push({name: 'LensHome'})
-    },
     async goPublicModels() {
       this.$router.push({name: 'PublicModels'})
     },
