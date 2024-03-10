@@ -358,6 +358,7 @@ const patchModel = async (context) => {
 const createUserInstance = async (context) => {
   const { data, app } = context;
   const modelService = app.service('models');
+  const uploadService = context.app.service('upload');
   const result = await modelService.find(
     { query: { sharedModelId: context.id, userId: context.params.user._id, isSharedModelAnonymousType: false }}
   );
@@ -365,12 +366,16 @@ const createUserInstance = async (context) => {
     const sharedModel = await context.service.get(context.id);
     const dummyModel = await modelService.get(sharedModel.dummyModelId);
 
-    await modelService.create({
+    const isFcstdExists = await uploadService.checkFileExists(
+      context.app.get('awsClientModelBucket'),
+      `${dummyModel._id.toString()}_generated.FCSTD`
+    );
+    const newModel = await modelService.create({
       'uniqueFileName': dummyModel.uniqueFileName,
       'custFileName': dummyModel.custFileName || dummyModel.file.custFileName,
-      'shouldStartObjGeneration': true,
+      'shouldStartObjGeneration': !isFcstdExists,
       'isObjGenerationInProgress': false,
-      'isObjGenerated': false,
+      'isObjGenerated': isFcstdExists,
       'errorMsg': dummyModel.errorMsg,
       'attributes': dummyModel.attributes,
       'isSharedModel': true,
@@ -379,6 +384,11 @@ const createUserInstance = async (context) => {
     }, {
       authentication: context.params.authentication,
     });
+
+    if (isFcstdExists) {
+      await uploadService.copy(`${dummyModel._id.toString()}_generated.FCSTD`, `${newModel._id.toString()}_generated.FCSTD`);
+    }
+
   } else if (!result.data[0].objUrl && !result.data[0].error) {
     // Incase if mesh was not generated earlier
     await modelService.patch(result.data[0]._id, { shouldStartObjGeneration: true }, context.params)
