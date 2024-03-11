@@ -77,7 +77,7 @@ export default {
             notation: {
               updatedAt: Date.now(), // not used
               historicUser: {}, // not used
-              message: match.score.toString(),
+              message: '', // match.score.toString(),
             },
             curation: match.curation,
           };
