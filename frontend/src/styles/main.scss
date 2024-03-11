@@ -1,0 +1,7 @@
+@use 'vuetify' with (
+   //$body-font-family: Roboto // load from ViteFonts in vite.config.js
+   $body-font-family: Rubik
+);
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+

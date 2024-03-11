@@ -33,6 +33,7 @@ import PermissionError from "@/views/PermissionError.vue";
 import UserHome from "@/views/UserHome.vue";
 import SearchResults from "@/views/SearchResults.vue";
 import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
+import GettingStarted from "@/views/GettingStarted.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -61,6 +62,12 @@ const routes = [
     path: '/signup',
     component: SignUp,
     name: 'SignUp',
+  },
+  {
+    path: '/getting-started',
+    component: GettingStarted,
+    name: 'GettingStarted',
+    meta: { tryAuth: true },
   },
   {
     path: '/legal-document/:doc_name',

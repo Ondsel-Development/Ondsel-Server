@@ -20,7 +20,6 @@ export function buildNewCurationForSharedModel(sm) {
 export const afterCreateHandleSharedModelCuration = async (context) => {
   // first, set up the curation
   context.result.curation = buildNewCurationForSharedModel(context.result);
-  context.result.curation.keywordRefs = await generateAndApplyKeywords(context, context.result.curation);
   await context.service.patch(
     context.result._id,
     {

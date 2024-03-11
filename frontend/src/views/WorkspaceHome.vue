@@ -6,10 +6,11 @@
       icon="mdi-arrow-left"
       @click="goHome()"
     />
-    <span class="text-body-2">workspace &nbsp;</span>
+    <span class="text-body-2">workspace </span>
     <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
     <span v-if="!publicView">
       <v-btn
+        class="ms-1"
         icon="mdi-cog"
         size="small"
         flat
@@ -22,6 +23,7 @@
     </span>
     <span v-else>
       <v-btn
+        class="ms-1"
         icon="mdi-cog"
         size="small"
         flat

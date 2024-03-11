@@ -62,7 +62,13 @@
     >
       <div>
         <v-card>
-          <v-card-item>
+          <v-progress-linear
+            :active="!error && !model"
+            indeterminate
+            absolute
+            bottom
+          ></v-progress-linear>
+          <v-card-item class="text-center">
             <v-alert
               variant="outlined"
               type="error"
