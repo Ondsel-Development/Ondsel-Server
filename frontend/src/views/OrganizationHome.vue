@@ -31,9 +31,9 @@
       <p class="text-sm-body-2"><i>{{natureDetails}}</i></p>
     </v-sheet>
     <v-sheet class="ma-1" v-if="longDescriptionHtml">
-      <v-card min-width="22em" max-height="200" overflow-y-visible>
+      <v-card min-width="22em" max-height="20em" style="overflow-y:auto;">
         <v-card-text>
-          <div v-html="longDescriptionHtml"></div>
+          <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
         </v-card-text>
       </v-card>
     </v-sheet>
@@ -110,12 +110,13 @@ import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
+  components: {MarkdownViewer, OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],

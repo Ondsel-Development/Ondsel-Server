@@ -91,7 +91,7 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                <div v-html="longDescriptionHtml"></div>
+                <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
               </v-card-text>
             </v-card>
           </v-list-item-media>
@@ -234,12 +234,14 @@ import _ from "lodash";
 import EditLongDescriptionMdDialog from "@/components/EditLongDescriptionMdDialog.vue";
 import {marked} from "marked";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 const { Organization } = models.api;
 
 export default {
   name: 'EditOrganization',
   components: {
+    MarkdownViewer,
     EditDescriptionDialog,
     EditLongDescriptionMdDialog,
     EditTagsDialog,
