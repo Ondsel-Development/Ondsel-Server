@@ -33,7 +33,7 @@
       <v-tooltip
         activator="parent"
         location="start"
-      >Manage share link</v-tooltip>
+      >Manage share links</v-tooltip>
     </v-btn>
     <v-btn icon flat :disabled="!user" @click="openExportModelDialog">
       <v-icon>mdi-file-export</v-icon>
