@@ -6,7 +6,7 @@
     >
       <v-card-subtitle>ver {{ specific_doc.version }}</v-card-subtitle>
       <v-card-text>
-        <div v-html='markdown' class="pa-3"></div>
+        <markdown-viewer :markdown-html="markdown"></markdown-viewer>
       </v-card-text>
     </v-card>
     <v-card
@@ -45,10 +45,11 @@
 <script>
 import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 export default {
   name: 'LegalDoc',
-  components: { },
+  components: {MarkdownViewer},
   data() {
     return {
       result: {},

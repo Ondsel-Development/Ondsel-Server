@@ -1,5 +1,5 @@
 <template>
-  <v-container class="d-flex flex-wrap" width="100%">
+  <v-container class="d-flex flex-wrap justify-space-between" width="100%">
     <v-sheet class="ma-1">
       <span class="text-h6">User {{ userSum.name }}</span>
       <span v-if="promotionPossible" class="ms-2">
@@ -30,9 +30,9 @@
       <p v-if="organization.description" class="text-lg-body-1">{{ organization.description }}</p>
     </v-sheet>
     <v-sheet class="ma-1" v-if="longDescriptionHtml">
-      <v-card min-width="22em" max-height="200" overflow-y-visible>
+      <v-card max-height="20em" style="overflow-y:auto;">
         <v-card-text>
-          <div v-html="longDescriptionHtml"></div>
+          <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
         </v-card-text>
       </v-card>
     </v-sheet>
@@ -77,12 +77,13 @@ import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 const { Workspace } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'UserHome',
-  components: {OnePromotionSheet, PromotionsViewer, EditPromotionDialog},
+  components: {MarkdownViewer, OnePromotionSheet, PromotionsViewer, EditPromotionDialog},
   data: () => ({
     userSumDetail: {name: 'locating...', username: ''},
     organizationDetail: {},

@@ -5,3 +5,22 @@ export function removeNonPublicItems(curation) {
   curation.promoted = [];
   curation.keywordRefs = [];
 }
+
+export function translateCollection(collection) {
+  let tr = '';
+  switch (collection) {
+    case 'workspaces':
+      tr = 'workspace';
+      break;
+    case 'organizations':
+      tr = 'organization';
+      break;
+    case 'users':
+      tr = 'individual user';
+      break;
+    case 'shared-models':
+      tr = 'shared CAD model';
+      break;
+  }
+  return tr;
+}

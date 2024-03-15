@@ -4,7 +4,7 @@
     v-model="dialog"
     width="auto"
   >
-    <v-card width="600" max-height="800">
+    <v-card max-width="40em" min-width="22em">
       <template v-slot:title>
         <div class="text-center">Change Name</div>
       </template>
