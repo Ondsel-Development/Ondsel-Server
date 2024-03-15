@@ -4,7 +4,7 @@
     v-model="dialog"
     width="auto"
   >
-    <v-card width="600" max-height="800">
+    <v-card max-width="40em" min-width="22em">
       <template v-slot:title>
         <div class="text-center">Edit Description</div>
       </template>
@@ -42,6 +42,8 @@
 
 <script>
 
+import {marked} from "marked";
+
 export default {
   name: 'EditDescriptionDialog',
   props: {
@@ -51,9 +53,6 @@ export default {
     }
   },
   emits: ['saveDescription'],
-  created() {
-    this.newDescription = this.description;
-  },
   data: () => ({
     dialog: false,
     snackerMsg: '',
@@ -68,6 +67,13 @@ export default {
       this.$emit('saveDescription');
     },
   },
+  watch: {
+    async dialog(newVal) {
+      if (newVal === true) {
+        this.newDescription = this.description;
+      }
+    }
+  }
 }
 </script>
 <style scoped>

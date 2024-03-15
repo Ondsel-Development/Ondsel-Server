@@ -28,6 +28,7 @@
 <script>
 
 import ReprViewer from "@/components/ReprViewer.vue";
+import {translateCollection} from "@/curationHelpers";
 
 export default {
   name: "OnePromotionSheet",
@@ -53,24 +54,7 @@ export default {
   data: () => ({
   }),
   methods: {
-    translateCollection(collection) {
-      let tr = '';
-      switch (collection) {
-        case 'workspaces':
-          tr = 'workspace';
-          break;
-        case 'organizations':
-          tr = 'organization';
-          break;
-        case 'users':
-          tr = 'individual user';
-          break;
-        case 'shared-models':
-          tr = 'shared CAD model';
-          break;
-      }
-      return tr;
-    }
+    translateCollection
   },
 }
 </script>
