@@ -16,24 +16,21 @@
           <v-list-item-subtitle>
             {{ user.name }}
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openUserChangeNameDialog()"
-              >
-                Change Name
-              </v-btn>
-              <v-spacer></v-spacer>
-              <UserChangeNameDialog
-                :is-active="isUserChangeNameDialogActive"
-                :user="user"
-                ref="userChangeNameDialog"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openUserChangeNameDialog()"
+            >
+              Change Name
+            </v-btn>
+            <UserChangeNameDialog
+              :is-active="isUserChangeNameDialogActive"
+              :user="user"
+              ref="userChangeNameDialog"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -55,25 +52,22 @@
               <i>none supplied</i>
             </div>
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openEditDescriptionDialog()"
-              >
-                Edit Description
-              </v-btn>
-              <v-spacer></v-spacer>
-              <EditDescriptionDialog
-                :is-active="isChangeDescriptionDialogActive"
-                :long-description-md="organization.description || ''"
-                ref="editDescriptionDialog"
-                @save-description="saveDescriptionDialog"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openEditDescriptionDialog()"
+            >
+              Edit Description
+            </v-btn>
+            <EditDescriptionDialog
+              :is-active="isChangeDescriptionDialogActive"
+              :description="organization.description || ''"
+              ref="editDescriptionDialog"
+              @save-description="saveDescriptionDialog"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -82,29 +76,26 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                <div v-html="longDescriptionHtml"></div>
+                <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
               </v-card-text>
             </v-card>
           </v-list-item-media>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openEditLongDescriptionMdDialog()"
-              >
-                Edit Long Description
-              </v-btn>
-              <v-spacer></v-spacer>
-              <EditLongDescriptionMdDialog
-                :is-active="isOrgChangeLongDescriptionMdDialogActive"
-                :long-description-md="organization.curation?.longDescriptionMd || ''"
-                ref="editLongDescriptionMdDialog"
-                @save-long-description-md="saveLongDescriptionMd"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openEditLongDescriptionMdDialog()"
+            >
+              Edit Long Description
+            </v-btn>
+            <EditLongDescriptionMdDialog
+              :is-active="isOrgChangeLongDescriptionMdDialogActive"
+              :long-description-md="organization.curation?.longDescriptionMd || ''"
+              ref="editLongDescriptionMdDialog"
+              @save-long-description-md="saveLongDescriptionMd"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -118,25 +109,22 @@
             </div>
             <span v-else><i>None</i></span>
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openEditTagsDialog()"
-              >
-                Edit Tags
-              </v-btn>
-              <v-spacer></v-spacer>
-              <EditTagsDialog
-                :is-active="isEditTagsDialogActive"
-                :tagList="organization.curation?.tags || []"
-                ref="editTagsDialog"
-                @save-tags="saveTags"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openEditTagsDialog()"
+            >
+              Edit Tags
+            </v-btn>
+            <EditTagsDialog
+              :is-active="isEditTagsDialogActive"
+              :tagList="organization.curation?.tags || []"
+              ref="editTagsDialog"
+              @save-tags="saveTags"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -164,24 +152,21 @@
             <v-chip v-if="user.isVerified">Verified</v-chip>
             <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action v-if="!user.isVerified">
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openVerifyEmailDialog()"
-              >
-                Resend Verification
-              </v-btn>
-              <v-spacer></v-spacer>
-              <VerifyEmailDialog
-                :is-active="isVerifyEmailDialogActive"
-                :user="user"
-                ref="verifyEmailDialog"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action v-if="!user.isVerified" class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openVerifyEmailDialog()"
+            >
+              Resend Verification
+            </v-btn>
+            <VerifyEmailDialog
+              :is-active="isVerifyEmailDialogActive"
+              :user="user"
+              ref="verifyEmailDialog"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -190,25 +175,22 @@
           <v-list-item-subtitle>
             **********
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action v-if="user.isVerified">
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openResetPasswordDialog()"
-                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
-              >
-                Reset Password
-              </v-btn>
-              <v-spacer></v-spacer>
-              <ResetPasswordDialog
-                :is-active="isResetPasswordDialogActive"
-                :user="user"
-                ref="resetPasswordDialog"
-              />
-            </v-list-item-action>
-          </template>
+          <v-list-item-action v-if="user.isVerified" class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click.stop="openResetPasswordDialog()"
+              :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+            >
+              Reset Password
+            </v-btn>
+            <ResetPasswordDialog
+              :is-active="isResetPasswordDialogActive"
+              :user="user"
+              ref="resetPasswordDialog"
+            />
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -234,24 +216,20 @@
           <v-list-item-subtitle>
             {{ user.fullTierName }}
           </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click="gotoChooseTier()"
-                :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
-              >
-                Choose New Tier
-              </v-btn>
-            </v-list-item-action>
-            <v-list-item-action>
-              <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
-                View Account History
-              </v-btn>
-            </v-list-item-action>
-          </template>
+          <v-list-item-action class="justify-end">
+            <v-btn
+              variant="outlined"
+              color="default"
+              size="small"
+              @click="gotoChooseTier()"
+              :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+            >
+              Choose New Tier
+            </v-btn>
+            <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
+              View Account History
+            </v-btn>
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider />
@@ -284,12 +262,14 @@ import EditTagsDialog from "@/components/EditTagsDialog.vue";
 import _ from "lodash";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
 import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    MarkdownViewer,
     OrganizationPromotionsTable,
     EditDescriptionDialog,
     EditTagsDialog, EditLongDescriptionMdDialog, UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},

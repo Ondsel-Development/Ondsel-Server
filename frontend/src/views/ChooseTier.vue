@@ -17,10 +17,11 @@
             </v-list>
           </v-card-text>
           <v-spacer></v-spacer>
-          <v-card-actions>
+          <v-card-actions class="flex-column">
             <v-btn
               variant="outlined"
             >{{soloOptions.text}}</v-btn>
+            <p>&nbsp;</p>
           </v-card-actions>
         </v-card>
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="peerClicked()">
@@ -37,10 +38,12 @@
             </v-list>
           </v-card-text>
           <v-spacer></v-spacer>
-          <v-card-actions>
+          <v-card-actions class="flex-column">
             <v-btn
+              class="float-left"
               variant="outlined"
             >{{peerOptions.text}}</v-btn>
+            <p>** billed annually</p>
           </v-card-actions>
         </v-card>
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="enterpriseClicked()">
@@ -58,11 +61,12 @@
             </v-list>
           </v-card-text>
           <v-spacer></v-spacer>
-          <v-card-actions>
+          <v-card-actions class="flex-column">
             <v-btn
               variant="outlined"
               disabled
             >{{enterpriseOptions.text}}</v-btn>
+            <p>&nbsp;</p>
           </v-card-actions>
         </v-card>
       </v-container>
@@ -157,7 +161,7 @@ export default {
       if (this.loggedInUser.nextTier=== SubscriptionTypeMap.peer) {
         return {action: `tbd`, text: `Cancel the Switch to Peer`}
       } else if (this.loggedInUser.user.tier !== SubscriptionTypeMap.peer) {
-        return {action: 'upgradeToPeer', text: 'Switch to Peer ($120/yr)'}
+        return {action: 'upgradeToPeer', text: 'Switch to Peer ($10 / mo)**'}
       }
       return {action: 'goAway', text: 'Continue'}
     },

@@ -4,7 +4,7 @@
     v-model="dialog"
     width="auto"
   >
-    <v-card width="600" max-height="800">
+    <v-card min-width="22em">
       <template v-slot:title>
         <div class="text-center">Edit Long Description (Markdown)</div>
       </template>
@@ -50,9 +50,6 @@ export default {
     }
   },
   emits: ['saveLongDescriptionMd'],
-  created() {
-    this.newLongDescriptionMd = this.longDescriptionMd;
-  },
   data: () => ({
     dialog: false,
     snackerMsg: '',
@@ -66,7 +63,17 @@ export default {
     async doSaveLongDescriptionMd() {
       this.$emit('saveLongDescriptionMd');
     },
+    async refresh() {
+      this.newLongDescriptionMd = this.$props.longDescriptionMd;
+    }
   },
+  watch: {
+    async dialog(newVal) {
+      if (newVal === true) {
+        await this.refresh();
+      }
+    }
+  }
 }
 </script>
 <style scoped>

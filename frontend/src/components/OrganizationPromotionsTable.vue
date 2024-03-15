@@ -2,7 +2,7 @@
   <v-data-table
     v-if="organization"
     :headers="headers"
-    :items="organization.curation?.promoted"
+    :items="cleanPromotions"
   >
     <template v-slot:top>
       <v-toolbar
@@ -33,6 +33,7 @@
 <script>
 import {mapGetters} from 'vuex';
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import {translateCollection} from "@/curationHelpers";
 
 export default {
   name: "OrganizationPromotionsTable",
@@ -42,6 +43,7 @@ export default {
   components: {EditPromotionDialog},
   computed: {
     ...mapGetters('organizations', ['isLoggedInUserAdmin']),
+    cleanPromotions: vm => vm.cleanupPromotions(vm.organization?.curation?.promoted),
   },
   data: () => ({
     headers: [
@@ -50,28 +52,22 @@ export default {
         align: 'start',
         sortable: true,
         key: 'message',
-        value: 'notation.message',
+        value: 'message',
       },
       {
         title: 'Type',
         sortable: true,
         key: 'collection',
-        value: 'curation.collection',
+        value: 'collectionName',
       },
       {
         title: 'Name',
         sortable: true,
         key: 'name',
-        value: 'curation.name',
+        value: 'name',
       },
       {
-        title: 'Id',
-        sortable: true,
-        key: 'id',
-        value: 'curation._id',
-      },
-      {
-        title: 'Actions',
+        title: '',
         align: 'end',
         key: 'actions',
         sortable: false
@@ -82,9 +78,24 @@ export default {
     rowItemName: "tbd",
   }),
   methods: {
+    cleanupPromotions(promotions) {
+      let result = [];
+      if (promotions) {
+        for (const promotion of promotions) {
+          result.push({
+            id: promotion.curation._id.toString(),
+            message: promotion.notation.message,
+            collection: promotion.curation.collection,
+            collectionName: translateCollection(promotion.curation.collection),
+            name: promotion.curation.name,
+          })
+        }
+      }
+      return result;
+    },
     async openEditPromotionDialog(item) {
       this.rowCollection = item.columns.collection;
-      this.rowItemId = item.columns.id.toString();
+      this.rowItemId = item.columns.id;
       this.rowItemName = item.columns.name;
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
