@@ -82,7 +82,7 @@
           <v-list-item-media>
             <v-card>
               <v-card-text>
-                <div v-html="longDescriptionHtml"></div>
+                <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
               </v-card-text>
             </v-card>
           </v-list-item-media>
@@ -284,12 +284,14 @@ import EditTagsDialog from "@/components/EditTagsDialog.vue";
 import _ from "lodash";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
 import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    MarkdownViewer,
     OrganizationPromotionsTable,
     EditDescriptionDialog,
     EditTagsDialog, EditLongDescriptionMdDialog, UserChangeNameDialog, VerifyEmailDialog, ResetPasswordDialog},

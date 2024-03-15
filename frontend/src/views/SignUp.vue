@@ -128,7 +128,7 @@
         <v-card-title>{{ tosDoc.current.title }}</v-card-title>
         <v-card-subtitle>ver {{ tosDoc.current.version }}</v-card-subtitle>
         <v-card-text>
-          <div v-html='tosMarkdown' class="pa-3"></div>
+          <markdown-viewer :markdown-html="tosMarkdown"></markdown-viewer>
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" block @click="tosDialog = false">Close</v-btn>
@@ -142,7 +142,7 @@
         <v-card-title>{{ ppDoc.current.title }}</v-card-title>
         <v-card-subtitle>ver {{ ppDoc.current.version }}</v-card-subtitle>
         <v-card-text>
-          <div v-html='ppMarkdown' class="pa-3"></div>
+          <markdown-viewer :markdown-html="ppMarkdown"></markdown-viewer>
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" block @click="ppDialog = false">Close</v-btn>
@@ -159,10 +159,11 @@ import { models } from '@feathersjs/vuex';
 import {marked} from "marked";
 import {conformRefName} from "@/refNameFunctions";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 export default {
   name: 'SignUp',
-  components: {SignupProgressBar},
+  components: {MarkdownViewer, SignupProgressBar},
   data() {
     return {
       result: {},
