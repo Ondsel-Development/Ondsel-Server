@@ -293,6 +293,9 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
+  window._paq.push(["setCustomUrl", to.fullPath]);
+  window._paq.push(["trackPageView"]);
+
   if (to.meta && to.meta.checkIframe) {
     to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
   }
