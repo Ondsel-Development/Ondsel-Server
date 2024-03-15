@@ -133,6 +133,11 @@ const routes = [
     name: 'Login',
   },
   {
+    path: '/exit-login',
+    component: Login,
+    name: 'Logout', // this version of the "Login" page is for logging out.
+  },
+  {
     path: '/share/:id',
     component: Share,
     name: 'Share',
@@ -300,13 +305,24 @@ router.beforeEach(async (to, from, next) => {
     to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
   }
 
-  if (link.name === 'Login' || link.name === 'SignUp') {
+  if (link.name === 'Login' || link.name === 'SignUp' || link.name === 'Logout') {
     try {
-      await store.dispatch('auth/authenticate');
-      next({ name: 'LensHome' });
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
       window._paq.push(["trackPageView"]);
+      next({ name: 'LensHome' });
       return;
     } catch (err) {
+      // The "catch" scenario is, ironically, the normal flow. Users generally go to the Login/Signup/"Logout" page
+      // when they are NOT logged in.
+      if (link.name === 'Logout') {
+        window._paq.push(['resetUserId']); // just in case the User has just logged out, we reset the User ID
+        window._paq.push(['appendToTrackingUrl', 'new_visit=1']); // force a new visit
+        window._paq.push(['trackPageView']);
+        window._paq.push(['appendToTrackingUrl', '']); // needed for a single page app like this one
+      }
     }
   }
   else if (to.meta && to.meta.requiresAuth) {
