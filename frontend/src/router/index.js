@@ -294,7 +294,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   window._paq.push(["setCustomUrl", to.fullPath]);
-  window._paq.push(["trackPageView"]);
+  window._paq.push(["setDocumentTitle", to.name]);
 
   if (to.meta && to.meta.checkIframe) {
     to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
@@ -304,28 +304,37 @@ router.beforeEach(async (to, from, next) => {
     try {
       await store.dispatch('auth/authenticate');
       next({ name: 'LensHome' });
+      window._paq.push(["trackPageView"]);
       return;
     } catch (err) {
     }
   }
   else if (to.meta && to.meta.requiresAuth) {
     try {
-      await store.dispatch('auth/authenticate');
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
     } catch (err) {
       if (to.meta.nonAuthenticatedUsersPointsToUrl) {
         next({ name: to.meta.nonAuthenticatedUsersPointsToUrl });
       } else {
         next({ name: 'Login', query: { redirect_uri: window.location.origin + to.fullPath } });
       }
+      window._paq.push(["trackPageView"]);
       return;
     }
   }
   else if (to.meta && to.meta.tryAuth) {
     try {
-      await store.dispatch('auth/authenticate');
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
     } catch (err) {
     }
   }
+  window._paq.push(["trackPageView"]);
   next();
 });
 
