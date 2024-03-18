@@ -1,6 +1,4 @@
-import {
-  agreementCategoryTypeMap,
-} from "../../agreements.schema.js";
+import {agreementCategoryTypeMap} from "../../agreements.subdocs.js";
 
 export const doAcceptOneAgreement = async (context) => {
   context.data.dbResultMsg = "agreement logic failed to complete.";
