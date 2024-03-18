@@ -1,12 +1,7 @@
 // add new TOS for 2023-aug-31
 
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {
-  agreementCategoryType,
-  agreementCategoryTypeMap,
-  specificAgreementType
-} from "../services/agreements/agreements.schema.js";
 import {ObjectId} from "mongodb";
+import {agreementCategoryTypeMap} from "../services/agreements/agreements.subdocs.js";
 
 export async function updateTos2023Aug31Command(app) {
   const version = '20230831';

@@ -9,6 +9,7 @@ export const agreementCategoryTypeMap = {
 export const agreementCategoryType = StringEnum([
   agreementCategoryTypeMap.privacyPolicy,
   agreementCategoryTypeMap.termsOfService,
+  agreementCategoryTypeMap.lensSiteCuration,
 ])
 
 export const specificAgreementType = Type.Object(
@@ -20,6 +21,7 @@ export const specificAgreementType = Type.Object(
     version: Type.String(),
     markdownContent: Type.String(),
     curation: Type.Optional(Type.Any()), // a curationSchema but I'm getting a circular ref error if I use that directly
+                                         // curation for agreement doc is strictly utility; it does NOT generate keywords
     docPostedAt: Type.Number(), // when this was uploaded to db
   }
 )
