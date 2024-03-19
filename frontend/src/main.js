@@ -18,3 +18,5 @@ const app = createApp(App)
 registerPlugins(app)
 
 app.mount('#app')
+
+// window._paq.push(['trackPageView']); // To track a page view

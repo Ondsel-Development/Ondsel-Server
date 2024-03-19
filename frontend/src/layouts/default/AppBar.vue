@@ -96,10 +96,10 @@
     location="left"
     temporary
   >
-    <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type !== 'Personal'">
+    <v-list density="compact" nav v-if="user && currentOrganization && currentOrganization.type !== 'Personal'">
       <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'OrganizationHome', params: {slug: currentOrganization.refName}}">Public view of {{ currentOrganization.name }}</v-list-item>
     </v-list>
-    <v-list density="compact" nav v-if="currentOrganization && currentOrganization.type === 'Personal'">
+    <v-list density="compact" nav v-if="user && currentOrganization && currentOrganization.type === 'Personal'">
       <v-list-item prepend-icon="mdi-view-dashboard" :to="{ name: 'UserHome', params: {slug: user.username}}">Public View of Me</v-list-item>
     </v-list>
     <v-list density="compact" nav v-if="user">
@@ -139,7 +139,7 @@ export default {
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
     logout() {
-      this.authLogout().then(() => this.$router.push({ name: 'Login' }));
+      this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
       this.menu = false;
     },
     gotoAccountSettings() {

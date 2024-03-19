@@ -133,6 +133,11 @@ const routes = [
     name: 'Login',
   },
   {
+    path: '/exit-login',
+    component: Login,
+    name: 'Logout', // this version of the "Login" page is for logging out.
+  },
+  {
     path: '/share/:id',
     component: Share,
     name: 'Share',
@@ -293,36 +298,59 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
+  window._paq.push(["setCustomUrl", to.fullPath]);
+  window._paq.push(["setDocumentTitle", to.name]);
+
   if (to.meta && to.meta.checkIframe) {
     to.meta.isWindowLoadedInIframe = isWindowLoadedInIframe();
   }
 
-  if (link.name === 'Login' || link.name === 'SignUp') {
+  if (link.name === 'Login' || link.name === 'SignUp' || link.name === 'Logout') {
     try {
-      await store.dispatch('auth/authenticate');
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
+      window._paq.push(["trackPageView"]);
       next({ name: 'LensHome' });
       return;
     } catch (err) {
+      // The "catch" scenario is, ironically, the normal flow. Users generally go to the Login/Signup/"Logout" page
+      // when they are NOT logged in.
+      if (link.name === 'Logout') {
+        window._paq.push(['resetUserId']); // just in case the User has just logged out, we reset the User ID
+        window._paq.push(['appendToTrackingUrl', 'new_visit=1']); // force a new visit
+        window._paq.push(['trackPageView']);
+        window._paq.push(['appendToTrackingUrl', '']); // needed for a single page app like this one
+      }
     }
   }
   else if (to.meta && to.meta.requiresAuth) {
     try {
-      await store.dispatch('auth/authenticate');
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
     } catch (err) {
       if (to.meta.nonAuthenticatedUsersPointsToUrl) {
         next({ name: to.meta.nonAuthenticatedUsersPointsToUrl });
       } else {
         next({ name: 'Login', query: { redirect_uri: window.location.origin + to.fullPath } });
       }
+      window._paq.push(["trackPageView"]);
       return;
     }
   }
   else if (to.meta && to.meta.tryAuth) {
     try {
-      await store.dispatch('auth/authenticate');
+      let detail = await store.dispatch('auth/authenticate');
+      if (detail?.user?.username) {
+        window._paq.push(["setUserId", detail.user.username]);
+      }
     } catch (err) {
     }
   }
+  window._paq.push(["trackPageView"]);
   next();
 });
 
