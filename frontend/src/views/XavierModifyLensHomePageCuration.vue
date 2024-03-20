@@ -43,17 +43,26 @@
                   <template v-slot:item.actions="{ item }">
                     <v-icon
                       size="small"
-                      @click.stop="openEditPromotionDialog(item)"
+                      @click.stop="console.log('openEditPromotionDialog(item)')"
                     >
-                      mdi-pencil
+                      mdi-cancel
                     </v-icon>
                   </template>
                 </v-data-table>
-                <edit-promotion-dialog ref="editPromotionDialog" :collection="rowCollection" :item-id="rowItemId" :item-name="rowItemName"></edit-promotion-dialog>
               </v-card-text>
             </v-card>
           </v-list-item-media>
           <v-list-item-action class="justify-end">
+            <v-btn
+              class="ma-2"
+              @click.stop="$refs.createPromotion.$data.dialog=true"
+            >
+              <v-icon
+                size="small"
+              >
+                mdi-plus
+              </v-icon>
+            </v-btn>
           </v-list-item-action>
         </v-list-item>
       </v-list>
@@ -61,6 +70,7 @@
     </v-card-text>
   </v-card>
 
+  <create-xavier-promotion-from-url ref="createPromotion" @create-promotion="createPromotion"></create-xavier-promotion-from-url>
 </template>
 
 <script>
@@ -69,13 +79,13 @@ import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
-import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {translateCollection} from "@/curationHelpers";
+import CreateXavierPromotionFromUrl from "@/components/CreateXavierPromotionFromURL.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'XavierModifyLensHomePageCuration',
-  components: {EditPromotionDialog, MarkdownViewer},
+  components: {CreateXavierPromotionFromUrl, MarkdownViewer},
   data: () => ({
     lensSiteCuration: {},
     markdownHtml: 'missing data',
@@ -146,12 +156,17 @@ export default {
         }
       });
     },
-    async openEditPromotionDialog(item) {
-      this.rowCollection = item.columns.collection;
-      this.rowItemId = item.columns.id;
-      this.rowItemName = item.columns.name;
-      this.$refs.editPromotionDialog.$data.dialog = true;
-    },
+    async createPromotion(curation, comment) {
+      console.log("HERE");
+      console.log(curation);
+      console.log(comment);
+    }
+    // async openEditPromotionDialog(item) {
+    //   this.rowCollection = item.columns.collection;
+    //   this.rowItemId = item.columns.id;
+    //   this.rowItemName = item.columns.name;
+    //   this.$refs.editPromotionDialog.$data.dialog = true;
+    // },
   },
   watch: {
   }
