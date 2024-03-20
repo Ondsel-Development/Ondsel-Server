@@ -43,7 +43,7 @@
                   <template v-slot:item.actions="{ item }">
                     <v-icon
                       size="small"
-                      @click.stop="console.log('openEditPromotionDialog(item)')"
+                      @click.stop="deletePromotion(item)"
                     >
                       mdi-cancel
                     </v-icon>
@@ -87,7 +87,7 @@ export default {
   name: 'XavierModifyLensHomePageCuration',
   components: {CreateXavierPromotionFromUrl, MarkdownViewer},
   data: () => ({
-    lensSiteCuration: {},
+    lensSiteDocument: {},
     markdownHtml: 'missing data',
     title: 'missing title',
     promoted: [],
@@ -118,9 +118,6 @@ export default {
         sortable: false
       },
     ],
-    rowCollection: "tbd",
-    rowItemId: "tbd",
-    rowItemName: "tbd",
   }),
   async created() {
     if (!this.user || !this.user.isTripe) {
@@ -138,11 +135,11 @@ export default {
         query: {category: 'lens-site-curation'}
       }).then(response => {
         if (response.data.length > 0) {
-          this.lensSiteCuration = response.data[0];
-          this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
-          this.title = this.lensSiteCuration.current.curation.description || '';
+          this.lensSiteDocument = response.data[0];
+          this.markdownHtml =  marked.parse(this.lensSiteDocument.current.markdownContent);
+          this.title = this.lensSiteDocument.current.curation.description || '';
           let newProm = [];
-          const currentProm = this.lensSiteCuration.current.curation.promoted || [];
+          const currentProm = this.lensSiteDocument.current.curation.promoted || [];
           for (const promotion of currentProm) {
             newProm.push({
               id: promotion.curation._id.toString(),
@@ -157,16 +154,33 @@ export default {
       });
     },
     async createPromotion(curation, comment) {
-      console.log("HERE");
-      console.log(curation);
-      console.log(comment);
-    }
-    // async openEditPromotionDialog(item) {
-    //   this.rowCollection = item.columns.collection;
-    //   this.rowItemId = item.columns.id;
-    //   this.rowItemName = item.columns.name;
-    //   this.$refs.editPromotionDialog.$data.dialog = true;
-    // },
+      let newCurrent = this.lensSiteDocument.current;
+      newCurrent.curation.promoted.push({
+        notation: {
+          updatedAt: Date.now(),
+          historicUser: {
+            _id: this.user._id,
+            username: this.user.username,
+            name: this.user.name,
+            tier: this.user.tier,
+          },
+          message: comment,
+        },
+        curation: curation,
+      })
+      await this.lensSiteDocument.patch({
+        current: newCurrent,
+      })
+      this.update();
+    },
+    async deletePromotion(item) {
+      let newCurrent = this.lensSiteDocument.current;
+      newCurrent.curation.promoted = newCurrent.curation.promoted.filter(promo => promo.curation._id.toString() !== item.value);
+      await this.lensSiteDocument.patch({
+        current: newCurrent,
+      })
+      this.update();
+    },
   },
   watch: {
   }

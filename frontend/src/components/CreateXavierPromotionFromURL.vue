@@ -52,6 +52,7 @@
 
 
 import {mapActions} from "vuex";
+import {removeNonPublicItems} from "@/curationHelpers";
 
 export default {
   name: "CreateXavierPromotionFromUrl",
@@ -71,31 +72,58 @@ export default {
     isCreatePending: vm => vm.isCreatePendingDetail,
   },
   methods: {
-    ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
+    ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByNamePublic', 'getOrgByIdOrNamePublic']),
     async interpretUrlAndCreatePromotion() {
       this.isCreatePendingDetail = true;
       const urlParts = this.url.split("/");
-      console.log(urlParts);
       if (urlParts.length > 3) {
         const id = urlParts.pop();
         const category = urlParts.pop();
         let curation;
         let obj;
-        switch (category) {
-          case 'user':
-            obj = await this.getUserByIdOrNamePublic(id);
-            curation = {
-              _id: obj._id,
-              collection: 'users',
-              name: obj.name,
-              description: obj.description || '',
-            };
-            break;
-          default:
-            break;
+        let personalOrg;
+        let orgRefName;
+        let orgType;
+        try {
+          switch (category) {
+            case 'user':
+              obj = await this.getUserByIdOrNamePublic(id);
+              personalOrg = await this.getOrgByIdOrNamePublic(obj._id.toString());
+              curation = {
+                _id: obj._id,
+                collection: 'users',
+                name: obj.name,
+                description: personalOrg.description || '',
+              };
+              break;
+            case 'workspace':
+              orgRefName = urlParts.pop();
+              orgType = urlParts.pop();
+              if (orgType === 'user') {
+                obj = await this.getUserByIdOrNamePublic(orgRefName);
+                orgRefName = obj._id.toString(); // orgname is userid when a user ws reference
+              }
+              obj = await this.getWorkspaceByNamePublic({wsName: id, orgName: orgRefName} )
+              curation = obj.curation;
+              break;
+            case 'org':
+              obj = await this.getOrgByIdOrNamePublic(id);
+              curation = obj.curation;
+              break;
+            default:
+              break;
+          }
+        } catch (e) {
+          console.log(e)
         }
-        this.$emit('createPromotion', curation, this.comment);
-        this.dialog = false;
+        if (curation) {
+          removeNonPublicItems(curation);
+          this.$emit('createPromotion', curation, this.comment);
+          this.dialog = false;
+        } else {
+          this.snackerMsg = 'could not interpret url';
+          this.showSnacker = true;
+        }
       } else {
         this.snackerMsg = 'url not complete enough';
         this.showSnacker = true;
