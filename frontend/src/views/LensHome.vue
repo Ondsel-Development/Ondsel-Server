@@ -1,12 +1,15 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-card-title>LENS</v-card-title>
+  <v-container class="ma-2">
+    <v-container>
+      <h2>LENS</h2>
+    </v-container>
+    <v-card class="ma-4">
+      <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
         <div v-html="markdownHtml"></div>
       </v-card-text>
     </v-card>
-    <v-card class="mt-4">
+    <v-card class="ma-4">
       <v-card-text>
         <promotions-viewer :promoted="promoted"></promotions-viewer>
       </v-card-text>
@@ -27,6 +30,7 @@ export default {
   data: () => ({
     lensSiteCuration: {},
     markdownHtml: 'missing data',
+    title: 'missing title',
     promoted: [],
   }),
   async created() {
@@ -36,8 +40,8 @@ export default {
       if (response.data.length > 0) {
         this.lensSiteCuration = response.data[0];
         this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
-        this.promoted = this.lensSiteCuration.current.curation.promoted || []
-        console.log(this.lensSiteCuration);
+        this.promoted = this.lensSiteCuration.current.curation.promoted || [];
+        this.title = this.lensSiteCuration.current.curation.description || '';
       }
     });
   },

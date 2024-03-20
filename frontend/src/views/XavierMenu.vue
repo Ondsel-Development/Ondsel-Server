@@ -5,7 +5,7 @@
       <v-list>
         <v-list-item>
           <v-list-item-title
-            @click="$router.push({ name: 'XavierLensHomePageCuration', params: {} })"
+            @click="$router.push({ name: 'XavierModifyLensHomePageCuration', params: {} })"
           >
             Modify Lens Home Page Curation
           </v-list-item-title>
