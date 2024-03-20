@@ -6,7 +6,7 @@
     <v-card class="ma-4">
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
-        <div v-html="markdownHtml"></div>
+        <markdown-viewer :markdown-html="markdownHtml"></markdown-viewer>
       </v-card-text>
     </v-card>
     <v-card class="ma-4">
@@ -22,11 +22,12 @@
 import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'LensHome',
-  components: {PromotionsViewer},
+  components: {MarkdownViewer, PromotionsViewer},
   data: () => ({
     lensSiteCuration: {},
     markdownHtml: 'missing data',

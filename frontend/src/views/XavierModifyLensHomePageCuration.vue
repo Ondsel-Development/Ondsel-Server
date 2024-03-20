@@ -13,6 +13,12 @@
             {{ title }}
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
+            <v-btn
+              class="ma-2"
+              @click.stop="$refs.editDescription.$data.dialog=true"
+            >
+              Edit
+            </v-btn>
           </v-list-item-action>
         </v-list-item>
 
@@ -27,6 +33,12 @@
             </v-card>
           </v-list-item-media>
           <v-list-item-action class="justify-end">
+            <v-btn
+              class="ma-2"
+              @click.stop="$refs.editLongDescriptionMd.$data.dialog=true"
+            >
+              Edit
+            </v-btn>
           </v-list-item-action>
         </v-list-item>
 
@@ -70,6 +82,8 @@
     </v-card-text>
   </v-card>
 
+  <edit-description-dialog ref="editDescription" :description="title" @save-description="saveDescription"></edit-description-dialog>
+  <edit-long-description-md-dialog ref="editLongDescriptionMd" :long-description-md="lensSiteDocument?.current?.markdownContent" @save-long-description-md="saveLongDescriptionMd"></edit-long-description-md-dialog>
   <create-xavier-promotion-from-url ref="createPromotion" @create-promotion="createPromotion"></create-xavier-promotion-from-url>
 </template>
 
@@ -81,11 +95,13 @@ import {marked} from "marked";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import {translateCollection} from "@/curationHelpers";
 import CreateXavierPromotionFromUrl from "@/components/CreateXavierPromotionFromURL.vue";
+import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
+import EditLongDescriptionMdDialog from "@/components/EditLongDescriptionMdDialog.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'XavierModifyLensHomePageCuration',
-  components: {CreateXavierPromotionFromUrl, MarkdownViewer},
+  components: {EditLongDescriptionMdDialog, EditDescriptionDialog, CreateXavierPromotionFromUrl, MarkdownViewer},
   data: () => ({
     lensSiteDocument: {},
     markdownHtml: 'missing data',
@@ -181,6 +197,24 @@ export default {
       })
       this.update();
     },
+    async saveDescription() {
+      let newCurrent = this.lensSiteDocument.current;
+      newCurrent.curation.description = this.$refs.editDescription.$data.newDescription;
+      await this.lensSiteDocument.patch({
+        current: newCurrent,
+      })
+      this.update();
+      this.$refs.editDescription.$data.dialog = false;
+    },
+    async saveLongDescriptionMd() {
+      let newCurrent = this.lensSiteDocument.current;
+      newCurrent.markdownContent = this.$refs.editLongDescriptionMd.$data.newLongDescriptionMd;
+      await this.lensSiteDocument.patch({
+        current: newCurrent,
+      })
+      this.update();
+      this.$refs.editLongDescriptionMd.$data.dialog = false;
+    }
   },
   watch: {
   }
