@@ -10,6 +10,8 @@ import vuetify from './vuetify'
 import router from '../router'
 import store from '../store'
 import { FeathersVuex } from './feathers-client'
+import {matomoOptions} from "@/plugins/matomo";
+import VueMatomo from "vue-matomo";
 
 export function registerPlugins (app) {
   loadFonts()
@@ -18,4 +20,5 @@ export function registerPlugins (app) {
     .use(router)
     .use(store)
     .use(FeathersVuex)
+    .use(VueMatomo, matomoOptions)
 }
