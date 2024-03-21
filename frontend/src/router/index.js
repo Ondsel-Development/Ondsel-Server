@@ -34,6 +34,8 @@ import UserHome from "@/views/UserHome.vue";
 import SearchResults from "@/views/SearchResults.vue";
 import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
 import GettingStarted from "@/views/GettingStarted.vue";
+import XavierMenu from "@/views/XavierMenu.vue";
+import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -178,6 +180,18 @@ const routes = [
       return { path: ''} // don't actually go anywhere internally
     },
     name: 'PaymentProcessorForPeerSubscription',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-68373833',
+    component: XavierMenu,
+    name: 'XavierMenu',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-95684395856',
+    component: XavierModifyLensHomePageCuration,
+    name: 'XavierModifyLensHomePageCuration',
     meta: { requiresAuth: true },
   },
   //

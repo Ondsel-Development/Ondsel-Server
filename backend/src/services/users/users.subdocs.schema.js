@@ -3,8 +3,8 @@
 import { Type } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
-import {agreementCategoryType} from "../agreements/agreements.schema.js";
 import _ from "lodash";
+import {agreementCategoryType} from "../agreements/agreements.subdocs.js";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',

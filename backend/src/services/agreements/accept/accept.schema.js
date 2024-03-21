@@ -3,7 +3,7 @@ import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../../validators.js'
-import {agreementCategoryType} from "../agreements.schema.js";
+import {agreementCategoryType} from "../agreements.subdocs.js";
 
 // Main data model schema
 export const acceptAgreementSchema = Type.Object(

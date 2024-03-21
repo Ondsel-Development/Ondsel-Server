@@ -1,12 +1,7 @@
 // add initial TOS and PP documents
 
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {
-  agreementCategoryType,
-  agreementCategoryTypeMap,
-  specificAgreementType
-} from "../services/agreements/agreements.schema.js";
 import {ObjectId} from "mongodb";
+import {agreementCategoryTypeMap} from "../services/agreements/agreements.subdocs.js";
 
 export async function addInitialTosPp(app) {
 

@@ -1,12 +1,5 @@
 // add new TOS for 2023-aug-31
 
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {
-  agreementCategoryType,
-  agreementCategoryTypeMap,
-  specificAgreementType
-} from "../services/agreements/agreements.schema.js";
-import {ObjectId} from "mongodb";
 import {conformRefName, refNameHasher} from "../refNameFunctions.js";
 
 export async function addUsernameCommand(app) {

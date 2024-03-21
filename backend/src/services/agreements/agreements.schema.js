@@ -3,27 +3,7 @@ import { resolve } from '@feathersjs/schema'
 import {Type, getValidator, querySyntax, StringEnum} from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-
-export const agreementCategoryTypeMap = {
-  privacyPolicy: 'privacy-policy',
-  termsOfService: 'terms-of-service'
-}
-export const agreementCategoryType = StringEnum([
-  agreementCategoryTypeMap.privacyPolicy,
-  agreementCategoryTypeMap.termsOfService,
-])
-
-export const specificAgreementType = Type.Object(
-  {
-    agreementDocId: ObjectIdSchema(),
-    title: Type.String(),
-    effective: Type.Number(), // a formal date
-    deprecated: Type.Union([Type.Number(), Type.Null()]), // null means not deprecated yet
-    version: Type.String(),
-    markdownContent: Type.String(),
-    docPostedAt: Type.Number(), // when this was uploaded to db
-  }
-)
+import {agreementCategoryType, specificAgreementType} from "./agreements.subdocs.js";
 
 // Main data model schema
 export const agreementsSchema = Type.Object(
