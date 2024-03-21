@@ -5,9 +5,9 @@
     width="auto"
   >
     <v-card max-width="40em" min-width="22em">
-      <template v-slot:title>
-        <div class="text-center">Edit Description</div>
-      </template>
+      <v-card-title>
+        <div class="text-center">{{finalLabel}}</div>
+      </v-card-title>
       <v-progress-linear
         :active="isPatchPending"
         indeterminate
@@ -23,7 +23,7 @@
             maxlength="80"
             :disabled="isPatchPending"
           ></v-text-field>
-          <small>Short description limited to a single line and 80 characters.</small>
+          <small>limited to a single line and 80 characters.</small>
         </v-card-text>
       </v-form>
       <v-snackbar
@@ -42,12 +42,14 @@
 
 <script>
 
-import {marked} from "marked";
-
 export default {
   name: 'EditDescriptionDialog',
   props: {
     description: {
+      Type: Text,
+      default: '',
+    },
+    label: {
       Type: Text,
       default: '',
     }
@@ -58,8 +60,12 @@ export default {
     snackerMsg: '',
     showSnacker: false,
     newDescription: '',
+    finalLabel: '',
     isPatchPending: false,
   }),
+  async created() {
+    this.finalLabel = this.$props.label || "Edit Description";
+  },
   computed: {
   },
   methods: {
