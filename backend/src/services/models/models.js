@@ -120,7 +120,7 @@ export const model = (app) => {
           isProvider('external'),
           canUserAccessModelPatchMethod
         ),
-        preventChanges(false, 'isSharedModel', 'custFileName'),
+        preventChanges(false, 'isSharedModel', 'custFileName', 'createSystemGeneratedShareLink', 'haveWriteAccess'),
         iff(
           context => context.data.shouldCommitNewVersion,
           commitNewVersion
@@ -230,6 +230,7 @@ const startObjGeneration = async (context) => {
 
   context.data.shouldStartObjGeneration = false;
   context.data.isObjGenerationInProgress = true;
+  context.data.isObjGenerated = false;
   context.data.latestLogErrorIdForObjGenerationCommand = null;
   return context
 };

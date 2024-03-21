@@ -242,7 +242,7 @@ export default {
       } catch (error) {
         this.error = 'NotFound';
       }
-      if (this.model && !this.model.objUrl) {
+      if (this.model && !this.model.objUrl && !this.model.isThumbnailGenerated) {
         await this.model.patch({
           data: {
             shouldStartObjGeneration: true,
@@ -432,14 +432,14 @@ export default {
   },
   watch: {
     'model.isObjGenerated'(v) {
-      if (v) {
+      if (v && !this.model.isObjGenerationInProgress) {
         if (this.isReloadingOBJ) {
           this.$refs.modelViewer.reloadOBJ(this.model.objUrl);
         } else {
           this.$refs.modelViewer.init(this.model.objUrl);
         }
       }
-    }
+    },
   }
 }
 </script>
