@@ -201,7 +201,7 @@ const routes = [
     path: '/',
     component: LensHome,
     name: 'LensHome',
-    meta: { requiresAuth: true, nonAuthenticatedUsersPointsToUrl: 'PublicModels' },
+    meta: { tryAuth: true },
   },
   {
     path: '/public-models',
