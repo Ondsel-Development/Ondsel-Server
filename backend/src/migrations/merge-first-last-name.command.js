@@ -1,14 +1,5 @@
 // merge first and last name to new 'name' field.
 
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {
-  agreementCategoryType,
-  agreementCategoryTypeMap,
-  specificAgreementType
-} from "../services/agreements/agreements.schema.js";
-import {ObjectId} from "mongodb";
-import {conformRefName, refNameHasher} from "../refNameFunctions.js";
-
 export async function mergeFirstLastNameCommand(app) {
   const userService = app.service('users');
 

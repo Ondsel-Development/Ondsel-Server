@@ -1,42 +1,54 @@
 <template>
-  <v-container>
-    <v-row class="pl-4 pr-4">
-      <div class="text-h5">LENS</div>
-      <v-spacer />
-    </v-row>
-    <br>
-    <v-row class="pl-4 pr-4">
-      Lens is a system of storing, sharing, and collaborating on CAD models.
-      <v-spacer />
-    </v-row>
+  <v-container class="ma-2">
+    <v-container>
+      <h2>LENS</h2>
+    </v-container>
+    <v-card class="ma-4">
+      <v-card-title>{{ title }}</v-card-title>
+      <v-card-text>
+        <markdown-viewer :markdown-html="markdownHtml"></markdown-viewer>
+      </v-card-text>
+    </v-card>
+    <v-card class="ma-4">
+      <v-card-text>
+        <promotions-viewer :promoted="promoted"></promotions-viewer>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-import {mapGetters, mapState} from "vuex";
+
+import {models} from "@feathersjs/vuex";
+import {marked} from "marked";
+import PromotionsViewer from "@/components/PromotionsViewer.vue";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'LensHome',
-  components: { },
+  components: {MarkdownViewer, PromotionsViewer},
   data: () => ({
+    lensSiteCuration: {},
+    markdownHtml: 'missing data',
+    title: 'missing title',
+    promoted: [],
   }),
   async created() {
-    if (this.userCurrentOrganization) {
-      if (this.userCurrentOrganization.type === 'Personal') {
-        this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
-      } else {
-        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: this.userCurrentOrganization.refName } });
+    models.api.Agreements.find({
+      query: {category: 'lens-site-curation'}
+    }).then(response => {
+      if (response.data.length > 0) {
+        this.lensSiteCuration = response.data[0];
+        this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
+        this.promoted = this.lensSiteCuration.current.curation.promoted || [];
+        this.title = this.lensSiteCuration.current.curation.description || '';
       }
-    } else {
-      this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
-    }
+    });
   },
   async mounted() {
   },
   computed: {
-    ...mapState('auth', ['user']),
-    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
   },
   methods: {
   }
