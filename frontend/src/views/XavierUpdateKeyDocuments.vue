@@ -24,7 +24,7 @@
           <v-list-item-action class="justify-end">
             <v-btn
               class="ma-2"
-              @click.stop="$refs.editLongDescriptionMd.$data.dialog=true"
+              @click.stop="$refs.editKeyDocument.$data.dialog=true"
             >
               Edit
             </v-btn>
@@ -48,7 +48,7 @@
     </v-card-text>
   </v-card>
 
-  <edit-long-description-md-dialog ref="editLongDescriptionMd" :long-description-md="lensSiteDocument?.current?.markdownContent" @save-long-description-md="saveLongDescriptionMd"></edit-long-description-md-dialog>
+  <edit-key-document-dialog ref="editKeyDocument" :markdown="lensSiteDocument?.current?.markdownContent" @save-key-document="saveKeyDocument"></edit-key-document-dialog>
 </template>
 
 <script>
@@ -57,12 +57,12 @@ import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
-import EditLongDescriptionMdDialog from "@/components/EditLongDescriptionMdDialog.vue";
+import EditKeyDocumentDialog from "@/components/EditKeyDocumentDialog.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'XavierUpdateKeyDocuments',
-  components: {EditLongDescriptionMdDialog, MarkdownViewer},
+  components: {EditKeyDocumentDialog, MarkdownViewer},
   data: () => ({
     lensSiteDocument: {},
     markdownHtml: 'missing data',
@@ -74,9 +74,14 @@ export default {
         value: 'version',
       },
       {
-        title: 'When',
-        key: 'date',
-        value: 'date',
+        title: 'Effective',
+        key: 'effective',
+        value: 'effective',
+      },
+      {
+        title: 'Deprecated',
+        key: 'deprecated',
+        value: 'deprecated',
       },
     ]
   }),
@@ -103,35 +108,51 @@ export default {
           for (const h of this.lensSiteDocument.history) {
             newHistory.push({
               version: h.version,
-              date: this.dateFormat(h.effective),
+              effective: this.dateFormat(h.effective),
+              deprecated: h.deprecated ? this.dateFormat(h.deprecated) : '-',
             })
           }
           this.history = newHistory;
         }
       });
     },
-    async saveLongDescriptionMd() {
-      let newCurrent = this.lensSiteDocument.current;
-      newCurrent.markdownContent = this.$refs.editLongDescriptionMd.$data.newLongDescriptionMd;
-      await this.lensSiteDocument.patch({
-        current: newCurrent,
-      })
-      this.update();
-      this.$refs.editLongDescriptionMd.$data.dialog = false;
-    },
-    async takeSnapshot() {
-      let newCurrent = { ...this.lensSiteDocument.current};
-      let newHistory = this.lensSiteDocument.history;
+    async saveKeyDocument(newDoc, version) {
+      this.$refs.editKeyDocument.$data.isPatchPending = true;
+      let newCurrent = {...this.lensSiteDocument.current};
+      newCurrent.markdownContent = newDoc;
+      let newHistory = [];
+      newHistory.push(...this.lensSiteDocument.history);
       let now = Date.now();
+      // interpret version text
+      let effectiveDate;
+      let deprecatedDate;
+      try {
+        let year  = parseInt(version.substring(0,4));
+        let month = parseInt(version.substring(4,6));
+        let day   = parseInt(version.substring(6,8));
+        let keyDate = new Date(year, month-1, day);
+        effectiveDate = keyDate.getTime();
+        keyDate.setDate(keyDate.getDate() - 1);
+        deprecatedDate = keyDate.getTime();
+      } catch (e) {
+        console.log(e.message);
+      }
+      if (!effectiveDate || !deprecatedDate) {
+        this.$refs.editKeyDocument.$data.snackerMsg = "can't interpret version with date YYYYMMDD";
+        this.$refs.editKeyDocument.$data.showSnacker = true;
+        this.$refs.editKeyDocument.$data.isPatchPending = false;
+        return;
+      }
+      newCurrent.version = version;
       // deprecate the old
       const lastIndex = newHistory.length - 1;
-      newHistory[lastIndex].deprecated = now;
+      newHistory[lastIndex].deprecated = deprecatedDate;
       // add the new
       newCurrent.agreementDocId = this.newObjectId();
-      newCurrent.effective = now;
+      newCurrent.effective = effectiveDate;
       newCurrent.docPostedAt = now;
-      newCurrent.version = this.$refs.takeSnapshotDialog.$data.newDescription;
       newHistory.push(newCurrent);
+      // save it all and return
       await models.api.Agreements.patch(
         this.lensSiteDocument._id.toString(),
         {
@@ -140,7 +161,8 @@ export default {
         }
       );
       this.update();
-      this.$refs.takeSnapshotDialog.$data.dialog = false;
+      this.$refs.editKeyDocument.$data.isPatchPending = false;
+      this.$refs.editKeyDocument.$data.dialog = false;
     },
     dateFormat(number) {
       const date = new Date(number);
