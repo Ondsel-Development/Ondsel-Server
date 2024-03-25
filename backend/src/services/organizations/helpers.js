@@ -20,13 +20,20 @@ export const isUserMemberOfOrganization = async context => {
   throw new BadRequest({ type: 'PermissionError', msg: 'You must be a member of organization to get private information' });
 }
 
+export const isUserOwnerOrAdminOfOrg = (organization, user) => {
+
+  // Only Owner or Admins of Org allow to add users
+  return (
+    user._id.equals(organization.owner._id)
+    || organization.users.some(user => user._id.equals(user._id.toString()) && user.isAdmin)
+  );
+}
+
 export const isUserOwnerOrAdminOfOrganization = async context => {
   const organization = await context.service.get(context.id);
 
   // Only Owner or Admins of Org allow to add users
-  if (
-    context.params.user._id.equals(organization.owner._id)
-    || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
+  if (isUserOwnerOrAdminOfOrg(organization, context.params.user)) {
     return context;
   }
   throw new BadRequest('Only admins of organization allow to perform this action');

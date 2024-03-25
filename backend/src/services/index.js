@@ -32,7 +32,11 @@ import { upload } from './upload/upload.js'
 
 import { user } from './users/users.js'
 
+import { preferences } from './preferences/preferences.js'
+
 export const services = (app) => {
+  app.configure(preferences)
+
   app.configure(keywords)
 
   app.configure(orgInvites)
