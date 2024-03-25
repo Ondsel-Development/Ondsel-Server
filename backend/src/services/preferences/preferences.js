@@ -69,7 +69,15 @@ export const preferences = (app) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      create: [
+        async context => {
+          await context.app.service('organizations').patch(
+            context.result.organization._id,
+            { preferencesId: context.result._id }
+          );
+        }
+      ]
     },
     error: {
       all: []

@@ -49,7 +49,7 @@ const generateFilesVersionPayload = async (context, filesVersion) => {
       files.push({
         fileName: fileVersion.fileName,
         uniqueFileName: fileVersion.uniqueFileName,
-        additionalData: fileVersion.additionalData,
+        additionalData: fileVersion.additionalData || {},
         data: prefData,
       })
     }
