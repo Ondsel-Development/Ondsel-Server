@@ -1,5 +1,5 @@
 // // For more information about this file see https://dove.feathersjs.com/guides/cli/service.schemas.html
-import { resolve } from '@feathersjs/schema'
+import {resolve, virtual} from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
@@ -22,12 +22,18 @@ export const preferencesSchema = Type.Object(
   { $id: 'Preferences', additionalProperties: false }
 )
 export const preferencesValidator = getValidator(preferencesSchema, dataValidator)
-export const preferencesResolver = resolve({})
+export const preferencesResolver = resolve({
+  currentVersion: virtual(async(message, _context) => {
+    if (message.versions && message.currentVersionId ) {
+      return message.versions.find(version => version._id.equals(message.currentVersionId) )
+    }
+  })
+})
 
 export const preferencesExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const preferencesDataSchema = Type.Pick(preferencesSchema, ['organization', 'versions'], {
+export const preferencesDataSchema = Type.Pick(preferencesSchema, ['organization', 'versions', 'currentVersionId'], {
   $id: 'PreferencesData'
 })
 export const preferencesDataValidator = getValidator(preferencesDataSchema, dataValidator)

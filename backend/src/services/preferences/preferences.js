@@ -19,7 +19,7 @@ import {
 } from './preferences.schema.js'
 import { PreferencesService, getOptions } from './preferences.class.js'
 import { preferencesPath, preferencesMethods } from './preferences.shared.js'
-import { validateAndFeedPayload } from './helpers.js';
+import { validateAndFeedCreatePayload } from './helpers.js';
 
 export * from './preferences.class.js'
 export * from './preferences.schema.js'
@@ -58,7 +58,7 @@ export const preferences = (app) => {
       find: [],
       get: [],
       create: [
-        validateAndFeedPayload,
+        validateAndFeedCreatePayload,
         schemaHooks.validateData(preferencesDataValidator),
         schemaHooks.resolveData(preferencesDataResolver),
       ],

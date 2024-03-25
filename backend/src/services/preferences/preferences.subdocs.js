@@ -6,7 +6,7 @@ export const preferenceVersionDataEntrySchema = Type.Object(
   {
     key: Type.String(),
     type: Type.String(),
-    value: Type.Boolean(),
+    value: Type.String(),
   }
 )
 
@@ -24,7 +24,7 @@ export const preferenceVersionSchema = Type.Object(
     _id: ObjectIdSchema(),
     createdBy: userSummarySchema,
     createdAt: Type.Number(),
-    updatedAt: Type.Number(),
+    // updatedAt: Type.Number(),
     files: Type.Array(preferenceFileVersionSchema)
   }
 )
