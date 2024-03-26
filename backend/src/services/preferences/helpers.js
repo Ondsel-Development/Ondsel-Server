@@ -9,7 +9,7 @@ import { buildOrganizationSummary } from '../organizations/organizations.distrib
 import { buildUserSummary } from '../users/users.distrib.js';
 
 
-const validateFileVersionPayload = context => {
+export const validateFileVersionPayload = context => {
   if (!context.data.version) {
     throw new BadRequest('version object is mandatory');
   }
@@ -24,7 +24,7 @@ const validateFileVersionPayload = context => {
 };
 
 
-const generateFilesVersionPayload = async (context, filesVersion) => {
+export const generateFilesVersionPayload = async (context, filesVersion) => {
 
   const getLookupKeys = fileVersion => {
     let keys = [];
@@ -93,3 +93,16 @@ export const validateAndFeedCreatePayload = async context => {
   };
   return context;
 };
+
+
+export const isUserHavePatchAccess = async context => {
+  const preference = await context.service.get(context.id);
+  const organizationService = context.app.service('organizations');
+  const organization = await organizationService.get(preference.organization._id);
+
+  const canUserPatchPrefToOrg = isUserOwnerOrAdminOfOrg(organization, context.params.user);
+
+  if (!canUserPatchPrefToOrg) {
+    throw new BadRequest('You dont have access to patch preferences');
+  }
+}

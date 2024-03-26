@@ -2,6 +2,7 @@
 import swagger from 'feathers-swagger';
 import { authenticate } from '@feathersjs/authentication'
 
+import { iff } from 'feathers-hooks-common';
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   preferencesDataValidator,
@@ -19,7 +20,9 @@ import {
 } from './preferences.schema.js'
 import { PreferencesService, getOptions } from './preferences.class.js'
 import { preferencesPath, preferencesMethods } from './preferences.shared.js'
-import { validateAndFeedCreatePayload } from './helpers.js';
+import { isUserHavePatchAccess, validateAndFeedCreatePayload } from './helpers.js';
+import { commitNewVersion } from './commands/commitNewVersion.js';
+import { checkoutToVersion } from './commands/checkoutToVersion.js';
 
 export * from './preferences.class.js'
 export * from './preferences.schema.js'
@@ -63,6 +66,15 @@ export const preferences = (app) => {
         schemaHooks.resolveData(preferencesDataResolver),
       ],
       patch: [
+        isUserHavePatchAccess,
+        iff(
+          context => context.data.shouldCommitNewVersion,
+          commitNewVersion
+        ),
+        iff(
+          context => context.data.shouldCheckoutToVersion,
+          checkoutToVersion
+        ),
         schemaHooks.validateData(preferencesPatchValidator),
         schemaHooks.resolveData(preferencesPatchResolver)
       ],
