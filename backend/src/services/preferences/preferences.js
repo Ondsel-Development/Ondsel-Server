@@ -2,7 +2,7 @@
 import swagger from 'feathers-swagger';
 import { authenticate } from '@feathersjs/authentication'
 
-import { iff } from 'feathers-hooks-common';
+import {disallow, iff, isProvider} from 'feathers-hooks-common';
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
   preferencesDataValidator,
@@ -20,7 +20,7 @@ import {
 } from './preferences.schema.js'
 import { PreferencesService, getOptions } from './preferences.class.js'
 import { preferencesPath, preferencesMethods } from './preferences.shared.js'
-import { isUserHavePatchAccess, validateAndFeedCreatePayload } from './helpers.js';
+import {canUserHaveGetAccess, isUserHavePatchAccess, validateAndFeedCreatePayload} from './helpers.js';
 import { commitNewVersion } from './commands/commitNewVersion.js';
 import { checkoutToVersion } from './commands/checkoutToVersion.js';
 
@@ -58,8 +58,15 @@ export const preferences = (app) => {
         schemaHooks.validateQuery(preferencesQueryValidator),
         schemaHooks.resolveQuery(preferencesQueryResolver)
       ],
-      find: [],
-      get: [],
+      find: [
+        disallow('external'),
+      ],
+      get: [
+        iff(
+          isProvider('external'),
+          canUserHaveGetAccess
+        )
+      ],
       create: [
         validateAndFeedCreatePayload,
         schemaHooks.validateData(preferencesDataValidator),
@@ -78,7 +85,9 @@ export const preferences = (app) => {
         schemaHooks.validateData(preferencesPatchValidator),
         schemaHooks.resolveData(preferencesPatchResolver)
       ],
-      remove: []
+      remove: [
+        disallow()
+      ]
     },
     after: {
       all: [],

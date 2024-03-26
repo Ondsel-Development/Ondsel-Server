@@ -2,7 +2,7 @@ import axios from 'axios';
 import mongodb from 'mongodb';
 import { BadRequest } from '@feathersjs/errors';
 
-import { isUserOwnerOrAdminOfOrg } from '../organizations/helpers.js';
+import {isUserMemberOfOrg, isUserOwnerOrAdminOfOrg} from '../organizations/helpers.js';
 import { lookupUserConfigKeys, lookupSystemConfigKeys } from './preferences.config.js';
 import { getLookupData } from './xmlUtils.js';
 import { buildOrganizationSummary } from '../organizations/organizations.distrib.js';
@@ -106,3 +106,14 @@ export const isUserHavePatchAccess = async context => {
     throw new BadRequest('You dont have access to patch preferences');
   }
 }
+
+
+export const canUserHaveGetAccess = async context => {
+  const preference = await context.service.get(context.id);
+  const organizationService = context.app.service('organizations');
+  const organization = await organizationService.get(preference.organization._id);
+  if (isUserMemberOfOrg(organization, context.params.user)) {
+    return context;
+  }
+  throw new BadRequest('You dont have access to preference');
+};
