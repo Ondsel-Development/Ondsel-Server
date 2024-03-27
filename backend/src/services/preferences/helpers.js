@@ -3,7 +3,7 @@ import mongodb from 'mongodb';
 import { BadRequest } from '@feathersjs/errors';
 
 import {isUserMemberOfOrg, isUserOwnerOrAdminOfOrg} from '../organizations/helpers.js';
-import { lookupUserConfigKeys, lookupSystemConfigKeys } from './preferences.config.js';
+import {lookupUserConfigKeys, lookupSystemConfigKeys, typesToSkip} from './preferences.config.js';
 import { getLookupData } from './xmlUtils.js';
 import { buildOrganizationSummary } from '../organizations/organizations.distrib.js';
 import { buildUserSummary } from '../users/users.distrib.js';
@@ -45,7 +45,7 @@ export const generateFilesVersionPayload = async (context, filesVersion) => {
     const { url } = await uploadService.get(fileVersion.uniqueFileName);
     if (url) {
       const response = await axios.get(url);
-      const prefData = getLookupData(response.data, getLookupKeys(fileVersion));
+      const prefData = getLookupData(response.data, getLookupKeys(fileVersion), typesToSkip);
       files.push({
         fileName: fileVersion.fileName,
         uniqueFileName: fileVersion.uniqueFileName,

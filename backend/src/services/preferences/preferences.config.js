@@ -1,3 +1,7 @@
+export const typesToSkip = [
+  'FCParamGroup'
+];
+
 export const lookupUserConfigKeys = [
   '/Root/BaseApp/Preferences/General/ShowSplasher',
   '/Root/BaseApp/Preferences/General/ToolbarIconSize',

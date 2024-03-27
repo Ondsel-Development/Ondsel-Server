@@ -1,7 +1,7 @@
 import xmlJs from 'xml-js';
 
 // Function to get value by path
-export function getValueByPath(obj, path) {
+export function getValueByPath(obj, path, typesToSkip=null) {
   const parts = path.split('/');
   let currentNode = obj;
 
@@ -20,18 +20,26 @@ export function getValueByPath(obj, path) {
     }
   }
 
+  const getValue = item => (item.hasOwnProperty('_text') ? item._text : item._attributes.Value) || '';
+
   for (let key of Object.keys(currentNode)) {
     const values = currentNode[key];
 
     if (Array.isArray(values)) {
       for (let item of values) {
         if (item._attributes.Name === parts[parts.length-1]) {
-          return {key: path, type: key, value: item.hasOwnProperty('_text') ? item._text : item._attributes.Value };
+          if (Array.isArray(typesToSkip) && typesToSkip.includes(key)) {
+            continue;
+          }
+          return {key: path, type: key, value: getValue(item) };
         }
       }
     } else {
       if (values._attributes?.Name === parts[parts.length-1]) {
-        return {key: path, type: key, value: values.hasOwnProperty('_text') ? values._text : values._attributes.Value};
+        if (Array.isArray(typesToSkip) && typesToSkip.includes(key)) {
+          continue;
+        }
+        return { key: path, type: key, value: getValue(values) };
       }
     }
 
@@ -41,11 +49,11 @@ export function getValueByPath(obj, path) {
 }
 
 
-export function getLookupData (fileContent, lookupPaths) {
+export function getLookupData (fileContent, lookupPaths, typesToSkip=null) {
   const data = [];
   const parsedXml = xmlJs.xml2js(fileContent, { compact: true });
   for (let path of lookupPaths) {
-    const value = getValueByPath(parsedXml.FCParameters, path);
+    const value = getValueByPath(parsedXml.FCParameters, path, typesToSkip);
     if (value) {
       data.push(value);
     }
