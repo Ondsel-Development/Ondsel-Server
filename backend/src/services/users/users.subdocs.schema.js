@@ -8,7 +8,9 @@ import {agreementCategoryType} from "../agreements/agreements.subdocs.js";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
+  community: 'Community',
   solo: 'Solo',
+  basic: 'Basic',
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
@@ -18,7 +20,9 @@ export const SubscriptionTypeANON = "anonymous"
 export const SubscriptionType = StringEnum(
   [
     SubscriptionTypeMap.unverified,
+    SubscriptionTypeMap.community,
     SubscriptionTypeMap.solo,
+    SubscriptionTypeMap.basic,
     SubscriptionTypeMap.peer,
     SubscriptionTypeMap.enterprise,
   ]
