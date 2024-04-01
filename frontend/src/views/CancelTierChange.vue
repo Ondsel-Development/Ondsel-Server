@@ -42,6 +42,7 @@ import {mapActions, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
 import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
+import {consistentNameForSubscriptionChange, matomoEventActionMap, matomoEventCategoryMap} from "@/plugins/matomo";
 
 export default {
   name: 'CancelTierChange',
@@ -63,6 +64,7 @@ export default {
   },
   methods: {
     async applySubscription() {
+      const originalPendingTier = this.loggedInUser.user.nextTier;
       this.accountEvent.event = AccountEventTypeMap.cancelTierDowngrade;
       this.accountEvent.detail.subscription = this.loggedInUser.user.tier;
       this.accountEvent.detail.currentSubscription = this.loggedInUser.user.tier;
@@ -74,6 +76,14 @@ export default {
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
+          if (originalPendingTier) {
+            window._paq.push([
+              "trackEvent",
+              matomoEventCategoryMap.subscription,
+              matomoEventActionMap.cancelChange,
+              consistentNameForSubscriptionChange(matomoEventActionMap.cancelChange, originalPendingTier),
+            ]);
+          }
         })
         .catch((e) => {
           console.log(e);
