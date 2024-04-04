@@ -66,8 +66,16 @@
       <v-switch
         v-model="item.raw.isActive"
         hide-details
-        :disabled="!user.constraint.canDisableAutomaticGenerationOfPublicLink"
+        :disabled="item.raw.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
         @update:modelValue="updateSharedModel(item.raw._id, {isActive: item.raw.isActive})"
+      ></v-switch>
+    </template>
+    <template v-slot:item.showInPublicGallery="{ item }">
+      <v-switch
+        v-model="item.raw.showInPublicGallery"
+        hide-details
+        :disabled="item.raw.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
+        @update:modelValue="updateSharedModel(item.raw._id, {showInPublicGallery: item.raw.showInPublicGallery})"
       ></v-switch>
     </template>
 
@@ -232,8 +240,9 @@ export default {
           sortable: false,
           key: 'link',
         },
-        { title: 'Description', key: 'description', sortable: false, width: '400px'},
+        { title: 'Description', key: 'description', sortable: false, width: '270px'},
         { title: 'Created At', key: 'createdAt', sortable: true},
+        { title: 'Display In Public Gallery', key: 'showInPublicGallery', sortable: true},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
       isShareModelDialogActive: false,
