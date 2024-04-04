@@ -1340,8 +1340,6 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/MainWindow/StyleSheet",
   "/Root/BaseApp/Preferences/MainWindow/OverlayActiveStyleSheet",
   "/Root/BaseApp/Preferences/MainWindow/WSPosition",
-  "/Root/BaseApp/Preferences/MainWindow/MainWindowState",
-  "/Root/BaseApp/Preferences/MainWindow/WindowStateRestored",
   "/Root/BaseApp/Preferences/MainWindow/Maximized",
   "/Root/BaseApp/Preferences/MainWindow/StatusBar",
   "/Root/BaseApp/Preferences/MainWindow/Geometry",
