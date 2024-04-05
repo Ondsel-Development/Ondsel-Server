@@ -148,24 +148,24 @@ export function getConstraint(user){
 
 export const LedgerMap = {
   cash: 'Cash',
-  processorExpense: 'ProcessorExpense',
   unearnedRevenue: 'UnearnedRevenue',
   revenue: 'Revenue',
   salesReturnsAndAllowances: 'SalesReturnsAndAllowances',
+  customerCredit: 'CustomerCredit',
 }
 
 export const LedgerNature = {
   'Cash': 1,                           // +1 DEBIT  as ASSET
-  'ProcessorExpense': 1,               // +1 DEBIT  as EXPENSE
   'UnearnedRevenue': -1,               // -1 CREDIT as LIABILITY
+  'CustomerCredit': -1,                // -1 CREDIT as LIABILITY
   'Revenue': -1,                       // -1 CREDIT as INCOME
   'SalesReturnsAndAllowances': 1,      // +1 DEBIT  as CONTRA-REVENUE
 }
 export const Ledger = StringEnum(
   [
     LedgerMap.cash,
-    LedgerMap.processorExpense,
     LedgerMap.unearnedRevenue,
+    LedgerMap.customerCredit,
     LedgerMap.revenue,
     LedgerMap.salesReturnsAndAllowances,
   ]
