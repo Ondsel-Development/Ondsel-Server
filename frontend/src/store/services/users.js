@@ -10,6 +10,15 @@ export const SubscriptionTypeMap = {
   enterprise: 'Enterprise',
 }
 
+export const SubscriptionMonthlyPricingMap = {
+  'Unverified': 0,
+  'Community': 0,
+  'Solo': 0,
+  'Basic': 4,
+  'Peer': 10,
+  'Enterprise': 100,
+}
+
 export const SubscriptionTermTypeMap = {
   monthly: 'Monthly',
   yearly: 'Yearly',
