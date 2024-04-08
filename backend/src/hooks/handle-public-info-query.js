@@ -61,3 +61,17 @@ export const ThrowBadRequestIfNotForPublicInfo = async (context) => {
   }
   return context;
 }
+
+
+export const tryToAuthenticate = () => {
+  // this is an "around" hook
+  // Try To authenticate context but also allow anonymous calls
+  return async (context, next) => {
+    try {
+      await authenticate("jwt")(context, next);
+    } catch (error) {
+      await next();
+    }
+    return context;
+  }
+}
