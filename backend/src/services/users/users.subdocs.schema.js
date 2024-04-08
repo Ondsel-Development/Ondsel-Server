@@ -73,6 +73,8 @@ export const subscriptionDetailSchema= Type.Object(
     state: SubscriptionStateType,
     term: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
     anniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
+    lastRenewalDate: Type.Optional(Type.Number()), // if missing, use anniversary
+    stripeSubscriptionId: Type.Optional(Type.String()), // if missing, no Stripe-handled subscription active
   }
 );
 

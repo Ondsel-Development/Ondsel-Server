@@ -14,9 +14,9 @@ export const SubscriptionMonthlyPricingMap = {
   'Unverified': 0,
   'Community': 0,
   'Solo': 0,
-  'Basic': 4,
-  'Peer': 10,
-  'Enterprise': 100,
+  'Basic': 400,
+  'Peer': 1000,
+  'Enterprise': 10000,
 }
 
 export const SubscriptionTermTypeMap = {
