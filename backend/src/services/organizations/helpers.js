@@ -4,6 +4,13 @@ import {buildOrganizationSummary} from "./organizations.distrib.js";
 import { getConstraint } from "../users/users.subdocs.schema.js";
 import {OrganizationType, OrganizationTypeMap} from "./organizations.subdocs.schema.js";
 
+
+export const isUserMemberOfOrg = (organization, user) => {
+
+  const userList = organization.users || [];
+  return userList.some(orgUser => orgUser._id.equals(user._id.toString()));
+};
+
 export const isUserMemberOfOrganization = async context => {
   // this is called from after/get; so result has the org (if found)
   if (context.publicDataOnly) {
@@ -13,20 +20,27 @@ export const isUserMemberOfOrganization = async context => {
   if (!organization) {
     return context; // no result, all is good
   }
-  const userList = organization.users || [];
-  if (userList.some(user => user._id.equals(context.params.user._id.toString()))) {
+
+  if (isUserMemberOfOrg(organization, context.params.user)) {
     return context;
   }
   throw new BadRequest({ type: 'PermissionError', msg: 'You must be a member of organization to get private information' });
+}
+
+export const isUserOwnerOrAdminOfOrg = (organization, user) => {
+
+  // Only Owner or Admins of Org allow to add users
+  return (
+    user._id.equals(organization.owner._id)
+    || organization.users.some(user => user._id.equals(user._id.toString()) && user.isAdmin)
+  );
 }
 
 export const isUserOwnerOrAdminOfOrganization = async context => {
   const organization = await context.service.get(context.id);
 
   // Only Owner or Admins of Org allow to add users
-  if (
-    context.params.user._id.equals(organization.owner._id)
-    || organization.users.some(user => user._id.equals(context.params.user._id.toString()) && user.isAdmin)) {
+  if (isUserOwnerOrAdminOfOrg(organization, context.params.user)) {
     return context;
   }
   throw new BadRequest('Only admins of organization allow to perform this action');

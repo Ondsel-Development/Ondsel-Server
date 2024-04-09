@@ -53,6 +53,9 @@
 
 import {mapActions} from "vuex";
 import {removeNonPublicItems} from "@/curationHelpers";
+import {models} from "@feathersjs/vuex";
+
+const { SharedModel } = models.api;
 
 export default {
   name: "CreateXavierPromotionFromUrl",
@@ -108,6 +111,10 @@ export default {
               break;
             case 'org':
               obj = await this.getOrgByIdOrNamePublic(id);
+              curation = obj.curation;
+              break;
+            case 'share':
+              obj = await SharedModel.get(id, {query: {isActive: true}});
               curation = obj.curation;
               break;
             default:

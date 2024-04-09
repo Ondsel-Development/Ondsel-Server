@@ -41,6 +41,7 @@ export const organizationSchema = Type.Object(
     owner: userSummarySchema,
     type: Type.Optional(OrganizationType),
     curation: Type.Optional(curationSchema),
+    preferencesId: Type.Optional(ObjectIdSchema()),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },

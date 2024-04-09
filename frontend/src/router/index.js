@@ -36,6 +36,7 @@ import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
 import GettingStarted from "@/views/GettingStarted.vue";
 import XavierMenu from "@/views/XavierMenu.vue";
 import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
+import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -182,6 +183,9 @@ const routes = [
     name: 'PaymentProcessorForPeerSubscription',
     meta: { requiresAuth: true },
   },
+  //
+  // XAVIER pages
+  //
   {
     path: '/xavier-68373833',
     component: XavierMenu,
@@ -192,6 +196,12 @@ const routes = [
     path: '/xavier-95684395856',
     component: XavierModifyLensHomePageCuration,
     name: 'XavierModifyLensHomePageCuration',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-7492783/:name',
+    component: XavierUpdateKeyDocuments,
+    name: 'XavierUpdateKeyDocuments',
     meta: { requiresAuth: true },
   },
   //

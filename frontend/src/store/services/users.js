@@ -3,9 +3,20 @@ import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
+  community: 'Community',
   solo: 'Solo',
+  basic: 'Basic',
   peer: 'Peer',
   enterprise: 'Enterprise',
+}
+
+export const SubscriptionMonthlyPricingMap = {
+  'Unverified': 0,
+  'Community': 0,
+  'Solo': 0,
+  'Basic': 400,
+  'Peer': 1000,
+  'Enterprise': 10000,
 }
 
 export const SubscriptionTermTypeMap = {

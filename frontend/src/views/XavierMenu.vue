@@ -10,6 +10,27 @@
             Modify Lens Home Page Curation
           </v-list-item-title>
         </v-list-item>
+        <v-list-item>
+          <v-list-item-title>
+            View/Modify Key Documents:
+            <v-list class="ms-4">
+              <v-list-item>
+                <v-list-item-title
+                  @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'privacy-policy'} })"
+                >
+                  Privacy Policy Document
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title
+                  @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'terms-of-service'} })"
+                >
+                  Terms of Service/Use
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-card-text>
   </v-card>

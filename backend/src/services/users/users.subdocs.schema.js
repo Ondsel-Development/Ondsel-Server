@@ -8,7 +8,9 @@ import {agreementCategoryType} from "../agreements/agreements.subdocs.js";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
+  community: 'Community',
   solo: 'Solo',
+  basic: 'Basic',
   peer: 'Peer',
   enterprise: 'Enterprise',
 }
@@ -18,7 +20,9 @@ export const SubscriptionTypeANON = "anonymous"
 export const SubscriptionType = StringEnum(
   [
     SubscriptionTypeMap.unverified,
+    SubscriptionTypeMap.community,
     SubscriptionTypeMap.solo,
+    SubscriptionTypeMap.basic,
     SubscriptionTypeMap.peer,
     SubscriptionTypeMap.enterprise,
   ]
@@ -69,6 +73,8 @@ export const subscriptionDetailSchema= Type.Object(
     state: SubscriptionStateType,
     term: Type.Optional(Type.Union([Type.Null(), SubscriptionTermType])),
     anniversary: Type.Optional(Type.Union([Type.Null(), Type.Number()])),
+    lastRenewalDate: Type.Optional(Type.Number()), // if missing, use anniversary
+    stripeSubscriptionId: Type.Optional(Type.String()), // if missing, no Stripe-handled subscription active
   }
 );
 
@@ -93,6 +99,30 @@ export const subscriptionConstraintMap = {
     maxShareLinksPerModel: 0,
     canUpload: false,
     canDownloadOriginal: false,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+    canCreateOpenOrganization: false,
+    canCreatePrivateOrganization: false,
+  },
+  'Community': {
+    maxModelObjects: 25,
+    maxShareLinksPerModel: 1,
+    canUpload: true,
+    canDownloadOriginal: true,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: true,
+    canDisableAutomaticGenerationOfPublicLink: false,
+    canCreateOpenOrganization: false,
+    canCreatePrivateOrganization: false,
+  },
+  'Basic': {
+    maxModelObjects: 50,
+    maxShareLinksPerModel: 2,
+    canUpload: true,
+    canDownloadOriginal: true,
     canUpdateModelParameters: false,
     canExportModel: false,
     defaultValueOfPublicLinkGeneration: true,
@@ -144,24 +174,24 @@ export function getConstraint(user){
 
 export const LedgerMap = {
   cash: 'Cash',
-  processorExpense: 'ProcessorExpense',
   unearnedRevenue: 'UnearnedRevenue',
   revenue: 'Revenue',
   salesReturnsAndAllowances: 'SalesReturnsAndAllowances',
+  customerCredit: 'CustomerCredit',
 }
 
 export const LedgerNature = {
   'Cash': 1,                           // +1 DEBIT  as ASSET
-  'ProcessorExpense': 1,               // +1 DEBIT  as EXPENSE
   'UnearnedRevenue': -1,               // -1 CREDIT as LIABILITY
+  'CustomerCredit': -1,                // -1 CREDIT as LIABILITY
   'Revenue': -1,                       // -1 CREDIT as INCOME
   'SalesReturnsAndAllowances': 1,      // +1 DEBIT  as CONTRA-REVENUE
 }
 export const Ledger = StringEnum(
   [
     LedgerMap.cash,
-    LedgerMap.processorExpense,
     LedgerMap.unearnedRevenue,
+    LedgerMap.customerCredit,
     LedgerMap.revenue,
     LedgerMap.salesReturnsAndAllowances,
   ]

@@ -29,6 +29,7 @@ import {addCurationToAllSharedModelsCommand} from "./add-curation-to-all-shared-
 import {fixSharedModelCurationsAndKeywordsCommand} from "./fix-shared-model-curations-and-keywords.command.js";
 import { upgradeUnverifiedUserToVerifiedAndMigrateToSoloTier } from './upgrade_unverified_user_to_verified_and_migrate_to_solo_tier.js';
 import {addInitialLensSiteCurationCommand} from "./add-initial-lens-site-curation.command.js";
+import { addShowInPublicGalleryFieldToSharedModelCommand } from './addShowInPublicGalleryFieldToSharedModel.js';
 
 async function runMigration() {
   console.log('Migration start');
@@ -126,6 +127,9 @@ async function runMigration() {
       break;
     case 'addInitialLensSiteCuration':
       await addInitialLensSiteCurationCommand(app);
+      break;
+    case 'addShowInPublicGalleryFieldToSharedModel':
+      await addShowInPublicGalleryFieldToSharedModelCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

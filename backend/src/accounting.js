@@ -92,3 +92,19 @@ export function verifyBalanced(transaction) {
   }
   return errMsg;
 }
+
+export function validNumberCheck(amt, amtName) {
+  if (amt === undefined || amt == null ) {
+    return `${amtName} must be be provided.`;
+  }
+  if (!Number.isInteger(amt)) {
+    return `${amtName} must be a simple integer measuring pennies (100ths of USD)`;
+  }
+  if (amt <= 1) {
+    return `${amtName} must be a positive non-zero integer (in pennies) for this event type.`;
+  }
+  if (amt > 100000) {
+    return `${amtName} must be a below 100000 (1000.00 USD) to be valid.`;
+  }
+  return "good";
+}

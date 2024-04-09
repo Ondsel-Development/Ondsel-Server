@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
+import { tryToAuthenticate } from '../../hooks/handle-public-info-query.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -66,7 +67,7 @@ export const model = (app) => {
         schemaHooks.resolveResult(modelResolver)
       ],
       find: [authenticate('jwt')],
-      get: [],
+      get: [tryToAuthenticate()],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],
@@ -406,6 +407,7 @@ const createSharedModelObject = async (context) => {
     dummyModelId: newModel._id.toString(),
     description: 'System Generated',
     isSystemGenerated: true,
+    showInPublicGallery: true,
     canViewModel: true,
     canViewModelAttributes: true,
     canUpdateModel: false,

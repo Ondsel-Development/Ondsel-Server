@@ -29,6 +29,7 @@ export const sharedModelsSchema = Type.Object(
     canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
+    showInPublicGallery: Type.Optional(Type.Boolean({default: false})),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
     curation: Type.Optional(curationSchema),
@@ -110,6 +111,7 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canDownloadDefaultModel',
   'dummyModelId',
   'isSystemGenerated',
+  'showInPublicGallery',
   'isThumbnailGenerated',
 ], {
   $id: 'SharedModelsData'
@@ -184,6 +186,12 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsSchema.properties.isSystemGenerated.default
   },
+  showInPublicGallery: async (_value, _message, context) => {
+    if (_value) {
+      return _value;
+    }
+    return sharedModelsSchema.properties.showInPublicGallery.default
+  },
   isThumbnailGenerated: async (_value, _message, context) => {
     if (_value) {
       return _value;
@@ -204,7 +212,7 @@ export const sharedModelsPatchResolver = resolve({
 // Schema for allowed query properties
 export const sharedModelsQueryProperties = Type.Pick(
   sharedModelsSchema,
-  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated', 'curation']
+  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated', 'curation', 'showInPublicGallery']
 )
 export const sharedModelsQuerySchema = Type.Intersect(
   [

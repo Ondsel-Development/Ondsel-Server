@@ -54,6 +54,7 @@ import {models} from "@feathersjs/vuex";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
 import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
+import {consistentNameForSubscriptionChange, matomoEventActionMap, matomoEventCategoryMap} from "@/plugins/matomo";
 
 //
 // This page is ONLY reached via a return call from a Stripe Purchase Page.
@@ -97,9 +98,21 @@ export default {
         .then(() => {
           this.transactionRecorded = true;
           newMsg = "completed";
+          window._paq.push([
+            "trackEvent",
+            matomoEventCategoryMap.subscription,
+            matomoEventActionMap.upgrade,
+            consistentNameForSubscriptionChange(matomoEventActionMap.upgrade, SubscriptionTypeMap.peer),
+          ]);
         })
         .catch((e) => {
           newMsg = 'attempted, please retry';
+          window._paq.push([
+            "trackEvent",
+            matomoEventCategoryMap.subscription,
+            matomoEventActionMap.failure,
+            `${matomoEventActionMap.failure} to ${SubscriptionTypeMap.peer} (${e.message})`,
+          ]);
           console.log(e);
           console.log(e.message);
         });

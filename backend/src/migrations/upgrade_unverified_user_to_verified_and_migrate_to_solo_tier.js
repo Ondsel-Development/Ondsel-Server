@@ -15,7 +15,7 @@ export async function upgradeUnverifiedUserToVerifiedAndMigrateToSoloTier(app) {
     const user = users.data[0];
     console.log('>>> User found')
     if (!user.isVerified && user.tier === SubscriptionTypeMap.unverified) {
-      console.log('>>> User is not verified and tier is Unverified, now make it verified and Peer tier...');
+      console.log('>>> User is not verified and tier is Unverified, now make it verified and Solo tier...');
       const as = await authService.create({
         action: "verifySignupLong",
         value: user.verifyToken,
