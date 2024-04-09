@@ -38,10 +38,15 @@
 
 <script>
 
-import {mapActions, mapState} from "vuex";
+import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
 import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
+import {
+  consistentNameForSubscriptionChange,
+  matomoEventActionMap,
+  matomoEventCategoryMap,
+} from "@/plugins/matomo";
 
 export default {
   name: 'DowngradeToSolo',
@@ -72,6 +77,12 @@ export default {
       await this.accountEvent.create()
         .then(() => {
           this.transactionRecorded = true;
+          window._paq.push([
+            "trackEvent",
+            matomoEventCategoryMap.subscription,
+            matomoEventActionMap.downgrade,
+            consistentNameForSubscriptionChange(matomoEventActionMap.downgrade, SubscriptionTypeMap.solo),
+          ]);
         })
         .catch((e) => {
           console.log(e);

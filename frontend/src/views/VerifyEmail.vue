@@ -42,6 +42,7 @@ import {resetStores} from "@/store";
 import {AuthManagement} from "@/store/services/auth-management";
 import {AccountEventTypeMap} from "@/store/services/accountEvent";
 import {SubscriptionTermTypeMap, SubscriptionTypeMap} from "@/store/services/users";
+import {consistentNameForSubscriptionChange, matomoEventActionMap, matomoEventCategoryMap} from "@/plugins/matomo";
 
 export default {
   name: 'VerifyEmail',
@@ -120,6 +121,12 @@ export default {
         };
         this.accountEvent.create()
           .then(() => {
+            window._paq.push([
+              "trackEvent",
+              matomoEventCategoryMap.subscription,
+              matomoEventActionMap.upgrade,
+              consistentNameForSubscriptionChange(matomoEventActionMap.upgrade, SubscriptionTypeMap.solo),
+            ]);
             this.$router
               .push({name: 'ChooseTier', query: { psu: true }}) // when here, a new user is verifying the first email
               .then(() => {
