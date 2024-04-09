@@ -181,7 +181,7 @@ export default {
   computed: {
     ...mapState('shared-models', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
-    sharedModels: () => SharedModel.findInStore({ query: { isSystemGenerated: true, isThumbnailGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
+    sharedModels: () => SharedModel.findInStore({ query: { showInPublicGallery: true, isThumbnailGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
   },
   methods: {
     async fetchDataOnScroll() {
@@ -196,7 +196,7 @@ export default {
             $sort: {
               createdAt: -1,
             },
-            isSystemGenerated: true,
+            showInPublicGallery: true,
             isActive: true,
             isThumbnailGenerated: true,
           }

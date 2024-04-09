@@ -406,6 +406,7 @@ const createSharedModelObject = async (context) => {
     dummyModelId: newModel._id.toString(),
     description: 'System Generated',
     isSystemGenerated: true,
+    showInPublicGallery: true,
     canViewModel: true,
     canViewModelAttributes: true,
     canUpdateModel: false,

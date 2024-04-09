@@ -11,6 +11,7 @@ class SharedModel extends BaseModel {
     return {
       cloneModelId: '',
       description: '',
+      showInPublicGallery: false,
       canViewModel: true,
       canViewModelAttributes: false,
       canUpdateModel: false,
