@@ -11,13 +11,17 @@ export async function addShowInPublicGalleryFieldToSharedModelCommand(app) {
   console.log(`>>> Found ${smList.length} shared models`);
   for (let sm of smList) {
     console.log(`  >>> sm ${sm._id}":`);
-    await smService.patch(
-      sm._id,
-      {
-        showInPublicGallery: !!sm.isSystemGenerated,
-      }
-    );
-    console.log(`    >>> UPDATED`);
+    try {
+      await smService.patch(
+        sm._id,
+        {
+          showInPublicGallery: !!sm.isSystemGenerated,
+        }
+      );
+      console.log(`    >>> UPDATED`);
+    } catch (e) {
+      console.log(`   >>>> ERROR`);
+    }
   }
   console.log(`>>> command complete.`);
 }
