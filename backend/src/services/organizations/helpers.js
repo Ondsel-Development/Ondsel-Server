@@ -32,7 +32,7 @@ export const isUserOwnerOrAdminOfOrg = (organization, user) => {
   // Only Owner or Admins of Org allow to add users
   return (
     user._id.equals(organization.owner._id)
-    || organization.users.some(user => user._id.equals(user._id.toString()) && user.isAdmin)
+    || organization.users.some(u => u._id.equals(user._id.toString()) && u.isAdmin)
   );
 }
 

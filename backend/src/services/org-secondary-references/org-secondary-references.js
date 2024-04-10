@@ -1,5 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
+import { iff, isProvider, preventChanges } from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -21,6 +22,7 @@ import {
   orgSecondaryReferencesPath,
   orgSecondaryReferencesMethods
 } from './org-secondary-references.shared.js'
+import { canUserPatchOrgSecondaryReferences } from './helpers.js';
 import swagger from "feathers-swagger";
 
 export * from './org-secondary-references.class.js'
@@ -64,6 +66,8 @@ export const orgSecondaryReferences = (app) => {
         schemaHooks.resolveData(orgSecondaryReferencesDataResolver)
       ],
       patch: [
+        iff(isProvider('external'), canUserPatchOrgSecondaryReferences),
+        iff(isProvider('external'), preventChanges(true, 'organizationId', 'bookmarks')),
         schemaHooks.validateData(orgSecondaryReferencesPatchValidator),
         schemaHooks.resolveData(orgSecondaryReferencesPatchResolver)
       ],
