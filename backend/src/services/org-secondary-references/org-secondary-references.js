@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import { iff, isProvider, preventChanges } from 'feathers-hooks-common';
+import {disallow, iff, isProvider, preventChanges} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -62,6 +62,7 @@ export const orgSecondaryReferences = (app) => {
       find: [],
       get: [],
       create: [
+        disallow('external'),
         schemaHooks.validateData(orgSecondaryReferencesDataValidator),
         schemaHooks.resolveData(orgSecondaryReferencesDataResolver)
       ],
@@ -71,7 +72,9 @@ export const orgSecondaryReferences = (app) => {
         schemaHooks.validateData(orgSecondaryReferencesPatchValidator),
         schemaHooks.resolveData(orgSecondaryReferencesPatchResolver)
       ],
-      remove: []
+      remove: [
+        disallow('external'),
+      ]
     },
     after: {
       all: []
