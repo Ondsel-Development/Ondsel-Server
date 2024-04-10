@@ -1,12 +1,10 @@
-import {isAdminUser} from "../../hooks/is-user.js";
-import {userPublicFields} from "./users.schema.js";
-import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
-import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
+import {buildUserSummary} from "./users.distrib.js";
 
 export function buildNewCurationForUser(user) {
   // note: this curation is stored in the Personal Org, but this routine is under 'users' to be thematic
   let curation =   {
     _id: user._id,
+    slug: user.username,
     collection: 'users',
     name: user.name || '',
     description: '',

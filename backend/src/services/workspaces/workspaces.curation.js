@@ -3,10 +3,12 @@
 
 import {generateAndApplyKeywords} from "../../curation.schema.js";
 import _ from "lodash";
+import {buildWorkspaceSummary} from "./workspaces.distrib.js";
 
 export function buildNewCurationForWorkspace(workspace) {
   let curation =   {
     _id: workspace._id,
+    slug: workspace.refName,
     collection: 'workspaces',
     name: workspace.name || "",
     description: workspace.description || "",

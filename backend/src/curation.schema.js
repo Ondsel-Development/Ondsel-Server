@@ -4,14 +4,22 @@ import pkg from 'node-rake-v2';
 import _ from "lodash";
 import {userSummarySchema} from "./services/users/users.subdocs.schema.js";
 import {buildFileSummary} from "./services/file/file.distrib.js";
+import {userPath} from "./services/users/users.shared.js";
+import {organizationPath} from "./services/organizations/organizations.shared.js";
+import {workspacePath} from "./services/workspaces/workspaces.shared.js";
+import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
 
 // this schema is shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
 // of support functions.
 
+// TODO: some day, remove 'promoted' from here. A promotions list belongs outside of the curation object; perhaps
+//  in the parent object or elsewhere.
+
 export const curationSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    slug: Type.String(),
     collection: Type.String(),
     name: Type.String(), // limited to 40 runes (unicode code points aka characters)
     description: Type.String(), // limited to 80 runes
@@ -37,6 +45,13 @@ export const promotionSchema = Type.Object(
     curation: curationSchema, // use 'curationSummaryOfCuration` method to shorten
   }
 )
+
+export const curationCollectionMap = {
+  users: userPath,
+  organizations: organizationPath,
+  workspaces: workspacePath,
+  sharedModels: sharedModelsPath,
+}
 
 const MAX_LONG_DESC_SUM = 60;
 export function curationSummaryOfCuration(curation) {
@@ -83,14 +98,6 @@ export async function generateAndApplyKeywords(context, curation) {
   return keywordScores.map(item => item.keyword);
 }
 
-// TODO: the following is not reliable in volume such as migration tool. Why?
-// let keywordPromises = []  // there can easily be 100 of these, so send them all at once.
-// for (const item of keywordScores) {
-//   keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
-// }
-// await Promise.all(keywordPromises);
-
-
 async function upsertScoreItem(keywordService, item, cleanCuration) {
     try {
         keywordService.create(
@@ -109,6 +116,7 @@ async function upsertScoreItem(keywordService, item, cleanCuration) {
 // Score constants. To be tweaked as we learn more.
 
 // a word simply appearing in an item gives it a strong score
+const slugStart = 175;
 const nameStart = 150;
 const descStart = 125;
 const longDescStart = 100;
@@ -116,6 +124,7 @@ const tagStart = 125;
 
 // the maximum score. If a bigger number is found, it is clipped to the max.
 //    all of these max numbers should add up to 1000.
+const slugMax = 300;
 const nameMax = 300;
 const descMax = 250;
 const longDescMax = 200;
@@ -124,6 +133,7 @@ const tagMax = 250;
 // the keywords are in an order. for some strings, being seen "later" has a cost
 // the RAKE algo places the "most important keywords" first.
 // the first item has nothing deducted, the second is decremented once, the third twice, etc.
+const slugOrderCost = 0;  // order does not matter
 const nameOrderCost = 0;  // order does not matter in a name; order is often an effect of grammar
 const descOrderCost = -1;
 const longDescOrderCost = -2;
@@ -139,6 +149,11 @@ export function determineKeywordsWithScore(curation) {
     // returns a dictionary containing "keyphrase"
     // score is an integer from 0 to 1000; it describes the relative "importance" in terms of the content
     let keywordScores = []
+    //
+    // slug
+    //
+    const slugKeywords = useRake(curation.slug);
+    accumulateScores(keywordScores, slugKeywords, slugStart, slugMax, slugOrderCost);
     //
     // name
     //
@@ -234,6 +249,8 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         needPatch = true;
         changeFound = true;
       }
+      //
+      // slug: a slug can't change once created.
       //
       // name (pulled from parent except for personal orgs)
       //
