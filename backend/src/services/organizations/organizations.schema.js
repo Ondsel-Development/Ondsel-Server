@@ -42,6 +42,7 @@ export const organizationSchema = Type.Object(
     type: Type.Optional(OrganizationType),
     curation: Type.Optional(curationSchema),
     preferencesId: Type.Optional(ObjectIdSchema()),
+    orgSecondaryReferencesId: ObjectIdSchema(),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
