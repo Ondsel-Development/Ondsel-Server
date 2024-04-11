@@ -8,9 +8,13 @@ import {buildWorkspaceSummary} from "./workspaces.distrib.js";
 export function buildNewCurationForWorkspace(workspace) {
   let curation =   {
     _id: workspace._id,
-    slug: workspace.refName,
     collection: 'workspaces',
+    nav: {
+      slug: workspace.organization.refName,
+      wsname: workspace.refName,
+    },
     name: workspace.name || "",
+    slug: workspace.refName,
     description: workspace.description || "",
     longDescriptionMd: '',
     tags: [],

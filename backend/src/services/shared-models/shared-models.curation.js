@@ -5,9 +5,12 @@ import {buildFileSummary} from "../file/file.distrib.js";
 export function buildNewCurationForSharedModel(sm) {
   let curation =   {
     _id: sm._id,
-    slug: '', // a shared model has no slug
     collection: 'shared-models',
+    nav: {
+      id: sm._id.toString(),
+    },
     name: sm.model?.file?.custFileName || '',
+    slug: '', // a shared model has no searchable slug
     description: sm.description || '',
     longDescriptionMd: '',
     tags: [],

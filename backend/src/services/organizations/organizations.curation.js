@@ -8,9 +8,12 @@ export function buildNewCurationForOrganization(org) {
   // optional slug param is used for Personal Collections
   let curation =   {
     _id: org._id,
-    slug: org.refName,
     collection: 'organizations',
+    nav: {
+      slug: org.refName,
+    },
     name: org.name || '',
+    slug: org.refName,
     description: '',
     longDescriptionMd: '',
     tags: [],

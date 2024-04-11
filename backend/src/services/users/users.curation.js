@@ -4,9 +4,12 @@ export function buildNewCurationForUser(user) {
   // note: this curation is stored in the Personal Org, but this routine is under 'users' to be thematic
   let curation =   {
     _id: user._id,
-    slug: user.username,
     collection: 'users',
+    nav: {
+      slug: user.username,
+    },
     name: user.name || '',
+    slug: user.username,
     description: '',
     longDescriptionMd: '',
     tags: [],

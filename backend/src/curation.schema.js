@@ -9,19 +9,33 @@ import {organizationPath} from "./services/organizations/organizations.shared.js
 import {workspacePath} from "./services/workspaces/workspaces.shared.js";
 import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
 
-// this schema is shared by users, organizations, and workspaces (and possibly others)
+// these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
 // of support functions.
 
-// TODO: some day, remove 'promoted' from here. A promotions list belongs outside of the curation object; perhaps
-//  in the parent object or elsewhere.
+export const navRefSchema = Type.Object(
+  // from frontend:
+  // - users: /user/:slug
+  // - organizations: /org/:slug
+  // - workspaces: /org/:slug/workspace/:wsname
+  // - shared-models: /share/:id
+  {
+    slug: Type.Optional(Type.String()),
+    wsname: Type.Optional(Type.String()),
+    id: Type.Optional(Type.String()),
+  }
+)
+
+// TODO: some day, remove 'promoted' from curationSchema. A promotions list belongs outside of the curation
+//       object; perhaps in the parent object or elsewhere.
 
 export const curationSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    slug: Type.String(),
     collection: Type.String(),
+    nav: navRefSchema,
     name: Type.String(), // limited to 40 runes (unicode code points aka characters)
+    slug: Type.String(), // this "slug" is for searching, not navigation/urls/api. For navigation, use `nav` field.
     description: Type.String(), // limited to 80 runes
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
