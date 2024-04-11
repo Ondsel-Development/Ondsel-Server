@@ -1,52 +1,71 @@
 <template>
   <v-container fluid class="fill-height">
-    <v-card title="Login to Ondsel" class="mx-auto position-relative" width="400" style="top: -100px" flat>
-      <template v-slot:loader="{ isActive }">
-        <v-progress-linear
-          :active="isAuthenticatePending"
-          height="4"
-          indeterminate
-        ></v-progress-linear>
-      </template>
-      <v-form v-model="isValid" @submit.prevent="login">
-        <v-text-field
-          v-model="user.email"
-          label="Email"
-          :rules="[rules.isRequired, rules.isEmail]"
-          :disabled="isAuthenticatePending"
-          autofocus
-        ></v-text-field>
+    <v-sheet class="mx-auto position-relative d-flex flex-wrap">
+      <v-card title="Login to Ondsel" width="26em" class="pa-2 ma-2">
+        <template v-slot:loader="{ isActive }">
+          <v-progress-linear
+            :active="isAuthenticatePending"
+            height="4"
+            indeterminate
+          ></v-progress-linear>
+        </template>
+        <v-form v-model="isValid" @submit.prevent="login">
+          <v-text-field
+            v-model="user.email"
+            label="Email"
+            :rules="[rules.isRequired, rules.isEmail]"
+            :disabled="isAuthenticatePending"
+            autofocus
+          ></v-text-field>
 
-        <v-text-field
-          v-model="user.password"
-          label="Password"
-          type="password"
-          :rules="[rules.isRequired]"
-          :disabled="isAuthenticatePending"
-        ></v-text-field>
+          <v-text-field
+            v-model="user.password"
+            label="Password"
+            type="password"
+            :rules="[rules.isRequired]"
+            :disabled="isAuthenticatePending"
+          ></v-text-field>
 
-        <v-card-actions>
-        <v-btn type="submit" v-bind:disabled="isAuthenticatePending" block class="mt-2">Submit</v-btn>
-        </v-card-actions>
+          <v-card-actions>
+            <v-btn type="submit" v-bind:disabled="isAuthenticatePending" color="blue" variant="flat" class="mt-2">Submit</v-btn>
+          </v-card-actions>
 
-        <v-row justify="end">
-          <v-col class="text-right">
-            <v-btn
-              size="x-small"
-              variant="text"
-              @click.stop="openForgotPasswordDialog()">
-              Forgot Password?
-            </v-btn>
-            <v-spacer></v-spacer>
-            <ForgotPasswordDialog
-              :is-active="isForgotPasswordDialogActive"
-              ref="forgotPasswordDialog"
-            />
-          </v-col>
-        </v-row>
+          <v-row justify="end">
+            <v-col class="text-right">
+              <v-btn
+                size="x-small"
+                variant="outlined"
+                @click.stop="openForgotPasswordDialog()">
+                Forgot Password?
+              </v-btn>
+              <v-spacer></v-spacer>
+              <ForgotPasswordDialog
+                :is-active="isForgotPasswordDialogActive"
+                ref="forgotPasswordDialog"
+              />
+            </v-col>
+          </v-row>
 
-      </v-form>
-    </v-card>
+        </v-form>
+      </v-card>
+      <v-card width="26em" class="pa-2 mx-2" v-if="isRedirectedFromDownloadPage">
+        <v-card-title>...redirect from download page</v-card-title>
+        <v-card-text>
+          <p>&nbsp;</p>
+          <p>
+            You have been redirected from the Download & Explore page. To reach that page, you must be logged in.
+          </p>
+          <p>&nbsp;</p>
+          <p>
+            If you don’t have an account, visit <v-btn density="compact" class="mx-2" color="blue" variant="tonal" :to="{ name: 'SignUp' }">Signup</v-btn> to create a new account
+          </p>
+          <p>&nbsp;</p>
+          <p>
+            If you <b>do</b> have an account, just login using the form on the left. You will then be automatically sent to the page.
+          </p>
+        </v-card-text>
+      </v-card>
+    </v-sheet>
     <v-snackbar
       :timeout="2000"
       v-model="showSnacker"
@@ -80,6 +99,7 @@ export default {
       snackerMsg: '',
       showSnacker: false,
       isForgotPasswordDialogActive: false,
+      isRedirectedFromDownloadPage: false,
     }
   },
   computed: {
@@ -89,6 +109,11 @@ export default {
   },
   mounted() {
     resetStores();
+    if (this.$route.query.redirect_uri) {
+      if (this.$route.query.redirect_uri.endsWith('/download-and-explore')) {
+        this.isRedirectedFromDownloadPage = true;
+      }
+    }
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
