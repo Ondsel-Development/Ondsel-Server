@@ -24,10 +24,6 @@ const validatePayloadBookmarkObject = bookmark => {
 };
 
 
-// const buildCollectionSummary = context => {
-//   const service = context.app.service(CollectionNameMap[])
-// };
-
 const CollectionNameMappingWithSummaryBuildMethods = {
   users: buildUserSummary,
   workspaces: buildWorkspaceSummary,
