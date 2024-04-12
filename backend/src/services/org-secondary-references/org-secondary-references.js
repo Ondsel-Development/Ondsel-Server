@@ -24,6 +24,7 @@ import {
 } from './org-secondary-references.shared.js'
 import { canUserPatchOrgSecondaryReferences } from './helpers.js';
 import swagger from "feathers-swagger";
+import {addBookmark} from "./commands/addBookmark.js";
 
 export * from './org-secondary-references.class.js'
 export * from './org-secondary-references.schema.js'
@@ -69,6 +70,10 @@ export const orgSecondaryReferences = (app) => {
       patch: [
         iff(isProvider('external'), canUserPatchOrgSecondaryReferences),
         iff(isProvider('external'), preventChanges(true, 'organizationId', 'bookmarks')),
+        iff(
+          context => context.data.shouldAddBookmark,
+          addBookmark,
+        ),
         schemaHooks.validateData(orgSecondaryReferencesPatchValidator),
         schemaHooks.resolveData(orgSecondaryReferencesPatchResolver)
       ],

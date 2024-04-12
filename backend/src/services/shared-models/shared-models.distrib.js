@@ -1,13 +1,9 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import _ from 'lodash';
 
 export const sharedModelsSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    userId: Type.String({ objectid: true }),
-    modelId: ObjectIdSchema(),
-    fileId: ObjectIdSchema(),
-    workspaceId: ObjectIdSchema(),
-    description: Type.String({ maxLength: 20 }),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
   },
@@ -20,4 +16,15 @@ export const copySharedModelBeforePatch = async (context) => {
     const smId = context.id;
     context.beforePatchCopy = await smService.get(smId);
     return context;
+}
+
+
+export function buildSharedModelSummary(sharedModel) {
+    let summary = {};
+    if (sharedModel) {
+        summary = _.pick(sharedModel, [
+          '_id', 'isThumbnailGenerated', 'thumbnailUrl'
+        ])
+    }
+    return summary;
 }

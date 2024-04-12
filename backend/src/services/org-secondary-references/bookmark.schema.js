@@ -9,7 +9,7 @@ export const CollectionNameMap = {
   users: 'users',
   workspaces: 'workspaces',
   models: 'models',
-  sharedModels: 'shared-models',
+  'shared-models': 'shared-models',
 };
 
 
@@ -19,13 +19,9 @@ export const bookmarkSchema = Type.Object(
     createdAt: Type.Number(),
     createdBy: userSummarySchema,
     description: Type.String(),
-    collection: StringEnum([
-      CollectionNameMap.models,
-      CollectionNameMap.sharedModels,
-      CollectionNameMap.workspaces,
-      CollectionNameMap.users,
-    ]),
-    summary: Type.Union([
+    collectionId: ObjectIdSchema(),
+    collectionName: StringEnum(Object.values(CollectionNameMap)),
+    collectionSummary: Type.Union([
       modelSummarySchema,
       sharedModelsSummarySchema,
       workspaceSummary,
