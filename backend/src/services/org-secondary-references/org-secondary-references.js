@@ -25,6 +25,7 @@ import {
 import { canUserPatchOrgSecondaryReferences } from './helpers.js';
 import swagger from "feathers-swagger";
 import {addBookmark} from "./commands/addBookmark.js";
+import {removeBookmark} from "./commands/removeBookmark.js";
 
 export * from './org-secondary-references.class.js'
 export * from './org-secondary-references.schema.js'
@@ -73,6 +74,10 @@ export const orgSecondaryReferences = (app) => {
         iff(
           context => context.data.shouldAddBookmark,
           addBookmark,
+        ),
+        iff(
+          context => context.data.shouldRemoveBookmark,
+          removeBookmark,
         ),
         schemaHooks.validateData(orgSecondaryReferencesPatchValidator),
         schemaHooks.resolveData(orgSecondaryReferencesPatchResolver)

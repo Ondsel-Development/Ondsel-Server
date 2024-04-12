@@ -4,7 +4,6 @@ import {CollectionNameMap} from "../bookmark.schema.js";
 import {buildUserSummary} from "../../users/users.distrib.js";
 import {buildWorkspaceSummary} from "../../workspaces/workspaces.distrib.js";
 import {buildModelSummary} from "../../models/models.distrib.js";
-import {buildNewCurationForSharedModel} from "../../shared-models/shared-models.curation.js";
 import mongodb from "mongodb";
 import {buildSharedModelSummary} from "../../shared-models/shared-models.distrib.js";
 
@@ -56,14 +55,11 @@ export const addBookmark = async context => {
     createdAt: Date.now(),
     createdBy: buildUserSummary(context.params.user),
     description: bookmark.description || '',
-    collectionId: bookmark.collectionId,
     collectionName: bookmark.collectionName,
     collectionSummary: docSummary,
   }
 
   bookmarks.push(bookmarkEntry);
-
-  console.log(bookmarks);
   context.data.bookmarks = bookmarks;
   context.data = _.omit(data, ['shouldAddBookmark', 'bookmark']);
   return context;

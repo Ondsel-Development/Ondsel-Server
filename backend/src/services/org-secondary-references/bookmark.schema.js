@@ -19,7 +19,6 @@ export const bookmarkSchema = Type.Object(
     createdAt: Type.Number(),
     createdBy: userSummarySchema,
     description: Type.String(),
-    collectionId: ObjectIdSchema(),
     collectionName: StringEnum(Object.values(CollectionNameMap)),
     collectionSummary: Type.Union([
       modelSummarySchema,
