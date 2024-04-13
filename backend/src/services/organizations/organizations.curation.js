@@ -1,4 +1,4 @@
-import {generateAndApplyKeywords} from "../../curation.schema.js";
+import {generateAndApplyKeywords, navTargetMap} from "../../curation.schema.js";
 import _ from "lodash";
 import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
 import {OrganizationTypeMap} from "./organizations.subdocs.schema.js";
@@ -10,7 +10,8 @@ export function buildNewCurationForOrganization(org) {
     _id: org._id,
     collection: 'organizations',
     nav: {
-      slug: org.refName,
+      target: navTargetMap.organizations,
+      orgname: org.refName,
     },
     name: org.name || '',
     slug: org.refName,

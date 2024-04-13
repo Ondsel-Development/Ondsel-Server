@@ -1,4 +1,5 @@
 import {buildUserSummary} from "./users.distrib.js";
+import {navTargetMap} from "../../curation.schema.js";
 
 export function buildNewCurationForUser(user) {
   // note: this curation is stored in the Personal Org, but this routine is under 'users' to be thematic
@@ -6,7 +7,8 @@ export function buildNewCurationForUser(user) {
     _id: user._id,
     collection: 'users',
     nav: {
-      slug: user.username,
+      target: navTargetMap.users,
+      username: user.username,
     },
     name: user.name || '',
     slug: user.username,

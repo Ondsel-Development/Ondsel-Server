@@ -1,4 +1,4 @@
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
 import _ from "lodash";
@@ -8,21 +8,41 @@ import {userPath} from "./services/users/users.shared.js";
 import {organizationPath} from "./services/organizations/organizations.shared.js";
 import {workspacePath} from "./services/workspaces/workspaces.shared.js";
 import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
+import {OrganizationTypeMap} from "./services/organizations/organizations.subdocs.schema.js";
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
 // of support functions.
 
+export const navTargetMap = {
+  users: userPath,
+  organizations: organizationPath,
+  workspaces: workspacePath,
+  sharedModels: sharedModelsPath,
+  ondsel: 'ondsel', // meta ref for lens home page, not a collection name
+}
+
+export const navTargetType = StringEnum([
+  navTargetMap.users,
+  navTargetMap.organizations,
+  navTargetMap.workspaces,
+  navTargetMap.sharedModels,
+  navTargetMap.ondsel,
+])
+
 export const navRefSchema = Type.Object(
   // from frontend:
-  // - users: /user/:slug
-  // - organizations: /org/:slug
-  // - workspaces: /org/:slug/workspace/:wsname
-  // - shared-models: /share/:id
+  // - users: /user/:slug                         -> slug renamed username
+  // - organizations: /org/:slug                  -> slug renamed orgname
+  // - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
+  // - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
+  // - shared-models: /share/:id                  -> id renamed sharelinkid
   {
-    slug: Type.Optional(Type.String()),
+    target: navTargetType,
+    username: Type.Optional(Type.String()),
+    orgname: Type.Optional(Type.String()),
     wsname: Type.Optional(Type.String()),
-    id: Type.Optional(Type.String()),
+    sharelinkid: Type.Optional(Type.String()),
   }
 )
 
@@ -40,8 +60,8 @@ export const curationSchema = Type.Object(
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
     representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
-    promoted: Type.Array(Type.Any()), // an array of promotionSchema
-    keywordRefs: Type.Array(Type.String()), // used for pre-emptive "cleanup" prior to recalculating keywords
+    promoted: Type.Optional(Type.Array(Type.Any())), // an array of promotionSchema
+    keywordRefs: Type.Optional(Type.Array(Type.String())), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
 
@@ -59,13 +79,6 @@ export const promotionSchema = Type.Object(
     curation: curationSchema, // use 'curationSummaryOfCuration` method to shorten
   }
 )
-
-export const curationCollectionMap = {
-  users: userPath,
-  organizations: organizationPath,
-  workspaces: workspacePath,
-  sharedModels: sharedModelsPath,
-}
 
 const MAX_LONG_DESC_SUM = 60;
 export function curationSummaryOfCuration(curation) {
@@ -88,11 +101,18 @@ export function matchingCuration(curationA, curationB) {
   return false;
 };
 
+export function cleanedCuration(curation) {
+  // returns a curation without self-references such as keywordRefs and 'promoted'
+  let {...cleanCuration} = curation;
+  delete cleanCuration.keywordRefs;
+  delete cleanCuration.promoted;
+  return cleanCuration;
+}
+
 export async function generateAndApplyKeywords(context, curation) {
   const keywordService = context.app.service('keywords');
   const keywordScores = determineKeywordsWithScore(curation);
-  let {keywordRefs: _, ...cleanCuration} = curation;
-  cleanCuration.keywordRefs = [];
+  let cleanCuration = cleanedCuration(curation);
   // apply the keywords to the collection
   for (const item of keywordScores) {
     await upsertScoreItem(keywordService, item, cleanCuration);
@@ -264,7 +284,15 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         changeFound = true;
       }
       //
-      // slug: a slug can't change once created.
+      // slug: skipping since a slug can't change once created.
+      //
+      //
+      // nav: this also can't be modified after creation, but, for migration purposes, I'll check anyway.
+      //  TODO: remove the whole nav check after nav migration PR has happened.
+      //
+      if (!_.isEqual(originalCuration.nav, newCuration.nav)) {
+        needPatch = true;
+      }
       //
       // name (pulled from parent except for personal orgs)
       //
@@ -310,12 +338,12 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       // representative file
       //
       switch (newCuration.collection) {
-        case 'workspaces':
+        case navTargetMap.workspaces:
           if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
             changeFound = true;
           }
           break;
-        case 'shared-models':
+        case navTargetMap.sharedModels:
           if (!newCuration.representativeFile) {
             if (context.beforePatchCopy.model?.file) {
               newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
@@ -344,19 +372,19 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       let isOpenEnoughForKeywords = false;
       switch (newCuration.collection) {
-        case 'workspaces':
+        case navTargetMap.workspaces:
           isOpenEnoughForKeywords = context.beforePatchCopy.open;
           break;
-        case 'organizations':
+        case navTargetMap.organizations:
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
-        case 'users':
+        case navTargetMap.users:
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
-        case 'shared-models':
-          isOpenEnoughForKeywords = context.beforePatchCopy.isSystemGenerated;
+        case navTargetMap.sharedModels:
+          isOpenEnoughForKeywords = context.beforePatchCopy.showInPublicGallery;
           break;
-        case 'ondsel':
+        case navTargetMap.ondsel:
           isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search
           break;
       }
