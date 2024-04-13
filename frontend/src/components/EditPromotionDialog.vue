@@ -121,8 +121,7 @@ export default {
           await this.applyChange(decision, curation);
           break;
         case 'users':
-          obj = await this.getOrgByIdOrNamePublic(this.itemId);
-          // obj = await this.getUserByIdOrNamePublic(this.itemId);
+          obj = await this.getOrgByIdOrNamePublic(this.itemId); // picks up Personal Org by refName
           curation = obj.curation;
           removeNonPublicItems(curation);
           await this.applyChange(decision, curation);

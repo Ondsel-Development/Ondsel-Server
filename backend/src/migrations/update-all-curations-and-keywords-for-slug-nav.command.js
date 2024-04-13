@@ -8,40 +8,14 @@ import {buildNewCurationForWorkspace} from "../services/workspaces/workspaces.cu
 export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
   // update orgs (both personal and other), workspaces, and shared-models with curation fixes
   // specifically, adding the `slug` and `nav` fields.
-  const orgService = app.service('organizations');
   const wsService = app.service('workspaces');
   const smService = app.service('shared-models');
+  const orgService = app.service('organizations');
 
-  console.log('>>> organizations');
-  let list = await orgService.find({
-    paginate: false,
-    query: {
-    },
-  });
-  console.log(`>>>   qty found: ${list.length}`);
-  for (let item of list) {
-    console.log(`  >>>   org ${item._id}`);
-    let newCuration = item.curation;
-    let refCuration;
-    if (item.type === OrganizationTypeMap.personal) {
-      refCuration = buildNewCurationForUser(item.owner);
-    } else {
-      refCuration = buildNewCurationForOrganization(item);
-    }
-    newCuration.slug = refCuration.slug;
-    newCuration.nav = refCuration.nav;
-    await orgService.patch(
-      item._id,
-      {
-        curation: newCuration,
-      }
-    );
-  }
-  console.log('>>> organizations done');
-
+  const curationsMap = {};
 
   console.log('>>> workspaces');
-  list = await wsService.find({
+  let list = await wsService.find({
     paginate: false,
     query: {
       // open: true
@@ -54,6 +28,7 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
     const refCuration = buildNewCurationForWorkspace(item);
     newCuration.slug = refCuration.slug;
     newCuration.nav = refCuration.nav;
+    curationsMap[item._id.toString()] = newCuration;
     await wsService.patch(
       item._id,
       {
@@ -62,8 +37,6 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
     );
   }
   console.log('>>> workspaces done');
-
-
 
   console.log('>>> shared-models');
   list = await smService.find({
@@ -85,6 +58,7 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
       newCuration.slug = refCuration.slug; // this is always an empty string
       newCuration.nav = refCuration.nav;
     }
+    curationsMap[item._id.toString()] = newCuration;
     await smService.patch(
       item._id,
       {
@@ -93,5 +67,58 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
     );
   }
   console.log('>>> shared-models done');
+
+  console.log('>>> organizations; PASS 1 (curation)');
+  list = await orgService.find({
+    paginate: false,
+    query: {
+    },
+  });
+  console.log(`>>>   qty found: ${list.length}`);
+  for (let item of list) {
+    console.log(`  >>>   org ${item._id}`);
+    let newCuration = item.curation;
+    let refCuration;
+    if (item.type === OrganizationTypeMap.personal) {
+      refCuration = buildNewCurationForUser(item.owner);
+    } else {
+      refCuration = buildNewCurationForOrganization(item);
+    }
+    newCuration.slug = refCuration.slug;
+    newCuration.nav = refCuration.nav;
+    curationsMap[newCuration._id.toString()] = newCuration; // this can differ for Personal
+    await orgService.patch(
+      item._id,
+      {
+        curation: newCuration,
+      }
+    );
+  }
+  console.log('>>> organizations; PASS 2 (promoted)');
+  for (let item of list) {
+    console.log(`  >>>   org ${item._id}`);
+    let newCuration = item.curation;
+    let currentPromoted = newCuration.promoted || [];
+    let newPromoted = [];
+    for (let promo of currentPromoted) {
+      if (curationsMap.hasOwnProperty(promo.curation._id.toString())) {
+        promo.curation = curationsMap[promo.curation._id.toString()];
+        delete promo.curation.promoted;
+        delete promo.curation.keywordRefs;
+        newPromoted.push(promo);
+      } else {
+        console.log(`    >>> invalid promo ${promo.curation._id.toString()}`);
+      }
+    }
+    newCuration.promoted = newPromoted;
+    await orgService.patch(
+      item._id,
+      {
+        curation: newCuration,
+      }
+    );
+  }
+  console.log('>>> organizations done');
+
   console.log(`>>> command complete.`);
 }
