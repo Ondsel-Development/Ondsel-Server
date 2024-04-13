@@ -24,17 +24,21 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
   console.log(`>>>   qty found: ${list.length}`);
   for (let item of list) {
     console.log(`  >>>   ws ${item._id}`);
-    let newCuration = item.curation;
-    const refCuration = buildNewCurationForWorkspace(item);
-    newCuration.slug = refCuration.slug;
-    newCuration.nav = refCuration.nav;
-    curationsMap[item._id.toString()] = newCuration;
-    await wsService.patch(
-      item._id,
-      {
-        curation: newCuration,
-      }
-    );
+    try {
+      let newCuration = item.curation;
+      const refCuration = buildNewCurationForWorkspace(item);
+      newCuration.slug = refCuration.slug;
+      newCuration.nav = refCuration.nav;
+      curationsMap[item._id.toString()] = newCuration;
+      await wsService.patch(
+        item._id,
+        {
+          curation: newCuration,
+        }
+      );
+    } catch(e) {
+      console.log(`      err: ${e.name}`);
+    }
   }
   console.log('>>> workspaces done');
 
@@ -48,23 +52,27 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
   console.log(`>>>   qty found: ${list.length}`);
   for (let item of list) {
     console.log(`  >>>   shared-model ${item._id}`);
-    let newCuration = item.curation;
-    if (!newCuration) {
-      // because of possible private sharing, all share-links getting a curation.
-      // However, only showInPublicGallery shares are included in keywords
-      newCuration = buildNewCurationForSharedModel(item);
-    } else {
-      const refCuration = buildNewCurationForSharedModel(item);
-      newCuration.slug = refCuration.slug; // this is always an empty string
-      newCuration.nav = refCuration.nav;
-    }
-    curationsMap[item._id.toString()] = newCuration;
-    await smService.patch(
-      item._id,
-      {
-        curation: newCuration,
+    try {
+      let newCuration = item.curation;
+      if (!newCuration) {
+        // because of possible private sharing, all share-links getting a curation.
+        // However, only showInPublicGallery shares are included in keywords
+        newCuration = buildNewCurationForSharedModel(item);
+      } else {
+        const refCuration = buildNewCurationForSharedModel(item);
+        newCuration.slug = refCuration.slug; // this is always an empty string
+        newCuration.nav = refCuration.nav;
       }
-    );
+      curationsMap[item._id.toString()] = newCuration;
+      await smService.patch(
+        item._id,
+        {
+          curation: newCuration,
+        }
+      );
+    } catch(e) {
+      console.log(`      err: ${e.name}`);
+    }
   }
   console.log('>>> shared-models done');
 
@@ -77,46 +85,54 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
   console.log(`>>>   qty found: ${list.length}`);
   for (let item of list) {
     console.log(`  >>>   org ${item._id}`);
-    let newCuration = item.curation;
-    let refCuration;
-    if (item.type === OrganizationTypeMap.personal) {
-      refCuration = buildNewCurationForUser(item.owner);
-    } else {
-      refCuration = buildNewCurationForOrganization(item);
-    }
-    newCuration.slug = refCuration.slug;
-    newCuration.nav = refCuration.nav;
-    curationsMap[newCuration._id.toString()] = newCuration; // this can differ for Personal
-    await orgService.patch(
-      item._id,
-      {
-        curation: newCuration,
+    try {
+      let newCuration = item.curation;
+      let refCuration;
+      if (item.type === OrganizationTypeMap.personal) {
+        refCuration = buildNewCurationForUser(item.owner);
+      } else {
+        refCuration = buildNewCurationForOrganization(item);
       }
-    );
+      newCuration.slug = refCuration.slug;
+      newCuration.nav = refCuration.nav;
+      curationsMap[newCuration._id.toString()] = newCuration; // this can differ for Personal
+      await orgService.patch(
+        item._id,
+        {
+          curation: newCuration,
+        }
+      );
+    } catch(e) {
+      console.log(`      err: ${e.name}`);
+    }
   }
   console.log('>>> organizations; PASS 2 (promoted)');
   for (let item of list) {
     console.log(`  >>>   org ${item._id}`);
-    let newCuration = item.curation;
-    let currentPromoted = newCuration.promoted || [];
-    let newPromoted = [];
-    for (let promo of currentPromoted) {
-      if (curationsMap.hasOwnProperty(promo.curation._id.toString())) {
-        promo.curation = curationsMap[promo.curation._id.toString()];
-        delete promo.curation.promoted;
-        delete promo.curation.keywordRefs;
-        newPromoted.push(promo);
-      } else {
-        console.log(`    >>> invalid promo ${promo.curation._id.toString()}`);
+    try {
+      let newCuration = item.curation;
+      let currentPromoted = newCuration.promoted || [];
+      let newPromoted = [];
+      for (let promo of currentPromoted) {
+        if (curationsMap.hasOwnProperty(promo.curation._id.toString())) {
+          promo.curation = curationsMap[promo.curation._id.toString()];
+          delete promo.curation.promoted;
+          delete promo.curation.keywordRefs;
+          newPromoted.push(promo);
+        } else {
+          console.log(`    >>> invalid promo ${promo.curation._id.toString()}`);
+        }
       }
+      newCuration.promoted = newPromoted;
+      await orgService.patch(
+        item._id,
+        {
+          curation: newCuration,
+        }
+      );
+    } catch(e) {
+      console.log(`      err: ${e.name}`);
     }
-    newCuration.promoted = newPromoted;
-    await orgService.patch(
-      item._id,
-      {
-        curation: newCuration,
-      }
-    );
   }
   console.log('>>> organizations done');
 
