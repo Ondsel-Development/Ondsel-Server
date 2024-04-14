@@ -16,7 +16,7 @@ export function getValueByPath(obj, path, typesToSkip=null) {
     if (foundNode) {
       currentNode = foundNode;
     } else {
-      return { key: path, type: 'KeyNotFound', value: null };
+      return { key: path, type: 'KeyNotFound', value: '' };
     }
   }
 
@@ -45,7 +45,7 @@ export function getValueByPath(obj, path, typesToSkip=null) {
 
   }
 
-  return { key: path, type: 'KeyNotFound', value: null };
+  return { key: path, type: 'KeyNotFound', value: '' };
 }
 
 
