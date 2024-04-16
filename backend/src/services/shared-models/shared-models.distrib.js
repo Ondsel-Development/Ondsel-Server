@@ -6,6 +6,8 @@ export const sharedModelsSummarySchema = Type.Object(
     _id: ObjectIdSchema(),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    custFileName: Type.String(),
+    createdAt: Type.Number(),
   },
 )
 
@@ -22,9 +24,13 @@ export const copySharedModelBeforePatch = async (context) => {
 export function buildSharedModelSummary(sharedModel) {
     let summary = {};
     if (sharedModel) {
-        summary = _.pick(sharedModel, [
-          '_id', 'isThumbnailGenerated', 'thumbnailUrl'
-        ])
+      summary = {
+        _id: sharedModel._id,
+        custFileName: sharedModel.model?.file?.custFileName || '',
+        isThumbnailGenerated: sharedModel.isThumbnailGenerated,
+        thumbnailUrl: sharedModel.thumbnailUrl,
+        createdAt: sharedModel.createdAt,
+      };
     }
     return summary;
 }
