@@ -33,6 +33,10 @@ import { addShowInPublicGalleryFieldToSharedModelCommand } from './addShowInPubl
 import {
   updateAllCurationsAndKeywordsForSlugNavCommand
 } from "./update-all-curations-and-keywords-for-slug-nav.command.js";
+import {
+  addOrgSecondaryReferencesToAllOrganizationsCommand
+} from "./add-org-secondary-references-to-all-organizations.command.js";
+
 
 async function runMigration() {
   console.log('Migration start');
@@ -136,6 +140,9 @@ async function runMigration() {
       break;
     case 'updateAllCurationsAndKeywordsForSlugNav':
       await updateAllCurationsAndKeywordsForSlugNavCommand(app);
+      break;
+    case 'addOrgSecondaryReferencesToAllOrganizations':
+      await addOrgSecondaryReferencesToAllOrganizationsCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

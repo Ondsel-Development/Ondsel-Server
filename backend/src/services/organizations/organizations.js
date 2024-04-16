@@ -175,7 +175,7 @@ export const organization = (app) => {
       ],
       patch: [
 	      copyOrgBeforePatch,
-        iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner', 'deleted', 'type')),
+        iff(isProvider('external'), preventChanges(false, 'admins', 'users', 'owner', 'deleted', 'type', 'orgSecondaryReferencesId')),
         iff(isProvider('external'), isUserOwnerOrAdminOfOrganization),
         iff(
           context => context.data.shouldAddUsersToOrganization,
@@ -216,6 +216,7 @@ export const organization = (app) => {
         assignOrganizationIdToUser,
         createDefaultEveryoneGroup,
         afterCreateHandleOrganizationCuration,
+        createOrgSecondaryReferences,
       ],
       patch: [
         distributeOrganizationSummaries,
@@ -316,5 +317,19 @@ const doSoftDeleteInstead = async context => {
       organizations: reducedOrgList
     }
   )
+  return context;
+}
+
+
+const createOrgSecondaryReferences = async context => {
+  const orgSecondaryReferences = await context.app.service('org-secondary-references').create({
+    organizationId: context.result._id.toString(),
+  })
+  context.result = await context.service.patch(
+    context.result._id.toString(),
+    {
+      orgSecondaryReferencesId: orgSecondaryReferences._id.toString(),
+    }
+  );
   return context;
 }

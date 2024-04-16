@@ -28,7 +28,7 @@ export function buildModelSummary(model) {
     summary._id = model._id;
     summary.createdAt = model.createdAt;
     summary.isObjGenerated = model.isObjGenerated;
-    summary.isThumbnailGenerated = model.isThumbnailGenerated;
+    summary.isThumbnailGenerated = !!model.isThumbnailGenerated;
     summary.thumbnailUrlCache = model.thumbnailUrl; // when it finally generates, the model will compute it
   }
   return summary;

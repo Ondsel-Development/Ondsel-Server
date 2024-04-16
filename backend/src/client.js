@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { orgSecondaryReferencesClient } from './services/org-secondary-references/org-secondary-references.shared.js'
+
 import { preferencesClient } from './services/preferences/preferences.shared.js'
 
 import { keywordsClient } from './services/keywords/keywords.shared.js'
@@ -87,6 +89,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(keywordsClient)
 
   client.configure(preferencesClient)
+
+  client.configure(orgSecondaryReferencesClient)
 
   return client
 }
