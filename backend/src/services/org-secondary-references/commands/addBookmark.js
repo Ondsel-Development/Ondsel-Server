@@ -55,7 +55,9 @@ export const addBookmark = async context => {
     collectionSummary: docSummary,
   }
 
-  bookmarks.push(bookmarkEntry);
+  if (!bookmarks.some(bm => bm.collectionName === bookmarkEntry.collectionName && bm.collectionSummary._id.equals(bookmarkEntry.collectionSummary._id))) {
+    bookmarks.push(bookmarkEntry);
+  }
   context.data.bookmarks = bookmarks;
   context.data = _.omit(data, ['shouldAddBookmark', 'bookmark']);
   return context;
