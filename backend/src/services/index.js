@@ -34,7 +34,12 @@ import { user } from './users/users.js'
 
 import { preferences } from './preferences/preferences.js'
 
+import { orgSecondaryReferences } from './org-secondary-references/org-secondary-references.js'
+
+
 export const services = (app) => {
+  app.configure(orgSecondaryReferences)
+
   app.configure(preferences)
 
   app.configure(keywords)

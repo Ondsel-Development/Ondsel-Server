@@ -41,13 +41,35 @@ export const keywords = (app) => {
           get: {
             'parameters': [
               {
-                'description': 'keyword/keyphrase to return',
+                'description': 'single keyword/keyphrase to return',
                 'in': 'path',
                 'name': '_id',
                 'schema': {
                   'type': 'string'
                 },
                 'required': true,
+              },
+            ]
+          },
+          find: {
+            'parameters': [
+              {
+                'description': 'string to search on',
+                'in': 'query',
+                'name': 'text',
+                'schema': {
+                  'type': 'string'
+                },
+                'required': true,
+              },
+              {
+                'description': 'target/collection restriction; don\'t include for all',
+                'in': 'query',
+                'name': 'target',
+                'schema': {
+                  'type': 'string'
+                },
+                'required': false,
               },
             ]
           },
@@ -105,6 +127,7 @@ export const keywords = (app) => {
 
 const expandSearchUsingAlgorithms = async context => {
   const rawText = context.params.query?.text || '';
+  const targetFilter = context.params.query?.target || null;
   const rakeList = useRake(rawText);
   let allFound = [];
   for (const keyphrase of rakeList) {
@@ -116,6 +139,10 @@ const expandSearchUsingAlgorithms = async context => {
         console.log('keyword get problem: ' + e.message);
       }
     }
+  }
+  // use targetFilter (if given) to reduce list to a single collection/target
+  if (targetFilter) {
+    allFound = allFound.filter((entry) => entry.curation.collection === targetFilter);
   }
   // sort first, so that the best rise to the top; this includes finding the best duplicate
   allFound.sort((a, b) => b.score - a.score);

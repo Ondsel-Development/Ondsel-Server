@@ -90,6 +90,9 @@ export const sharedModelsResolver = resolve({
       if (error instanceof NotFound) {
         return {};
       }
+      if (error.message === 'next() called multiple times') {
+        return {};
+      }
       throw error;
     }
   }),
