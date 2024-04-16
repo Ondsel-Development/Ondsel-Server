@@ -18,7 +18,11 @@
         </v-sheet>
         <v-sheet>
           <p class="text-h6">{{ curation.name }}</p>
-          <span class="text-body-2">{{ curation.description }}</span>
+          <p><code class="text-blue">{{curation.slug}}</code></p>
+          <p class="text-body-2">{{ curation.description }}</p>
+          <v-chip-group>
+            <v-chip v-for="(tag) in curation?.tags" size="small">{{tag}}</v-chip>
+          </v-chip-group>
         </v-sheet>
       </div>
     </v-container>

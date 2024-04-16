@@ -2,6 +2,7 @@
 
 import {ObjectId} from "mongodb";
 import {agreementCategoryTypeMap} from "../services/agreements/agreements.subdocs.js";
+import {navTargetMap} from "../curation.schema.js";
 
 export async function addInitialLensSiteCurationCommand(app) {
 
@@ -25,7 +26,11 @@ export async function addInitialLensSiteCurationCommand(app) {
       curation: {
         _id: lscId,
         collection: 'agreements',
+        nav: {
+          target: navTargetMap.ondsel,
+        },
         name: 'ondsel-lens-curation',
+        slug: '',
         description: 'Current Headline Goes Here', // max: 80 runes
         longDescriptionMd: '',
         tags: [], // not used YET
