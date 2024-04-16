@@ -248,3 +248,17 @@ export const agreementsAcceptedSchema = Type.Object(
     history: Type.Array(specificAgreementCompletionType),
   }
 )
+
+// used by optionNotificationByEmail
+export const NotificationCadenceTypeMap = {
+  never: "Never",
+  live: "Immediately",
+  // In the future, "Daily Summary" and other options may appear.
+}
+
+export const NotificationCadenceType = StringEnum(
+  [
+    NotificationCadenceTypeMap.never,
+    NotificationCadenceTypeMap.live,
+  ]
+)

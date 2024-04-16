@@ -3,12 +3,11 @@ import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
-import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
-import { organizationSummarySchema } from '../organizations/organizations.subdocs.schema.js';
+import {organizationSummarySchema} from '../organizations/organizations.subdocs.schema.js';
 import {
-  agreementsAcceptedSchema, getConstraint,
+  agreementsAcceptedSchema, getConstraint, NotificationCadenceType, NotificationCadenceTypeMap,
   SubscriptionConstraintsType,
   subscriptionDetailSchema,
   SubscriptionStateMap,
@@ -16,7 +15,6 @@ import {
   SubscriptionTypeMap,
   userAccountingSchema
 } from "./users.subdocs.schema.js";
-import {ObjectId} from "mongodb";
 import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 
@@ -62,6 +60,7 @@ export const userSchema = Type.Object(
     updatedAt: Type.Number(),
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
+    optionalNotificationByEmail: NotificationCadenceType,
   },
   { $id: 'User', additionalProperties: false }
 )
@@ -124,6 +123,9 @@ export const userDataResolver = resolve({
         }
       ],
     }
+  },
+  optionalNotificationByEmail: async (_value, message, _context) => {
+    return message.optionalNotificationByEmail || NotificationCadenceTypeMap.live;
   },
 })
 export const userPublicFields = ['_id', 'name', 'username', 'tier', 'createdAt', 'defaultWorkspaceId'];
