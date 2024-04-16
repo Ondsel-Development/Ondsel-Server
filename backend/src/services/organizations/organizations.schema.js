@@ -42,6 +42,7 @@ export const organizationSchema = Type.Object(
     type: Type.Optional(OrganizationType),
     curation: Type.Optional(curationSchema),
     preferencesId: Type.Optional(ObjectIdSchema()),
+    orgSecondaryReferencesId: ObjectIdSchema(),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -112,7 +113,7 @@ export const organizationPatchResolver = resolve({
 })
 
 // Schema for allowed query properties
-export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'description', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'curation', 'users', 'deleted'])
+export const organizationQueryProperties = Type.Pick(organizationSchema, ['_id', 'name', 'refName', 'description', 'type', 'refNameHash', 'createdBy', 'createdAt', 'owner', 'curation', 'users', 'deleted', 'orgSecondaryReferencesId'])
 export const organizationQuerySchema = Type.Intersect(
   [
     querySyntax(organizationQueryProperties),
