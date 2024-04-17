@@ -22,7 +22,11 @@ import {
   orgSecondaryReferencesPath,
   orgSecondaryReferencesMethods
 } from './org-secondary-references.shared.js'
-import { canUserGetOrgSecondaryReferences, canUserPatchOrgSecondaryReferences } from './helpers.js';
+import {
+  canUserGetOrgSecondaryReferences,
+  canUserPatchOrgSecondaryReferences,
+  limitOrgSecondaryReferencesToUser
+} from './helpers.js';
 import swagger from "feathers-swagger";
 import {addBookmark} from "./commands/addBookmark.js";
 import {removeBookmark} from "./commands/removeBookmark.js";
@@ -61,7 +65,9 @@ export const orgSecondaryReferences = (app) => {
         schemaHooks.validateQuery(orgSecondaryReferencesQueryValidator),
         schemaHooks.resolveQuery(orgSecondaryReferencesQueryResolver)
       ],
-      find: [disallow('external')],
+      find: [
+        iff(isProvider('external'), limitOrgSecondaryReferencesToUser),
+      ],
       get: [
         iff(isProvider('external'), canUserGetOrgSecondaryReferences),
       ],
