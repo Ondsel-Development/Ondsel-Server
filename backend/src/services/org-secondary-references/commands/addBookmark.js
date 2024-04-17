@@ -8,7 +8,7 @@ import mongodb from "mongodb";
 import {buildSharedModelSummary} from "../../shared-models/shared-models.distrib.js";
 
 
-const validatePayloadBookmarkObject = bookmark => {
+export const validatePayloadBookmarkObject = bookmark => {
   if (!bookmark) {
     throw new BadRequest('bookmark object is mandatory in payload');
   }
