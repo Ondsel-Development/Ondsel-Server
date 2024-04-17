@@ -77,3 +77,13 @@ export const assignOrganizationIdToUser = async context => {
   await context.app.service('users').patch(context.result.createdBy, { organizations: userOrganizations });
   return context;
 }
+
+
+export const limitOrgranizationsToUser = async context => {
+  const { user } = context.params;
+  const organizations = user.organizations || [];
+  context.params.query['_id'] = {
+    $in: organizations.map(org => org._id)
+  };
+  return context;
+}

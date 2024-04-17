@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {disallow, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
+import {disallow, iff, iffElse, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -24,7 +24,7 @@ import {
   isUserMemberOfOrganization,
   isUserOwnerOrAdminOfOrganization,
   canUserCreateOrganization,
-  assignOrganizationIdToUser, isUserOwnerOfOrganization
+  assignOrganizationIdToUser, isUserOwnerOfOrganization, limitOrgranizationsToUser
 } from './helpers.js';
 import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
 import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
@@ -161,7 +161,14 @@ export const organization = (app) => {
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
       find: [
-        iff(isProvider('external'), ThrowBadRequestIfNotForPublicInfo)
+        iff(
+          isProvider('external'),
+          iffElse(
+            context => context.params.user && !context.publicDataOnly,
+            limitOrgranizationsToUser,
+            ThrowBadRequestIfNotForPublicInfo
+          ),
+        ),
       ],
       get: [
         // member check has been moved to "after"
