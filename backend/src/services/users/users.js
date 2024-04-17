@@ -304,7 +304,14 @@ const createDefaultOrganization = async context => {
   )
   await context.service.patch(
     context.result._id,
-    { defaultWorkspaceId: workspace._id, personalOrganization: buildOrganizationSummary(organization) }
+    {
+      // Note: the earlier organization CREATE automatically populated the `organizations` field of User.
+      // for details, visit assignOrganizationIdToUser in file:
+      //     backend/src/services/organizations/helpers.js
+      defaultWorkspaceId: workspace._id,
+      personalOrganization: buildOrganizationSummary(organization),
+      currentOrganizationId: organization._id,
+    }
   );
   return context;
 }

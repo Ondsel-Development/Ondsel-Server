@@ -13,10 +13,11 @@ import {
   SubscriptionStateMap,
   SubscriptionType,
   SubscriptionTypeMap,
-  userAccountingSchema
+  userAccountingSchema, UserOrgSchema
 } from "./users.subdocs.schema.js";
 import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
+import {ObjectId} from "mongodb";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -30,7 +31,7 @@ export const userSchema = Type.Object(
     defaultWorkspaceId: ObjectIdSchema(),
     personalOrganization: organizationSummarySchema,
     currentOrganizationId: ObjectIdSchema(),
-    organizations: Type.Array(organizationSummarySchema),
+    organizations: Type.Array(UserOrgSchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),
     firstName: Type.String(), // deprecated
@@ -60,7 +61,6 @@ export const userSchema = Type.Object(
     updatedAt: Type.Number(),
     nextTier: Type.Optional(Type.Union([Type.Null(), SubscriptionType])), // non-null when a change is planned by the user.
     agreementsAccepted: Type.Optional(agreementsAcceptedSchema),
-    optionalNotificationByEmail: NotificationCadenceType,
   },
   { $id: 'User', additionalProperties: false }
 )
@@ -123,9 +123,6 @@ export const userDataResolver = resolve({
         }
       ],
     }
-  },
-  optionalNotificationByEmail: async (_value, message, _context) => {
-    return message.optionalNotificationByEmail || NotificationCadenceTypeMap.live;
   },
 })
 export const userPublicFields = ['_id', 'name', 'username', 'tier', 'createdAt', 'defaultWorkspaceId'];

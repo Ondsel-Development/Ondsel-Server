@@ -5,6 +5,7 @@ import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
 import _ from "lodash";
 import {agreementCategoryType} from "../agreements/agreements.subdocs.js";
+import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
@@ -260,5 +261,14 @@ export const NotificationCadenceType = StringEnum(
   [
     NotificationCadenceTypeMap.never,
     NotificationCadenceTypeMap.live,
+  ]
+)
+
+export const UserOrgSchema = Type.Intersect(
+  [
+    organizationSummarySchema,
+    Type.Object({
+      notificationByEmailCadence: Type.Optional(NotificationCadenceType),
+    }),
   ]
 )
