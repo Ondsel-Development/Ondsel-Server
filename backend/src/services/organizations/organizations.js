@@ -138,7 +138,7 @@ export const organization = (app) => {
   })
 
   app.service(organizationPath).publish((data, context) => {
-    return app.channel(context.result.users.map(user => user._id.toString()))
+    return app.channel(`organization/${context.result._id.toString()}`);
   })
 
   // Initialize hooks

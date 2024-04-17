@@ -52,6 +52,11 @@ export const orgSecondaryReferences = (app) => {
       }
     })
   })
+
+  app.service(orgSecondaryReferencesPath).publish((data, context) => {
+    return app.channel(`organization/${context.result.organizationId.toString()}`);
+  })
+
   // Initialize hooks
   app.service(orgSecondaryReferencesPath).hooks({
     around: {
