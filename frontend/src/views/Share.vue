@@ -42,19 +42,19 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openEditPromotionDialog()">
-      <v-icon>mdi-bullhorn</v-icon>
-      <v-tooltip
-        activator="parent"
-        location="start"
-      >Should {{selfPronoun}} promote this shared link</v-tooltip>
-    </v-btn>
     <v-btn v-if="isAuthenticated" icon flat @click="openManageBookmarkDialog">
       <v-icon>mdi-bookmark</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Manage Bookmarks</v-tooltip>
+    </v-btn>
+    <v-btn icon flat @click="openEditPromotionDialog()">
+      <v-icon>mdi-bullhorn</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Should {{selfPronoun}} promote this shared link</v-tooltip>
     </v-btn>
 
   </v-navigation-drawer>
