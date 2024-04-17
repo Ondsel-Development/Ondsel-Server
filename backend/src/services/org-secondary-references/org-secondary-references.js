@@ -3,6 +3,7 @@ import { authenticate } from '@feathersjs/authentication'
 import {disallow, iff, isProvider, preventChanges} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
+import { handlePaginateQuery } from '../../hooks/handle-paginate-query.js';
 import {
   orgSecondaryReferencesDataValidator,
   orgSecondaryReferencesPatchValidator,
@@ -28,8 +29,8 @@ import {
   limitOrgSecondaryReferencesToUser
 } from './helpers.js';
 import swagger from "feathers-swagger";
-import {addBookmark} from "./commands/addBookmark.js";
-import {removeBookmark} from "./commands/removeBookmark.js";
+import { addBookmark } from './commands/addBookmark.js';
+import { removeBookmark } from './commands/removeBookmark.js';
 
 export * from './org-secondary-references.class.js'
 export * from './org-secondary-references.schema.js'
@@ -62,6 +63,7 @@ export const orgSecondaryReferences = (app) => {
     },
     before: {
       all: [
+        handlePaginateQuery,
         schemaHooks.validateQuery(orgSecondaryReferencesQueryValidator),
         schemaHooks.resolveQuery(orgSecondaryReferencesQueryResolver)
       ],
