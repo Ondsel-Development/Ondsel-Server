@@ -23,7 +23,7 @@
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn @click="dialog=false">Close</v-btn>
-        <v-btn color="primary" :disabled="isPatchOrgSecondaryReferencesPending" :loading="isPatchOrgSecondaryReferencesPending" @click="updateBookmarks">Update</v-btn>
+        <v-btn color="primary" :disabled="isPatchOrgSecondaryReferencesPending" :loading="isPatchOrgSecondaryReferencesPending" @click="updateBookmarks">Update Bookmarks</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -72,7 +72,8 @@ export default {
       await Organization.find({
         query: {
           'users._id': this.user._id,
-          'users.isAdmin': true
+          'users.isAdmin': true,
+          $paginate: false,
         }
       })
 
