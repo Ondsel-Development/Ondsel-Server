@@ -15,6 +15,7 @@ import orgInvite from '@/store/services/orgInvites';
 import directory from '@/store/services/directories';
 import workspace from '@/store/services/workspaces';
 import keywords from "@/store/services/keywords";
+import orgSecondaryReference from '@/store/services/orgSecondaryReferences';
 
 const store =  new Vuex.Store({
   state: {},
@@ -39,6 +40,7 @@ const store =  new Vuex.Store({
     directory,
     workspace,
     keywords,
+    orgSecondaryReference,
   ]
 })
 
