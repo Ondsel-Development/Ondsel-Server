@@ -1421,9 +1421,9 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/PythonConsole/ProfilerInterval",
 
   // RecentMacros Prefs
-  "/Root/BaseApp/Preferences/RecentMacors/RecentMacros",
-  "/Root/BaseApp/Preferences/RecentMacors/ShortcutModifiers",
-  "/Root/BaseApp/Preferences/RecentMacors/ShortcutCount",
+  "/Root/BaseApp/Preferences/RecentMacros/RecentMacros",
+  "/Root/BaseApp/Preferences/RecentMacros/ShortcutModifiers",
+  "/Root/BaseApp/Preferences/RecentMacros/ShortcutCount",
 
   // CacheDirectory Prefs
   "/Root/BaseApp/Preferences/CacheDirectory/Period",
@@ -1437,6 +1437,7 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/MainWindow/DockWindows/Std_ComboView",
   "/Root/BaseApp/MainWindow/DockWindows/Std_ReportView",
   "/Root/BaseApp/MainWindow/DockWindows/Std_PythonView",
+  "/Root/BaseApp/MainWindow/DockWindows/Std_TaskView",
   "/Root/BaseApp/MainWindow/DockWindows/Std_TreeView",
   "/Root/BaseApp/MainWindow/DockWindows/Std_PropertyView",
   "/Root/BaseApp/MainWindow/DockWindows/Std_DAGView",
@@ -1454,7 +1455,6 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/MainWindow/DockWindows/OverlayTop/Height",
   "/Root/BaseApp/MainWindow/DockWindows/OverlayBottom/Width",
   "/Root/BaseApp/MainWindow/DockWindows/OverlayBottom/Height",
-  "/Root/BaseApp/MainWindow/Std_TaskView",
   "/Root/BaseApp/MainWindow/Toolbars/File",
   "/Root/BaseApp/MainWindow/Toolbars/Edit",
   "/Root/BaseApp/MainWindow/Toolbars/Workbench",
