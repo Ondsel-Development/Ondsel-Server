@@ -69,6 +69,12 @@
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
+              v-if="isAuthenticated"
+              icon="mdi-bookmark"
+              size="small"
+              @click.stop="openManageBookmarkDialog(sharedModel)"
+            ></v-btn>
+            <v-btn
               prepend-icon="mdi-share"
               variant="text"
               @click.stop="openShareLinkDialog(sharedModel)"
@@ -137,21 +143,26 @@
       :shared-model-id="activeShareModel._id"
       ref="shareLinkDialog"
     />
+    <ManageBookmarkDialog
+      ref="manageBookmarkDialog"
+      :shared-model="activeShareModel"
+    />
   </v-container>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 
 import ShareLinkDialog from '@/components/ShareLinkDialog.vue';
+import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
 
 const { SharedModel } = models.api;
 
 export default {
   name: 'PublicModels',
-  components: { ShareLinkDialog },
+  components: { ShareLinkDialog, ManageBookmarkDialog },
   mixins: [scrollListenerMixin],
   data: () => ({
     showRecentModels: true,
@@ -181,6 +192,7 @@ export default {
   computed: {
     ...mapState('shared-models', ['isFindPending']),
     ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapGetters('auth', ['isAuthenticated']),
     sharedModels: () => SharedModel.findInStore({ query: { showInPublicGallery: true, isThumbnailGenerated: true, isActive: true, $sort: { createdAt: -1 } }}),
   },
   methods: {
@@ -213,7 +225,11 @@ export default {
       this.isShareLinkDialogActive = true;
       this.activeShareModel = sharedModel;
       this.$refs.shareLinkDialog.$data.dialog = true;
-    }
+    },
+    async openManageBookmarkDialog(sharedModel) {
+      this.activeShareModel = sharedModel;
+      await this.$refs.manageBookmarkDialog.openDialog();
+    },
   }
 }
 </script>

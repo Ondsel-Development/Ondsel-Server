@@ -217,6 +217,7 @@ const routes = [
     path: '/public-models',
     component: PublicModels,
     name: 'PublicModels',
+    meta: { tryAuth: true },
   },
   //
   // USER pages

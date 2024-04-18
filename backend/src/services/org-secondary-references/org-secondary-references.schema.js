@@ -44,12 +44,15 @@ export const orgSecondaryReferencesPatchValidator = getValidator(
 export const orgSecondaryReferencesPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const orgSecondaryReferencesQueryProperties = Type.Pick(orgSecondaryReferencesSchema, ['_id', 'text'])
+export const orgSecondaryReferencesQueryProperties = Type.Pick(orgSecondaryReferencesSchema, ['_id', 'organizationId'])
 export const orgSecondaryReferencesQuerySchema = Type.Intersect(
   [
     querySyntax(orgSecondaryReferencesQueryProperties),
     // Add additional query properties here
-    Type.Object({}, { additionalProperties: false })
+    Type.Object({
+      'bookmarks.collectionName': Type.Optional(Type.String()),
+      'bookmarks.collectionSummary._id': Type.Optional(ObjectIdSchema()),
+    }, { additionalProperties: false })
   ],
   { additionalProperties: false }
 )
