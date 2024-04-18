@@ -242,6 +242,52 @@
 
       </v-list>
     </v-card>
+    <v-card>
+      <v-card-title>Organization Memberships</v-card-title>
+      <v-card-text>
+        <v-table>
+          <thead>
+            <tr>
+              <th class="text-left">
+                Name
+              </th>
+              <th class="text-left">
+                Type
+              </th>
+              <th class="text-left">
+                Send Email Notifications
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="item in user.organizations"
+              :key="item.name"
+            >
+              <td>{{ item.name }}</td>
+              <td>{{ item.type }}</td>
+              <td>
+                {{ item.notificationByEmailCadence || "Immediately" }}
+                <v-icon
+                  size="small"
+                  @click.stop="openNotificationByEmailCadenceDialog(item)"
+                >
+                  mdi-pencil
+                </v-icon>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+        <generic-selection-dialog
+          :currentSelection="notificationCadenceSelection"
+          :selectionList="notificationCadenceOptions"
+          :title="notificationCadenceTitle"
+          :subtitle="notificationCadenceSubTitle"
+          ref="notificationByEmailCadenceDialog"
+          @save-generic-selection="saveNotificationByEmailCadenceSelection"
+        ></generic-selection-dialog>
+      </v-card-text>
+    </v-card>
     <v-row class="mt-12">
       <organization-promotions-table :organization="organization" />
     </v-row>
@@ -263,12 +309,14 @@ import _ from "lodash";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
 import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import GenericSelectionDialog from "@/components/GenericSelectionDialog.vue";
 
 const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    GenericSelectionDialog,
     MarkdownViewer,
     OrganizationPromotionsTable,
     EditDescriptionDialog,
@@ -285,6 +333,13 @@ export default {
       userHomeUrl: 'tbd',
       userWorkspaceUrl: 'tbd',
       organization: {},
+      notificationCadenceOptions: [
+        {'order': 'a', 'label': 'Immediately: send an email as soon as the notification arrives', 'value': 'Immediately'},
+        {'order': 'b', 'label': 'Never: never send an email for notifications', 'value': 'Never'},
+      ],
+      notificationCadenceTitle: '',
+      notificationCadenceSubTitle: '',
+      notificationCadenceSelection: '',
     }
   },
   computed: {
@@ -311,7 +366,7 @@ export default {
       try {
         const models = await Model.find({query: {userId: this.user._id, isSharedModel: false}})
         this.remainingFiles = this.user.calculateRemainingModels(models.data.length);
-      } catch(e) {
+      } catch (e) {
         console.log('during model count query: ' + e.message);
         this.remainingFiles = 'unknown at moment'; // this can happen during a network hiccup because of S3 dependency
       }
@@ -403,6 +458,20 @@ export default {
         console.log(msg);
       });
       this.$refs.editTagsDialog.$data.isPatchPending = false;
+    },
+    async openNotificationByEmailCadenceDialog(item) {
+      this.notificationCadenceSelection = item.notificationByEmailCadence || "Immediately";
+      if (item.type === 'Personal') {
+        this.notificationCadenceTitle = `Email handling for you (${item.name})`
+      } else {
+        this.notificationCadenceTitle = `Email handling for org "${item.name}"`
+      }
+      this.notificationCadenceSubTitle = `When should you get notification emails at ${this.user.email}?`;
+      this.$refs.notificationByEmailCadenceDialog.$data.dialog = true;
+    },
+    async saveNotificationByEmailCadenceSelection() {
+      // not sure how to change yet.
+      this.$refs.notificationByEmailCadenceDialog.$data.dialog = false;
     },
   }
 }
