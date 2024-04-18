@@ -32,6 +32,7 @@ import {
 } from "../../hooks/handle-public-info-query.js";
 import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
 import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
+import {changeEmailNotification} from "./commands/changeEmailNotification.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -176,6 +177,10 @@ export const user = (app) => {
             "verifyExpires",
             "verifyShortToken",
             "verifyToken",
+          ),
+          iff(
+            context => context.data.shouldChangeEmailNotification,
+            changeEmailNotification
           ),
           specialUserOrgCurationHandler,
           schemaHooks.validateData(userPatchValidator),

@@ -311,7 +311,7 @@ import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTabl
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import GenericSelectionDialog from "@/components/GenericSelectionDialog.vue";
 
-const { Model, Organization } = models.api;
+const { Model, Organization, User } = models.api;
 
 export default {
   name: 'AccountSettings',
@@ -340,6 +340,7 @@ export default {
       notificationCadenceTitle: '',
       notificationCadenceSubTitle: '',
       notificationCadenceSelection: '',
+      notificationCadenceOrgId: null,
     }
   },
   computed: {
@@ -467,10 +468,19 @@ export default {
         this.notificationCadenceTitle = `Email handling for org "${item.name}"`
       }
       this.notificationCadenceSubTitle = `When should you get notification emails at ${this.user.email}?`;
+      this.notificationCadenceOrgId = item._id;
       this.$refs.notificationByEmailCadenceDialog.$data.dialog = true;
     },
     async saveNotificationByEmailCadenceSelection() {
-      // not sure how to change yet.
+      const newCadence = this.$refs.notificationByEmailCadenceDialog.$data.finalSelection;
+      await User.patch(
+        this.user._id,
+        {
+          shouldChangeEmailNotification: true,
+          organizationId: this.notificationCadenceOrgId,
+          notificationByEmailCadence: newCadence,
+        }
+      )
       this.$refs.notificationByEmailCadenceDialog.$data.dialog = false;
     },
   }
