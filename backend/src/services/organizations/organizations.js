@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import {disallow, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
+import {disallow, iff, iffElse, isProvider, preventChanges, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -24,7 +24,7 @@ import {
   isUserMemberOfOrganization,
   isUserOwnerOrAdminOfOrganization,
   canUserCreateOrganization,
-  assignOrganizationIdToUser, isUserOwnerOfOrganization
+  assignOrganizationIdToUser, isUserOwnerOfOrganization, limitOrgranizationsToUser
 } from './helpers.js';
 import { addUsersToOrganization } from './commands/addUsersToOrganization.js';
 import { removeUsersFromOrganization } from './commands/removeUsersFromOrganization.js';
@@ -44,6 +44,7 @@ import {OrganizationTypeMap} from "./organizations.subdocs.schema.js";
 import {afterCreateHandleOrganizationCuration, buildNewCurationForOrganization} from "./organizations.curation.js";
 import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForWorkspace} from "../workspaces/workspaces.curation.js";
+import { handlePaginateQuery } from '../../hooks/handle-paginate-query.js';
 
 export * from './organizations.class.js'
 export * from './organizations.schema.js'
@@ -137,7 +138,7 @@ export const organization = (app) => {
   })
 
   app.service(organizationPath).publish((data, context) => {
-    return app.channel(context.result.users.map(user => user._id.toString()))
+    return app.channel(`organization/${context.result._id.toString()}`);
   })
 
   // Initialize hooks
@@ -157,11 +158,19 @@ export const organization = (app) => {
     },
     before: {
       all: [
+        handlePaginateQuery,
         schemaHooks.validateQuery(organizationQueryValidator),
         schemaHooks.resolveQuery(organizationQueryResolver)
       ],
       find: [
-        iff(isProvider('external'), ThrowBadRequestIfNotForPublicInfo)
+        iff(
+          isProvider('external'),
+          iffElse(
+            context => context.params.user && !context.publicDataOnly,
+            limitOrgranizationsToUser,
+            ThrowBadRequestIfNotForPublicInfo
+          ),
+        ),
       ],
       get: [
         // member check has been moved to "after"

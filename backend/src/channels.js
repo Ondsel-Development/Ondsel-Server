@@ -26,6 +26,10 @@ export const channels = (app) => {
       app.service('workspaces').find({query: { $select: ['_id']}, user: user, paginate: false}).then(
         workspaces => app.channel(workspaces.map(workspace => `workspace/${workspace._id.toString()}`)).join(connection)
       );
+      const organizations = user.organizations || [];
+      organizations.map(
+        organization => app.channel(`organization/${organization._id.toString()}`).join(connection)
+      )
     }
   })
 

@@ -20,3 +20,12 @@ export const canUserGetOrgSecondaryReferences = async context => {
   }
   throw new BadRequest('Only members of organization allow to perform this action');
 }
+
+export const limitOrgSecondaryReferencesToUser = async context => {
+  const { user } = context.params;
+  const organizations = user.organizations || [];
+  context.params.query['organizationId'] = {
+    $in: organizations.map(org => org._id)
+  };
+  return context;
+}
