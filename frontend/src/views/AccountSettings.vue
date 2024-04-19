@@ -469,6 +469,7 @@ export default {
       }
       this.notificationCadenceSubTitle = `When should you get notification emails at ${this.user.email}?`;
       this.notificationCadenceOrgId = item._id;
+      this.$refs.notificationByEmailCadenceDialog.$data.finalSelection = this.notificationCadenceSelection;
       this.$refs.notificationByEmailCadenceDialog.$data.dialog = true;
     },
     async saveNotificationByEmailCadenceSelection() {

@@ -16,7 +16,7 @@
           absolute
           bottom
         ></v-progress-linear>
-        <p class="text-caption mb-2">selection: {{visualSelection}}</p>
+        <p class="text-caption mb-2">was: {{currentSelection}}</p>
         <v-radio-group v-model="finalSelection">
           <v-radio
             v-for="item in selectionList"
@@ -53,7 +53,6 @@ export default {
   },
   emits: ['saveGenericSelection'],
   async created() {
-    await this.refresh();
   },
   data: () => ({
     dialog: false,
@@ -63,23 +62,12 @@ export default {
     isPatchPending: false,
   }),
   computed: {
-    visualSelection: vm => vm.finalSelection || vm.$props.currentSelection,
   },
   methods: {
-    async refresh() {
-      this.finalSelection = this.$props.currentSelection;
-    },
     async sendFinalSelection() {
       this.$emit('saveGenericSelection');
     },
   },
-  watch: {
-    async dialog(newValue){
-      if (newValue) {
-        await this.refresh();
-      }
-    }
-  }
 }
 </script>
 <style scoped>
