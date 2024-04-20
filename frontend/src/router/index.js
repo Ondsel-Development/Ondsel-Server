@@ -37,6 +37,7 @@ import GettingStarted from "@/views/GettingStarted.vue";
 import XavierMenu from "@/views/XavierMenu.vue";
 import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
+import Bookmarks from "@/views/Bookmarks.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -168,6 +169,12 @@ const routes = [
     path: '/download-and-explore',
     component: DownloadAndExplore,
     name: 'DownloadAndExplore',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/bookmarks',
+    component: Bookmarks,
+    name: 'Bookmarks',
     meta: { requiresAuth: true },
   },
   {
