@@ -1,6 +1,6 @@
 export const notificationsPath = 'notifications'
 
-export const notificationsMethods = ['find', 'get', 'create', 'patch', 'remove']
+export const notificationsMethods = ['find', 'patch']
 
 export const notificationsClient = (client) => {
   const connection = client.get('connection')

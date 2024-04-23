@@ -1,5 +1,6 @@
-import {StringEnum} from "@feathersjs/typebox";
-
+import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
+import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
+import {userSummarySchema} from "../users/users.subdocs.schema.js";
 
 export const specificDeliveryMethodMap = {
   mailchimpSMTP: 'mailchimp SMTP',
@@ -31,4 +32,19 @@ export const notificationMessageType = StringEnum(
     notificationMessageMap.resetPwdLong,
     notificationMessageMap.itemShared,
   ]
+)
+
+export const notificationsEntrySchema = Type.Object(
+  {
+    _id: ObjectIdSchema(),
+    read: Type.Boolean(),
+    to: ObjectIdSchema(),
+    from: organizationSummarySchema, // the org that the sender is representing
+    createdBy: userSummarySchema,
+    when: Type.Number(),
+    method: specificDeliveryMethodType,
+    message: notificationMessageType,
+    bodySummaryTxt: Type.String(),
+    parameters: Type.Any(), // an open-ended mapping of parameters used by the delivery mechanism
+  }
 )
