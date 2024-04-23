@@ -16,8 +16,11 @@ export const commitMessage = async context => {
   const messagePayload = context.data.message;
   validateMessagePayload(messagePayload);
 
+  const { messages, messagesParticipants, showInPublicGallery } = await context.service.get(context.id, { query: { $select: ['messages', 'messagesParticipants'] } });
 
-  const { messages, messagesParticipants } = await context.service.get(context.id, { query: { $select: ['messages', 'messagesParticipants'] } });
+  if (showInPublicGallery) {
+    throw new BadRequest('Public gallery models not allowed to post messages');
+  }
 
   const message = {
     _id: new mongodb.ObjectId(),
@@ -36,6 +39,5 @@ export const commitMessage = async context => {
   context.data.messagesParticipants = messagesParticipants;
 
   context.data = _.omit(context.data, ['message']);
-  console.log(context.data);
   return context;
 }
