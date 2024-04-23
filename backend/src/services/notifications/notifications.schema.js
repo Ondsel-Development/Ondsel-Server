@@ -20,16 +20,16 @@ export const notificationsSchema = Type.Object(
 export const notificationsValidator = getValidator(notificationsSchema, dataValidator)
 export const notificationsResolver = resolve({})
 
-export const notificationsExternalResolver = resolve({
-  readNotifications: virtual(async(message, _context) => {
-    const readNotifications = message.notificationsReceived.filter((entry) => entry.read === true);
-    return readNotifications;
-  }),
-  unreadNotifications: virtual(async(message, _context) => {
-    const unreadNotifications = message.notificationsReceived.filter((entry) => entry.read === false);
-    return unreadNotifications;
-  }),
-})
+export const notificationsExternalResolver = resolve({})
+  // readNotifications: async(message, _context) => {
+  //   const readNotifications = message.notificationsReceived.filter((entry) => entry.read === true);
+  //   return readNotifications;
+  // },
+  // unreadNotifications: async(message, _context) => {
+  //   const unreadNotifications = message.notificationsReceived.filter((entry) => entry.read === false);
+  //   return unreadNotifications;
+  // },
+
 
 // Schema for creating new entries
 export const notificationsDataSchema = Type.Pick(notificationsSchema, [], {

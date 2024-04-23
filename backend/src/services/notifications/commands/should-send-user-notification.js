@@ -6,7 +6,7 @@ import {specificDeliveryMethodMap} from "../notifications.subdocs.js";
 import {BadRequest} from "@feathersjs/errors";
 
 
-export const shouldSendNotification = async (context) => {
+export const shouldSendUserNotification = async (context) => {
   const userId = context.id || null;
   const selfId = context.params.user._id.toString();
   if (!_.isEqual(selfId, userId)) {

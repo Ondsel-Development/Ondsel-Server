@@ -3,12 +3,9 @@ import { authenticate } from '@feathersjs/authentication'
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
-  notificationsDataValidator,
   notificationsPatchValidator,
   notificationsQueryValidator,
   notificationsResolver,
-  notificationsExternalResolver,
-  notificationsDataResolver,
   notificationsPatchResolver,
   notificationsQueryResolver,
   notificationsSchema,
@@ -20,11 +17,9 @@ import { NotificationsService, getOptions } from './notifications.class.js'
 import { notificationsPath, notificationsMethods } from './notifications.shared.js'
 import {disallow, iff} from "feathers-hooks-common";
 import swagger from "feathers-swagger";
-import {isAdminUser} from "../../hooks/is-user.js";
-import {userPublicFields} from "../users/users.schema.js";
 import {BadRequest} from "@feathersjs/errors";
 import _ from "lodash";
-import {shouldSendNotification} from "./commands/should-send-notification.js";
+import {shouldSendUserNotification} from "./commands/should-send-user-notification.js";
 
 export * from './notifications.class.js'
 export * from './notifications.schema.js'
@@ -61,7 +56,6 @@ export const notifications = (app) => {
       ],
       find: [
         createIfMissingAndAllowed,
-        schemaHooks.resolveData(notificationsExternalResolver), // adds the read/unread arrays
       ],
       get: [
         disallow(),  // to keep the Notifications document _id unique from userId, there is no real value in GET
@@ -71,8 +65,8 @@ export const notifications = (app) => {
       ],
       patch: [
        iff(
-          context => context.data.shouldSendNotification,
-          shouldSendNotification,
+          context => context.data.shouldSendUserNotification,
+          shouldSendUserNotification,
         ),
         schemaHooks.validateData(notificationsPatchValidator),
         schemaHooks.resolveData(notificationsPatchResolver)
@@ -82,7 +76,9 @@ export const notifications = (app) => {
       ]
     },
     after: {
-      all: []
+      all: [],
+      find: [
+      ],
     },
     error: {
       all: []
@@ -114,23 +110,3 @@ const createIfMissingAndAllowed = async context => {
   }
   return context;
 }
-
-//  const userService = context.app.service('users');
-//   const userId = context.id;
-//   context.beforePatchCopy = await userService.get(userId);
-//   return context;
-
-
-// const sharedModelsService = app.service('shared-models');
-//   const db = await sharedModelsService.options.Model;
-//   try {
-//     // Update shared models where 'messages' field does not exist
-//     const result = await db.updateMany(
-//       { messages: { $exists: false } },
-//       { $set: { messages: [], messagesParticipants: [] } }
-//     );
-//     console.log(result);
-//     console.log('Migration successful.');
-//   } catch (error) {
-//     console.error('Error during migration:', error);
-//   }
