@@ -32,7 +32,7 @@ export const isUserOwnerOrAdminOfOrg = (organization, user) => {
   // Only Owner or Admins of Org allow to add users
   return (
     user._id.equals(organization.owner._id)
-    || organization.users.some(user => user._id.equals(user._id.toString()) && user.isAdmin)
+    || organization.users.some(u => u._id.equals(user._id.toString()) && u.isAdmin)
   );
 }
 
@@ -75,5 +75,15 @@ export const assignOrganizationIdToUser = async context => {
   userOrganizations.push(buildOrganizationSummary(context.result));
 
   await context.app.service('users').patch(context.result.createdBy, { organizations: userOrganizations });
+  return context;
+}
+
+
+export const limitOrgranizationsToUser = async context => {
+  const { user } = context.params;
+  const organizations = user.organizations || [];
+  context.params.query['_id'] = {
+    $in: organizations.map(org => org._id)
+  };
   return context;
 }

@@ -16,7 +16,7 @@ export function getValueByPath(obj, path, typesToSkip=null) {
     if (foundNode) {
       currentNode = foundNode;
     } else {
-      return null;
+      return { key: path, type: 'KeyNotFound', value: '' };
     }
   }
 
@@ -45,7 +45,7 @@ export function getValueByPath(obj, path, typesToSkip=null) {
 
   }
 
-  return null;
+  return { key: path, type: 'KeyNotFound', value: '' };
 }
 
 
@@ -70,7 +70,17 @@ const fileContent = fs.readFileSync("/home/ambu/.config/FreeCAD/system.cfg", "ut
 // Parse XML string
 const parsedXml = xmlJs.xml2js(fileContent, { compact: true });
 
-const path = "/Root/Modules/Spreadsheet/WorkBenchName";
-const value = getValueByPath(parsedXml.FCParameters, path);
-console.log(value);  // Output: Path/Help/index.html
-*/
+const paths = [
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/Widgets",
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/Transparent",
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/TaskShow",
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/Width",
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/Height",
+  "/Root/BaseApp/MainWindow/DockWindows/OverlayRight/Sizes",
+];
+
+for (let path of paths) {
+  let value = getValueByPath(parsedXml.FCParameters, path);
+  console.log(value);  // Output: Path/Help/index.html
+}
+// */

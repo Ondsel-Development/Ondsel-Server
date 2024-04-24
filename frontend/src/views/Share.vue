@@ -42,6 +42,13 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
+    <v-btn v-if="isAuthenticated" icon flat @click="openManageBookmarkDialog">
+      <v-icon>mdi-bookmark</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Manage Bookmarks</v-tooltip>
+    </v-btn>
     <v-btn icon flat @click="openEditPromotionDialog()">
       <v-icon>mdi-bullhorn</v-icon>
       <v-tooltip
@@ -165,6 +172,10 @@
     <ModelInfo ref="modelInfoDrawer" :shared-model="sharedModel"/>
   </v-navigation-drawer>
   <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="shared-models" :item-id="sharedModel?._id" :item-name="name"></edit-promotion-dialog>
+  <ManageBookmarkDialog
+    ref="manageBookmarkDialog"
+    :shared-model="sharedModel"
+  />
 </template>
 
 <script>
@@ -178,12 +189,22 @@ import ShareLinkDialog from '@/components/ShareLinkDialog';
 import ModelInfo from '@/components/ModelInfo.vue';
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import ObjectsListView from '@/components/ObjectsListView.vue';
+import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
-  components: {EditPromotionDialog, ShareLinkDialog, AttributeViewer, ModelViewer, ExportModelDialog, ModelInfo, ObjectsListView},
+  components: {
+    ManageBookmarkDialog,
+    EditPromotionDialog,
+    ShareLinkDialog,
+    AttributeViewer,
+    ModelViewer,
+    ExportModelDialog,
+    ModelInfo,
+    ObjectsListView
+  },
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -315,7 +336,10 @@ export default {
     },
     objectClicked(object3d) {
       this.$refs.objectListView.selectListItem(object3d);
-    }
+    },
+    async openManageBookmarkDialog() {
+      await this.$refs.manageBookmarkDialog.openDialog();
+    },
   },
   watch: {
     async 'model.isObjGenerated'(v) {

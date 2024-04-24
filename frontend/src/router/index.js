@@ -37,6 +37,7 @@ import GettingStarted from "@/views/GettingStarted.vue";
 import XavierMenu from "@/views/XavierMenu.vue";
 import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
+import Bookmarks from "@/views/Bookmarks.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -171,6 +172,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/bookmarks',
+    component: Bookmarks,
+    name: 'Bookmarks',
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/payment-processor-redirect/:prefilled_email/:utm_content',
     redirect: to => {
       let stripePurchasePeerUrl = import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL;
@@ -217,6 +224,7 @@ const routes = [
     path: '/public-models',
     component: PublicModels,
     name: 'PublicModels',
+    meta: { tryAuth: true },
   },
   //
   // USER pages

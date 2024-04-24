@@ -108,6 +108,9 @@
     <v-list density="compact" nav>
       <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
     </v-list>
+    <v-list density="compact" nav>
+      <v-list-item prepend-icon="mdi-bookmark" title="Bookmarks" :to="{ name: 'Bookmarks'}"></v-list-item>
+    </v-list>
   </v-navigation-drawer>
 
   <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />

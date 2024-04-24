@@ -110,52 +110,26 @@ export default {
       switch (this.collection) {
         case 'workspaces':
           obj = await this.getWorkspaceByIdPublic(this.itemId);
-          if (obj.curation) {
-            curation = obj.curation;
-            removeNonPublicItems(curation);
-          } else {
-            curation = {
-              _id: this.itemId,
-              collection: this.collection,
-              name: obj.name,
-              description: obj.description || '',
-            };
-          }
+          curation = obj.curation;
+          removeNonPublicItems(curation);
           await this.applyChange(decision, curation);
           break;
         case 'organizations':
           obj = await this.getOrgByIdOrNamePublic(this.itemId);
-          curation = {
-            _id: this.itemId,
-            collection: this.collection,
-            name: obj.name,
-            description: obj.description || '',
-          };
+          curation = obj.curation;
+          removeNonPublicItems(curation);
           await this.applyChange(decision, curation);
           break;
         case 'users':
-          obj = await this.getUserByIdOrNamePublic(this.itemId);
-          curation = {
-            _id: this.itemId,
-            collection: this.collection,
-            name: obj.name,
-            description: obj.description || '',
-          };
+          obj = await this.getOrgByIdOrNamePublic(this.itemId); // picks up Personal Org by refName
+          curation = obj.curation;
+          removeNonPublicItems(curation);
           await this.applyChange(decision, curation);
           break;
         case 'shared-models':
           obj = await SharedModel.get(this.itemId);
-          if (obj.curation) {
-            curation = obj.curation;
-            removeNonPublicItems(curation);
-          } else {
-            curation = {
-              _id: this.itemId,
-              collection: this.collection,
-              name: this.itemName || obj.description || '',
-              description: obj.description || '',
-            };
-          }
+          curation = obj.curation;
+          removeNonPublicItems(curation);
           await this.applyChange(decision, curation);
           break;
         default:

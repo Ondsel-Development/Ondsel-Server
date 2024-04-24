@@ -1,25 +1,67 @@
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
 import {fileSummary} from "./services/file/file.subdocs.js";
 import pkg from 'node-rake-v2';
 import _ from "lodash";
 import {userSummarySchema} from "./services/users/users.subdocs.schema.js";
 import {buildFileSummary} from "./services/file/file.distrib.js";
+import {userPath} from "./services/users/users.shared.js";
+import {organizationPath} from "./services/organizations/organizations.shared.js";
+import {workspacePath} from "./services/workspaces/workspaces.shared.js";
+import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
+import {OrganizationTypeMap} from "./services/organizations/organizations.subdocs.schema.js";
 
-// this schema is shared by users, organizations, and workspaces (and possibly others)
+// these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
 // of support functions.
+
+export const navTargetMap = {
+  users: userPath,
+  organizations: organizationPath,
+  workspaces: workspacePath,
+  sharedModels: sharedModelsPath,
+  ondsel: 'ondsel', // meta ref for lens home page, not a collection name
+}
+
+export const navTargetType = StringEnum([
+  navTargetMap.users,
+  navTargetMap.organizations,
+  navTargetMap.workspaces,
+  navTargetMap.sharedModels,
+  navTargetMap.ondsel,
+])
+
+export const navRefSchema = Type.Object(
+  // from frontend:
+  // - users: /user/:slug                         -> slug renamed username
+  // - organizations: /org/:slug                  -> slug renamed orgname
+  // - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
+  // - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
+  // - shared-models: /share/:id                  -> id renamed sharelinkid
+  {
+    target: navTargetType,
+    username: Type.Optional(Type.String()),
+    orgname: Type.Optional(Type.String()),
+    wsname: Type.Optional(Type.String()),
+    sharelinkid: Type.Optional(Type.String()),
+  }
+)
+
+// TODO: some day, remove 'promoted' from curationSchema. A promotions list belongs outside of the curation
+//       object; perhaps in the parent object or elsewhere.
 
 export const curationSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     collection: Type.String(),
+    nav: navRefSchema,
     name: Type.String(), // limited to 40 runes (unicode code points aka characters)
+    slug: Type.String(), // this "slug" is for searching, not navigation/urls/api. For navigation, use `nav` field.
     description: Type.String(), // limited to 80 runes
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
     representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
-    promoted: Type.Array(Type.Any()), // an array of promotionSchema
-    keywordRefs: Type.Array(Type.String()), // used for pre-emptive "cleanup" prior to recalculating keywords
+    promoted: Type.Optional(Type.Array(Type.Any())), // an array of promotionSchema
+    keywordRefs: Type.Optional(Type.Array(Type.String())), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
 )
 
@@ -59,11 +101,18 @@ export function matchingCuration(curationA, curationB) {
   return false;
 };
 
+export function cleanedCuration(curation) {
+  // returns a curation without self-references such as keywordRefs and 'promoted'
+  let {...cleanCuration} = curation;
+  delete cleanCuration.keywordRefs;
+  delete cleanCuration.promoted;
+  return cleanCuration;
+}
+
 export async function generateAndApplyKeywords(context, curation) {
   const keywordService = context.app.service('keywords');
   const keywordScores = determineKeywordsWithScore(curation);
-  let {keywordRefs: _, ...cleanCuration} = curation;
-  cleanCuration.keywordRefs = [];
+  let cleanCuration = cleanedCuration(curation);
   // apply the keywords to the collection
   for (const item of keywordScores) {
     await upsertScoreItem(keywordService, item, cleanCuration);
@@ -83,14 +132,6 @@ export async function generateAndApplyKeywords(context, curation) {
   return keywordScores.map(item => item.keyword);
 }
 
-// TODO: the following is not reliable in volume such as migration tool. Why?
-// let keywordPromises = []  // there can easily be 100 of these, so send them all at once.
-// for (const item of keywordScores) {
-//   keywordPromises.push( upsertScoreItem(keywordService, item, cleanCuration) )
-// }
-// await Promise.all(keywordPromises);
-
-
 async function upsertScoreItem(keywordService, item, cleanCuration) {
     try {
         keywordService.create(
@@ -109,6 +150,7 @@ async function upsertScoreItem(keywordService, item, cleanCuration) {
 // Score constants. To be tweaked as we learn more.
 
 // a word simply appearing in an item gives it a strong score
+const slugStart = 175;
 const nameStart = 150;
 const descStart = 125;
 const longDescStart = 100;
@@ -116,6 +158,7 @@ const tagStart = 125;
 
 // the maximum score. If a bigger number is found, it is clipped to the max.
 //    all of these max numbers should add up to 1000.
+const slugMax = 300;
 const nameMax = 300;
 const descMax = 250;
 const longDescMax = 200;
@@ -124,6 +167,7 @@ const tagMax = 250;
 // the keywords are in an order. for some strings, being seen "later" has a cost
 // the RAKE algo places the "most important keywords" first.
 // the first item has nothing deducted, the second is decremented once, the third twice, etc.
+const slugOrderCost = 0;  // order does not matter
 const nameOrderCost = 0;  // order does not matter in a name; order is often an effect of grammar
 const descOrderCost = -1;
 const longDescOrderCost = -2;
@@ -139,6 +183,11 @@ export function determineKeywordsWithScore(curation) {
     // returns a dictionary containing "keyphrase"
     // score is an integer from 0 to 1000; it describes the relative "importance" in terms of the content
     let keywordScores = []
+    //
+    // slug
+    //
+    const slugKeywords = useRake(curation.slug);
+    accumulateScores(keywordScores, slugKeywords, slugStart, slugMax, slugOrderCost);
     //
     // name
     //
@@ -235,6 +284,16 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
         changeFound = true;
       }
       //
+      // slug: skipping since a slug can't change once created.
+      //
+      //
+      // nav: this also can't be modified after creation, but, for migration purposes, I'll check anyway.
+      //  TODO: remove the whole nav check after nav migration PR has happened.
+      //
+      if (!_.isEqual(originalCuration.nav, newCuration.nav)) {
+        needPatch = true;
+      }
+      //
       // name (pulled from parent except for personal orgs)
       //
       if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
@@ -279,12 +338,12 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       // representative file
       //
       switch (newCuration.collection) {
-        case 'workspaces':
+        case navTargetMap.workspaces:
           if (patchCuration.representativeFile && originalCuration.representativeFile !== newCuration.representativeFile) {
             changeFound = true;
           }
           break;
-        case 'shared-models':
+        case navTargetMap.sharedModels:
           if (!newCuration.representativeFile) {
             if (context.beforePatchCopy.model?.file) {
               newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
@@ -313,19 +372,19 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       let isOpenEnoughForKeywords = false;
       switch (newCuration.collection) {
-        case 'workspaces':
+        case navTargetMap.workspaces:
           isOpenEnoughForKeywords = context.beforePatchCopy.open;
           break;
-        case 'organizations':
+        case navTargetMap.organizations:
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
-        case 'users':
+        case navTargetMap.users:
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
-        case 'shared-models':
-          isOpenEnoughForKeywords = context.beforePatchCopy.isSystemGenerated;
+        case navTargetMap.sharedModels:
+          isOpenEnoughForKeywords = context.beforePatchCopy.showInPublicGallery;
           break;
-        case 'ondsel':
+        case navTargetMap.ondsel:
           isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search
           break;
       }
