@@ -104,7 +104,6 @@ const createIfMissingAndAllowed = async context => {
     // the document being searched for does not exist yet, create an empty one directly via DB
     const newDoc = await notDb.insertOne({
       userId: userId,
-      notificationsSent: [],
       notificationsReceived: [],
     })
   }

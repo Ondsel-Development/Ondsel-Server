@@ -4,9 +4,21 @@ import _ from "lodash";
 import {buildOrganizationSummary} from "../../organizations/organizations.distrib.js";
 import {specificDeliveryMethodMap} from "../notifications.subdocs.js";
 import {BadRequest} from "@feathersjs/errors";
+import {generateGenericBodySummaryTxt, performExternalNotificationDelivery} from "../notifications.delivery.js";
 
+// example of messageDetail:
+// {
+//     to: '6526e74940840b9fa4ec51cc',
+//     message: 'itemShared',
+//     nav: {},
+//     parameters: {sharelink: 'http://example.com/'}
+// }
+// the following are overwritten regardless of what is passed: _id, read, createdBy, when, methods, bodySummaryTxt
 
 export const shouldSendUserNotification = async (context) => {
+  //
+  // setup and verify
+  //
   const userId = context.id || null;
   const selfId = context.params.user._id.toString();
   if (!_.isEqual(selfId, userId)) {
@@ -14,15 +26,10 @@ export const shouldSendUserNotification = async (context) => {
     throw new BadRequest('User does not have permission');
   }
   let ntf = {...context.data.messageDetail};
-  context.data = _.omit(context.data, ['shouldSendNotification', 'messageDetail']);
-
-  // example of messageDetail:
-  // {
-  //     to: '6526e74940840b9fa4ec51cc',
-  //     message: 'itemShared',
-  //     parameters: {sharelink: 'http://example.com/'}
-  // }
-  // the following are overwritten regardless of what is passed: _id, read, createdBy, when, method, bodySummaryTxt
+  context.data = _.omit(context.data, ['shouldSendUserNotification', 'messageDetail']);
+  //
+  // build message 'ntf'
+  //
   ntf.read = false;
   ntf._id = new ObjectId();
   ntf.createdBy = buildUserSummary(context.params.user);
@@ -30,10 +37,20 @@ export const shouldSendUserNotification = async (context) => {
   const currentUserOrg = context.params.user.organizations.find((org) => _.isEqual(org._id, currentOrgId));
   ntf.from = buildOrganizationSummary(currentUserOrg);
   const targetUserId = new ObjectId(ntf.to);
-  ntf.bodySummaryTxt = 'TODO => build this from notification system';
-  ntf.method = specificDeliveryMethodMap.mailchimpSMTP;
   ntf.when = Date.now();
-
+  ntf.bodySummaryTxt = await generateGenericBodySummaryTxt(ntf);
+  //
+  // deliver to email, sms, etc
+  //
+  try { // use try/catch since, strictly speaking, external notification is of secondary priority
+    const externalDeliveryResult = await performExternalNotificationDelivery(targetUserId, ntf, context);
+    ntf.methods = externalDeliveryResult.methods;
+  } catch (e) {
+    console.log(e.error)
+  }
+  //
+  // store the new unread notification with full details
+  //
   const notService = context.app.service('notifications');
   const notDb = await notService.options.Model;
   const updateResult = await notDb.updateOne(
@@ -43,7 +60,9 @@ export const shouldSendUserNotification = async (context) => {
     },
     {upsert: true},
   )
-  console.log(JSON.stringify(updateResult));
+  //
+  // respond back on patch
+  //
   if (updateResult.matchedCount === 1) {
     context.result = {
       _id: userId, // passing this back makes vuetify happy

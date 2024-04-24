@@ -1,6 +1,7 @@
 import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
 import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 import {userSummarySchema} from "../users/users.subdocs.schema.js";
+import {navRefSchema} from "../../curation.schema.js";
 
 export const specificDeliveryMethodMap = {
   mailchimpSMTP: 'mailchimp SMTP',
@@ -42,8 +43,9 @@ export const notificationsEntrySchema = Type.Object(
     from: organizationSummarySchema, // the org that the sender is representing
     createdBy: userSummarySchema,
     when: Type.Number(),
-    method: specificDeliveryMethodType,
+    methods: Type.Array(specificDeliveryMethodType),
     message: notificationMessageType,
+    nav: Type.Optional(navRefSchema),
     bodySummaryTxt: Type.String(),
     parameters: Type.Any(), // an open-ended mapping of parameters used by the delivery mechanism
   }
