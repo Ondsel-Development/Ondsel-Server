@@ -227,6 +227,7 @@ export default {
         this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
       } catch (error) {
         this.error = 'NotFound';
+        return;
       }
 
       if (this.isAuthenticated) {
