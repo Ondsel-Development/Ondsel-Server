@@ -44,7 +44,7 @@ export const shouldSendUserNotification = async (context) => {
   //
   try { // use try/catch since, strictly speaking, external notification is of secondary priority
     const externalDeliveryResult = await performExternalNotificationDelivery(targetUserId, ntf, context);
-    ntf.methods = externalDeliveryResult.methods;
+    ntf.deliveryDetails = externalDeliveryResult.details;
   } catch (e) {
     console.log(e.error)
   }

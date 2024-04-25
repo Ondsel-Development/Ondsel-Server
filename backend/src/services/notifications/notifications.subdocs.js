@@ -17,6 +17,14 @@ export const specificDeliveryMethodType = StringEnum(
   ]
 )
 
+export const deliveryDetail = Type.Object(
+  {
+    method: specificDeliveryMethodType,
+    result: Type.String(),
+    success: Type.Boolean(),
+  }
+)
+
 export const notificationMessageMap = {
   resendVerifySignup: 'resendVerifySignup', // these first four are from auth system plugin
   verifySignupLong: 'verifySignupLong',
@@ -43,7 +51,7 @@ export const notificationsEntrySchema = Type.Object(
     from: organizationSummarySchema, // the org that the sender is representing
     createdBy: userSummarySchema,
     when: Type.Number(),
-    methods: Type.Array(specificDeliveryMethodType),
+    deliveryDetails: Type.Array(deliveryDetail),
     message: notificationMessageType,
     nav: Type.Optional(navRefSchema),
     bodySummaryTxt: Type.String(),

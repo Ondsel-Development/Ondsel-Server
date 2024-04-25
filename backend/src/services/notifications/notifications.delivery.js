@@ -1,7 +1,12 @@
 import {OrganizationTypeMap} from "../organizations/organizations.subdocs.schema.js";
 import _ from "lodash";
 import {NotificationCadenceTypeMap} from "../users/users.subdocs.schema.js";
-import {notificationMessageMap, specificDeliveryMethodMap} from "./notifications.subdocs.js";
+import {
+  notificationMessageMap,
+  specificDeliveryMethodMap,
+  specificDeliveryMethodType
+} from "./notifications.subdocs.js";
+import {Type} from "@feathersjs/typebox";
 
 export async function generateGenericBodySummaryTxt(ntf) {
   let txt = "";
@@ -26,7 +31,7 @@ export async function generateGenericBodySummaryTxt(ntf) {
 }
 
 export async function performExternalNotificationDelivery(targetUserId, ntf, context) {
-  let methods = [];
+  let details = [];
 
   const userService = context.app.service('users');
   const user = await userService.get(targetUserId);
@@ -34,17 +39,27 @@ export async function performExternalNotificationDelivery(targetUserId, ntf, con
   const settings = user.organizations.find((userOrg) => _.isEqual(userOrg._id, orgId));
   // we only do email right now
   if (settings.notificationByEmailCadence === NotificationCadenceTypeMap.live) {
-    const result = await deliverViaMailchimpSMTP(user, ntf);
-    if (result) {
-      methods.push(specificDeliveryMethodMap.mailchimpSMTP);
-    }
+    const result = await deliverViaMailchimpSMTP(user, ntf, context);
+    details.push(result);
   }
   return {
-    methods: methods,
+    details: details,
   }
 }
 
-async function deliverViaMailchimpSMTP(user, ntf) {
-  // TODO: continue here
-  return true;
+async function deliverViaMailchimpSMTP(user, ntf, context) {
+  const emailService = context.app.service('email');
+  let msgDetail = {
+    from: 'contact@ondsel.com',
+    to: user.email,
+    subject: `[Ondsel] notification`,
+    text: ntf.bodySummaryTxt,
+  };
+  const result = await emailService.create(msgDetail);
+  const response = {
+    method: specificDeliveryMethodMap.mailchimpSMTP,
+    result: JSON.stringify(result),
+    success: result?.accepted?.length === 1,
+  }
+ return response;
 }
