@@ -5,8 +5,10 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { NotFound } from '@feathersjs/errors';
 import { dataValidator, queryValidator } from '../../validators.js'
-import { modelSchema} from '../models/models.schema.js';
 import {curationSchema} from "../../curation.schema.js";
+import { modelSchema } from '../models/models.schema.js';
+import { userSummarySchema } from '../users/users.subdocs.schema.js';
+import { messageSchema } from './message.schema.js';
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -33,6 +35,8 @@ export const sharedModelsSchema = Type.Object(
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
     curation: Type.Optional(curationSchema),
+    messages: Type.Array(messageSchema),
+    messagesParticipants: Type.Array(userSummarySchema),
 
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -201,6 +205,12 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsDataSchema.properties.isThumbnailGenerated.default;
   },
+  messages: async (_value, _message, _context) => {
+    return [];
+  },
+  messagesParticipants: async (_value, _message, _context) => {
+    return [];
+  },
 })
 
 // Schema for updating existing entries
@@ -215,7 +225,20 @@ export const sharedModelsPatchResolver = resolve({
 // Schema for allowed query properties
 export const sharedModelsQueryProperties = Type.Pick(
   sharedModelsSchema,
-  ['_id', 'cloneModelId', 'isActive', 'deleted', 'userId', 'isSystemGenerated', 'createdAt', 'isThumbnailGenerated', 'curation', 'showInPublicGallery']
+  [
+    '_id',
+    'cloneModelId',
+    'isActive',
+    'deleted',
+    'userId',
+    'isSystemGenerated',
+    'createdAt',
+    'isThumbnailGenerated',
+    'curation',
+    'showInPublicGallery',
+    'messages',
+    'messagesParticipants',
+  ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(
   [

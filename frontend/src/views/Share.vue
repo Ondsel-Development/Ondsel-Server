@@ -56,7 +56,13 @@
         location="start"
       >Should {{selfPronoun}} promote this shared link</v-tooltip>
     </v-btn>
-
+    <v-btn v-if="isAuthenticated && sharedModel && !sharedModel.showInPublicGallery" icon flat @click="openMessages">
+      <v-icon>mdi-chat</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Open messages</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView v-if="!isWindowLoadedInIframe && viewer" ref="objectListView" :viewer="viewer" />
@@ -169,7 +175,8 @@
     width="1100"
     temporary
   >
-    <ModelInfo ref="modelInfoDrawer" :shared-model="sharedModel"/>
+    <ModelInfo v-if="drawerActiveWindow === 'modelInfo'" ref="modelInfoDrawer" :shared-model="sharedModel"/>
+    <Messages v-else-if="drawerActiveWindow === 'openMessages'" ref="messagesDrawer" :shared-model="sharedModel" />
   </v-navigation-drawer>
   <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="shared-models" :item-id="sharedModel?._id" :item-name="name"></edit-promotion-dialog>
   <ManageBookmarkDialog
@@ -190,12 +197,14 @@ import ModelInfo from '@/components/ModelInfo.vue';
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import ObjectsListView from '@/components/ObjectsListView.vue';
 import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
+import Messages from "@/components/Messages.vue";
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
   components: {
+    Messages,
     ManageBookmarkDialog,
     EditPromotionDialog,
     ShareLinkDialog,
@@ -219,6 +228,7 @@ export default {
     isDrawerOpen: false,
     name: '',
     viewer: null,
+    drawerActiveWindow: null,
   }),
   async created() {
     const shareModelId = this.$route.params.id;
@@ -227,6 +237,7 @@ export default {
         this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
       } catch (error) {
         this.error = 'NotFound';
+        return;
       }
 
       if (this.isAuthenticated) {
@@ -328,8 +339,13 @@ export default {
       setTimeout(() => this.uploadThumbnail(), 500);
     },
     async modelInfoDrawerClicked() {
+      this.drawerActiveWindow = 'modelInfo';
       this.isDrawerOpen = !this.isDrawerOpen;
       await this.$refs.modelInfoDrawer.fetchData();
+    },
+    async openMessages() {
+      this.drawerActiveWindow = 'openMessages';
+      this.isDrawerOpen = !this.isDrawerOpen;
     },
     openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;

@@ -42,9 +42,7 @@ export const addBookmark = async context => {
 
   const doc = await context.app.service(CollectionNameMap[bookmark.collectionName]).get(bookmark.collectionId);
 
-  console.log(doc);
   const docSummary = CollectionNameMappingWithSummaryBuildMethods[CollectionNameMap[bookmark.collectionName]](doc);
-  console.log(docSummary);
 
   const bookmarkEntry = {
     _id: (new mongodb.ObjectId()).toString(),
