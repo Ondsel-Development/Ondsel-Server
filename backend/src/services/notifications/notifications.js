@@ -23,6 +23,7 @@ import {shouldSendUserNotification} from "./commands/should-send-user-notificati
 import {copyBeforePatch} from "../../helpers.js";
 import {shouldMarkReadOrUnread} from "./commands/should-mark-read-or-unread.js";
 import {isAdminUser} from "../../hooks/is-user.js";
+import {shouldDelete} from "./commands/should-delete.js";
 
 export * from './notifications.class.js'
 export * from './notifications.schema.js'
@@ -74,6 +75,10 @@ export const notifications = (app) => {
         iff(
           context => context.data.shouldMarkReadOrUnread,
           shouldMarkReadOrUnread,
+        ),
+        iff(
+          context => context.data.shouldDelete,
+          shouldDelete,
         ),
         schemaHooks.validateData(notificationsPatchValidator),
         schemaHooks.resolveData(notificationsPatchResolver)
