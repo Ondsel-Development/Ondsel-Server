@@ -19,13 +19,8 @@ export const shouldSendUserNotification = async (context) => {
   //
   // setup and verify
   //
-  const userId = context.id || null;
-  const selfId = context.params.user._id.toString();
-  if (!_.isEqual(selfId, userId)) {
-    console.log(`user ${selfId} attempted to send a notification on behalf of ${userId} notifications`);
-    throw new BadRequest('User does not have permission');
-  }
   let ntf = {...context.data.messageDetail};
+  const targetUserId = new ObjectId(ntf.to);
   context.data = _.omit(context.data, ['shouldSendUserNotification', 'messageDetail']);
   //
   // build message 'ntf'
@@ -36,7 +31,6 @@ export const shouldSendUserNotification = async (context) => {
   const currentOrgId = context.params.user.currentOrganizationId;
   const currentUserOrg = context.params.user.organizations.find((org) => _.isEqual(org._id, currentOrgId));
   ntf.from = buildOrganizationSummary(currentUserOrg);
-  const targetUserId = new ObjectId(ntf.to);
   ntf.when = Date.now();
   ntf.bodySummaryTxt = await generateGenericBodySummaryTxt(ntf);
   //
@@ -65,19 +59,19 @@ export const shouldSendUserNotification = async (context) => {
   //
   if (updateResult.matchedCount === 1) {
     context.result = {
-      _id: userId, // passing this back makes vuetify happy
+      _id: context.id, // passing this back makes vuetify happy
       success: true,
       msg: 'Successfully sent notification',
     }
   } else if (updateResult.upsertedCount === 1) {
     context.result = {
-      _id: userId,
+      _id: context.id,
       success: true,
       msg: 'Successfully sent notification and created related notification doc.',
     }
   } else {
     context.result = {
-      _id: userId,
+      _id: context.id,
       success: false,
       msg: `failed to notify user ${targetUserId}`,
     }

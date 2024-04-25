@@ -31,6 +31,7 @@ export const userSchema = Type.Object(
     defaultWorkspaceId: ObjectIdSchema(),
     personalOrganization: organizationSummarySchema,
     currentOrganizationId: ObjectIdSchema(),
+    notificationsId: ObjectIdSchema(),
     organizations: Type.Array(UserOrgSchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),

@@ -33,6 +33,8 @@ import {
 import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
 import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
 import {changeEmailNotification} from "./commands/changeEmailNotification.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {notificationsEntrySchema} from "../notifications/notifications.subdocs.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -196,6 +198,7 @@ export const user = (app) => {
         sendVerify(),
         removeVerification(),
         createDefaultOrganization,
+        createNotificationsDoc,
         createSampleModels,
         sendCreateAccountNotificationToSlack,
       ],
@@ -316,6 +319,23 @@ const createDefaultOrganization = async context => {
       defaultWorkspaceId: workspace._id,
       personalOrganization: buildOrganizationSummary(organization),
       currentOrganizationId: organization._id,
+    }
+  );
+  return context;
+}
+
+const createNotificationsDoc = async context => {
+  const ntfService = context.app.service('notifications');
+  const ntfDoc = await ntfService.create(
+    {
+      userId: context.result._id,
+      notificationsReceived: [],
+    }
+  );
+  await context.service.patch(
+    context.result._id,
+    {
+      notificationsId: ntfDoc._id,
     }
   );
   return context;

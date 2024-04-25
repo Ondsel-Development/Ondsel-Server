@@ -15,11 +15,14 @@ import {
 } from './notifications.schema.js'
 import { NotificationsService, getOptions } from './notifications.class.js'
 import { notificationsPath, notificationsMethods } from './notifications.shared.js'
-import {disallow, iff} from "feathers-hooks-common";
+import {disallow, iff, isProvider, preventChanges} from "feathers-hooks-common";
 import swagger from "feathers-swagger";
 import {BadRequest} from "@feathersjs/errors";
 import _ from "lodash";
 import {shouldSendUserNotification} from "./commands/should-send-user-notification.js";
+import {copyBeforePatch} from "../../helpers.js";
+import {shouldMarkReadOrUnread} from "./commands/should-mark-read-or-unread.js";
+import {isAdminUser} from "../../hooks/is-user.js";
 
 export * from './notifications.class.js'
 export * from './notifications.schema.js'
@@ -55,18 +58,22 @@ export const notifications = (app) => {
         schemaHooks.resolveQuery(notificationsQueryResolver)
       ],
       find: [
-        createIfMissingAndAllowed,
+        disallow(),
       ],
-      get: [
-        disallow(),  // to keep the Notifications document _id unique from userId, there is no real value in GET
-      ],
+      get: [],
       create: [
-        disallow(),  // Do not "create" a Notifications document. They are auto-created on first FIND or PATCH.
+        disallow('external'), // creation occurs during user creation or migration script
       ],
       patch: [
-       iff(
+        copyBeforePatch,
+        isProperUser,
+        iff(
           context => context.data.shouldSendUserNotification,
           shouldSendUserNotification,
+        ),
+        iff(
+          context => context.data.shouldMarkReadOrUnread,
+          shouldMarkReadOrUnread,
         ),
         schemaHooks.validateData(notificationsPatchValidator),
         schemaHooks.resolveData(notificationsPatchResolver)
@@ -77,7 +84,8 @@ export const notifications = (app) => {
     },
     after: {
       all: [],
-      find: [
+      get: [
+        wasProperUser,
       ],
     },
     error: {
@@ -86,26 +94,22 @@ export const notifications = (app) => {
   })
 }
 
-
-const createIfMissingAndAllowed = async context => {
-  const userId = context.params.query?.userId || null;
-  if (!userId) {
+const isProperUser = async (context) => {
+  const provider = context.params.provider; // Internal calls are "undefined"
+  if (provider === undefined) {
     return context;
   }
-  const selfId = context.params.user._id;
-  if (!_.isEqual(selfId, userId)) {
-    console.log(`user ${selfId} attempted to read user ${userId} notifications`);
-    throw new BadRequest('User does not have permission');
+  if (!_.isEqual(context.beforePatchCopy.userId, context.params.user._id)) {
+    throw new BadRequest(`User ${context.params.user._id} does not have permission to patch ${context.id}`);
   }
-  const notService = context.app.service('notifications');
-  const notDb = await notService.options.Model;
-  const result = await notDb.findOne({ 'userId': userId });
-  if (!result) {
-    // the document being searched for does not exist yet, create an empty one directly via DB
-    const newDoc = await notDb.insertOne({
-      userId: userId,
-      notificationsReceived: [],
-    })
+}
+
+const wasProperUser = async (context) => {
+  const provider = context.params.provider; // Internal calls are "undefined"
+  if (provider === undefined) {
+    return context;
   }
-  return context;
+  if (!_.isEqual(context.result.userId, context.params.user._id)) {
+    throw new BadRequest(`User ${context.params.user._id} does not have permission to patch ${context.id}`);
+  }
 }

@@ -21,15 +21,6 @@ export const notificationsValidator = getValidator(notificationsSchema, dataVali
 export const notificationsResolver = resolve({})
 
 export const notificationsExternalResolver = resolve({})
-  // readNotifications: async(message, _context) => {
-  //   const readNotifications = message.notificationsReceived.filter((entry) => entry.read === true);
-  //   return readNotifications;
-  // },
-  // unreadNotifications: async(message, _context) => {
-  //   const unreadNotifications = message.notificationsReceived.filter((entry) => entry.read === false);
-  //   return unreadNotifications;
-  // },
-
 
 // Schema for creating new entries
 export const notificationsDataSchema = Type.Pick(notificationsSchema, [], {
