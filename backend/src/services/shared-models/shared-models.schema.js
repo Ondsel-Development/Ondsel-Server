@@ -205,6 +205,12 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsDataSchema.properties.isThumbnailGenerated.default;
   },
+  messages: async (_value, _message, _context) => {
+    return [];
+  },
+  messagesParticipants: async (_value, _message, _context) => {
+    return [];
+  },
 })
 
 // Schema for updating existing entries
