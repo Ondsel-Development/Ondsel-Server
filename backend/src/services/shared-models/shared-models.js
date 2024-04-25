@@ -67,6 +67,9 @@ export const sharedModels = (app) => {
     if (data.isSystemGenerated) {
       return app.channel('authenticated').send(_.omit(data, 'model'));
     }
+    if (data.messagesParticipants) {
+      return data.messagesParticipants.map(user => app.channel(user._id.toString()).send(_.omit(data, 'model')));
+    }
   })
 
   // Initialize hooks
