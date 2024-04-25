@@ -54,10 +54,16 @@ export const upsertScore = async context => {
         actionToTake = ACT_REPLACE;
         sortedMatches[index] = newItem;
       }
-    } else {
-      if (newScore > minScore || sortedMatches.length < MAX_MATCHES_KEPT) {
-        actionToTake = ACT_APPEND
+    } else { // match not found
+      if (sortedMatches.length < MAX_MATCHES_KEPT) {
+        actionToTake = ACT_APPEND;
         sortedMatches.push(newItem);
+      } else {
+        if (newScore > minScore) {
+          actionToTake = ACT_REPLACE;
+          sortedMatches.push(newItem);
+          sortedMatches = sortedMatches.sort((a, b) => b.score - a.score).slice(0, MAX_MATCHES_KEPT);
+        }
       }
     }
   }
@@ -101,7 +107,7 @@ export const upsertScore = async context => {
           { _id: keyword },
           {
             $setOnInsert: { _id: keyword },
-            $set: { sortedMatches: sortedMatches }, // there is probably a fancier way with $[]
+            $set: { sortedMatches: sortedMatches },
           },
           { upsert: true }
         )
