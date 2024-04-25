@@ -186,17 +186,45 @@ export function determineKeywordsWithScore(curation) {
     //
     // slug
     //
-    const slugKeywords = useRake(curation.slug);
+    let slugKeywords = useRake(curation.slug);
+    switch (curation.collection) {
+      case navTargetMap.workspaces:
+        slugKeywords = _.without(slugKeywords, 'default')
+        break;
+    }
     accumulateScores(keywordScores, slugKeywords, slugStart, slugMax, slugOrderCost);
     //
     // name
     //
-    const nameKeywords = useRake(curation.name);
+    let nameKeywords = useRake(curation.name);
+    switch (curation.collection) {
+      case navTargetMap.organizations:
+        nameKeywords = _.without(nameKeywords, 'personal');
+        break;
+      case navTargetMap.workspaces:
+        nameKeywords = _.without(nameKeywords, 'workspace')
+        nameKeywords = _.without(nameKeywords, 'default')
+        break;
+      case navTargetMap.sharedModels:
+        nameKeywords = _.without(nameKeywords, 'fcstd')
+        break;
+    }
     accumulateScores(keywordScores, nameKeywords, nameStart, nameMax, nameOrderCost);
     //
     // description
     //
-    const descKeywords = useRake(curation.description);
+    let descKeywords = useRake(curation.description);
+    switch (curation.collection) {
+      case navTargetMap.workspaces:
+        descKeywords = _.without(descKeywords, 'workspace')
+        descKeywords = _.without(descKeywords, 'default')
+        break;
+      case navTargetMap.sharedModels:
+        descKeywords = _.without(descKeywords, 'system')
+        descKeywords = _.without(descKeywords, 'generated')
+        descKeywords = _.without(descKeywords, 'system generated')
+        break;
+    }
     accumulateScores(keywordScores, descKeywords, descStart, descMax, descOrderCost);
     //
     // longDescriptionMd
@@ -273,6 +301,10 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       let changeFound = false;
       let needPatch = false; // if true, then ALSO needing changes applied to keywords
+      if (context.data.curation?.resetKeywords) {
+        delete context.data.curation.resetKeywords;
+        changeFound = true;
+      }
       const originalCuration = context.beforePatchCopy.curation || {};
       const patchCuration = context.data.curation || {};
       let newCuration = {...originalCuration, ...patchCuration};

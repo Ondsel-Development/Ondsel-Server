@@ -30,6 +30,7 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
       newCuration.slug = refCuration.slug;
       newCuration.nav = refCuration.nav;
       curationsMap[item._id.toString()] = newCuration;
+      newCuration.resetKeywords = true;
       await wsService.patch(
         item._id,
         {
@@ -64,6 +65,7 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
         newCuration.nav = refCuration.nav;
       }
       curationsMap[item._id.toString()] = newCuration;
+      newCuration.resetKeywords = true;
       await smService.patch(
         item._id,
         {
@@ -96,6 +98,7 @@ export async function updateAllCurationsAndKeywordsForSlugNavCommand(app) {
       newCuration.slug = refCuration.slug;
       newCuration.nav = refCuration.nav;
       curationsMap[newCuration._id.toString()] = newCuration; // this can differ for Personal
+      newCuration.resetKeywords = true;
       await orgService.patch(
         item._id,
         {
