@@ -6,12 +6,14 @@ export const OrganizationTypeMap = {
   personal: 'Personal',
   open: 'Open',
   private: 'Private',
+  ondsel: 'Ondsel',
 }
 
 export const OrganizationType = StringEnum([
   OrganizationTypeMap.personal,
   OrganizationTypeMap.open,
-  OrganizationTypeMap.private
+  OrganizationTypeMap.private,
+  OrganizationTypeMap.ondsel,
 ])
 
 export const organizationSummarySchema = Type.Object(
