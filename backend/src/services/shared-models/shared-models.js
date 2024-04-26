@@ -28,6 +28,7 @@ import {afterCreateHandleSharedModelCuration, buildNewCurationForSharedModel} fr
 import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
+import { commitMessage } from './message.hooks.js';
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -65,6 +66,9 @@ export const sharedModels = (app) => {
   app.service(sharedModelsPath).publish('patched', (data, context) => {
     if (data.isSystemGenerated) {
       return app.channel('authenticated').send(_.omit(data, 'model'));
+    }
+    if (data.messagesParticipants) {
+      return data.messagesParticipants.map(user => app.channel(user._id.toString()).send(_.omit(data, 'model')));
     }
   })
 
@@ -144,7 +148,7 @@ export const sharedModels = (app) => {
             'isActive',
           )
         ),
-        preventChanges(false, 'thumbnailUrl'),
+        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
         iff(
           isProvider('external'),
           iff(
@@ -160,6 +164,10 @@ export const sharedModels = (app) => {
         iff(
           context => context.data.model,
           patchModel,
+        ),
+        iff(
+          context => context.data.message,
+          commitMessage,
         ),
         beforePatchHandleGenericCuration(buildNewCurationForSharedModel),
         schemaHooks.validateData(sharedModelsPatchValidator),
