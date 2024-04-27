@@ -56,8 +56,9 @@
         location="start"
       >Should {{selfPronoun}} promote this shared link</v-tooltip>
     </v-btn>
-    <v-btn v-if="isAuthenticated && sharedModel && !sharedModel.showInPublicGallery" icon flat @click="openMessages">
-      <v-icon>mdi-chat</v-icon>
+    <v-btn v-if="sharedModel && !sharedModel.showInPublicGallery" icon flat @click="openMessages">
+      <v-icon v-if="sharedModel.messages.length">mdi-chat</v-icon>
+      <v-icon v-else>mdi-chat-outline</v-icon>
       <v-tooltip
         activator="parent"
         location="start"

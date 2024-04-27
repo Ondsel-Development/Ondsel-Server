@@ -26,6 +26,7 @@
       </v-list>
       <v-card-actions>
         <v-text-field
+          v-if="isAuthenticated"
           v-model="text"
           label="Type your message..."
           @keyup.enter="postMessage"
@@ -40,7 +41,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapGetters, mapState} from "vuex";
 
 export default {
   name: "Messages",
@@ -55,6 +56,7 @@ export default {
   }),
   computed: {
     ...mapState('shared-models', ['isPatchPending']),
+    ...mapGetters('auth', ['isAuthenticated']),
   },
   methods: {
     dateFormat(number) {
