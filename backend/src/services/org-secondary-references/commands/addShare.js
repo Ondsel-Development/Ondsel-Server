@@ -3,7 +3,7 @@ import {CollectionNameMap} from "../bookmark.schema.js";
 import {buildUserSummary} from "../../users/users.distrib.js";
 import mongodb from "mongodb";
 import {CollectionNameMappingWithSummaryBuildMethods, validatePayloadBookmarkObject} from "../helpers.js";
-import {cleanedCuration} from "../../../curation.schema.js";
+import {buildNavUrl, cleanedCuration} from "../../../curation.schema.js";
 import {buildOrganizationSummary} from "../../organizations/organizations.distrib.js";
 import {BadRequest} from "@feathersjs/errors";
 
@@ -45,20 +45,44 @@ export const addShare = async context => {
     collectionSummary: docSummary,
     curation: cleanedCuration(doc.curation),
   }
+  let needPatch = false;
   if (!sharedWithMe.some(bm => bm.collectionName === bookmarkEntry.collectionName && bm.collectionSummary._id.equals(bookmarkEntry.collectionSummary._id))) {
     sharedWithMe.push(bookmarkEntry);
+    needPatch = true;
   }
 
-  await context.service.patch(
-    receivingUserRefId,
-    {
-      sharedWithMe: sharedWithMe,
+  if (needPatch) {
+    await context.service.patch(
+      receivingUserRefId,
+      {
+        sharedWithMe: sharedWithMe,
+      }
+    )
+    try {
+      // TODO: the following is awaiting merge of a different PR
+      // await context.app.service('notifications').create({
+      //   shouldSendUserNotification: true,
+      //   messageDetail: {
+      //     to: toUserId,
+      //     message: 'itemShared',
+      //     nav: sharedWithMe.curation.nav,
+      //     parameters: {link: buildNavUrl(sharedWithMe.curation.nav)},
+      //   },
+      // })
+    } catch (e) {
+      console.log(`on notification, got error: ${e.error}`);
     }
-  )
-  // TODO: add notifications at this point next with try/catch
-  context.result = {
-    success: true,
-    result: `sent share for ${JSON.stringify(doc.curation.nav)} to user ${toUserId}`
+    context.result = {
+      success: true,
+      result: `sent share for ${JSON.stringify(doc.curation.nav)} to user ${toUserId}`
+    }
+  } else {
+    // the extra "period" on result is a subtle sign the object was already shared.
+    // technically, the sender should not know of the state of the receiver's bookmarks.
+    context.result = {
+      success: true,
+      result: `sent share for ${bookmarkEntry.collectionName} to user ${toUserId}.`
+    }
   }
 
   context.data = _.omit(data, ['shouldAddShare', 'bookmark', 'toUserId']);

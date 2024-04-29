@@ -52,6 +52,41 @@ export const navRefSchema = Type.Object(
   }
 )
 
+// - users: /user/:slug                         -> slug renamed username
+// - organizations: /org/:slug                  -> slug renamed orgname
+// - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
+// - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
+// - shared-models: /share/:id                  -> id renamed sharelinkid
+// - models: /model/:id                         -> id renamed to modelid
+export function buildNavUrl(nav) {
+  let url = "/404";
+  switch (nav.target) {
+    case navTargetMap.users:
+      url = `/user/${nav.username}`;
+      break;
+    case navTargetMap.organizations:
+      url = `/org/${nav.orgname}`;
+      break;
+    case navTargetMap.workspaces:
+      if (nav.orgname) {
+        url = `/org/${nav.orgname}/workspace/${nav.wsname}`;
+      } else {
+        url = `/user/${nav.username}/workspace/${nav.wsname}`;
+      }
+      break;
+    case navTargetMap.sharedModels:
+      url = `/share/${nav.sharelinkid}`;
+      break;
+    case navTargetMap.models:
+      url = `/model/${nav.modelid}`;
+      break;
+    case navTargetMap.ondsel:
+      url = "/";
+      break;
+  }
+  return url;
+}
+
 // TODO: some day, remove 'promoted' from curationSchema. A promotions list belongs outside of the curation
 //       object; perhaps in the parent object or elsewhere.
 
