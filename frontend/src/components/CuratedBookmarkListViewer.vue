@@ -4,14 +4,20 @@
       v-for="entry in displayList"
       :key="entry.curation._id"
     >
-      <v-sheet
-        min-width="22em"
-        max-width="40em"
-        class="ma-2 align-self-stretch"
-        link
-        @click.stop="goToPromoted(entry.curation)"
-      >
-        <one-promotion-sheet :curation="entry.curation" :message="entry.description"></one-promotion-sheet>
+      <v-sheet>
+        <v-sheet
+          min-width="22em"
+          max-width="40em"
+          class="ma-2 align-self-stretch"
+          link
+          @click.stop="goToItem(entry.curation)"
+        >
+          <curated-item-sheet :curation="entry.curation" :message="entry.description" :from-user="entry.createdBy" :from-org="entry.onBehalfOf" :from-date="entry.createdAt"></curated-item-sheet>
+        </v-sheet>
+      </v-sheet>
+      <v-sheet>
+        <v-icon icon="mdi-pencil" class="mx-2"></v-icon>
+        <v-icon icon="mdi-delete" class="mx-2"></v-icon>
       </v-sheet>
     </v-sheet>
   </v-sheet>
@@ -19,13 +25,14 @@
 
 <script>
 
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 
 export default {
   name: "CuratedBookmarkListViewer",
-  components: {OnePromotionSheet},
+  components: {CuratedItemSheet},
   props: {
     displayList: Array,
+    allowEdits: {type: Boolean, default: false},
   },
   async created() {
   },
@@ -34,7 +41,7 @@ export default {
   data: () => ({
   }),
   methods: {
-    async goToPromoted(curation) {
+    async goToItem(curation) {
       const nav = curation.nav;
       switch (nav.target) {
         case 'workspaces':

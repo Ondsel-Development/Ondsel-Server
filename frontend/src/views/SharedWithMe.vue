@@ -31,7 +31,6 @@ export default {
   async mounted() {
     const org = await Organization.get(this.organizationSummary._id);
     this.orgSecondaryReferences = await OrgSecondaryReference.get(org.orgSecondaryReferencesId);
-    console.log(this.orgSecondaryReferences);
   },
   methods: {
   },
