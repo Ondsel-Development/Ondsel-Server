@@ -9,6 +9,7 @@ import {organizationPath} from "./services/organizations/organizations.shared.js
 import {workspacePath} from "./services/workspaces/workspaces.shared.js";
 import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
 import {OrganizationTypeMap} from "./services/organizations/organizations.subdocs.schema.js";
+import {modelPath} from "./services/models/models.shared.js";
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -19,6 +20,7 @@ export const navTargetMap = {
   organizations: organizationPath,
   workspaces: workspacePath,
   sharedModels: sharedModelsPath,
+  models: modelPath,
   ondsel: 'ondsel', // meta ref for lens home page, not a collection name
 }
 
@@ -27,9 +29,11 @@ export const navTargetType = StringEnum([
   navTargetMap.organizations,
   navTargetMap.workspaces,
   navTargetMap.sharedModels,
+  navTargetMap.models,
   navTargetMap.ondsel,
 ])
 
+// TODO: add curation and model support to Models in addition to SharedModels
 export const navRefSchema = Type.Object(
   // from frontend:
   // - users: /user/:slug                         -> slug renamed username
@@ -37,12 +41,14 @@ export const navRefSchema = Type.Object(
   // - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
   // - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
   // - shared-models: /share/:id                  -> id renamed sharelinkid
+  // - models: /model/:id                         -> id renamed to modelId
   {
     target: navTargetType,
     username: Type.Optional(Type.String()),
     orgname: Type.Optional(Type.String()),
     wsname: Type.Optional(Type.String()),
     sharelinkid: Type.Optional(Type.String()),
+    modelId: Type.Optional(Type.String()),
   }
 )
 

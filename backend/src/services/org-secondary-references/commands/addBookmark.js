@@ -1,35 +1,8 @@
 import _ from "lodash";
-import {BadRequest} from "@feathersjs/errors";
 import {CollectionNameMap} from "../bookmark.schema.js";
 import {buildUserSummary} from "../../users/users.distrib.js";
-import {buildWorkspaceSummary} from "../../workspaces/workspaces.distrib.js";
-import {buildModelSummary} from "../../models/models.distrib.js";
 import mongodb from "mongodb";
-import {buildSharedModelSummary} from "../../shared-models/shared-models.distrib.js";
-
-
-export const validatePayloadBookmarkObject = bookmark => {
-  if (!bookmark) {
-    throw new BadRequest('bookmark object is mandatory in payload');
-  }
-  if (!bookmark.collectionId) {
-    throw new BadRequest('"collectionId" field is mandatory in bookmark object');
-  }
-  if (!bookmark.collectionName) {
-    throw new BadRequest('"collection" field is mandatory in bookmark object');
-  }
-  if (!Object.values(CollectionNameMap).includes(bookmark.collectionName)) {
-    throw new BadRequest('"collection" name is not recognized in bookmark object');
-  }
-};
-
-
-const CollectionNameMappingWithSummaryBuildMethods = {
-  users: buildUserSummary,
-  workspaces: buildWorkspaceSummary,
-  models: buildModelSummary,
-  'shared-models': buildSharedModelSummary,
-}
+import {CollectionNameMappingWithSummaryBuildMethods, validatePayloadBookmarkObject} from "../helpers.js";
 
 
 export const addBookmark = async context => {
