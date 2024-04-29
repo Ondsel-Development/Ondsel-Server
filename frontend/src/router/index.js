@@ -38,6 +38,7 @@ import XavierMenu from "@/views/XavierMenu.vue";
 import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
 import Bookmarks from "@/views/Bookmarks.vue";
+import SharedWithMe from "@/views/SharedWithMe.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -175,6 +176,12 @@ const routes = [
     path: '/bookmarks',
     component: Bookmarks,
     name: 'Bookmarks',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/shared-with-me',
+    component: SharedWithMe,
+    name: 'SharedWithMe',
     meta: { requiresAuth: true },
   },
   {
