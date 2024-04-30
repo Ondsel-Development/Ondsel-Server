@@ -2,7 +2,7 @@ import {ObjectId} from "mongodb";
 import {buildUserSummary} from "../../users/users.distrib.js";
 import _ from "lodash";
 import {buildOrganizationSummary} from "../../organizations/organizations.distrib.js";
-import {specificDeliveryMethodMap} from "../notifications.subdocs.js";
+import {notificationMessageMap, specificDeliveryMethodMap} from "../notifications.subdocs.js";
 import {BadRequest} from "@feathersjs/errors";
 import {generateGenericBodySummaryTxt, performExternalNotificationDelivery} from "../notifications.delivery.js";
 
@@ -25,6 +25,9 @@ export const shouldSendUserNotification = async (context) => {
   //
   // build message 'ntf'
   //
+  if (!notificationMessageMap.hasOwnProperty(ntf.message)) {
+    throw new BadRequest(`message template ${ntf.message} does not exist.`);
+  }
   ntf.read = false;
   ntf._id = new ObjectId();
   ntf.createdBy = buildUserSummary(context.params.user);
