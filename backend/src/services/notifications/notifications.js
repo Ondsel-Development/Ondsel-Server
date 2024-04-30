@@ -24,6 +24,7 @@ import {copyBeforePatch} from "../../helpers.js";
 import {shouldMarkReadOrUnread} from "./commands/should-mark-read-or-unread.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 import {shouldDelete} from "./commands/should-delete.js";
+import {validateNavObject} from "../../curation.schema.js";
 
 export * from './notifications.class.js'
 export * from './notifications.schema.js'
@@ -71,7 +72,10 @@ export const notifications = (app) => {
         iff(isProvider('external'), preventChanges(false, 'userId', 'notificationsReceived')),
         iff(
           context => context.data.shouldSendUserNotification,
-          shouldSendUserNotification,
+          [
+            validateNavObject('messageDetail.nav', false),
+            shouldSendUserNotification,
+          ]
         ),
         iff(
           context => context.data.shouldMarkReadOrUnread,

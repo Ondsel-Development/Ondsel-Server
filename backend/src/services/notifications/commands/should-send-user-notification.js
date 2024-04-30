@@ -30,6 +30,7 @@ export const shouldSendUserNotification = async (context) => {
   }
   ntf.read = false;
   ntf._id = new ObjectId();
+  ntf.to = new ObjectId(ntf.to);
   ntf.createdBy = buildUserSummary(context.params.user);
   const currentOrgId = context.params.user.currentOrganizationId;
   const currentUserOrg = context.params.user.organizations.find((org) => _.isEqual(org._id, currentOrgId));

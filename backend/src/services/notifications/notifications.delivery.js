@@ -38,7 +38,8 @@ export async function performExternalNotificationDelivery(targetUserId, ntf, con
   const orgId = user.personalOrganization._id;
   const settings = user.organizations.find((userOrg) => _.isEqual(userOrg._id, orgId));
   // we only do email right now
-  if (settings.notificationByEmailCadence === NotificationCadenceTypeMap.live) {
+  const emailCadence = settings.notificationByEmailCadence || NotificationCadenceTypeMap.live;
+  if (emailCadence) {
     const result = await deliverViaMailchimpSMTP(user, ntf, context);
     details.push(result);
   }
