@@ -68,6 +68,7 @@ export const notifications = (app) => {
       patch: [
         copyBeforePatch,
         isProperUser,
+        iff(isProvider('external'), preventChanges(false, 'userId', 'notificationsReceived')),
         iff(
           context => context.data.shouldSendUserNotification,
           shouldSendUserNotification,
