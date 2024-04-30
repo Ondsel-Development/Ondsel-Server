@@ -16,8 +16,10 @@
         </v-sheet>
       </v-sheet>
       <v-sheet>
-        <v-icon icon="mdi-pencil" class="mx-2"></v-icon>
-        <v-icon icon="mdi-delete" class="mx-2"></v-icon>
+        <p class="text-right">
+          <v-icon icon="mdi-pencil" class="mx-2"></v-icon>
+          <v-icon icon="mdi-delete" class="mx-2"></v-icon>
+        </p>
       </v-sheet>
     </v-sheet>
   </v-sheet>
