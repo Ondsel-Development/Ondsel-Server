@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { BadRequest } from '@feathersjs/errors';
 import {buildOrganizationSummary} from "./organizations.distrib.js";
-import { getConstraint } from "../users/users.subdocs.schema.js";
+import {getConstraint, NotificationCadenceTypeMap} from "../users/users.subdocs.schema.js";
 import {OrganizationType, OrganizationTypeMap} from "./organizations.subdocs.schema.js";
 
 
@@ -72,7 +72,10 @@ export const assignOrganizationIdToUser = async context => {
   const userService = context.app.service('users');
   const user = await userService.get(context.params.user._id);
   const userOrganizations = user.organizations || [];
-  userOrganizations.push(buildOrganizationSummary(context.result));
+  userOrganizations.push({
+    ...buildOrganizationSummary(context.result),
+    notificationByEmailCadence: NotificationCadenceTypeMap.live,
+  });
 
   await context.app.service('users').patch(context.result.createdBy, { organizations: userOrganizations });
   return context;
