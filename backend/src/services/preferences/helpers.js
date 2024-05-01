@@ -7,6 +7,7 @@ import {lookupUserConfigKeys, lookupSystemConfigKeys, typesToSkip} from './prefe
 import { getLookupData } from './xmlUtils.js';
 import { buildOrganizationSummary } from '../organizations/organizations.distrib.js';
 import { buildUserSummary } from '../users/users.distrib.js';
+import { ondselPrefId } from './preferences.schema.js';
 
 
 export const validateFileVersionPayload = context => {
@@ -109,6 +110,9 @@ export const isUserHavePatchAccess = async context => {
 
 
 export const canUserHaveGetAccess = async context => {
+  if (context.id === ondselPrefId) {
+    return context;
+  }
   const preference = await context.service.get(context.id);
   const organizationService = context.app.service('organizations');
   const organization = await organizationService.get(preference.organization._id);

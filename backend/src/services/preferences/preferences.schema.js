@@ -8,6 +8,8 @@ import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { preferenceVersionSchema } from './preferences.subdocs.js';
 
 
+export const ondselPrefId = '000000000000000000000000';
+
 // Main data model schema
 export const preferencesSchema = Type.Object(
   {

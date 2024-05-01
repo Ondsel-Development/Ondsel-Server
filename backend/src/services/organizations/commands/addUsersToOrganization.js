@@ -24,10 +24,10 @@ export const addUsersToOrganization = async (context) => {
         ...userSum,
         isAdmin: false
       });
-      if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
+      if (!userOrganizations.some(org => org._id.equals(organization._id))) {
         userOrganizations.push({
           ...buildOrganizationSummary(organization),
-          notificationByEmailCadence: NotificationCadenceTypeMap.live,
+          notificationByEmailCadence: NotificationCadenceTypeMap.live
         });
         await userService.patch(user._id, { organizations: userOrganizations});
         await addUserToDefaultingGroups(context, organization, user);
