@@ -33,6 +33,7 @@ import { addBookmark } from './commands/addBookmark.js';
 import { removeBookmark } from './commands/removeBookmark.js';
 import {addShare} from "./commands/addShare.js";
 import {removeShare} from "./commands/removeShare.js";
+import {editShare} from "./commands/editShare.js";
 
 export * from './org-secondary-references.class.js'
 export * from './org-secondary-references.schema.js'
@@ -99,6 +100,10 @@ export const orgSecondaryReferences = (app) => {
         iff(
           context => context.data.shouldAddShare,
           addShare,
+        ),
+        iff(
+          context => context.data.shouldEditShare,
+          editShare,
         ),
         iff(
           context => context.data.shouldRemoveShare,

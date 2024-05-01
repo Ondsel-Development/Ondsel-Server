@@ -13,7 +13,7 @@ export const canUserPatchOrgSecondaryReferences = async context => {
   if (isUserOwnerOrAdminOfOrg(organization, context.params.user)) {
     return context;
   }
-  throw new BadRequest('Only admins of organization allow to perform this action');
+  throw new BadRequest(`Only admins of organization ${context.id} allowed to perform this action`);
 }
 
 

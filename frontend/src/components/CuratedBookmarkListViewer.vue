@@ -10,40 +10,79 @@
           max-width="40em"
           class="ma-2 align-self-stretch"
           link
-          @click.stop="goToItem(entry.curation)"
+          @click.stop="goToItem(entry)"
         >
           <curated-item-sheet :curation="entry.curation" :message="entry.description" :from-user="entry.createdBy" :from-org="entry.onBehalfOf" :from-date="entry.createdAt"></curated-item-sheet>
         </v-sheet>
       </v-sheet>
-      <v-sheet>
-        <p class="text-right">
-          <v-icon icon="mdi-pencil" class="mx-2"></v-icon>
-          <v-icon icon="mdi-delete" class="mx-2"></v-icon>
-        </p>
+      <v-sheet class="d-flex justify-space-between">
+        <div>
+          <v-btn class="mx-4" v-if="entry.read" flat @click.stop="goToItem(entry.curation)">
+            <v-icon icon="mdi-email-open"></v-icon>
+            <v-tooltip activator="parent">already seen</v-tooltip>
+          </v-btn>
+          <v-btn class="mx-4" v-else flat @click.stop="goToItem(entry.curation)">
+            <v-icon icon="mdi-email"></v-icon>
+            <v-tooltip activator="parent">not yet seen</v-tooltip>
+          </v-btn>
+        </div>
+        <div>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="startEditDescription(entry)">
+                <v-list-item-title><v-icon icon="mdi-pencil" class="mx-2"></v-icon> Edit Description</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="markReadState(entry, false)" v-if="entry.read">
+                <v-list-item-title><v-icon icon="mdi-email" class="mx-2"></v-icon> Mark As Unread</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="markReadState(entry, true)" v-if="!entry.read">
+                <v-list-item-title><v-icon icon="mdi-email-open" class="mx-2"></v-icon> Mark As Read</v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Remove</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
       </v-sheet>
     </v-sheet>
   </v-sheet>
+  <edit-description-dialog ref="editDescription" @save-description="saveDescription"></edit-description-dialog>
 </template>
 
 <script>
 
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
+import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
+import {models} from "@feathersjs/vuex";
+import {mapGetters} from "vuex";
+const { Organization, OrgSecondaryReference } = models.api;
 
 export default {
   name: "CuratedBookmarkListViewer",
-  components: {CuratedItemSheet},
+  components: {EditDescriptionDialog, CuratedItemSheet},
   props: {
     displayList: Array,
     allowEdits: {type: Boolean, default: false},
   },
   async created() {
+    const org = await Organization.get(this.organizationSummary._id);
+    this.orgSecondaryReferencesId = org.orgSecondaryReferencesId;
   },
   computed: {
+    ...mapGetters('app', { organizationSummary: 'currentOrganization' }),
   },
   data: () => ({
+    currentEntry: {},
+    orgSecondaryReferencesId: null,
   }),
   methods: {
-    async goToItem(curation) {
+    async goToItem(entry) {
+      await this.markReadState(entry, true);
+      const curation = entry.curation;
       const nav = curation.nav;
       switch (nav.target) {
         case 'workspaces':
@@ -70,6 +109,43 @@ export default {
           break;
       }
     },
+    async saveDescription() {
+      const newDescription = this.$refs.editDescription.$data.newDescription;
+      await OrgSecondaryReference.patch(
+        this.orgSecondaryReferencesId,
+        {
+          "shouldEditShare": true,
+          "bookmark": {
+            "collectionName": this.currentEntry.collectionName,
+            "collectionId": this.currentEntry.collectionSummary._id,
+            description: newDescription,
+          }
+        }
+      )
+      this.$refs.editDescription.$data.dialog = false;
+    },
+    async startEditDescription(entry) {
+      this.currentEntry = entry;
+      this.$refs.editDescription.$data.newDescription = entry.description;
+      this.$refs.editDescription.$data.dialog = true;
+    },
+    async markReadState(entry, desiredState) {
+      if (entry.read !== desiredState) {
+        await OrgSecondaryReference.patch(
+          this.orgSecondaryReferencesId,
+          {
+            "shouldEditShare": true,
+            "bookmark": {
+              "collectionName": entry.collectionName,
+              "collectionId": entry.collectionSummary._id,
+              read: desiredState,
+            }
+          }
+        )
+      } else {
+        console.log(`minor err: already in ${desiredState} state!`);
+      }
+    }
   },
 }
 </script>

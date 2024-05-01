@@ -24,6 +24,7 @@ export const bookmarkSchema = Type.Object(
     createdBy: userSummarySchema,
     onBehalfOf: Type.Optional(organizationSummarySchema), // used by SharedWithMe
     description: Type.String(),
+    read: Type.Optional(Type.Boolean()),
     collectionName: StringEnum(Object.values(CollectionNameMap)),
     collectionSummary: Type.Union([
       modelSummarySchema,
