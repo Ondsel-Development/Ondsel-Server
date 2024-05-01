@@ -9,6 +9,9 @@ import {organizationPath} from "./services/organizations/organizations.shared.js
 import {workspacePath} from "./services/workspaces/workspaces.shared.js";
 import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
 import {OrganizationTypeMap} from "./services/organizations/organizations.subdocs.schema.js";
+import {BadRequest} from "@feathersjs/errors";
+import err from "mocha/lib/pending.js";
+import {getProperty} from "./helpers.js";
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -45,6 +48,55 @@ export const navRefSchema = Type.Object(
     sharelinkid: Type.Optional(Type.String()),
   }
 )
+
+export const validateNavObject = (navField, isRequired) => {
+  return async (context) => {
+    // uses context.data for validation
+    // use dotted notation for the fieldName, so "nav" or "something.curation.nav"
+    const navValue = getProperty(navField, context.data)
+    let errMsgs = [];
+    if (navValue === undefined && !isRequired) { // only 'undefined' will make Type.Optional() happy; null does not
+      return context;
+    }
+    if (!navValue) {
+      errMsgs.push(`nav value ${navValue} missing, null, or empty`);
+    } else {
+      switch (navValue.target) {
+        case navTargetMap.users:
+          if (!navValue.username) {
+            errMsgs.push("for a user the username must be supplied");
+          }
+          break;
+        case navTargetMap.organizations:
+          if (!navValue.orgname) {
+            errMsgs.push("for an organization the orgname must be supplied");
+          }
+          break;
+        case navTargetMap.workspaces:
+          if (!navValue.wsname) {
+            errMsgs.push("for a workspace the wsname must be supplied");
+          }
+          if ((!navValue.username) && (!navValue.orgname)) {
+            errMsgs.push("for a workspace the username OR orgname must be supplied");
+          }
+          break;
+        case navTargetMap.sharedModels:
+          if (!navValue.sharelinkid) {
+            errMsgs.push("for a shared-model the sharelinkid must be supplied");
+          }
+          break;
+        default:
+          errMsgs.push(`target "${navValue.target}" is not a legit value`);
+          break;
+      }
+    }
+    if (errMsgs.length > 0) {
+      const finalErrorMessage = 'problems with nav object found: ' + errMsgs.join(', ');
+      throw new BadRequest(finalErrorMessage);
+    }
+    return context;
+  }
+}
 
 // TODO: some day, remove 'promoted' from curationSchema. A promotions list belongs outside of the curation
 //       object; perhaps in the parent object or elsewhere.

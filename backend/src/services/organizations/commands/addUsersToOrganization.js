@@ -3,6 +3,7 @@ import { buildOrganizationSummary } from '../organizations.distrib.js';
 import { buildUserSummary } from '../../users/users.distrib.js';
 import { BadRequest } from '@feathersjs/errors';
 import { OrganizationTypeMap } from '../organizations.subdocs.schema.js';
+import {NotificationCadenceTypeMap} from "../../users/users.subdocs.schema.js";
 
 export const addUsersToOrganization = async (context) => {
   const { data } = context;
@@ -24,7 +25,10 @@ export const addUsersToOrganization = async (context) => {
         isAdmin: false
       });
       if (!userOrganizations.some(org => {org._id.equals(organization._id)})) {
-        userOrganizations.push(buildOrganizationSummary(organization));
+        userOrganizations.push({
+          ...buildOrganizationSummary(organization),
+          notificationByEmailCadence: NotificationCadenceTypeMap.live,
+        });
         await userService.patch(user._id, { organizations: userOrganizations});
         await addUserToDefaultingGroups(context, organization, user);
       }

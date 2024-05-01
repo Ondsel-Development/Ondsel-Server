@@ -9,6 +9,7 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {buildOrganizationSummary, upsertUserSummaryToOrganization} from "../organizations/organizations.distrib.js";
 import {upsertUserSummaryToGroup} from "../groups/groups.distrib.js";
 import {updateUserSummaryToWorkspace} from "../workspaces/workspaces.distrib.js";
+import {NotificationCadenceTypeMap} from "./users.subdocs.schema.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection; never include summaries in a summary
@@ -115,14 +116,17 @@ export async function distributeUserSummaries(app, user){
 
 export async function upsertOrganizationSummaryToUser(context, userId, orgSummary) {
   try {
+    let cleanSum = {...orgSummary};
     const userService = context.app.service('users');
     const user = await userService.get(userId);
     let orgList = user.organizations || [];
     const index = orgList.findIndex((o) => o._id.toString() === orgSummary._id.toString());
     if (index === -1) {
-      orgList.push(orgSummary);
+      cleanSum.notificationByEmailCadence = NotificationCadenceTypeMap.live;
+      orgList.push(cleanSum);
     } else {
-      orgList[index] = orgSummary;
+      cleanSum.notificationByEmailCadence = orgList[index].notificationByEmailCadence || NotificationCadenceTypeMap.live;
+      orgList[index] = cleanSum;
     }
     await userService.patch(
       userId,

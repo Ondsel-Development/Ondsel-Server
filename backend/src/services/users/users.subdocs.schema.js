@@ -5,6 +5,7 @@ import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import {CurrencyType} from "../../currencies.js";
 import _ from "lodash";
 import {agreementCategoryType} from "../agreements/agreements.subdocs.js";
+import {organizationSummarySchema} from "../organizations/organizations.subdocs.schema.js";
 
 export const SubscriptionTypeMap = {
   unverified: 'Unverified',
@@ -247,4 +248,27 @@ export const agreementsAcceptedSchema = Type.Object(
     currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
     history: Type.Array(specificAgreementCompletionType),
   }
+)
+
+// used by optionNotificationByEmail
+export const NotificationCadenceTypeMap = {
+  never: "Never",
+  live: "Immediately",
+  // In the future, "Daily Summary" and other options may appear.
+}
+
+export const NotificationCadenceType = StringEnum(
+  [
+    NotificationCadenceTypeMap.never,
+    NotificationCadenceTypeMap.live,
+  ]
+)
+
+export const UserOrgSchema = Type.Intersect(
+  [
+    organizationSummarySchema,
+    Type.Object({
+      notificationByEmailCadence: Type.Optional(NotificationCadenceType),
+    }),
+  ]
 )

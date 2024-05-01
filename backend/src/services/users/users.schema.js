@@ -3,22 +3,21 @@ import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema, StringEnum } from '@feathersjs/typebox'
 import { passwordHash } from '@feathersjs/authentication-local'
-import { BadRequest } from '@feathersjs/errors'
 import { dataValidator, queryValidator } from '../../validators.js'
 
-import { organizationSummarySchema } from '../organizations/organizations.subdocs.schema.js';
+import {organizationSummarySchema} from '../organizations/organizations.subdocs.schema.js';
 import {
-  agreementsAcceptedSchema, getConstraint,
+  agreementsAcceptedSchema, getConstraint, NotificationCadenceType, NotificationCadenceTypeMap,
   SubscriptionConstraintsType,
   subscriptionDetailSchema,
   SubscriptionStateMap,
   SubscriptionType,
   SubscriptionTypeMap,
-  userAccountingSchema
+  userAccountingSchema, UserOrgSchema
 } from "./users.subdocs.schema.js";
-import {ObjectId} from "mongodb";
 import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
+import {ObjectId} from "mongodb";
 
 // Main data model schema
 export const userSchema = Type.Object(
@@ -32,7 +31,8 @@ export const userSchema = Type.Object(
     defaultWorkspaceId: ObjectIdSchema(),
     personalOrganization: organizationSummarySchema,
     currentOrganizationId: ObjectIdSchema(),
-    organizations: Type.Array(organizationSummarySchema),
+    notificationsId: ObjectIdSchema(),
+    organizations: Type.Array(UserOrgSchema),
     password: Type.Optional(Type.String()),
     name: Type.String(),
     firstName: Type.String(), // deprecated
