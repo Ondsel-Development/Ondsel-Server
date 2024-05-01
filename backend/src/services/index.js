@@ -36,6 +36,7 @@ import { preferences } from './preferences/preferences.js'
 
 import { orgSecondaryReferences } from './org-secondary-references/org-secondary-references.js'
 
+import { notifications } from './notifications/notifications.js'
 
 export const services = (app) => {
   app.configure(orgSecondaryReferences)
@@ -75,6 +76,8 @@ export const services = (app) => {
   app.configure(upload)
 
   app.configure(user)
+
+  app.configure(notifications)
 
   // All services will be registered here
 }

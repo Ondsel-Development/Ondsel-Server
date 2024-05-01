@@ -32,6 +32,9 @@ import {
 } from "../../hooks/handle-public-info-query.js";
 import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
 import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
+import {changeEmailNotification} from "./commands/changeEmailNotification.js";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {notificationsEntrySchema} from "../notifications/notifications.subdocs.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -177,6 +180,10 @@ export const user = (app) => {
             "verifyShortToken",
             "verifyToken",
           ),
+          iff(
+            context => context.data.shouldChangeEmailNotification,
+            changeEmailNotification
+          ),
           specialUserOrgCurationHandler,
           schemaHooks.validateData(userPatchValidator),
           uniqueUserPatchValidator,
@@ -191,6 +198,7 @@ export const user = (app) => {
         sendVerify(),
         removeVerification(),
         createDefaultOrganization,
+        createNotificationsDoc,
         createSampleModels,
         sendCreateAccountNotificationToSlack,
       ],
@@ -304,7 +312,31 @@ const createDefaultOrganization = async context => {
   )
   await context.service.patch(
     context.result._id,
-    { defaultWorkspaceId: workspace._id, personalOrganization: buildOrganizationSummary(organization) }
+    {
+      // Note: the earlier organization CREATE automatically populated the `organizations` field of User.
+      // for details, visit assignOrganizationIdToUser in file:
+      //     backend/src/services/organizations/helpers.js
+      defaultWorkspaceId: workspace._id,
+      personalOrganization: buildOrganizationSummary(organization),
+      currentOrganizationId: organization._id,
+    }
+  );
+  return context;
+}
+
+const createNotificationsDoc = async context => {
+  const ntfService = context.app.service('notifications');
+  const ntfDoc = await ntfService.create(
+    {
+      userId: context.result._id,
+      notificationsReceived: [],
+    }
+  );
+  await context.service.patch(
+    context.result._id,
+    {
+      notificationsId: ntfDoc._id,
+    }
   );
   return context;
 }
