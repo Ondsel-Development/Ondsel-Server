@@ -9,22 +9,14 @@
           min-width="22em"
           max-width="40em"
           class="ma-2 align-self-stretch"
-          link
           @click.stop="goToItem(entry)"
+          :border="entry.read ? 'background xl' : 'info xl'"
         >
           <curated-item-sheet :curation="entry.curation" :message="entry.description" :from-user="entry.createdBy" :from-org="entry.onBehalfOf" :from-date="entry.createdAt"></curated-item-sheet>
         </v-sheet>
       </v-sheet>
       <v-sheet class="d-flex justify-space-between">
         <div>
-          <v-btn class="mx-4" v-if="entry.read" flat @click.stop="goToItem(entry)">
-            <v-icon icon="mdi-email-open"></v-icon>
-            <v-tooltip activator="parent">already seen</v-tooltip>
-          </v-btn>
-          <v-btn class="mx-4" v-else flat @click.stop="goToItem(entry)">
-            <v-icon icon="mdi-email"></v-icon>
-            <v-tooltip activator="parent">not yet seen</v-tooltip>
-          </v-btn>
         </div>
         <div>
           <v-menu>
