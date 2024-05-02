@@ -36,10 +36,10 @@
                 <v-list-item-title><v-icon icon="mdi-pencil" class="mx-2"></v-icon> Edit Description</v-list-item-title>
               </v-list-item>
               <v-list-item @click="markReadState(entry, false)" v-if="entry.read">
-                <v-list-item-title><v-icon icon="mdi-email" class="mx-2"></v-icon> Mark As Unread</v-list-item-title>
+                <v-list-item-title><v-icon icon="mdi-eye-minus" class="mx-2"></v-icon> Mark As Unseen</v-list-item-title>
               </v-list-item>
               <v-list-item @click="markReadState(entry, true)" v-if="!entry.read">
-                <v-list-item-title><v-icon icon="mdi-email-open" class="mx-2"></v-icon> Mark As Read</v-list-item-title>
+                <v-list-item-title><v-icon icon="mdi-eye-check" class="mx-2"></v-icon> Mark As Seen</v-list-item-title>
               </v-list-item>
               <v-list-item @click="remove(entry)">
                 <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Remove</v-list-item-title>
