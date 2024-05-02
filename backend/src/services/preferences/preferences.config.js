@@ -226,14 +226,15 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Mod/Sketcher/View/ExternalWidth",
   "/Root/BaseApp/Preferences/Mod/Sketcher/View/InternalPattern",
   "/Root/BaseApp/Preferences/Mod/Sketcher/View/InternalWidth",
-  "/Root/BaseApp/Preferences/Mod/Sketcher/Spreadsheet/AliasedCellBackgroundColor",
-  "/Root/BaseApp/Preferences/Mod/Sketcher/Spreadsheet/NegativeNumberColor",
-  "/Root/BaseApp/Preferences/Mod/Sketcher/Spreadsheet/PositiveNumberColor",
-  "/Root/BaseApp/Preferences/Mod/Sketcher/Spreadsheet/TextColor",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedMessagesWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedSolverAdvancedWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedConstraintsWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedElementsWidget",
+
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/AliasedCellBackgroundColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/NegativeNumberColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/PositiveNumberColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/TextColor",
 
   // Path WB Prefs
   "/Root/BaseApp/Preferences/Mod/Path/DefaultBBoxNormalColor",
