@@ -109,6 +109,9 @@
       <v-list-item prepend-icon="mdi-view-dashboard" title="Public Models" :to="{ name: 'PublicModels'}"></v-list-item>
     </v-list>
     <v-list density="compact" nav v-if="user">
+      <v-list-item prepend-icon="mdi-bell" title="Notifications" :to="{ name: 'MyNotifications'}"></v-list-item>
+    </v-list>
+    <v-list density="compact" nav v-if="user">
       <v-list-item prepend-icon="mdi-inbox" title="SharedWithMe" :to="{ name: 'SharedWithMe'}"></v-list-item>
     </v-list>
     <v-list density="compact" nav v-if="user">

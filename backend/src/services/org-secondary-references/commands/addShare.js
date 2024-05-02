@@ -65,15 +65,22 @@ export const addShare = async context => {
       }
     )
     try {
-      await context.app.service('notifications').create({
-        shouldSendUserNotification: true,
-        messageDetail: {
-          to: toUserId,
-          message: 'itemShared',
-          nav: sharedWithMe.curation.nav,
-          parameters: {link: buildNavUrl(sharedWithMe.curation.nav)},
+      const link = buildNavUrl(bookmarkEntry.curation.nav);
+      const result = await context.app.service('notifications').patch(
+        context.params.user.notificationsId,
+        {
+          shouldSendUserNotification: true,
+          messageDetail: {
+            to: toUserId,
+            message: 'itemShared',
+            nav: bookmarkEntry.curation.nav,
+            parameters: {link: link},
+          },
         },
-      })
+        {
+          authentication: context.params.authentication,
+        }
+      )
     } catch (e) {
       console.log(`on notification, got error: ${e.error}`);
     }
@@ -86,7 +93,7 @@ export const addShare = async context => {
     // technically, the sender should not know of the state of the receiver's bookmarks.
     context.result = {
       success: true,
-      result: `sent share for ${bookmarkEntry.collectionName} to user ${toUserId}.`
+      result: `sent share for ${JSON.stringify(curation.nav)} to user ${toUserId}.`
     }
   }
 
