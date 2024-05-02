@@ -34,6 +34,12 @@ export const addShare = async context => {
   if (userOrgSummary) {
     userOrgSummary = buildOrganizationSummary(userOrgSummary);
   }
+  let curation;
+  if (bookmark.collectionName === CollectionNameMap.users) {
+    curation = receivingOrg.curation;
+  } else {
+    curation = doc.curation;
+  }
 
   const bookmarkEntry = {
     _id: (new mongodb.ObjectId()).toString(),
@@ -43,7 +49,7 @@ export const addShare = async context => {
     description: bookmark.description || '',
     collectionName: bookmark.collectionName,
     collectionSummary: docSummary,
-    curation: cleanedCuration(doc.curation),
+    curation: cleanedCuration(curation),
   }
   let needPatch = false;
   if (!sharedWithMe.some(bm => bm.collectionName === bookmarkEntry.collectionName && bm.collectionSummary._id.equals(bookmarkEntry.collectionSummary._id))) {
@@ -59,22 +65,21 @@ export const addShare = async context => {
       }
     )
     try {
-      // TODO: the following is awaiting merge of a different PR
-      // await context.app.service('notifications').create({
-      //   shouldSendUserNotification: true,
-      //   messageDetail: {
-      //     to: toUserId,
-      //     message: 'itemShared',
-      //     nav: sharedWithMe.curation.nav,
-      //     parameters: {link: buildNavUrl(sharedWithMe.curation.nav)},
-      //   },
-      // })
+      await context.app.service('notifications').create({
+        shouldSendUserNotification: true,
+        messageDetail: {
+          to: toUserId,
+          message: 'itemShared',
+          nav: sharedWithMe.curation.nav,
+          parameters: {link: buildNavUrl(sharedWithMe.curation.nav)},
+        },
+      })
     } catch (e) {
       console.log(`on notification, got error: ${e.error}`);
     }
     context.result = {
       success: true,
-      result: `sent share for ${JSON.stringify(doc.curation.nav)} to user ${toUserId}`
+      result: `sent share for ${JSON.stringify(curation.nav)} to user ${toUserId}`
     }
   } else {
     // the extra "period" on result is a subtle sign the object was already shared.

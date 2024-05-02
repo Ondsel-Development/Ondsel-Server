@@ -17,11 +17,11 @@
       </v-sheet>
       <v-sheet class="d-flex justify-space-between">
         <div>
-          <v-btn class="mx-4" v-if="entry.read" flat @click.stop="goToItem(entry.curation)">
+          <v-btn class="mx-4" v-if="entry.read" flat @click.stop="goToItem(entry)">
             <v-icon icon="mdi-email-open"></v-icon>
             <v-tooltip activator="parent">already seen</v-tooltip>
           </v-btn>
-          <v-btn class="mx-4" v-else flat @click.stop="goToItem(entry.curation)">
+          <v-btn class="mx-4" v-else flat @click.stop="goToItem(entry)">
             <v-icon icon="mdi-email"></v-icon>
             <v-tooltip activator="parent">not yet seen</v-tooltip>
           </v-btn>
@@ -41,7 +41,7 @@
               <v-list-item @click="markReadState(entry, true)" v-if="!entry.read">
                 <v-list-item-title><v-icon icon="mdi-email-open" class="mx-2"></v-icon> Mark As Read</v-list-item-title>
               </v-list-item>
-              <v-list-item>
+              <v-list-item @click="remove(entry)">
                 <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Remove</v-list-item-title>
               </v-list-item>
             </v-list>
@@ -49,6 +49,9 @@
         </div>
       </v-sheet>
     </v-sheet>
+  </v-sheet>
+  <v-sheet v-if="displayList.length === 0">
+    <v-card class="ma8"><v-card-text><em>No Items Shared</em></v-card-text></v-card>
   </v-sheet>
   <edit-description-dialog ref="editDescription" @save-description="saveDescription"></edit-description-dialog>
 </template>
@@ -128,6 +131,18 @@ export default {
       this.currentEntry = entry;
       this.$refs.editDescription.$data.newDescription = entry.description;
       this.$refs.editDescription.$data.dialog = true;
+    },
+    async remove(entry) {
+      await OrgSecondaryReference.patch(
+        this.orgSecondaryReferencesId,
+        {
+          "shouldRemoveShare": true,
+          "bookmark": {
+            "collectionName": entry.collectionName,
+            "collectionId": entry.collectionSummary._id,
+          }
+        }
+      )
     },
     async markReadState(entry, desiredState) {
       if (entry.read !== desiredState) {
