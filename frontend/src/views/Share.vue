@@ -180,6 +180,7 @@
   <share-with-user-dialog
     :curation="sharedModel.curation"
     ref="shareWithUserDialog"
+    @save-share-with-user="saveShareWithUser"
   ></share-with-user-dialog>
   <v-navigation-drawer
     v-model="isDrawerOpen"
@@ -212,7 +213,7 @@ import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import Messages from "@/components/Messages.vue";
 import ShareWithUserDialog from "@/components/ShareWithUserDialog.vue";
 
-const { SharedModel, Model } = models.api;
+const { SharedModel, Model, OrgSecondaryReference } = models.api;
 
 export default {
   name: 'ShareView',
@@ -372,6 +373,26 @@ export default {
     },
     async openShareWithUserDialog() {
       this.$refs.shareWithUserDialog.$data.dialog = true;
+    },
+    async saveShareWithUser() {
+      this.$refs.shareWithUserDialog.$data.isPatchPending = true;
+      const userIdSelected = this.$refs.shareWithUserDialog.$data.userIdSelected;
+      const message = this.$refs.shareWithUserDialog.$data.message;
+      const orgSecondaryReferencesId = this.$refs.shareWithUserDialog.$data.orgSecondaryReferencesId;
+      await OrgSecondaryReference.patch(
+        orgSecondaryReferencesId,
+        {
+          shouldAddShare: true,
+          bookmark: {
+            collectionName: 'shared-models',
+            collectionId: this.sharedModel._id,
+            description: message,
+          },
+          toUserId: userIdSelected,
+        }
+      )
+      this.$refs.shareWithUserDialog.$data.isPatchPending = false;
+      this.$refs.shareWithUserDialog.$data.dialog = false;
     },
   },
   watch: {

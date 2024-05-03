@@ -23,7 +23,7 @@
             <v-divider></v-divider>
             <v-sheet class="ma-1 pl-2 overflow-y-auto" border height="20em">
               <v-radio-group
-                v-model="userSelected"
+                v-model="userIdSelected"
                 v-for="person in searchResult"
                 :key="person.username"
               >
@@ -36,6 +36,7 @@
             </v-sheet>
           </v-card-text>
         </v-card>
+        <v-text-field label="optional message" v-model="message" hint="provide details or context for the receiving user"></v-text-field>
       </v-form>
       <v-snackbar
         :timeout="2000"
@@ -57,42 +58,43 @@ import {mapActions, mapGetters, mapState} from "vuex";
 import {translateCollection} from "@/curationHelpers";
 import {models} from "@feathersjs/vuex";
 
-// const { Organization, OrgSecondaryReference } = models.api;
-const { Keywords } = models.api;
+const { Keywords, Organization } = models.api;
 
 export default {
   name: 'ShareWithUserDialog',
   props: {
     curation: Object,
   },
+  emits: ['saveShareWithUser'],
   async created() {
     await this.reCalc();
   },
   data: () => ({
     dialog: false,
-    message: '',
-    userId: null,
     snackerMsg: '',
     showSnacker: false,
     isPatchPending: false,
     longCollectionDesc: 'tbd',
+    orgSecondaryReferencesId: null,
     searchResult: [],
     searchString: '',
-    userSelected: null,
+    userIdSelected: null,
+    message: '',
   }),
   computed: {
-    ...mapState('auth', ['user']),
-    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
-    disableShare: vm => vm.userSelected === null || vm.isPatchPending,
+    ...mapState('auth', { loggedInUser: 'payload' }),
+    disableShare: vm => vm.userIdSelected === null || vm.isPatchPending,
   },
   methods: {
-    ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
+    // ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
     async reCalc() {
+      const user = this.loggedInUser.user;
+      const org = await Organization.get(user.personalOrganization._id);
+      this.orgSecondaryReferencesId = org.orgSecondaryReferencesId;
       this.longCollectionDesc = translateCollection(this.curation.collection);
     },
     async sendShare() {
-      // TODO
-      console.log(this.userSelected);
+      this.$emit('saveShareWithUser');
     },
     async doSearch() {
       let users = [];

@@ -25,11 +25,11 @@ export default {
     };
   },
   computed: {
-    ...mapState('org-secondary-references', { isFindPendingOrgSecRefs: 'isFindPending' }),
-    ...mapGetters('app', { organizationSummary: 'currentOrganization' }),
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
   async mounted() {
-    const org = await Organization.get(this.organizationSummary._id);
+    const user = this.loggedInUser.user;
+    const org = await Organization.get(user.personalOrganization._id);
     this.orgSecondaryReferences = await OrgSecondaryReference.get(org.orgSecondaryReferencesId);
   },
   methods: {
