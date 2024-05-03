@@ -42,6 +42,13 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="openShareWithUserDialog">
+      <v-icon>mdi-account-network</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Share With User</v-tooltip>
+    </v-btn>
     <v-btn v-if="isAuthenticated" icon flat @click="openManageBookmarkDialog">
       <v-icon>mdi-bookmark</v-icon>
       <v-tooltip
@@ -170,6 +177,10 @@
     :shared-model-id="sharedModel._id"
     ref="shareLinkDialog"
   />
+  <share-with-user-dialog
+    :curation="sharedModel.curation"
+    ref="shareWithUserDialog"
+  ></share-with-user-dialog>
   <v-navigation-drawer
     v-model="isDrawerOpen"
     location="right"
@@ -199,12 +210,14 @@ import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import ObjectsListView from '@/components/ObjectsListView.vue';
 import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import Messages from "@/components/Messages.vue";
+import ShareWithUserDialog from "@/components/ShareWithUserDialog.vue";
 
 const { SharedModel, Model } = models.api;
 
 export default {
   name: 'ShareView',
   components: {
+    ShareWithUserDialog,
     Messages,
     ManageBookmarkDialog,
     EditPromotionDialog,
@@ -356,6 +369,9 @@ export default {
     },
     async openManageBookmarkDialog() {
       await this.$refs.manageBookmarkDialog.openDialog();
+    },
+    async openShareWithUserDialog() {
+      this.$refs.shareWithUserDialog.$data.dialog = true;
     },
   },
   watch: {
