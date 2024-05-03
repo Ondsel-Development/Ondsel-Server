@@ -91,8 +91,15 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Mod/Arch/ColladaOptimize",
   "/Root/BaseApp/Preferences/Mod/Arch/ColladaAllowQuads",
 
+  // Mesh WB Prefs
+  "/Root/BaseApp/Preferences/Mod/Mesh/BackfaceColor",
+  "/Root/BaseApp/Preferences/Mod/Mesh/LineColor",
+  "/Root/BaseApp/Preferences/Mod/Mesh/MeshColor",
+
   // Draft WB Prefs
   "/Root/BaseApp/Preferences/Mod/Draft/gridTransparency",
+  "/Root/BaseApp/Preferences/Mod/Draft/DefaultAnnoLineColor",
+  "/Root/BaseApp/Preferences/Mod/Draft/color",
   "/Root/BaseApp/Preferences/Mod/Draft/constructioncolor",
   "/Root/BaseApp/Preferences/Mod/Draft/gridColor",
   "/Root/BaseApp/Preferences/Mod/Draft/snapcolor",
@@ -176,11 +183,19 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/Background",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/PreSelectColor",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/HiddenColor",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/LightTextColor",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/PageColor",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/SelectColor",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/NormalColor",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/CutSurfaceColor",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/GeomHatch",
   "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/FaceColor",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/TemplateUnderlineColor",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Colors/gridColor",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Dimensions/Color",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/Markups/Color",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/dimensioning/SeparatedDimensioningTools",
+  "/Root/BaseApp/Preferences/Mod/TechDraw/dimensioning/SingleDimensioningTool",
 
   // Sketcher WB Prefs
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/NotifyConstraintSubstitutions",
@@ -189,8 +204,11 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridDivLineColor",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridLineColor",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/RestoreCamera",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/General/BSplineCombVisible",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/ForceOrtho",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/SectionView",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridDivLinePattern",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridLinePattern",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridSize/ConstraintFilterState",
   "/Root/BaseApp/Preferences/Mod/Sketcher/General/GridSize/ElementFilterEnabled",
   "/Root/BaseApp/Preferences/Mod/Sketcher/Constraints/UnifiedCoincident",
@@ -200,10 +218,32 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Mod/Sketcher/UseSystemDecimals",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ShowDimensionalName",
   "/Root/BaseApp/Preferences/Mod/Sketcher/Snap/SnapToGrid",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/ConstructionPattern",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/ConstructionWidth",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/EdgePattern",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/EdgeWidth",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/ExternalPattern",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/ExternalWidth",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/InternalPattern",
+  "/Root/BaseApp/Preferences/Mod/Sketcher/View/InternalWidth",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedMessagesWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedSolverAdvancedWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedConstraintsWidget",
   "/Root/BaseApp/Preferences/Mod/Sketcher/ExpandedElementsWidget",
+
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/AliasedCellBackgroundColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/NegativeNumberColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/PositiveNumberColor",
+  "/Root/BaseApp/Preferences/Mod/Spreadsheet/TextColor",
+
+  // Path WB Prefs
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultBBoxNormalColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultBBoxSelectionColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultHighlightPathColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultNormalPathColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultPathMarkerColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultProbePathColor",
+  "/Root/BaseApp/Preferences/Mod/Path/DefaultRapidPathColor",
 
   // PartDesign WB Prefs
   "/Root/BaseApp/Preferences/Mod/PartDesign/RefineModel",
@@ -1221,6 +1261,7 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/View/CursorCrosshairColor",
   "/Root/BaseApp/Preferences/View/CreateLineColor",
   "/Root/BaseApp/Preferences/View/CornerCoordSystem",
+  "/Root/BaseApp/Preferences/View/CanAbortRecompute",
   "/Root/BaseApp/Preferences/View/CheckBoxSelectionCheckBoxes",
   "/Root/BaseApp/Preferences/View/InvertZoom",
   "/Root/BaseApp/Preferences/View/Orthographic",
@@ -1252,6 +1293,7 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/View/UseBackgroundColorMid",
   "/Root/BaseApp/Preferences/View/BacklightIntensity",
   "/Root/BaseApp/Preferences/View/DefaultShapeTransparency",
+  "/Root/BaseApp/Preferences/View/DefaultShapePointSize",
   "/Root/BaseApp/Preferences/View/AnnotationTextColor",
   "/Root/BaseApp/Preferences/View/BackgroundColor",
   "/Root/BaseApp/Preferences/View/BackgroundColor2",
@@ -1260,6 +1302,8 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/View/BacklightColor",
   "/Root/BaseApp/Preferences/View/BoundingBoxColor",
   "/Root/BaseApp/Preferences/View/DefaultShapeColor",
+  "/Root/BaseApp/Preferences/View/DefaultShapeLineColor",
+  "/Root/BaseApp/Preferences/View/DefaultShapeVertexColor",
   "/Root/BaseApp/Preferences/View/HighlightColor",
   "/Root/BaseApp/Preferences/View/SelectionColor",
   "/Root/BaseApp/Preferences/View/TransparentObjectRenderType",
@@ -1273,6 +1317,13 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/View/EnableHeadlight",
   "/Root/BaseApp/Preferences/View/HeadlightColor",
   "/Root/BaseApp/Preferences/View/HeadlightIntensity",
+  "/Root/BaseApp/Preferences/View/HeadlightRotationW",
+  "/Root/BaseApp/Preferences/View/HeadlightRotationX",
+  "/Root/BaseApp/Preferences/View/HeadlightRotationY",
+  "/Root/BaseApp/Preferences/View/HeadlightRotationZ",
+  "/Root/BaseApp/Preferences/View/HeadlightDirection",
+  "/Root/BaseApp/Preferences/View/HiddenLineBackground",
+  "/Root/BaseApp/Preferences/View/HiddenLineFaceColor",
   "/Root/BaseApp/Preferences/View/DockOverlayHideTabBar",
   "/Root/BaseApp/Preferences/View/DockOverlayAutoView",
   "/Root/BaseApp/Preferences/View/DockOverlayAutoMouseThrough",
@@ -1309,6 +1360,8 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/View/CbLabelColor",
   "/Root/BaseApp/Preferences/View/CbLabelTextSize",
   "/Root/BaseApp/Preferences/View/SaveWBbyTab",
+  "/Root/BaseApp/Preferences/View/ShadowGroundColor",
+  "/Root/BaseApp/Preferences/View/ShadowLightColor",
 
   // NaviCube Prefs
   "/Root/BaseApp/Preferences/NaviCube/NaviRotateToNearest",
@@ -1400,6 +1453,7 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Workbenches/WorkbenchSelectorType",
 
   // DockWindows Prefs
+  "/Root/BaseApp/Preferences/DockWindows/ActivateOverlay",
   "/Root/BaseApp/Preferences/DockWindows/ComboView/Enabled",
   "/Root/BaseApp/Preferences/DockWindows/TreeView/Enabled",
   "/Root/BaseApp/Preferences/DockWindows/PropertyView/Enabled",
@@ -1436,9 +1490,9 @@ export const lookupUserConfigKeys = [
   "/Root/BaseApp/Preferences/Selection/AutoShowSelectionView",
 
   // Addons Prefs
-  "Root/BaseApp/Preferences/Addons/HideObsolete",
-  "Root/BaseApp/Preferences/Addons/HidePy2",
-  "Root/BaseApp/Preferences/Addons/ShowBranchSwitcher",
+  "/Root/BaseApp/Preferences/Addons/HideObsolete",
+  "/Root/BaseApp/Preferences/Addons/HidePy2",
+  "/Root/BaseApp/Preferences/Addons/ShowBranchSwitcher",
 
   // MainWindow Prefs
   "/Root/BaseApp/MainWindow/DockWindows/Std_SelectionView",

@@ -48,7 +48,7 @@ export const doAddUserToOrganization = async (context) => {
     org._id,
     {
       shouldAddUsersToOrganization: true,
-      userIds: [user._id],
+      userIds: [user._id.toString()],
     }
   );
   //

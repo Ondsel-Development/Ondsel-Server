@@ -37,6 +37,8 @@ import {
   addOrgSecondaryReferencesToAllOrganizationsCommand
 } from "./add-org-secondary-references-to-all-organizations.command.js";
 import { addMessagesFieldsToSharedModelsCommand } from './add-messages-fields-to-shared-models.command.js';
+import { createOndselOrganizationCommand } from './create-ondsel-organization.command.js';
+import {addNotificationsIdToUsersCommand} from "./add-notificationsId-to-users.command.js";
 
 
 async function runMigration() {
@@ -147,6 +149,12 @@ async function runMigration() {
       break;
     case 'addMessagesFieldsToSharedModels':
       await addMessagesFieldsToSharedModelsCommand(app);
+      break;
+    case 'createOndselOrganization':
+      await createOndselOrganizationCommand(app);
+      break;
+    case 'addNotificationsIdToUsers':
+      await addNotificationsIdToUsersCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
