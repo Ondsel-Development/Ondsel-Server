@@ -61,7 +61,7 @@ export const navRefSchema = Type.Object(
 // - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
 // - shared-models: /share/:id                  -> id renamed sharelinkid
 // - models: /model/:id                         -> id renamed to modelid
-export function buildNavUrl(nav) {
+export function buildNavUrl(nav, baseUrl) {
   let url = "/404";
   switch (nav.target) {
     case navTargetMap.users:
@@ -87,7 +87,8 @@ export function buildNavUrl(nav) {
       url = "/";
       break;
   }
-  return url;
+  const finalUrl = baseUrl + url;
+  return finalUrl;
 }
 
 export const validateNavObject = (navField, isRequired) => {

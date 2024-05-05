@@ -65,7 +65,9 @@ export const addShare = async context => {
       }
     )
     try {
-      const link = buildNavUrl(bookmarkEntry.curation.nav);
+      const baseUrl = context.app.get('frontendUrl');
+      const link = buildNavUrl(bookmarkEntry.curation.nav, baseUrl);
+      const message = bookmarkEntry.description || '';
       const result = await context.app.service('notifications').patch(
         context.params.user.notificationsId,
         {
@@ -74,7 +76,11 @@ export const addShare = async context => {
             to: toUserId,
             message: 'itemShared',
             nav: bookmarkEntry.curation.nav,
-            parameters: {link: link},
+            parameters: {
+              link: link,
+              name: bookmarkEntry.curation.name,
+              message: message,
+            },
           },
         },
         {
