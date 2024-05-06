@@ -17,6 +17,7 @@ export class ImporterBrep {
   }
 
   Reset() {
+    this.model = new Model ();
     this.file = null;
     if (this.worker !== null) {
       this.worker.terminate();
