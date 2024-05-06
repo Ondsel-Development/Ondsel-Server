@@ -14,6 +14,7 @@ export const SubscriptionTypeMap = {
   basic: 'Basic',
   peer: 'Peer',
   enterprise: 'Enterprise',
+  deleted: 'Deleted',
 }
 
 export const SubscriptionTypeANON = "anonymous"
@@ -26,6 +27,7 @@ export const SubscriptionType = StringEnum(
     SubscriptionTypeMap.basic,
     SubscriptionTypeMap.peer,
     SubscriptionTypeMap.enterprise,
+    SubscriptionTypeMap.deleted,
   ]
 )
 
@@ -166,6 +168,18 @@ export const subscriptionConstraintMap = {
     canDisableAutomaticGenerationOfPublicLink: true,
     canCreateOpenOrganization: true,
     canCreatePrivateOrganization: true,
+  },
+  'Deleted': {
+    maxModelObjects: 0,
+    maxShareLinksPerModel: 0,
+    canUpload: false,
+    canDownloadOriginal: false,
+    canUpdateModelParameters: false,
+    canExportModel: false,
+    defaultValueOfPublicLinkGeneration: false,
+    canDisableAutomaticGenerationOfPublicLink: false,
+    canCreateOpenOrganization: false,
+    canCreatePrivateOrganization: false,
   },
 };
 
