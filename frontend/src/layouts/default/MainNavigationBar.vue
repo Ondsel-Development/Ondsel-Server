@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { mapActions, mapState, mapGetters } from 'vuex';
+
 export default {
   name: "MainNavigationBar",
   data: () => ({
@@ -68,6 +70,33 @@ export default {
     ],
     drawer: null,
   }),
+  computed: {
+    ...mapState('auth', { loggedInUser: 'payload' }),
+    ...mapState('auth', ['user']),
+    ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
+    currentRouteName: (vm) => vm.$route.name,
+    currentOrganization() {
+      return this.userCurrentOrganization;
+    },
+  },
+  methods: {
+    ...mapActions('auth', {authLogout: 'logout'}),
+    logout() {
+      this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
+      this.menu = false;
+    },
+    gotoAccountSettings() {
+      this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
+      this.menu = false;
+    },
+    gotoDownloadAndExplore() {
+      this.$router.push({name: 'DownloadAndExplore'});
+      this.menu = false;
+    },
+    gotoHome() {
+      this.$router.push({name: 'LensHome'});
+    }
+  },
 }
 </script>
 

@@ -1,96 +1,25 @@
 <template>
-  <v-container>
-<!--    {{ sharedModelsFiltered }}-->
-    <v-row class="pl-4 pr-4">
-      <div class="text-h5">Public Models</div>
-      <v-spacer />
-      <v-col cols="3" class="text-right">
-        <v-btn
-          min-width="200"
-          prepend-icon="mdi-plus"
-          :to="{ name: 'Home'}"
-          :disabled="!loggedInUser || !loggedInUser.user.constraint.canUpload"
-        >
-          Upload New Model
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <br>
-    <v-row dense>
-      <v-col
-        v-for="(sharedModel, i) in sharedModels.data"
-        :key="sharedModel._id"
-        xs="12"
-        sm="12"
-        md="6"
-        lg="4"
-        xl="3"
-        xxl="2"
+  <Main>
+    <template #title>
+      <v-icon icon="mdi-dots-square" />
+      Public Models
+    </template>
+    <template #subtitle>Browse popular models ready to be integrated with FreeCAD</template>
+    <template #actions>
+      <v-btn
+        min-width="200"
+        prepend-icon="mdi-plus"
+        :to="{ name: 'Home'}"
+        :disabled="!loggedInUser || !loggedInUser.user.constraint.canUpload"
       >
-        <v-card
-          class="mx-auto"
-          width="344"
-        >
-          <router-link :to="{ name: 'Share', params: { id: sharedModel._id } }" style="text-decoration: none;">
-            <template v-if="sharedModel.thumbnailUrl">
-              <v-img
-                :src="sharedModel.thumbnailUrl"
-                height="200px"
-                cover
-              ></v-img>
-            </template>
-            <template v-else>
-              <v-sheet
-                color="#F4F4F4"
-                height="200px"
-                class="d-flex justify-center align-center"
-              >
-                <span style="color: #8D8D8D">?</span><br>
-              </v-sheet>
-            </template>
-          </router-link>
-
-          <v-card-title>
-            {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
-          </v-card-title>
-
-          <v-card-subtitle>
-            {{ dateFormat(sharedModel.createdAt) }}
-          </v-card-subtitle>
-
-          <v-card-actions>
-            <v-btn
-              color="orange-lighten-2"
-              variant="text"
-              :to="{ name: 'Share', params: { id: sharedModel._id } }"
-            >
-              Explore
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              v-if="isAuthenticated"
-              icon="mdi-bookmark"
-              size="small"
-              @click.stop="openManageBookmarkDialog(sharedModel)"
-            ></v-btn>
-            <v-btn
-              prepend-icon="mdi-share"
-              variant="text"
-              @click.stop="openShareLinkDialog(sharedModel)"
-            >
-              <template v-slot:prepend>
-                <v-icon></v-icon>
-              </template>
-              Share
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-      <template v-if="sharedModels.data.length === 0 && isFindPending">
+        Upload New Model
+      </v-btn>
+    </template>
+    <template #content>
+      <v-row dense>
         <v-col
-          v-for="i in 25"
-          :key="i"
+          v-for="(sharedModel, i) in sharedModels.data"
+          :key="sharedModel._id"
           xs="12"
           sm="12"
           md="6"
@@ -100,60 +29,132 @@
         >
           <v-card
             class="mx-auto"
-            max-width="344"
+            width="344"
           >
+            <router-link :to="{ name: 'Share', params: { id: sharedModel._id } }" style="text-decoration: none;">
+              <template v-if="sharedModel.thumbnailUrl">
+                <v-img
+                  :src="sharedModel.thumbnailUrl"
+                  height="200px"
+                  cover
+                ></v-img>
+              </template>
+              <template v-else>
+                <v-sheet
+                  color="#F4F4F4"
+                  height="200px"
+                  class="d-flex justify-center align-center"
+                >
+                  <span style="color: #8D8D8D">?</span><br>
+                </v-sheet>
+              </template>
+            </router-link>
+
+            <v-card-title>
+              {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
+            </v-card-title>
+
+            <v-card-subtitle>
+              {{ dateFormat(sharedModel.createdAt) }}
+            </v-card-subtitle>
+
+            <v-card-actions>
+              <v-btn
+                color="orange-lighten-2"
+                variant="text"
+                :to="{ name: 'Share', params: { id: sharedModel._id } }"
+              >
+                Explore
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn
+                v-if="isAuthenticated"
+                icon="mdi-bookmark"
+                size="small"
+                @click.stop="openManageBookmarkDialog(sharedModel)"
+              ></v-btn>
+              <v-btn
+                prepend-icon="mdi-share"
+                variant="text"
+                @click.stop="openShareLinkDialog(sharedModel)"
+              >
+                <template v-slot:prepend>
+                  <v-icon></v-icon>
+                </template>
+                Share
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+        <template v-if="sharedModels.data.length === 0 && isFindPending">
+          <v-col
+            v-for="i in 25"
+            :key="i"
+            xs="12"
+            sm="12"
+            md="6"
+            lg="4"
+            xl="3"
+            xxl="2"
+          >
+            <v-card
+              class="mx-auto"
+              max-width="344"
+            >
               <v-skeleton-loader
                 type="image, list-item-two-line"
               >
               </v-skeleton-loader>
 
-            <v-row dense>
-              <v-col cols='8'>
-                <v-skeleton-loader
-                  type="button"
-                >
-                </v-skeleton-loader>
-              </v-col>
-              <v-col cols='4'>
-                <v-skeleton-loader
-                  type="button" class=""
-                >
-                </v-skeleton-loader>
-              </v-col>
-            </v-row>
-          </v-card>
+              <v-row dense>
+                <v-col cols='8'>
+                  <v-skeleton-loader
+                    type="button"
+                  >
+                  </v-skeleton-loader>
+                </v-col>
+                <v-col cols='4'>
+                  <v-skeleton-loader
+                    type="button" class=""
+                  >
+                  </v-skeleton-loader>
+                </v-col>
+              </v-row>
+            </v-card>
 
-        </v-col>
-      </template>
-    </v-row>
-    <br>
-    <v-row dense class="justify-center">
-      <template v-if="sharedModels.data.length && isFindPending">
-        <v-progress-circular indeterminate></v-progress-circular>
-      </template>
-      <template v-else-if="sharedModels.data.length === this.pagination.total">
-        <div class="text-grey-darken-1">You reached the end!</div>
-      </template>
-      <template v-else>
-        <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
-      </template>
-    </v-row>
-    <ShareLinkDialog
-      :is-active="isShareLinkDialogActive"
-      :shared-model-id="activeShareModel._id"
-      ref="shareLinkDialog"
-    />
-    <ManageBookmarkDialog
-      ref="manageBookmarkDialog"
-      :shared-model="activeShareModel"
-    />
-  </v-container>
+          </v-col>
+        </template>
+      </v-row>
+      <br>
+      <v-row dense class="justify-center">
+        <template v-if="sharedModels.data.length && isFindPending">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </template>
+        <template v-else-if="sharedModels.data.length === this.pagination.total">
+          <div class="text-grey-darken-1">You reached the end!</div>
+        </template>
+        <template v-else>
+          <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
+        </template>
+      </v-row>
+      <ShareLinkDialog
+        :is-active="isShareLinkDialogActive"
+        :shared-model-id="activeShareModel._id"
+        ref="shareLinkDialog"
+      />
+      <ManageBookmarkDialog
+        ref="manageBookmarkDialog"
+        :shared-model="activeShareModel"
+      />
+    </template>
+  </Main>
 </template>
 
 <script>
 import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 
+import Main from '@/layouts/default/Main.vue';
 import ShareLinkDialog from '@/components/ShareLinkDialog.vue';
 import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
@@ -162,7 +163,7 @@ const { SharedModel } = models.api;
 
 export default {
   name: 'PublicModels',
-  components: { ShareLinkDialog, ManageBookmarkDialog },
+  components: { Main, ShareLinkDialog, ManageBookmarkDialog },
   mixins: [scrollListenerMixin],
   data: () => ({
     showRecentModels: true,
