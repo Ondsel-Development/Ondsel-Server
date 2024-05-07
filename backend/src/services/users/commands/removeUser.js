@@ -9,6 +9,7 @@ import {organization} from "../../organizations/organizations.js";
 import {keywords} from "../../keywords/keywords.js";
 import {OrganizationTypeMap} from "../../organizations/organizations.subdocs.schema.js";
 import {navTargetMap} from "../../../curation.schema.js";
+import {buildUserSummary} from "../users.distrib.js";
 
 export const REDACTED = "<REDACTED>"
 
@@ -33,9 +34,14 @@ export const removeUser = async (context) => {
     },
   });
   const defaultWorkspace = listWorkspaces.find(w => w._id.equals(user.defaultWorkspaceId));
-  const oldWsCuration = defaultWorkspace.curation;
-  const rootDirId = listWorkspaces[0].rootDirectory._id;
-  const rootDir = await dirService.get(rootDirId);
+  const oldWsCuration = defaultWorkspace?.curation;
+  const rootDirId = listWorkspaces[0]?.rootDirectory?._id;
+  let rootDir;
+  if (rootDirId) {
+    try {
+      rootDir = await dirService.get(rootDirId);
+    } catch {}
+  }
   //
   // verify PIN
   //
@@ -46,6 +52,7 @@ export const removeUser = async (context) => {
       success: false,
       message: 'bad pin',
     }
+    console.log(crc);
     return context;
   }
   //
@@ -62,11 +69,13 @@ export const removeUser = async (context) => {
   if (listWorkspaces.total > 1) {
     reasons.push('More than default workspace');
   }
-  if (rootDir.files.length > 0) {
-    reasons.push('Default workspace root directory has files');
-  }
-  if (rootDir.directories.length > 0) {
-    reasons.push('Default workspace root directory has subdirectories');
+  if (rootDir) {
+    if (rootDir.files.length > 0) {
+      reasons.push('Default workspace root directory has files');
+    }
+    if (rootDir.directories.length > 0) {
+      reasons.push('Default workspace root directory has subdirectories');
+    }
   }
   if (reasons.length > 0) {
     context.result = {
@@ -101,61 +110,89 @@ export const removeUser = async (context) => {
     // legacy cleanup
     user.organizations[0].type = OrganizationTypeMap.personal;
   }
-  console.log(JSON.stringify(user));
-
-  // TODO apply with direct patch
+  const userDb = await context.app.service('users').options.Model;
+  const userResult = await userDb.replaceOne({_id: user._id}, user);
+  log.push(`redacted ${userResult.modifiedCount} users`);
 
   //
   // remove all directories and workspaces
   //
-  // dirService.remove(rootDirId) DOES NOT works as it forbids removing root '/'.
-  const dirDb = dirService.options.Model;
-  const dirResult = await dirDb.deleteOne({_id: rootDirId});
-  log.push(`deleted ${dirResult.deletedCount} directories`);
-  const wsDb = wsService.options.Model;
-  const wsResult = await wsDb.deleteOne({_id: defaultWorkspace._id});
-  log.push(`deleted ${wsResult.deletedCount} workspaces`);
+  // dirService.remove(rootDirId) DOES NOT work as it forbids removing root '/'.
+  if (rootDir) {
+    const dirDb = await dirService.options.Model;
+    const dirResult = await dirDb.deleteOne({_id: rootDirId});
+    log.push(`deleted ${dirResult.deletedCount} directories`);
+  }
+  if (defaultWorkspace) {
+    const wsDb = await wsService.options.Model;
+    const wsResult = await wsDb.deleteOne({_id: defaultWorkspace._id});
+    log.push(`deleted ${wsResult.deletedCount} workspaces`);
+  }
 
   //
   // remove/redact all organizations
   //
+  const orgDb = await orgService.options.Model;
+  const redactedUserSummary = buildUserSummary(user);
+  personalOrg.users = [redactedUserSummary];
+  personalOrg.users[0].isAdmin = true;
+  personalOrg.owner = redactedUserSummary;
   personalOrg.curation.name = REDACTED;
   personalOrg.slug = REDACTED;
+  personalOrg.curation.slug = REDACTED;
   personalOrg.curation.description = REDACTED;
   personalOrg.curation.longDescriptionMd = REDACTED;
   personalOrg.curation.tags = [];
   personalOrg.curation.promoted = []
   personalOrg.curation.nav.username = REDACTED;
-  await orgService.update(
-    personalOrgId,
+  personalOrg.curation.keywordRefs = [];
+  const orgUpdateResult = await orgDb.replaceOne(
+    {_id: personalOrgId},
     personalOrg
   )
+  log.push(`redacted ${orgUpdateResult.modifiedCount} personal organizations`);
   const orgResult = await orgService.remove(personalOrg._id);
   if (orgResult) {
     log.push(`org ${personalOrg._id} marked as removed`);
   } else {
-    log.push(`did mark org ${personalOrg._id} as removed`);
+    log.push(`org ${personalOrg._id} NOT marked as removed`);
   }
 
   //
-  // TODO: remove notifications and secondaryorgrefs
+  // remove notifications and secondaryorgrefs
   //
+  const ntfDb = await context.app.service('notifications').options.Model;
+  const ntfResult = ntfDb.deleteOne({_id: user.notificationsId});
+  log.push(`deleted ${ntfResult.deletedCount} notification docs`);
+  const orgSecRefDb = await context.app.service('org-secondary-references').options.Model;
+  const orgSecRefResult = orgSecRefDb.deleteOne({_id: personalOrg.orgSecondaryReferencesId});
+  log.push(`deleted ${orgSecRefResult.deletedCount} org secondary references docs`);
 
   //
   // bluntly remove keywords to org and workspace
   //
-  await keywordService.update({
-    shouldRemoveScore: true,
-    curation: oldWsCuration,
-  });
-  await keywordService.update({
-    shouldRemoveScore: true,
-    curation: oldOrgCuration,
-  });
+  if (oldWsCuration) {
+    for (const kw of oldOrgCuration.keywordRefs) {
+      const rmKwWsResult = await keywordService.create({
+        shouldRemoveScore: true,
+        curation: oldWsCuration,
+      });
+      log.push(`removed ${rmKwWsResult.sortedMatches.length} workspace keyword ${kw}`);
+    }
+  }
+  for (const kw of oldOrgCuration.keywordRefs) {
+    const rmKwOrgResult = await keywordService.create({
+      _id: kw,
+      shouldRemoveScore: true,
+      curation: oldOrgCuration,
+    });
+    log.push(`removed ${rmKwOrgResult.sortedMatches.length} org keyword ${kw}`);
+  }
 
   context.result = {
     success: true,
     message: 'removal and redaction performed',
+    logs: log,
   }
   return context;
 }
