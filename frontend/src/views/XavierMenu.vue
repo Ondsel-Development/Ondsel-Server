@@ -7,7 +7,7 @@
           <v-list-item-title
             @click="$router.push({ name: 'XavierModifyLensHomePageCuration', params: {} })"
           >
-            Modify Lens Home Page Curation
+            <v-btn icon="mdi-gesture-tap"></v-btn> Modify Lens Home Page Curation
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
@@ -18,14 +18,14 @@
                 <v-list-item-title
                   @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'privacy-policy'} })"
                 >
-                  Privacy Policy Document
+                  <v-btn icon="mdi-gesture-tap"></v-btn> Privacy Policy Document
                 </v-list-item-title>
               </v-list-item>
               <v-list-item>
                 <v-list-item-title
                   @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'terms-of-service'} })"
                 >
-                  Terms of Service/Use
+                  <v-btn icon="mdi-gesture-tap"></v-btn> Terms of Service/Use
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -33,16 +33,27 @@
         </v-list-item>
       </v-list>
     </v-card-text>
+    <v-card-actions>
+      <v-btn
+        icon
+        @click="$refs.searchPopupDialogXavier.$data.dialog = true;"
+      >
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn>
+    </v-card-actions>
   </v-card>
+  <search-popup-dialog ref="searchPopupDialogXavier" dest-page-name="XavierSearchResults"></search-popup-dialog>
 </template>
 
 <script>
 
 import {mapState} from "vuex";
+import SearchPopupDialog from "@/components/SearchPopupDialog.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'XavierMenu',
+  components: {SearchPopupDialog},
   data: () => ({
   }),
   async created() {

@@ -52,7 +52,6 @@ export const removeUser = async (context) => {
       success: false,
       message: 'bad pin',
     }
-    console.log(crc);
     return context;
   }
   //

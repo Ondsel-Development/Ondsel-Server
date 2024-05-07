@@ -38,6 +38,7 @@ import XavierMenu from "@/views/XavierMenu.vue";
 import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
 import Bookmarks from "@/views/Bookmarks.vue";
+import XavierSearchResults from "@/views/XavierSearchResults.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -210,6 +211,12 @@ const routes = [
     component: XavierUpdateKeyDocuments,
     name: 'XavierUpdateKeyDocuments',
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-9584355633/:text',
+    component: XavierSearchResults,
+    name: 'XavierSearchResults',
+    meta: { tryAuth: true },
   },
   //
   // ONDSEL pages
