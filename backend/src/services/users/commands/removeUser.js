@@ -8,6 +8,7 @@ import {
 import {organization} from "../../organizations/organizations.js";
 import {keywords} from "../../keywords/keywords.js";
 import {OrganizationTypeMap} from "../../organizations/organizations.subdocs.schema.js";
+import {navTargetMap} from "../../../curation.schema.js";
 
 export const REDACTED = "<REDACTED>"
 
@@ -23,6 +24,7 @@ export const removeUser = async (context) => {
   const [trueId, pin] = originalUserId.split("z")
   let user = await context.service.get(trueId);
   let personalOrg = await orgService.get(user.personalOrganization._id);
+  const oldOrgCuration = personalOrg.curation;
   const personalOrgId = personalOrg._id;
   const listWorkspaces = await wsService.find({
     paginate: false,
@@ -31,6 +33,7 @@ export const removeUser = async (context) => {
     },
   });
   const defaultWorkspace = listWorkspaces.find(w => w._id.equals(user.defaultWorkspaceId));
+  const oldWsCuration = defaultWorkspace.curation;
   const rootDirId = listWorkspaces[0].rootDirectory._id;
   const rootDir = await dirService.get(rootDirId);
   //
@@ -75,6 +78,7 @@ export const removeUser = async (context) => {
   //
   // start redaction of actual user record
   //
+  let log = [];
   user.email = REDACTED;
   user.name = REDACTED;
   if (user.firstName) {
@@ -104,28 +108,50 @@ export const removeUser = async (context) => {
   //
   // remove all directories and workspaces
   //
-  let oldWsCuration = defaultWorkspace.curation;
-  // await dirService.remove(rootDirId);
-  // await wsService.remove(defaultWorkspace._id);
+  // dirService.remove(rootDirId) DOES NOT works as it forbids removing root '/'.
+  const dirDb = dirService.options.Model;
+  const dirResult = await dirDb.deleteOne({_id: rootDirId});
+  log.push(`deleted ${dirResult.deletedCount} directories`);
+  const wsDb = wsService.options.Model;
+  const wsResult = await wsDb.deleteOne({_id: defaultWorkspace._id});
+  log.push(`deleted ${wsResult.deletedCount} workspaces`);
 
   //
-  // remove all organizations
+  // remove/redact all organizations
   //
-  let oldOrgCuration = personalOrg.curation;
-  // await orgService.remove(personalOrg._id);
+  personalOrg.curation.name = REDACTED;
+  personalOrg.slug = REDACTED;
+  personalOrg.curation.description = REDACTED;
+  personalOrg.curation.longDescriptionMd = REDACTED;
+  personalOrg.curation.tags = [];
+  personalOrg.curation.promoted = []
+  personalOrg.curation.nav.username = REDACTED;
+  await orgService.update(
+    personalOrgId,
+    personalOrg
+  )
+  const orgResult = await orgService.remove(personalOrg._id);
+  if (orgResult) {
+    log.push(`org ${personalOrg._id} marked as removed`);
+  } else {
+    log.push(`did mark org ${personalOrg._id} as removed`);
+  }
 
   //
-  // remove keywords to org and workspace
-  // (this SHOULD happen automatically....)
+  // TODO: remove notifications and secondaryorgrefs
   //
-  // await keywordService.update({
-  //   shouldRemoveScore: true,
-  //   curation: oldWsCuration,
-  // });
-  // await keywordService.update({
-  //   shouldRemoveScore: true,
-  //   curation: oldOrgCuration,
-  // });
+
+  //
+  // bluntly remove keywords to org and workspace
+  //
+  await keywordService.update({
+    shouldRemoveScore: true,
+    curation: oldWsCuration,
+  });
+  await keywordService.update({
+    shouldRemoveScore: true,
+    curation: oldOrgCuration,
+  });
 
   context.result = {
     success: true,
