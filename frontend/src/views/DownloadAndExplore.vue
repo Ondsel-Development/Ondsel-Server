@@ -114,12 +114,12 @@
                     variant="outlined"
                     class="text-none justify-start mt-4"
                     min-width="12em"
-                    :href="ondselSeDownload['Windows-x86_64.7z']?.browser_download_url"
+                    :href="ondselSeDownload['Windows-x86_64-installer.exe']?.browser_download_url"
                   >
                     x86_64.7z
                   </v-btn>
                   <v-btn
-                    :href="ondselSeDownload['Windows-x86_64.7z-SHA256.txt']?.browser_download_url"
+                    :href="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url"
                     flat
                     size="x-small"
                     class="text-caption text-red"
@@ -232,7 +232,7 @@
                           variant="outlined"
                           class="text-none justify-start mt-4"
                           min-width="12em"
-                          :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
+                          :href="weeklyDownload['Windows-x86_64-installer.exe']?.browser_download_url"
                         >
                           x86_64.7z
                         </v-btn>
@@ -302,7 +302,8 @@ export default {
     let osd = {};
     await axios.get('https://api.github.com/repos/Ondsel-Development/FreeCAD/releases')
       .then(function (response) {
-        const tagsFound = response.data.map(build => build.tag_name);
+        const justCurrent = response.data.filter(build => build.prerelease !== true);
+        const tagsFound = justCurrent.map(build => build.tag_name);
         const semverExp = new RegExp('^\\d{4}.'); // must start with four digits and a dot
         let semverTags = tagsFound.filter(tag => semverExp.test(tag));
         semverTags.sort();
@@ -317,8 +318,8 @@ export default {
         osd['macOS-apple-silicon-arm64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg-SHA256.txt'));
         osd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
         osd['macOS-intel-x86_64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg-SHA256.txt'));
-        osd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
-        osd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
+        osd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
+        osd['Windows-x86_64-installer.exe-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe-SHA256.txt'));
         const testingBuild = response.data.find(build => build.tag_name === 'weekly-builds');
         buildDate = testingBuild.created_at;
         assets = testingBuild.assets || []
@@ -326,7 +327,7 @@ export default {
         wd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
         wd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
         wd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
-        wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
+        wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
       })
       .catch(function (error) {
         console.log(error);
