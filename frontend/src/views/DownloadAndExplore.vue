@@ -232,7 +232,7 @@
                           variant="outlined"
                           class="text-none justify-start mt-4"
                           min-width="12em"
-                          :href="weeklyDownload['Windows-x86_64-installer.exe']?.browser_download_url"
+                          :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
                           x86_64.7z
                         </v-btn>
@@ -327,7 +327,9 @@ export default {
         wd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
         wd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
         wd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
-        wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
+        // wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
+        wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
+        wd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
       })
       .catch(function (error) {
         console.log(error);
