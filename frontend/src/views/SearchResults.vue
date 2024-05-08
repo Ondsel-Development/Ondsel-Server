@@ -18,7 +18,7 @@
             <v-sheet
               class="mx-auto"
               link
-              @click.stop="goToPromoted(entry.curation)"
+              @click.stop="goToEntry(entry)"
             >
               <v-card-text>
                 <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
@@ -33,7 +33,7 @@
 
 <script>
 
-import {mapActions, mapState} from "vuex";
+import {mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 const { Keywords } = models.api;
@@ -55,7 +55,6 @@ export default {
     await this.doSearch();
   },
   methods: {
-    ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
     async doSearch() {
       this.searchText = this.$route.params.text || '';
       // all the smarts are on the API side. a "single simple word" works as expected, but anything else
@@ -85,48 +84,33 @@ export default {
         }
       }
     },
-    async goToPromoted(curation) {
-      let workspace;
-      let org;
-      let user;
-      switch (curation.collection) {
+    async goToEntry(entry) {
+      const curation = entry.curation;
+      const nav = curation.nav;
+      switch (nav.target) {
         case 'workspaces':
-          workspace = await this.getWorkspaceByIdPublic(curation._id);
-          if (!workspace) {
-            console.log(`cannot find workspace ${curation._id}`);
-            return;
-          }
-          org = await this.getOrgByIdOrNamePublic(workspace.organizationId);
-          if (org.type === 'Personal') {
-            this.$router.push({
-              name: 'UserWorkspaceHome',
-              params: {slug: org.owner.username, wsname: workspace.refName}
-            });
+          if (nav.username) {
+            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: nav.username, wsname: nav.wsname } });
           } else {
-            this.$router.push({name: 'OrgWorkspaceHome', params: {slug: org.refName, wsname: workspace.refName}});
+            this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: nav.orgname, wsname: nav.wsname } });
           }
           break;
         case 'organizations':
-          org = await this.getOrgByIdOrNamePublic(curation._id);
-          if (!org) {
-            console.log(`cannot find org ${curation._id}`);
-            return;
-          }
-          this.$router.push({name: 'OrganizationHome', params: {slug: org.refName}});
+          this.$router.push({ name: 'OrganizationHome', params: { slug: nav.orgname } });
           break;
         case 'users':
-          user = await this.getUserByIdOrNamePublic(curation._id);
-          if (!user) {
-            console.log(`cannot find user ${curation._id}`);
-            return;
-          }
-          this.$router.push({name: 'UserHome', params: {slug: user.username}});
+          this.$router.push({ name: 'UserHome', params: { slug: nav.username } });
           break;
         case 'shared-models':
-          this.$router.push({name: 'Share', params: {id: curation._id.toString()}})
+          this.$router.push({ name: 'Share', params: { id: nav.sharelinkid } })
+          break;
+        case 'models':
+          this.$router.push({ name: 'Home', params: { id: nav.modelid } })
+          break;
+        case 'ondsel': // not sure why this would ever show up; but for completeness...
+          this.$router.push({ name: 'LensHome' } )
           break;
       }
-
     },
   },
   watch: {
