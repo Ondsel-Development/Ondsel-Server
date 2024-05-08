@@ -1,15 +1,24 @@
 <template>
-  <v-navigation-drawer v-model="drawer" permanent style="background: #fafafa; border: none;">
-    <v-btn variant="outlined" class="ma-4" size="x-large" height="80px" color="#f1f2f2" style="background: #ffffff; border-width: 2px">
+  <v-navigation-drawer v-model="drawer" permanent style="background: #fafafa;">
+    <v-btn
+      variant="outlined"
+      class="ma-4"
+      size="x-large"
+      height="80px"
+      color="#f1f2f2"
+      style="background: #ffffff; border-width: 2px"
+      @click="$refs.selectedOrganization.$data.dialog = true;"
+    >
       <v-sheet class="d-flex align-start flex-column" style="background: inherit;" width="160">
         <span class="text-caption">Organization</span>
-        <span class="text-h6">Personal</span>
+        <v-sheet class="d-flex align-start text-body-1 overflow-x-auto" width="160">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
       </v-sheet>
       <template v-slot:append>
         <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
       </template>
     </v-btn>
     <v-text-field
+      v-model="searchText"
       class="ma-4"
       append-inner-icon="mdi-magnify"
       density="compact"
@@ -17,57 +26,141 @@
       variant="outlined"
       hide-details
       single-line
+      @click:append-inner="doSearch"
+      @keyup.enter="doSearch"
     ></v-text-field>
     <v-list class="mx-4">
-      <v-list-item
-        v-for="[icon, text] in mainItems"
+      <template
+        v-for="[icon, text, condition, path] in mainItems"
         :key="icon"
-        :prepend-icon="icon"
-        link
       >
-        <template #title>
-          <span style="color: black;">{{ text }}</span>
-        </template>
-      </v-list-item>
+        <v-list-item
+          v-if="condition"
+          :prepend-icon="icon"
+          :to="path"
+          link
+        >
+          <span class="text-body-2" style="color: black;">{{ text }}</span>
+        </v-list-item>
+      </template>
     </v-list>
     <template #append>
       <v-list class="mx-4">
-        <v-list-item
-          v-for="[icon, text] in secondaryItems"
+        <template
+          v-for="[icon, text, condition, path] in secondaryItems"
           :key="icon"
-          :prepend-icon="icon"
-          link
         >
-          <template #title>
-            <span style="color: black;">{{ text }}</span>
-          </template>
-          <template #prepend>
-            <v-icon size="small" />
-          </template>
-        </v-list-item>
+          <v-list-item
+            v-if="condition"
+            :prepend-icon="icon"
+            :to="path"
+            link
+          >
+            <span class="text-body-2" style="color: black;">{{ text }}</span>
+          </v-list-item>
+        </template>
       </v-list>
       <span class="d-flex justify-center text-caption mb-4">@ 2024 Ondsel, inc.</span>
+      <v-divider />
+      <v-list>
+        <v-list-item
+          v-if="loggedInUser"
+          nav
+        >
+          <template #prepend>
+            <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ma-1" min-width="40" min-height="40" rounded="circle" color="grey">
+              {{ getInitials(loggedInUser.user.name) }}
+            </v-sheet>
+          </template>
+          <template #title>
+            {{ loggedInUser.user.name }}
+          </template>
+          <template v-slot:append>
+            <v-menu
+              v-if="loggedInUser"
+              v-model="menu"
+              :close-on-content-click="false"
+              transition="slide-y-transition"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon
+                  variant="text"
+                  v-bind="props"
+                >
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+
+              <v-card min-width="200">
+                <v-list v-if="loggedInUser">
+                  <v-list-item
+                    :title="`${loggedInUser.user.name}`"
+                  >
+                  </v-list-item>
+                  <v-list-item>
+                    <v-btn
+                      variant="text"
+                      @click="gotoAccountSettings()"
+                    >
+                      account settings
+                    </v-btn>
+                  </v-list-item>
+                </v-list>
+
+                <v-divider></v-divider>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    variant="text"
+                    @click="logout"
+                  >
+                    Logout
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-menu>
+          </template>
+        </v-list-item>
+        <v-list-item v-else>
+          <span class="d-flex flex-row justify-center">
+            <v-btn
+              v-if="currentRouteName !== 'Login'"
+              variant="outlined"
+              class="ma-1"
+              :to="{ name: 'Login' }"
+            >
+              Login
+            </v-btn>
+            <v-btn
+              v-if="currentRouteName !== 'SignUp'"
+              variant="tonal"
+              color="primary"
+              class="ma-1"
+              :to="{ name: 'SignUp' }"
+            >
+              SignUp
+            </v-btn>
+          </span>
+        </v-list-item>
+      </v-list>
     </template>
   </v-navigation-drawer>
+  <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import SelectOrganization from '@/components/SelectOrganization.vue';
 
 export default {
   name: "MainNavigationBar",
+  components: { SelectOrganization },
   data: () => ({
-    mainItems: [
-      ['mdi-home-outline', 'Home'],
-      ['mdi-share-variant-outline', 'Workspaces'],
-      ['mdi-cube-outline', 'Models'],
-      ['mdi-dots-square', 'Public Models'],
-    ],
-    secondaryItems: [
-      ['mdi-bookmark-outline', 'Bookmarks'],
-      ['mdi-emoticon-happy-outline', 'Community'],
-      ['mdi-help-circle-outline', 'Help'],
-    ],
+    menu: false,
+    searchText: '',
     drawer: null,
   }),
   computed: {
@@ -78,6 +171,52 @@ export default {
     currentOrganization() {
       return this.userCurrentOrganization;
     },
+    mainItems() {
+      return [
+        [
+          'mdi-view-dashboard-outline',  // icon
+          `Public view of ${this.currentOrganization?.name}`,  // label
+          this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',  // condition
+          { name: 'OrganizationHome', params: { slug: this.currentOrganization?.refName }}  // route
+        ],
+        [
+          'mdi-earth',
+          'Public View of Me',
+          this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',
+          { name: 'UserHome', params: { slug: this.user?.username }}
+        ],
+        [
+          'mdi-cube-outline',
+          'Models',
+          this.user,
+          { name: 'Models', params: { slug: this.user?.username }}
+        ],
+        [
+          'mdi-dots-square',
+          'Public Models',
+          true,
+          { name: 'PublicModels' }
+        ],
+      ]
+    },
+    secondaryItems() {
+      return [
+        [
+          'mdi-bookmark-outline',
+          'Bookmarks',
+          true,
+          { name: 'Bookmarks' }
+        ],
+        [
+          'mdi-eye-outline',
+          'Download & Explore',
+          true,
+          { name: 'DownloadAndExplore' }
+        ],
+        // ['mdi-emoticon-happy-outline', 'Community'],
+        // ['mdi-help-circle-outline', 'Help'],
+      ]
+    }
   },
   methods: {
     ...mapActions('auth', {authLogout: 'logout'}),
@@ -95,7 +234,18 @@ export default {
     },
     gotoHome() {
       this.$router.push({name: 'LensHome'});
-    }
+    },
+    doSearch() {
+      if (this.searchText) {
+        this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
+      }
+    },
+    getInitials(name) {
+      const nameArray = name.split(' ');
+      const firstName = nameArray[0].charAt(0).toUpperCase();
+      const lastName = nameArray[nameArray.length - 1].charAt(0).toUpperCase();
+      return firstName + lastName;
+    },
   },
 }
 </script>
