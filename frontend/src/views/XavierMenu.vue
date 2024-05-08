@@ -1,4 +1,13 @@
 <template>
+  <v-sheet>
+    <v-btn
+      density="default"
+      icon="mdi-home"
+      color="success"
+      class="ml-12"
+    ></v-btn>
+  </v-sheet>
+
   <v-card class="ma-4">
     <v-card-title>Professor Xavier's School For The Hidden</v-card-title>
     <v-card-text>

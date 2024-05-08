@@ -1,15 +1,24 @@
 <template>
   <v-card class="mx-auto" max-width="896" flat>
     <v-card-title>Xavier Search Results</v-card-title>
-    <v-card-subtitle>{{searchText}}
+    <v-card-subtitle>
       <v-btn
-        icon
-        @click="$refs.searchPopupDialogXavier.$data.dialog = true;"
-      >
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
+        density="default"
+        icon="mdi-home"
+        color="success"
+        @click="$router.push({ name: 'XavierMenu', params: {}})"
+      ></v-btn> <b><i>Professor Xavier's School For The Hidden</i></b>
     </v-card-subtitle>
     <v-card-text>
+      <p>
+        {{searchText}}
+        <v-btn
+          icon
+          @click="$refs.searchPopupDialogXavier.$data.dialog = true;"
+        >
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </p>
       <v-container class="flex-column">
         <v-row>
           <v-col
