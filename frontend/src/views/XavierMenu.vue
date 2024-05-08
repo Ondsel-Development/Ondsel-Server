@@ -31,6 +31,13 @@
             </v-list>
           </v-list-item-title>
         </v-list-item>
+        <v-list-item>
+          <v-list-item-title
+            @click="$router.push({ name: 'XavierRemoveUser', params: {} })"
+          >
+            <v-btn icon="mdi-gesture-tap"></v-btn> Remove User
+          </v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-card-text>
     <v-card-actions>

@@ -39,6 +39,7 @@ import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCu
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
 import Bookmarks from "@/views/Bookmarks.vue";
 import XavierSearchResults from "@/views/XavierSearchResults.vue";
+import XavierRemoveUser from "@/views/XavierRemoveUser.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -210,6 +211,12 @@ const routes = [
     path: '/xavier-7492783/:name',
     component: XavierUpdateKeyDocuments,
     name: 'XavierUpdateKeyDocuments',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-55554337898',
+    component: XavierRemoveUser,
+    name: 'XavierRemoveUser',
     meta: { requiresAuth: true },
   },
   {
