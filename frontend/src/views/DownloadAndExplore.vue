@@ -116,7 +116,7 @@
                     min-width="12em"
                     :href="ondselSeDownload['Windows-x86_64-installer.exe']?.browser_download_url"
                   >
-                    x86_64.7z
+                    x86_64-installer.exe
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url"
