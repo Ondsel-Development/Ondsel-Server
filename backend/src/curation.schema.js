@@ -9,6 +9,7 @@ import {organizationPath} from "./services/organizations/organizations.shared.js
 import {workspacePath} from "./services/workspaces/workspaces.shared.js";
 import {sharedModelsPath} from "./services/shared-models/shared-models.shared.js";
 import {OrganizationTypeMap} from "./services/organizations/organizations.subdocs.schema.js";
+import {modelPath} from "./services/models/models.shared.js";
 import {BadRequest} from "@feathersjs/errors";
 import err from "mocha/lib/pending.js";
 import {getProperty} from "./helpers.js";
@@ -22,6 +23,7 @@ export const navTargetMap = {
   organizations: organizationPath,
   workspaces: workspacePath,
   sharedModels: sharedModelsPath,
+  models: modelPath,
   ondsel: 'ondsel', // meta ref for lens home page, not a collection name
 }
 
@@ -30,9 +32,11 @@ export const navTargetType = StringEnum([
   navTargetMap.organizations,
   navTargetMap.workspaces,
   navTargetMap.sharedModels,
+  navTargetMap.models,
   navTargetMap.ondsel,
 ])
 
+// TODO: add curation and model support to Models in addition to SharedModels
 export const navRefSchema = Type.Object(
   // from frontend:
   // - users: /user/:slug                         -> slug renamed username
@@ -40,14 +44,52 @@ export const navRefSchema = Type.Object(
   // - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
   // - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
   // - shared-models: /share/:id                  -> id renamed sharelinkid
+  // - models: /model/:id                         -> id renamed to modelId
   {
     target: navTargetType,
     username: Type.Optional(Type.String()),
     orgname: Type.Optional(Type.String()),
     wsname: Type.Optional(Type.String()),
     sharelinkid: Type.Optional(Type.String()),
+    modelId: Type.Optional(Type.String()),
   }
 )
+
+// - users: /user/:slug                         -> slug renamed username
+// - organizations: /org/:slug                  -> slug renamed orgname
+// - workspaces: /user/:slug/workspace/:wsname  -> slug renamed username
+// - workspaces: /org/:slug/workspace/:wsname   -> slug renamed orgname
+// - shared-models: /share/:id                  -> id renamed sharelinkid
+// - models: /model/:id                         -> id renamed to modelid
+export function buildNavUrl(nav, baseUrl) {
+  let url = "/404";
+  switch (nav.target) {
+    case navTargetMap.users:
+      url = `/user/${nav.username}`;
+      break;
+    case navTargetMap.organizations:
+      url = `/org/${nav.orgname}`;
+      break;
+    case navTargetMap.workspaces:
+      if (nav.orgname) {
+        url = `/org/${nav.orgname}/workspace/${nav.wsname}`;
+      } else {
+        url = `/user/${nav.username}/workspace/${nav.wsname}`;
+      }
+      break;
+    case navTargetMap.sharedModels:
+      url = `/share/${nav.sharelinkid}`;
+      break;
+    case navTargetMap.models:
+      url = `/model/${nav.modelid}`;
+      break;
+    case navTargetMap.ondsel:
+      url = "/";
+      break;
+  }
+  const finalUrl = baseUrl + url;
+  return finalUrl;
+}
 
 export const validateNavObject = (navField, isRequired) => {
   return async (context) => {

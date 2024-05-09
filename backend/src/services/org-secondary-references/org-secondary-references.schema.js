@@ -11,6 +11,7 @@ export const orgSecondaryReferencesSchema = Type.Object(
     _id: ObjectIdSchema(),
     organizationId: ObjectIdSchema(),
     bookmarks: Type.Array(bookmarkSchema),
+    sharedWithMe: Type.Array(bookmarkSchema),
   },
   { $id: 'OrgSecondaryReferences', additionalProperties: false }
 )

@@ -1,5 +1,10 @@
 import {isUserMemberOfOrg, isUserOwnerOrAdminOfOrg} from '../organizations/helpers.js';
 import { BadRequest } from '@feathersjs/errors';
+import {CollectionNameMap} from "./bookmark.schema.js";
+import {buildUserSummary} from "../users/users.distrib.js";
+import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
+import {buildModelSummary} from "../models/models.distrib.js";
+import {buildSharedModelSummary} from "../shared-models/shared-models.distrib.js";
 
 
 export const canUserPatchOrgSecondaryReferences = async context => {
@@ -8,7 +13,7 @@ export const canUserPatchOrgSecondaryReferences = async context => {
   if (isUserOwnerOrAdminOfOrg(organization, context.params.user)) {
     return context;
   }
-  throw new BadRequest('Only admins of organization allow to perform this action');
+  throw new BadRequest(`Only admins of organization ${context.id} allowed to perform this action`);
 }
 
 
@@ -29,3 +34,27 @@ export const limitOrgSecondaryReferencesToUser = async context => {
   };
   return context;
 }
+
+export const validatePayloadBookmarkObject = bookmark => {
+  if (!bookmark) {
+    throw new BadRequest('bookmark object is mandatory in payload');
+  }
+  if (!bookmark.collectionId) {
+    throw new BadRequest('"collectionId" field is mandatory in bookmark object');
+  }
+  if (!bookmark.collectionName) {
+    throw new BadRequest('"collection" field is mandatory in bookmark object');
+  }
+  if (!Object.values(CollectionNameMap).includes(bookmark.collectionName)) {
+    throw new BadRequest('"collection" name is not recognized in bookmark object');
+  }
+};
+
+
+export const CollectionNameMappingWithSummaryBuildMethods = {
+  users: buildUserSummary,
+  workspaces: buildWorkspaceSummary,
+  models: buildModelSummary,
+  'shared-models': buildSharedModelSummary,
+}
+

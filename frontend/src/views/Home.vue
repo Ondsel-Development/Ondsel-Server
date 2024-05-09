@@ -44,7 +44,7 @@
     </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
-  <ObjectsListView v-if="viewer" ref="objectListView" :viewer="viewer" />
+  <ObjectsListView ref="objectListView" @select-given-object="objectSelected" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -424,11 +424,15 @@ export default {
       }
       this.isModelLoaded = true;
       this.viewer = viewer;
+      this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
       setTimeout(() => this.uploadThumbnail(), 500);
     },
     objectClicked(object3d) {
       this.$refs.objectListView.selectListItem(object3d);
-    }
+    },
+    objectSelected(object3d) {
+      this.viewer.selectGivenObject(object3d);
+    },
   },
   watch: {
     'model.isObjGenerated'(v) {

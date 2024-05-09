@@ -34,23 +34,17 @@
 </template>
 
 <script>
-import _ from 'lodash';
-
 export default {
   name: "ObjectsListView",
-  props: {
-    viewer: Object,
-  },
+  emits: ['selectGivenObject'],
   data: () => ({
+    objects3d: [],
     open: ['Objects'],
     active: [],
   }),
-  computed: {
-    objects3d: vm => _.get(vm.viewer, 'model.objects', [])
-  },
   methods: {
     objectSelected(object3d) {
-      this.viewer.selectGivenObject(object3d);
+      this.$emit('selectGivenObject', object3d);
     },
     selectListItem(object3d) {
       const index = this.active.indexOf(object3d);

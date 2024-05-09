@@ -60,7 +60,7 @@
               link
               @click.stop="goToWorkspaceHome(workspace)"
             >
-              <one-promotion-sheet :curation="workspace.curation"></one-promotion-sheet>
+              <curated-item-sheet :curation="workspace.curation"></curated-item-sheet>
             </v-sheet>
           </v-col>
         </v-row>
@@ -87,7 +87,7 @@
               link
               @click.stop="goToUserHome(member)"
             >
-              <one-promotion-sheet :curation="member.curation"></one-promotion-sheet>
+              <curated-item-sheet :curation="member.curation"></curated-item-sheet>
             </v-sheet>
           </v-col>
         </v-row>
@@ -109,14 +109,14 @@ import ReprViewer from "@/components/ReprViewer.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 const { Workspace } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'OrganizationHome',
-  components: {MarkdownViewer, OnePromotionSheet, PromotionsViewer, EditPromotionDialog, ReprViewer},
+  components: {MarkdownViewer, CuratedItemSheet, PromotionsViewer, EditPromotionDialog},
   data: () => ({
     targetOrgDetail: {name: 'locating...'},
     publicWorkspacesDetail: [],

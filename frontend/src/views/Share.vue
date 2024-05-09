@@ -42,6 +42,13 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="openShareWithUserDialog">
+      <v-icon>mdi-account-network</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Share With User</v-tooltip>
+    </v-btn>
     <v-btn v-if="isAuthenticated" icon flat @click="openManageBookmarkDialog">
       <v-icon>mdi-bookmark</v-icon>
       <v-tooltip
@@ -66,7 +73,7 @@
     </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
-  <ObjectsListView v-if="!isWindowLoadedInIframe && viewer" ref="objectListView" :viewer="viewer" />
+  <ObjectsListView v-if="!isWindowLoadedInIframe" ref="objectListView" @select-given-object="objectSelected" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -170,6 +177,12 @@
     :shared-model-id="sharedModel._id"
     ref="shareLinkDialog"
   />
+  <share-with-user-dialog
+    v-if="sharedModel"
+    :curation="sharedModel.curation"
+    ref="shareWithUserDialog"
+    @save-share-with-user="saveShareWithUser"
+  ></share-with-user-dialog>
   <v-navigation-drawer
     v-model="isDrawerOpen"
     location="right"
@@ -199,12 +212,14 @@ import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import ObjectsListView from '@/components/ObjectsListView.vue';
 import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import Messages from "@/components/Messages.vue";
+import ShareWithUserDialog from "@/components/ShareWithUserDialog.vue";
 
-const { SharedModel, Model } = models.api;
+const { SharedModel, Model, OrgSecondaryReference } = models.api;
 
 export default {
   name: 'ShareView',
   components: {
+    ShareWithUserDialog,
     Messages,
     ManageBookmarkDialog,
     EditPromotionDialog,
@@ -337,7 +352,13 @@ export default {
       }
       this.isModelLoaded = true;
       this.viewer = viewer;
+      if (this.$refs.objectListView) {
+        this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
+      }
       setTimeout(() => this.uploadThumbnail(), 500);
+    },
+    objectSelected(object3d) {
+      this.viewer.selectGivenObject(object3d);
     },
     async modelInfoDrawerClicked() {
       this.drawerActiveWindow = 'modelInfo';
@@ -356,6 +377,29 @@ export default {
     },
     async openManageBookmarkDialog() {
       await this.$refs.manageBookmarkDialog.openDialog();
+    },
+    async openShareWithUserDialog() {
+      this.$refs.shareWithUserDialog.$data.dialog = true;
+    },
+    async saveShareWithUser() {
+      this.$refs.shareWithUserDialog.$data.isPatchPending = true;
+      const userIdSelected = this.$refs.shareWithUserDialog.$data.userIdSelected;
+      const message = this.$refs.shareWithUserDialog.$data.message;
+      const orgSecondaryReferencesId = this.$refs.shareWithUserDialog.$data.orgSecondaryReferencesId;
+      await OrgSecondaryReference.patch(
+        orgSecondaryReferencesId,
+        {
+          shouldAddShare: true,
+          bookmark: {
+            collectionName: 'shared-models',
+            collectionId: this.sharedModel._id,
+            description: message,
+          },
+          toUserId: userIdSelected,
+        }
+      )
+      this.$refs.shareWithUserDialog.$data.isPatchPending = false;
+      this.$refs.shareWithUserDialog.$data.dialog = false;
     },
   },
   watch: {

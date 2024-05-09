@@ -72,7 +72,7 @@
       </span>
     </span>
     <v-container class="d-flex flex-wrap">
-      <one-promotion-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></one-promotion-sheet>
+      <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
       <v-card class="ma-2 flex-md-grow-1" min-width="22em" max-width="44em" max-height="20em" style="overflow-y:auto;">
         <v-card-text>
           <markdown-viewer v-if="longDescriptionHtml" :markdown-html="longDescriptionHtml"></markdown-viewer>
@@ -132,16 +132,16 @@ import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
 import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
   components: {
+    CuratedItemSheet,
     MarkdownViewer,
-    OnePromotionSheet,
     EditPromotionDialog, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
   data() {
     return {
