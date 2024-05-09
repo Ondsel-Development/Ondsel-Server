@@ -30,6 +30,7 @@
           <v-col
             cols="12"
             v-for="entry in results"
+            :key="entry.curation._id"
           >
             <v-sheet>
               <v-sheet>
@@ -125,10 +126,13 @@ export default {
           break;
         case 'users':
           user = await User.get(curation._id);
+          if (!user) {
+            user = await this.getUserByIdOrNamePublic(curation.slug);
+          }
           detail += `        id: ${user._id}\n`;
           detail += `      tier: ${user.tier}\n`;
           detail += `  username: ${user.username}\n`;
-          detail += `     email: ${user.email}\n`;
+          detail += `     email: ${user.email || "<unable to retrieve>"}\n`;
           break;
         case 'shared-models':
           break;
