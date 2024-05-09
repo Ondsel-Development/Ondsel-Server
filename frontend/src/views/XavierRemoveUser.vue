@@ -32,37 +32,41 @@
       <p class="ma-4">
         If you don't know the ID or email of the user, use the <a href="/xavier-9584355633/search">Xavier Search Page</a>.
       </p>
-      <v-form>
-        <v-card  title="User Details for Removal" width="26em" class="pa-2 ma-2 mx-auto">
-          <v-card-text>
-            <v-text>
-              <v-text-field
-                v-model="userId"
-                label="Internal User Id"
-                autofocus
-              ></v-text-field>
-              <v-text-field
-                v-model="email"
-                label="Email Address"
-              ></v-text-field>
-            </v-text>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn type="submit" :disabled="isRemovalPending" class="mx-auto" variant="elevated" color="danger" outline>Delete</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
+      <v-card  title="User Details for Removal" width="26em" class="pa-2 ma-2 mx-auto">
+        <v-card-text>
+          <v-text-field
+            v-model="userId"
+            label="Internal User Id"
+            autofocus
+          ></v-text-field>
+          <v-text-field
+            v-model="email"
+            label="Email Address"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn type="submit" :disabled="isRemovalPending" class="mx-auto" variant="elevated" color="danger" outline @click.stop="doUserRemoval()">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-card-text>
   </v-card>
-  <p>
-    <pre>results pending...</pre>
-  </p>
+  <p></p>
+  <v-card class="ma-2 mx-auto">
+    <v-card-tile>RESULTS:</v-card-tile>
+    <v-card-text>
+      <pre>{{ results }}</pre>
+    </v-card-text>
+  </v-card>
 
 </template>
 
 <script>
 
 import {mapState} from "vuex";
+import {crc32} from "@/refNameFunctions";
+import {models} from "@feathersjs/vuex";
+
+const { User } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -71,6 +75,7 @@ export default {
   data: () => ({
     userId: '',
     email: '',
+    results: 'pending...',
     isRemovalPending: false,
   }),
   async created() {
@@ -78,14 +83,39 @@ export default {
       console.log("alert-33235-ru");
       this.$router.push({name: 'LensHome', params: {}});
     }
-    await this.update();
   },
   computed: {
     ...mapState('auth', ['user']),
   },
   methods: {
-    update() {
-    },
+    async doUserRemoval() {
+      this.isRemovalPending = true;
+      let hasError = false;
+      let log = ['starting.'];
+      if (!this.userId) {
+        log.push('User ID is missing.');
+        hasError = true;
+      }
+      if (!this.email) {
+        log.push('Email address is missing.');
+        hasError = true;
+      }
+      if (hasError) {
+        log.push('ERR: refraining from changes due to errors found.')
+      } else {
+        let crcValue = crc32(this.email);
+        let target = this.userId + "z" + crcValue.toString();
+        log.push(`making DEL call to user API with "${target}" via admin "${this.user.username}"`);
+        try {
+          const delResult = await User.remove(target);
+          log.push(`API CALL RETURN: ${JSON.stringify(delResult, null, 2)}`);
+        } catch (e) {
+          log.push('API GENERATED ERROR: ' + e.toString())
+        }
+      }
+      this.results = log.join('\n');
+      this.isRemovalPending = false;
+    }
   },
   watch: {
   }

@@ -25,7 +25,7 @@ export const removeUser = async (context) => {
   const [trueId, pin] = originalUserId.split("z")
   let user = await context.service.get(trueId);
   let personalOrg = await orgService.get(user.personalOrganization._id);
-  const oldOrgCuration = personalOrg.curation;
+  const oldOrgCuration = { ...personalOrg.curation};
   const personalOrgId = personalOrg._id;
   const listWorkspaces = await wsService.find({
     paginate: false,
@@ -171,12 +171,12 @@ export const removeUser = async (context) => {
   // bluntly remove keywords to org and workspace
   //
   if (oldWsCuration) {
-    for (const kw of oldOrgCuration.keywordRefs) {
+    for (const kw of oldWsCuration.keywordRefs) {
       const rmKwWsResult = await keywordService.create({
         shouldRemoveScore: true,
         curation: oldWsCuration,
       });
-      log.push(`removed ${rmKwWsResult.sortedMatches.length} workspace keyword ${kw}`);
+      log.push(`removed workspace keyword ${kw}`);
     }
   }
   for (const kw of oldOrgCuration.keywordRefs) {
@@ -185,7 +185,7 @@ export const removeUser = async (context) => {
       shouldRemoveScore: true,
       curation: oldOrgCuration,
     });
-    log.push(`removed ${rmKwOrgResult.sortedMatches.length} org keyword ${kw}`);
+    log.push(`removed user keyword ${kw}`);
   }
 
   context.result = {
