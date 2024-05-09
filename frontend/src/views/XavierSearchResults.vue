@@ -1,8 +1,24 @@
 <template>
   <v-card class="mx-auto" max-width="896" flat>
-    <v-card-title>Search Results</v-card-title>
-    <v-card-subtitle>{{searchText}}</v-card-subtitle>
+    <v-card-title>Xavier Search Results</v-card-title>
+    <v-card-subtitle>
+      <v-btn
+        density="default"
+        icon="mdi-home"
+        color="success"
+        @click="$router.push({ name: 'XavierMenu', params: {}})"
+      ></v-btn> <b><i>Professor Xavier's School For The Hidden</i></b>
+    </v-card-subtitle>
     <v-card-text>
+      <p>
+        {{searchText}}
+        <v-btn
+          icon
+          @click="$refs.searchPopupDialogXavier.$data.dialog = true;"
+        >
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </p>
       <v-container class="flex-column">
         <v-row>
           <v-col
@@ -14,33 +30,47 @@
           <v-col
             cols="12"
             v-for="entry in results"
+            :key="entry.curation._id"
           >
-            <v-sheet
-              class="mx-auto"
-              link
-              @click.stop="goToEntry(entry)"
-            >
-              <v-card-text>
-                <curated-item-sheet :curation="entry.curation" :message="entry.notation.message"></curated-item-sheet>
-              </v-card-text>
+            <v-sheet>
+              <v-sheet>
+                <v-expansion-panels>
+                  <v-expansion-panel title="Get Detail" @click.stop="getDetail(entry.curation)">
+                    <v-expansion-panel-text>
+                      <pre>{{entry.admin_details}}</pre>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-sheet>
+              <v-sheet
+                class="mx-auto"
+                link
+                @click.stop="goToEntry(entry)"
+              >
+                <v-card-text>
+                  <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
+                </v-card-text>
+              </v-sheet>
             </v-sheet>
           </v-col>
         </v-row>
       </v-container>
     </v-card-text>
   </v-card>
+  <search-popup-dialog ref="searchPopupDialogXavier" dest-page-name="XavierSearchResults"></search-popup-dialog>
 </template>
 
 <script>
 
-import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
-import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
-const { Keywords } = models.api;
+import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import SearchPopupDialog from "@/components/SearchPopupDialog.vue";
+const { User, Keywords } = models.api;
 
 export default {
-  name: 'SearchResults',
-  components: {CuratedItemSheet},
+  name: 'XavierSearchResults',
+  components: {SearchPopupDialog, OnePromotionSheet},
   data() {
     return {
       results: [], // list is stored as an array of "promotions"
@@ -55,6 +85,7 @@ export default {
     await this.doSearch();
   },
   methods: {
+    ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
     async doSearch() {
       this.searchText = this.$route.params.text || '';
       // all the smarts are on the API side. a "single simple word" works as expected, but anything else
@@ -76,11 +107,40 @@ export default {
             notation: {
               updatedAt: Date.now(), // not used
               historicUser: {}, // not used
-              message: '', // match.score.toString(),
+              message: '',
             },
             curation: match.curation,
+            admin_details: 'tbd',
           };
           this.results.push(fakePromo);
+        }
+      }
+    },
+    async getDetail(curation) {
+      let detail = `collection: ${curation.collection}\n`;
+      let user;
+      switch (curation.collection) {
+        case 'workspaces':
+          break;
+        case 'organizations':
+          break;
+        case 'users':
+          user = await User.get(curation._id);
+          if (!user) {
+            user = await this.getUserByIdOrNamePublic(curation.slug);
+          }
+          detail += `        id: ${user._id}\n`;
+          detail += `      tier: ${user.tier}\n`;
+          detail += `  username: ${user.username}\n`;
+          detail += `     email: ${user.email || "<unable to retrieve>"}\n`;
+          break;
+        case 'shared-models':
+          break;
+      }
+
+      for (const idx in this.results) {
+        if (this.results[idx].curation._id === curation._id) {
+          this.results[idx].admin_details = detail;
         }
       }
     },
@@ -115,7 +175,7 @@ export default {
   },
   watch: {
     async '$route'(to, from) {
-      if (to.name === 'SearchResults') {
+      if (to.name === 'XavierSearchResults') {
         await this.doSearch();
       }
     }

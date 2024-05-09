@@ -1,7 +1,14 @@
 <template>
   <v-card class="ma-4">
     <v-card-title>Modify Lens Home Page Curation</v-card-title>
-    <v-card-subtitle>Professor Xavier's School For The Hidden</v-card-subtitle>
+    <v-card-subtitle>
+      <v-btn
+        density="default"
+        icon="mdi-home"
+        color="success"
+        @click="$router.push({ name: 'XavierMenu', params: {}})"
+      ></v-btn> <b><i>Professor Xavier's School For The Hidden</i></b>
+    </v-card-subtitle>
     <v-card-text>
       <v-list lines="three">
         <v-list-subheader><i>All Changes Are Public</i></v-list-subheader>

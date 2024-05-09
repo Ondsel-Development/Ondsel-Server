@@ -8,6 +8,7 @@ export const SubscriptionTypeMap = {
   basic: 'Basic',
   peer: 'Peer',
   enterprise: 'Enterprise',
+  deleted: 'Deleted',
 }
 
 export const SubscriptionMonthlyPricingMap = {
@@ -17,6 +18,7 @@ export const SubscriptionMonthlyPricingMap = {
   'Basic': 400,
   'Peer': 1000,
   'Enterprise': 10000,
+  'Deleted': 0,
 }
 
 export const SubscriptionTermTypeMap = {
