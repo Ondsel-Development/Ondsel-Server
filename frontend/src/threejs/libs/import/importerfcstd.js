@@ -355,6 +355,8 @@ export class ImporterFcstd
 
     ResetContent ()
     {
+        this.model = new Model ();
+        this.objects = [];
         this.worker = null;
         this.document = new FreeCadDocument ();
     }
