@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { validatePayloadBookmarkObject } from './addBookmark.js';
+import {validatePayloadBookmarkObject} from "../helpers.js";
 
 
 export const removeBookmark = async context => {

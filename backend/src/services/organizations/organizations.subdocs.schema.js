@@ -22,6 +22,6 @@ export const organizationSummarySchema = Type.Object(
     name: Type.String(),
     refName: Type.String(),
     type: Type.Optional(OrganizationType),
-  }
+  },
 )
 

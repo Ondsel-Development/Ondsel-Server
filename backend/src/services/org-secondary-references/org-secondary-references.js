@@ -31,6 +31,9 @@ import {
 import swagger from "feathers-swagger";
 import { addBookmark } from './commands/addBookmark.js';
 import { removeBookmark } from './commands/removeBookmark.js';
+import {addShare} from "./commands/addShare.js";
+import {removeShare} from "./commands/removeShare.js";
+import {editShare} from "./commands/editShare.js";
 
 export * from './org-secondary-references.class.js'
 export * from './org-secondary-references.schema.js'
@@ -94,6 +97,19 @@ export const orgSecondaryReferences = (app) => {
           context => context.data.shouldRemoveBookmark,
           removeBookmark,
         ),
+        iff(
+          context => context.data.shouldAddShare,
+          addShare,
+        ),
+        iff(
+          context => context.data.shouldEditShare,
+          editShare,
+        ),
+        iff(
+          context => context.data.shouldRemoveShare,
+          removeShare,
+        ),
+        // TODO: in the future: add shouldAddPromotion and shouldRemovePromotion to this collection and endpoint
         schemaHooks.validateData(orgSecondaryReferencesPatchValidator),
         schemaHooks.resolveData(orgSecondaryReferencesPatchResolver)
       ],

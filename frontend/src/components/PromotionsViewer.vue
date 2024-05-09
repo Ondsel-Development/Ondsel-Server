@@ -11,7 +11,7 @@
         link
         @click.stop="goToPromoted(entry.curation)"
       >
-        <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
+        <curated-item-sheet :curation="entry.curation" :message="entry.notation.message"></curated-item-sheet>
       </v-sheet>
     </v-sheet>
   </v-sheet>
@@ -20,11 +20,11 @@
 <script>
 
 import {mapActions} from "vuex";
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 
 export default {
   name: "PromotionsViewer",
-  components: {OnePromotionSheet},
+  components: {CuratedItemSheet},
   props: {
     promoted: Array,
   },
@@ -37,29 +37,29 @@ export default {
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
     async goToPromoted(curation) {
-      let workspace;
-      let org;
-      let user;
-      switch (curation.collection) {
+      const nav = curation.nav;
+      switch (nav.target) {
         case 'workspaces':
-          workspace = await this.getWorkspaceByIdPublic(curation._id);
-          org = await this.getOrgByIdOrNamePublic(workspace.organizationId);
-          if (org.type === 'Personal') {
-            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: org.owner.username, wsname: workspace.refName } });
+          if (nav.username) {
+            this.$router.push({ name: 'UserWorkspaceHome', params: { slug: nav.username, wsname: nav.wsname } });
           } else {
-            this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: org.refName, wsname: workspace.refName } });
+            this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: nav.orgname, wsname: nav.wsname } });
           }
           break;
         case 'organizations':
-          org = await this.getOrgByIdOrNamePublic(curation._id);
-          this.$router.push({ name: 'OrganizationHome', params: { slug: org.refName } });
+          this.$router.push({ name: 'OrganizationHome', params: { slug: nav.orgname } });
           break;
         case 'users':
-          user = await this.getUserByIdOrNamePublic(curation._id);
-          this.$router.push({ name: 'UserHome', params: { slug: user.username } });
+          this.$router.push({ name: 'UserHome', params: { slug: nav.username } });
           break;
         case 'shared-models':
-          this.$router.push({ name: 'Share', params: { id: curation._id.toString() } })
+          this.$router.push({ name: 'Share', params: { id: nav.sharelinkid } })
+          break;
+        case 'models':
+          this.$router.push({ name: 'Home', params: { id: nav.modelid } })
+          break;
+        case 'ondsel': // not sure why this would ever show up; but for completeness...
+          this.$router.push({ name: 'LensHome' } )
           break;
       }
     },

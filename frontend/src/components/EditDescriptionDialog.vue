@@ -47,7 +47,7 @@ export default {
   props: {
     description: {
       Type: Text,
-      default: '',
+      default: null,
     },
     label: {
       Type: Text,
@@ -76,9 +76,11 @@ export default {
   watch: {
     async dialog(newVal) {
       if (newVal === true) {
-        this.newDescription = this.description;
+        if (this.description !== null) {
+          this.newDescription = this.description;
+        }
       }
-    }
+    },
   }
 }
 </script>
