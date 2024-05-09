@@ -25,7 +25,7 @@
                     min-width="14em"
                     :href="ondselSeDownload['Linux-x86_64.AppImage']?.browser_download_url"
                   >
-                    x86_64.AppImage
+                    x86_64 AppImage
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']?.browser_download_url"
@@ -41,7 +41,7 @@
                     min-width="14em"
                     :href="ondselSeDownload['Linux-aarch64.AppImage']?.browser_download_url"
                   >
-                    aarch.AppImage
+                    aarch64 AppImage
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']?.browser_download_url"
@@ -68,7 +68,7 @@
                     min-width="14em"
                     :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                   >
-                    macOS Apple Silicon arm64
+                    Apple Silicon dmg
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']?.browser_download_url"
@@ -84,7 +84,7 @@
                     min-width="14em"
                     :href="ondselSeDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                   >
-                    macOS Intel x86_64
+                    Intel dmg
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']?.browser_download_url"
@@ -110,7 +110,7 @@
                     min-width="14em"
                     :href="ondselSeDownload['Windows-x86_64-installer.exe']?.browser_download_url"
                   >
-                    x86_64-installer.exe
+                    x86_64 installer
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url"
@@ -149,7 +149,7 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
-                          x86_64.AppImage
+                          x86_64 AppImage
                         </v-btn>
                         <p/>
                         <v-btn
@@ -159,7 +159,7 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
-                          aarch.AppImage
+                          aarch64 AppImage
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -186,7 +186,7 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
-                          <v-sheet class="text-sm-body-2">macOS Apple Silicon arm64</v-sheet>
+                          Apple Silicon dmg
                         </v-btn>
                         <p/>
                         <v-btn
@@ -196,7 +196,7 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
-                          macOS Intel x86_64
+                          Intel dmg
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
