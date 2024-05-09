@@ -48,7 +48,7 @@
                 @click.stop="goToEntry(entry)"
               >
                 <v-card-text>
-                  <one-promotion-sheet :curation="entry.curation" :message="entry.notation.message"></one-promotion-sheet>
+                  <curated-item-sheet :curation="entry.curation" :message="entry.notation.message"></curated-item-sheet>
                 </v-card-text>
               </v-sheet>
             </v-sheet>
@@ -64,13 +64,13 @@
 
 import {mapActions, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 import SearchPopupDialog from "@/components/SearchPopupDialog.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 const { User, Keywords } = models.api;
 
 export default {
   name: 'XavierSearchResults',
-  components: {SearchPopupDialog, OnePromotionSheet},
+  components: {CuratedItemSheet, SearchPopupDialog},
   data() {
     return {
       results: [], // list is stored as an array of "promotions"
