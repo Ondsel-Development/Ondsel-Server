@@ -178,6 +178,7 @@
     ref="shareLinkDialog"
   />
   <share-with-user-dialog
+    v-if="sharedModel"
     :curation="sharedModel.curation"
     ref="shareWithUserDialog"
     @save-share-with-user="saveShareWithUser"
