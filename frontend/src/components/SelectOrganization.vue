@@ -25,13 +25,19 @@
             @click.stop="goToOrganization(organization)"
           >
             <template #title>
-              {{ organization.name }}
-              <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+              <v-btn
+                color="secondary"
+                variant="elevated"
+              >
+                {{ organization.name }}
+                <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+              </v-btn>
             </template>
             <template #append>
               <v-btn
+                color="secondary"
+                variant="elevated"
                 icon="mdi-cog"
-                variant="text"
                 flat
                 @click.stop="goToOrganizationEdit(organization)"
               />
@@ -40,9 +46,14 @@
         </v-list>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
-          color="primary"
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          color="error"
+          variant="elevated"
           :hidden="!user.constraint.canCreatePrivateOrganization && !user.constraint.canCreateOpenOrganization"
           :to="{ name: 'CreateOrganization'}"
           @click="dialog = false"

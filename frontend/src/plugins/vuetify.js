@@ -13,21 +13,26 @@ import { createVuetify } from 'vuetify';
 import { VSkeletonLoader } from 'vuetify/labs/VSkeletonLoader';
 import { VDataTable, VDataTableVirtual } from 'vuetify/labs/VDataTable';
 
+const customLightTheme = {
+  dark: false,
+  colors: {
+    primary: '#0D47A1',
+    secondary: '#607D8B',
+    error: '#B71C1C',
+    cancel: '#9E9E9E',
+    success: '#00C853',
+    // background: "#eee",
+    // surface: "#15202b",
+  },
+};
+
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   theme: {
     themes: {
-      light: {
-        colors: {
-          primary: '#1867C0',
-          secondary: '#5CBBF6',
-          danger: '#B71C1C',
-          cancel: '',
-          success: '',
-        },
-      },
-    },
+      light: customLightTheme,
+    }
   },
   components: {
     VSkeletonLoader, VDataTable, VDataTableVirtual
