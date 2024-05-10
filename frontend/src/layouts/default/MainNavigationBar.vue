@@ -1,35 +1,36 @@
 <template>
-  <v-navigation-drawer v-model="drawer" permanent style="background: #fafafa;">
-    <v-btn
-      variant="outlined"
-      class="ma-4"
-      size="x-large"
-      height="80px"
-      color="#f1f2f2"
-      style="background: #ffffff; border-width: 2px"
-      @click="$refs.selectedOrganization.$data.dialog = true;"
-    >
-      <v-sheet class="d-flex align-start flex-column" style="background: inherit;" width="160">
-        <span class="text-caption">Organization</span>
-        <v-sheet class="d-flex align-start text-body-1 overflow-x-auto" width="160">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
-      </v-sheet>
-      <template v-slot:append>
-        <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
-      </template>
-    </v-btn>
+  <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
+    <v-list class="my-2" nav>
+      <v-divider />
+      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" @click="$refs.selectedOrganization.$data.dialog = true;">
+        <template #prepend>
+          <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
+            {{ getInitials(currentOrganization?.name || '') }}
+          </v-sheet>
+        </template>
+        <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
+          <span class="text-caption">Organization</span>
+          <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
+        </v-sheet>
+        <template v-slot:append>
+          <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
+        </template>
+      </v-list-item>
+      <v-divider />
+    </v-list>
     <v-text-field
       v-model="searchText"
       class="ma-4"
       append-inner-icon="mdi-magnify"
       density="compact"
       label="Search..."
-      variant="outlined"
+      :variant="rail ? 'plain' : 'outlined'"
       hide-details
       single-line
       @click:append-inner="doSearch"
       @keyup.enter="doSearch"
     ></v-text-field>
-    <v-list class="mx-4">
+    <v-list density="compact" nav>
       <template
         v-for="[icon, text, condition, path] in mainItems"
         :key="icon"
@@ -45,7 +46,7 @@
       </template>
     </v-list>
     <template #append>
-      <v-list class="mx-4">
+      <v-list density="compact" nav>
         <template
           v-for="[icon, text, condition, path] in secondaryItems"
           :key="icon"
@@ -60,7 +61,7 @@
           </v-list-item>
         </template>
       </v-list>
-      <span class="d-flex justify-center text-caption mb-4">@ 2024 Ondsel, inc.</span>
+      <span v-if="!rail" class="d-flex justify-center text-caption mb-4">@ 2024 Ondsel, inc.</span>
       <v-divider />
       <v-list>
         <v-list-item
@@ -68,7 +69,7 @@
           nav
         >
           <template #prepend>
-            <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ma-1" min-width="40" min-height="40" rounded="circle" color="grey">
+            <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ma-1" min-width="40" min-height="40" rounded="circle" color="grey" @click="rail = false">
               {{ getInitials(loggedInUser.user.name) }}
             </v-sheet>
           </template>
@@ -147,6 +148,7 @@
         </v-list-item>
       </v-list>
     </template>
+    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" flat @click="rail = !rail"></v-btn>
   </v-navigation-drawer>
   <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
@@ -162,6 +164,7 @@ export default {
     menu: false,
     searchText: '',
     drawer: null,
+    rail: false,
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
@@ -248,6 +251,7 @@ export default {
       this.$router.push({name: 'LensHome'});
     },
     doSearch() {
+      this.rail = false;
       if (this.searchText) {
         this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
       }
@@ -264,5 +268,9 @@ export default {
 
 
 <style scoped>
-
+.railButton {
+  position: absolute;
+  top: 49%;
+  right: -17px;
+}
 </style>
