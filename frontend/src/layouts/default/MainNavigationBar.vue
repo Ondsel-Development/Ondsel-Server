@@ -2,7 +2,7 @@
   <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
     <v-list class="my-2" nav>
       <v-divider />
-      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" @click="$refs.selectedOrganization.$data.dialog = true;">
+      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user" @click="$refs.selectedOrganization.$data.dialog = true;">
         <template #prepend>
           <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
             {{ getInitials(currentOrganization?.name || '') }}
@@ -219,12 +219,12 @@ export default {
         [
           'mdi-bookmark-outline',
           'Bookmarks',
-          true,
+          this.user,
           { name: 'Bookmarks' }
         ],
         [
-          'mdi-eye-outline',
-          'Download & Explore',
+          'mdi-download-outline',
+          'Download Ondsel ES',
           true,
           { name: 'DownloadAndExplore' }
         ],
