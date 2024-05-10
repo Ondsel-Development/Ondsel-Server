@@ -30,42 +30,37 @@
           <v-card
             class="mx-auto"
             width="344"
+            elevation="1"
+            @click="$router.push({ name: 'Share', params: { id: sharedModel._id } })"
           >
-            <router-link :to="{ name: 'Share', params: { id: sharedModel._id } }" style="text-decoration: none;">
-              <template v-if="sharedModel.thumbnailUrl">
-                <v-img
-                  :src="sharedModel.thumbnailUrl"
-                  height="200px"
-                  cover
-                ></v-img>
-              </template>
-              <template v-else>
-                <v-sheet
-                  color="#F4F4F4"
-                  height="200px"
-                  class="d-flex justify-center align-center"
-                >
-                  <span style="color: #8D8D8D">?</span><br>
-                </v-sheet>
-              </template>
-            </router-link>
+            <template v-if="sharedModel.thumbnailUrl">
+              <v-img
+                :src="sharedModel.thumbnailUrl"
+                height="200px"
+                cover
+              ></v-img>
+            </template>
+            <template v-else>
+              <v-sheet
+                color="#F4F4F4"
+                height="200px"
+                class="d-flex justify-center align-center"
+              >
+                <span style="color: #8D8D8D">?</span><br>
+              </v-sheet>
+            </template>
 
-            <v-card-title>
-              {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
+            <v-card-title class="grey-color">
+              <span class="text-body-1">
+                {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
+              </span>
             </v-card-title>
 
-            <v-card-subtitle>
+            <v-card-subtitle class="grey-color">
               {{ dateFormat(sharedModel.createdAt) }}
             </v-card-subtitle>
 
-            <v-card-actions>
-              <v-btn
-                color="orange-lighten-2"
-                variant="text"
-                :to="{ name: 'Share', params: { id: sharedModel._id } }"
-              >
-                Explore
-              </v-btn>
+            <v-card-actions class="grey-color">
               <v-spacer></v-spacer>
               <v-btn
                 v-if="isAuthenticated"
@@ -107,18 +102,15 @@
               </v-skeleton-loader>
 
               <v-row dense>
-                <v-col cols='8'>
-                  <v-skeleton-loader
-                    type="button"
-                  >
-                  </v-skeleton-loader>
-                </v-col>
-                <v-col cols='4'>
-                  <v-skeleton-loader
-                    type="button" class=""
-                  >
-                  </v-skeleton-loader>
-                </v-col>
+                <v-spacer/>
+                <v-skeleton-loader
+                  type="button" width="70"
+                >
+                </v-skeleton-loader>
+                <v-skeleton-loader
+                  type="button" width="100"
+                >
+                </v-skeleton-loader>
               </v-row>
             </v-card>
 
@@ -238,5 +230,9 @@ export default {
 <style scoped>
 ::v-deep(.v-skeleton-loader__image) {
   height: 190px;
+}
+
+.grey-color {
+  background: #fafafa;
 }
 </style>

@@ -209,9 +209,9 @@ export default {
         ],
         [
           'mdi-inbox',
-          'SharedWithMe',
+          'Shared With Me',
           this.user,
-          { name: 'Shared With Me' }
+          { name: 'SharedWithMe' }
         ],
         [
           'mdi-bookmark-outline',
