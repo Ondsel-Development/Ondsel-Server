@@ -202,6 +202,18 @@ export default {
     secondaryItems() {
       return [
         [
+          'mdi-bell-outline',
+          'Notifications',
+          this.user,
+          { name: 'MyNotifications' }
+        ],
+        [
+          'mdi-inbox',
+          'SharedWithMe',
+          this.user,
+          { name: 'Shared With Me' }
+        ],
+        [
           'mdi-bookmark-outline',
           'Bookmarks',
           true,
