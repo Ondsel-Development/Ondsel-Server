@@ -56,7 +56,7 @@
               </span>
             </v-card-title>
 
-            <v-card-subtitle class="grey-color">
+            <v-card-subtitle class="grey-color text-grey" style="opacity: inherit;">
               {{ dateFormat(sharedModel.createdAt) }}
             </v-card-subtitle>
 
