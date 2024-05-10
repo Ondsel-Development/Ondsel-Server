@@ -9,28 +9,26 @@
             <v-card-title>Ondsel ES</v-card-title>
             <v-card-subtitle>v {{ondselSeVersionTxt}}</v-card-subtitle>
             <v-card-text class="overflow-y-auto" >
-              <v-container class="d-flex flex-row">
-                <v-container max-width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Linux"
-                      src="https://ondsel.com/img/os_linux.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row justify-start">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Linux"
+                    src="https://ondsel.com/img/os_linux.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
                     size="large"
                     variant="outlined"
-                    class="text-none justify-start"
-                    min-width="12em"
-                    :href="ondselSeDownload['Linux-aarch64.AppImage']?.browser_download_url"
+                    class="text-none justify-start mt-6"
+                    min-width="14em"
+                    :href="ondselSeDownload['Linux-x86_64.AppImage']?.browser_download_url"
                   >
-                    aarch.AppImage
+                    x86_64 AppImage
                   </v-btn>
                   <v-btn
-                    :href="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']?.browser_download_url"
+                    :href="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']?.browser_download_url"
                     flat
                     size="x-small"
                     class="text-caption text-red"
@@ -39,14 +37,14 @@
                   <v-btn
                     size="large"
                     variant="outlined"
-                    class="text-none justify-start mt-6"
-                    min-width="12em"
-                    :href="ondselSeDownload['Linux-x86_64.AppImage']?.browser_download_url"
+                    class="text-none justify-start"
+                    min-width="14em"
+                    :href="ondselSeDownload['Linux-aarch64.AppImage']?.browser_download_url"
                   >
-                    x86_64.AppImage
+                    aarch64 AppImage
                   </v-btn>
                   <v-btn
-                    :href="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']?.browser_download_url"
+                    :href="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']?.browser_download_url"
                     flat
                     size="x-small"
                     class="text-caption text-red"
@@ -54,25 +52,23 @@
                 </v-container>
               </v-container>
               <p/>
-              <v-container class="d-flex flex-row">
-                <v-container max-width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Mac"
-                      src="https://ondsel.com/img/os_mac.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row justify-start">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Mac"
+                    src="https://ondsel.com/img/os_mac.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
                     size="large"
                     variant="outlined"
                     class="text-none justify-start"
-                    min-width="12em"
+                    min-width="14em"
                     :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                   >
-                    arm64.dmg
+                    Apple Silicon dmg
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']?.browser_download_url"
@@ -85,10 +81,10 @@
                     size="large"
                     variant="outlined"
                     class="text-none justify-start mt-6"
-                    min-width="12em"
+                    min-width="14em"
                     :href="ondselSeDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                   >
-                    x86_64.dmg
+                    Intel dmg
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']?.browser_download_url"
@@ -98,25 +94,23 @@
                   >SHA256</v-btn>
                 </v-container>
               </v-container>
-              <v-container class="d-flex flex-row mt-4">
-                <v-container width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Windows"
-                      src="https://ondsel.com/img/os_windows.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row mt-4 justify-start">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Windows"
+                    src="https://ondsel.com/img/os_windows.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-btn
                     size="large"
                     variant="outlined"
                     class="text-none justify-start mt-4"
-                    min-width="12em"
+                    min-width="14em"
                     :href="ondselSeDownload['Windows-x86_64-installer.exe']?.browser_download_url"
                   >
-                    x86_64-installer.exe
+                    x86_64 installer
                   </v-btn>
                   <v-btn
                     :href="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url"
@@ -136,16 +130,14 @@
               <p>
                 ⚠️ These are intended for testing purposes only. Please don't use them for regular work. ⚠️
               </p>
-              <v-container class="d-flex flex-row">
-                <v-container max-width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Linux"
-                      src="https://ondsel.com/img/os_linux.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row justify-start">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Linux"
+                    src="https://ondsel.com/img/os_linux.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
@@ -153,21 +145,21 @@
                         <v-btn
                           size="large"
                           variant="outlined"
-                          class="text-none justify-start"
-                          min-width="12em"
-                          :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
+                          class="text-none justify-start mt-6"
+                          min-width="14em"
+                          :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
-                          aarch.AppImage
+                          x86_64 AppImage
                         </v-btn>
                         <p/>
                         <v-btn
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-6"
-                          min-width="12em"
-                          :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
+                          min-width="14em"
+                          :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
-                          x86_64.AppImage
+                          aarch64 AppImage
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -175,16 +167,14 @@
                 </v-container>
               </v-container>
               <p/>
-              <v-container class="d-flex flex-row">
-                <v-container max-width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Mac"
-                      src="https://ondsel.com/img/os_mac.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row justify-start">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Mac"
+                    src="https://ondsel.com/img/os_mac.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
@@ -193,36 +183,34 @@
                           size="large"
                           variant="outlined"
                           class="text-none justify-start"
-                          min-width="12em"
+                          min-width="14em"
                           :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
-                          arm64.dmg
+                          Apple Silicon dmg
                         </v-btn>
                         <p/>
                         <v-btn
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-6"
-                          min-width="12em"
+                          min-width="14em"
                           :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
-                          x86_64.dmg
+                          Intel dmg
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-container>
               </v-container>
-              <v-container class="d-flex flex-row mt-4">
-                <v-container width="8em" class="d-flex justify-end">
-                  <v-avatar width="7em" rounded="0">
-                    <v-img
-                      width="6em"
-                      alt="Windows"
-                      src="https://ondsel.com/img/os_windows.svg"
-                    />
-                  </v-avatar>
-                </v-container>
+              <v-container class="d-flex flex-row justify-start mt-4">
+                <v-avatar width="7em" rounded="0" class="mr-2">
+                  <v-img
+                    width="6em"
+                    alt="Windows"
+                    src="https://ondsel.com/img/os_windows.svg"
+                  />
+                </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
@@ -231,7 +219,7 @@
                           size="large"
                           variant="outlined"
                           class="text-none justify-start mt-4"
-                          min-width="12em"
+                          min-width="14em"
                           :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
                           x86_64.7z

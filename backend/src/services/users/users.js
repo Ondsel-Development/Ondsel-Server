@@ -35,6 +35,8 @@ import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.cu
 import {changeEmailNotification} from "./commands/changeEmailNotification.js";
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {notificationsEntrySchema} from "../notifications/notifications.subdocs.js";
+import {verifyOndselAdministrativePower} from "../hooks/administration.js";
+import {removeUser} from "./commands/removeUser.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -190,7 +192,10 @@ export const user = (app) => {
         ),
         schemaHooks.resolveData(userPatchResolver),
       ],
-      remove: []
+      remove: [
+        verifyOndselAdministrativePower,
+        removeUser,
+      ]
     },
     after: {
       all: [],

@@ -18,6 +18,7 @@ export class ImporterObj {
   }
 
   Reset() {
+    this.model = new Model ();
     this.file = null;
     this.objects = [];
   }

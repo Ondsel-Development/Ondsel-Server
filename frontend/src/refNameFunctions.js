@@ -79,7 +79,7 @@ const makeCRCTable = function(){
 
 const crcTable = makeCRCTable();
 
-const crc32 = function(str) {
+export const crc32 = function(str) {
   let crc = 0 ^ (-1);
   for (let i = 0; i < str.length; i++ ) {
     crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xFF];

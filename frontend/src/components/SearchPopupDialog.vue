@@ -34,6 +34,10 @@
 export default {
   name: 'searchPopupDialog',
   props: {
+    destPageName: {
+      Type: Text,
+      default: 'SearchResults',
+    },
   },
   created() {
   },
@@ -45,7 +49,8 @@ export default {
   },
   methods: {
     doSearch() {
-      this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
+      console.log(this.destPageName);
+      this.$router.push({ name: this.destPageName, params: { text: this.searchText } });
       this.dialog = false;
     }
   },

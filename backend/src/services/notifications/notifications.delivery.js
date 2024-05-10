@@ -7,19 +7,46 @@ import {
   specificDeliveryMethodType
 } from "./notifications.subdocs.js";
 import {Type} from "@feathersjs/typebox";
+import {navTargetMap} from "../../curation.schema.js";
+
+export function translateCollection(collection) {
+  let tr = '';
+  switch (collection) {
+    case navTargetMap.workspaces:
+      tr = 'a workspace';
+      break;
+    case navTargetMap.organizations:
+      tr = 'an organization';
+      break;
+    case navTargetMap.users:
+      tr = 'a individual user';
+      break;
+    case navTargetMap.sharedModels:
+      tr = 'a specific CAD model';
+      break;
+    case navTargetMap.models:
+      tr = 'a CAD model';
+      break;
+    case navTargetMap.ondsel:
+      tr = 'Ondsel (the company)'
+      break;
+  }
+  return tr;
+}
 
 export async function generateGenericBodySummaryTxt(ntf) {
   let txt = "";
-  txt += `User "${ntf.createdBy.name}"`;
+  txt += `User "${ntf.createdBy.name}" `;
   if (ntf.from.type !== OrganizationTypeMap.personal) {
-    txt += ` on behalf of "${ntf.from.name}"`
+    txt += `on behalf of "${ntf.from.name}" `
   }
   switch (ntf.message){
     case notificationMessageMap.itemShared:
       // later; add support for the other types of things to share.
-      txt += ` has shared a link to a specific CAD model`;
-      if (ntf.parameters?.sharelink) {
-        txt += ` at ${ntf.parameters?.sharelink}`;
+      txt += 'has shared ';
+      txt += translateCollection(ntf.nav?.target) + ' ';
+      if (ntf.parameters?.name) {
+        txt += `named "${ntf.parameters.name}" `;
       }
       txt += '.';
       break;
@@ -50,11 +77,18 @@ export async function performExternalNotificationDelivery(targetUserId, ntf, con
 
 async function deliverViaMailchimpSMTP(user, ntf, context) {
   const emailService = context.app.service('email');
+  let body = ntf.bodySummaryTxt + '\n';
+  if (ntf.parameters?.message) {
+    body += `\nMessage:\n\n${ntf.parameters.message}\n\n`;
+  }
+  if (ntf.parameters?.link) {
+    body += `\nVisit: ${ntf.parameters.link}\n`;
+  }
   let msgDetail = {
     from: 'contact@ondsel.com',
     to: user.email,
     subject: `[Ondsel] notification`,
-    text: ntf.bodySummaryTxt,
+    text: body,
   };
   const result = await emailService.create(msgDetail);
   const response = {

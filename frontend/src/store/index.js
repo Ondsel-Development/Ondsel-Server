@@ -16,6 +16,7 @@ import directory from '@/store/services/directories';
 import workspace from '@/store/services/workspaces';
 import keywords from "@/store/services/keywords";
 import orgSecondaryReference from '@/store/services/orgSecondaryReferences';
+import notifications from "@/store/services/notifications";
 
 const store =  new Vuex.Store({
   state: {},
@@ -41,6 +42,7 @@ const store =  new Vuex.Store({
     workspace,
     keywords,
     orgSecondaryReference,
+    notifications,
   ]
 })
 

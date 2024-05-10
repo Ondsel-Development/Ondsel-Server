@@ -60,7 +60,7 @@
               link
               @click.stop="goToWorkspaceHome(workspace)"
             >
-              <one-promotion-sheet :curation="workspace.curation" />
+              <curated-item-sheet :curation="workspace.curation" />
             </v-sheet>
           </v-col>
         </v-row>
@@ -76,14 +76,14 @@ import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
-import OnePromotionSheet from "@/components/OnePromotionSheet.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 
 const { Workspace } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'UserHome',
-  components: {MarkdownViewer, OnePromotionSheet, PromotionsViewer, EditPromotionDialog},
+  components: {CuratedItemSheet, MarkdownViewer, PromotionsViewer, EditPromotionDialog},
   data: () => ({
     userSumDetail: {name: 'locating...', username: ''},
     organizationDetail: {},
