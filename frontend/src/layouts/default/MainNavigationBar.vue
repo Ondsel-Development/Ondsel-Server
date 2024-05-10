@@ -148,7 +148,7 @@
         </v-list-item>
       </v-list>
     </template>
-    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" flat @click="rail = !rail"></v-btn>
+    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click="rail = !rail"></v-btn>
   </v-navigation-drawer>
   <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
