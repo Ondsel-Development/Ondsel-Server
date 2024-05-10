@@ -66,7 +66,7 @@ import {mapActions, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
 import SearchPopupDialog from "@/components/SearchPopupDialog.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
-const { User, Keywords } = models.api;
+const { Keywords } = models.api;
 
 export default {
   name: 'XavierSearchResults',
@@ -125,14 +125,15 @@ export default {
         case 'organizations':
           break;
         case 'users':
-          user = await User.get(curation._id);
-          if (!user) {
-            user = await this.getUserByIdOrNamePublic(curation.slug);
+          if (curation?.nav?.username) {
+            user = await this.getUserByIdOrNamePublic(curation?.nav.username);
+            detail += `        id: ${user._id}\n`;
+            detail += `      tier: ${user.tier}\n`;
+            detail += `  username: ${user.username}\n`;
+          } else {
+            detail += `        id: ${user._id}\n`;
+            detail += `   (curation nav object lacking proper detail)\n`;
           }
-          detail += `        id: ${user._id}\n`;
-          detail += `      tier: ${user.tier}\n`;
-          detail += `  username: ${user.username}\n`;
-          detail += `     email: ${user.email || "<unable to retrieve>"}\n`;
           break;
         case 'shared-models':
           break;

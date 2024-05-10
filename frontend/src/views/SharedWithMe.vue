@@ -11,7 +11,7 @@
 
 <script>
 import { models } from '@feathersjs/vuex';
-import {mapGetters, mapState} from 'vuex';
+import {mapState} from 'vuex';
 import CuratedBookmarkListViewer from "@/components/CuratedBookmarkListViewer.vue";
 
 const { Organization, OrgSecondaryReference } = models.api;
