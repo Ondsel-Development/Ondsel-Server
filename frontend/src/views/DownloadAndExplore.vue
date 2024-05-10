@@ -155,7 +155,7 @@
                         <v-btn
                           size="large"
                           variant="outlined"
-                          class="text-none justify-start"
+                          class="text-none justify-start mt-6"
                           min-width="14em"
                           :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
