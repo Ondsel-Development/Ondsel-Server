@@ -1,10 +1,5 @@
 import _ from "lodash";
-import {CollectionNameMap} from "../bookmark.schema.js";
-import {buildUserSummary} from "../../users/users.distrib.js";
-import mongodb from "mongodb";
-import {CollectionNameMappingWithSummaryBuildMethods, validatePayloadBookmarkObject} from "../helpers.js";
-import {buildNavUrl, cleanedCuration} from "../../../curation.schema.js";
-import {buildOrganizationSummary} from "../../organizations/organizations.distrib.js";
+import {validatePayloadBookmarkObject} from "../helpers.js";
 import {BadRequest} from "@feathersjs/errors";
 
 export const editShare = async context => {

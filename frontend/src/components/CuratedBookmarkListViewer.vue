@@ -53,7 +53,7 @@
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
 import {models} from "@feathersjs/vuex";
-import {mapGetters} from "vuex";
+import {mapGetters, mapState} from "vuex";
 const { Organization, OrgSecondaryReference } = models.api;
 
 export default {
@@ -64,12 +64,15 @@ export default {
     allowEdits: {type: Boolean, default: false},
   },
   async created() {
-    const org = await Organization.get(this.organizationSummary._id);
+    const user = this.loggedInUser.user;
+    const org = await Organization.get(user.personalOrganization._id);
     this.orgSecondaryReferencesId = org.orgSecondaryReferencesId;
   },
   computed: {
     ...mapGetters('app', { organizationSummary: 'currentOrganization' }),
+    ...mapState('auth', { loggedInUser: 'payload' }),
   },
+
   data: () => ({
     currentEntry: {},
     orgSecondaryReferencesId: null,
