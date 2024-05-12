@@ -15,7 +15,6 @@
       </v-col>
       <slot name="actions"></slot>
     </v-row>
-    <br>
     <slot name="content"></slot>
   </v-container>
 </template>
