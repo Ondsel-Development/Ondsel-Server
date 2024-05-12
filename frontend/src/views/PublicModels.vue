@@ -16,6 +16,7 @@
       </v-btn>
     </template>
     <template #content>
+      <br>
       <v-row dense>
         <v-col
           v-for="(sharedModel, i) in sharedModels.data"
@@ -50,17 +51,17 @@
               </v-sheet>
             </template>
 
-            <v-card-title class="grey-color">
+            <v-card-title style="background: #fafafa;">
               <span class="text-body-1">
                 {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
               </span>
             </v-card-title>
 
-            <v-card-subtitle class="grey-color text-grey" style="opacity: inherit;">
+            <v-card-subtitle style="background: #fafafa;">
               {{ dateFormat(sharedModel.createdAt) }}
             </v-card-subtitle>
 
-            <v-card-actions class="grey-color">
+            <v-card-actions style="background: #fafafa;">
               <v-spacer></v-spacer>
               <v-btn
                 v-if="isAuthenticated"
