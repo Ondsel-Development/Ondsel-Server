@@ -1,24 +1,30 @@
 <template>
-  <v-container>
-    <v-card elevation="0">
-      <v-card-title>Shared With Me</v-card-title>
-      <v-card-text>
-        <curated-bookmark-list-viewer :display-list="orgSecondaryReferences?.sharedWithMe || []" />
-      </v-card-text>
-    </v-card>
-  </v-container>
+  <Main>
+    <template #title>
+      <v-icon icon="mdi-inbox" />
+      Shared With Me
+    </template>
+    <template #content>
+      <v-card elevation="0">
+        <v-card-text>
+          <curated-bookmark-list-viewer :display-list="orgSecondaryReferences?.sharedWithMe || []" />
+        </v-card-text>
+      </v-card>
+    </template>
+  </Main>
 </template>
 
 <script>
 import { models } from '@feathersjs/vuex';
 import {mapState} from 'vuex';
 import CuratedBookmarkListViewer from "@/components/CuratedBookmarkListViewer.vue";
+import Main from '@/layouts/default/Main.vue';
 
 const { Organization, OrgSecondaryReference } = models.api;
 
 export default {
   name: "SharedWithMe",
-  components: {CuratedBookmarkListViewer},
+  components: {Main, CuratedBookmarkListViewer},
   data() {
     return {
       orgSecondaryReferences: null
