@@ -1,10 +1,14 @@
 <template>
-  <v-container>
-    <v-card elevation="0">
-      <v-card-title>My Notifications</v-card-title>
-      <v-card-text>
-        <v-table>
-          <thead>
+  <Main>
+    <template #title>
+      <v-icon icon="mdi-bell-outline" />
+      My Notifications
+    </template>
+    <template #content>
+      <v-card elevation="0">
+        <v-card-text>
+          <v-table>
+            <thead>
             <tr>
               <th class="text-left">
                 Message
@@ -14,8 +18,8 @@
               </th>
               <th></th>
             </tr>
-          </thead>
-          <tbody>
+            </thead>
+            <tbody>
             <tr
               v-for="item in cleanNotifications"
               :key="item.when"
@@ -49,25 +53,28 @@
                 </v-menu>
               </td>
             </tr>
-          </tbody>
-        </v-table>
-        <v-sheet v-if="cleanNotifications.length === 0">
-          <v-card class="ma8"><v-card-text><em>No Notifications</em></v-card-text></v-card>
-        </v-sheet>
-      </v-card-text>
-    </v-card>
-  </v-container>
+            </tbody>
+          </v-table>
+          <v-sheet v-if="cleanNotifications.length === 0">
+            <v-card class="ma8"><v-card-text><em>No Notifications</em></v-card-text></v-card>
+          </v-sheet>
+        </v-card-text>
+      </v-card>
+    </template>
+  </Main>
 </template>
 
 <script>
 import { models } from '@feathersjs/vuex';
 import {mapState} from "vuex";
 import {buildNavRoute} from "@/curationHelpers";
+import Main from '@/layouts/default/Main.vue';
 
 const { Notification } = models.api;
 
 export default {
   name: "MyNotifications",
+  components: { Main },
   data: () => ({
     notificationList: [],
     cleanNotifications: [],

@@ -1,55 +1,47 @@
 <template>
-  <v-container>
-    <v-row class="pl-4 pr-4">
-<!--      <v-col cols="6">-->
-<!--        <v-text-field-->
-<!--          v-model="search"-->
-<!--          outlined-->
-<!--          hide-details-->
-<!--          placeholder="Search (by name)"-->
-<!--          append-icon="mdi-magnify"-->
-<!--        />-->
-<!--      </v-col>-->
-      <div class="text-h5">My Models</div>
-      <v-spacer />
-      <v-col cols="3" class="text-right">
-<!--        <v-checkbox v-model="showRecentModels" label="Show Recent" @click="showRecent"></v-checkbox>-->
-        <v-btn
-          min-width="200"
-          prepend-icon="mdi-plus"
-          :to="{ name: 'Home'}"
-          v-if="loggedInUser && loggedInUser.user.constraint.canUpload"
-        >
-          Upload New Model
-        </v-btn>
-        <v-btn
-          min-width="200"
-          prepend-icon="mdi-plus"
-          v-else
-          disabled
-        >
-          Upload New Model
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <br>
-    <v-row dense>
-      <v-col
-        v-for="(model) in myModels.data"
-        :key="model._id"
-        xs="12"
-        sm="12"
-        md="6"
-        lg="4"
-        xl="3"
-        xxl="2"
+  <Main>
+    <template #title>
+      <v-icon icon="mdi-cube-outline" />
+      My Models
+    </template>
+    <template #actions>
+      <v-btn
+        min-width="200"
+        prepend-icon="mdi-plus"
+        :to="{ name: 'Home'}"
+        v-if="loggedInUser && loggedInUser.user.constraint.canUpload"
       >
-        <v-card
-          class="mx-auto"
-          width="344"
+        Upload New Model
+      </v-btn>
+      <v-btn
+        min-width="200"
+        prepend-icon="mdi-plus"
+        v-else
+        disabled
+      >
+        Upload New Model
+      </v-btn>
+
+    </template>
+    <template #content>
+      <br>
+      <v-row dense>
+        <v-col
+          v-for="(model) in myModels.data"
+          :key="model._id"
+          xs="12"
+          sm="12"
+          md="6"
+          lg="4"
+          xl="3"
+          xxl="2"
         >
-          <router-link :to="{ name: 'Home', params: { id: model._id } }" style="text-decoration: none;">
+          <v-card
+            class="mx-auto"
+            width="344"
+            elevation="1"
+            @click="$router.push({ name: 'Home', params: { id: model._id } })"
+          >
             <template v-if="model.thumbnailUrl">
               <v-img
                 :src="model.thumbnailUrl"
@@ -66,25 +58,18 @@
                 <span style="color: #8D8D8D">?</span>
               </v-sheet>
             </template>
-          </router-link>
 
-          <v-card-title>
-            {{ model.customerFileName }}
-          </v-card-title>
+            <v-card-title style="background: #fafafa;">
+              <span class="text-body-1">
+                {{ model.customerFileName }}
+              </span>
+            </v-card-title>
 
-          <v-card-subtitle>
-            {{ dateFormat(model.createdAt) }}
-          </v-card-subtitle>
+            <v-card-subtitle style="background: #fafafa;">
+              {{ dateFormat(model.createdAt) }}
+            </v-card-subtitle>
 
-          <v-card-actions>
-            <v-btn
-              color="orange-lighten-2"
-              variant="text"
-              :to="{ name: 'Home', params: { id: model._id } }"
-            >
-              Explore
-            </v-btn>
-
+          <v-card-actions style="background: #fafafa;">
             <v-spacer></v-spacer>
             <DeleteDialog :model="model" @delete-model="deleteModel" />
             <v-btn
@@ -93,86 +78,83 @@
               @click.stop="sharedModelDrawerClicked(model)"
             ></v-btn>
 
-          </v-card-actions>
-        </v-card>
-      </v-col>
-      <template v-if="myModels.data.length === 0 && isFindPending">
-        <v-col
-          v-for="i in 25"
-          :key="i"
-          xs="12"
-          sm="12"
-          md="6"
-          lg="4"
-          xl="3"
-          xxl="2"
-        >
-          <v-card
-            class="mx-auto"
-            max-width="344"
+            </v-card-actions>
+          </v-card>
+        </v-col>
+        <template v-if="myModels.data.length === 0 && isFindPending">
+          <v-col
+            v-for="i in 25"
+            :key="i"
+            xs="12"
+            sm="12"
+            md="6"
+            lg="4"
+            xl="3"
+            xxl="2"
           >
+            <v-card
+              class="mx-auto"
+              max-width="344"
+            >
               <v-skeleton-loader
                 type="image, list-item-two-line"
               >
               </v-skeleton-loader>
 
-            <v-row dense>
-              <v-col cols='8'>
-                <v-skeleton-loader
-                  type="button" width="300px"
-                >
-                </v-skeleton-loader>
-              </v-col>
+              <v-row dense>
 
-              <v-col cols='2'>
-                <v-skeleton-loader
-                  type="button" width="65px" class=""
-                >
-                </v-skeleton-loader>
-              </v-col>
+                <v-spacer />
+                <v-col cols='2'>
+                  <v-skeleton-loader
+                    type="button" width="65px" class=""
+                  >
+                  </v-skeleton-loader>
+                </v-col>
 
-              <v-col cols='2'>
-              <v-skeleton-loader
-                type="button" width="65px" class="ml-n2"
-              >
-              </v-skeleton-loader>
-              </v-col>
+                <v-col cols='2'>
+                  <v-skeleton-loader
+                    type="button" width="65px" class="ml-n2"
+                  >
+                  </v-skeleton-loader>
+                </v-col>
 
-            </v-row>
-          </v-card>
+              </v-row>
+            </v-card>
 
-        </v-col>
-      </template>
-    </v-row>
-    <br>
-    <v-row dense class="justify-center">
-      <template v-if="myModels.data.length && isFindPending">
-        <v-progress-circular indeterminate></v-progress-circular>
-      </template>
-      <template v-else-if="myModels.data.length === this.pagination.total">
-        <div class="text-grey-darken-1">You reached the end!</div>
-      </template>
-      <template v-else>
-        <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
-      </template>
-    </v-row>
-  </v-container>
+          </v-col>
+        </template>
+      </v-row>
+      <br>
+      <v-row dense class="justify-center">
+        <template v-if="myModels.data.length && isFindPending">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </template>
+        <template v-else-if="myModels.data.length === this.pagination.total">
+          <div class="text-grey-darken-1">You reached the end!</div>
+        </template>
+        <template v-else>
+          <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
+        </template>
+      </v-row>
+    </template>
 
-  <v-navigation-drawer
-    v-model="manageSharedModelsDrawer"
-    location="right"
-    width="1100"
-    temporary
-  >
-    <MangeSharedModels :model="activeModel"/>
-  </v-navigation-drawer>
+    <v-navigation-drawer
+      v-model="manageSharedModelsDrawer"
+      location="right"
+      width="1100"
+      temporary
+    >
+      <MangeSharedModels :model="activeModel"/>
+    </v-navigation-drawer>
 
+  </Main>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
 import { models } from '@feathersjs/vuex';
 
+import Main from '@/layouts/default/Main.vue';
 import MangeSharedModels from '@/components/MangeSharedModels';
 import DeleteDialog from '@/components/DeleteDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
@@ -182,7 +164,7 @@ const { Model, SharedModel } = models.api;
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Models',
-  components: { MangeSharedModels, DeleteDialog },
+  components: { Main, MangeSharedModels, DeleteDialog },
   mixins: [scrollListenerMixin],
   data: () => ({
     search: '',

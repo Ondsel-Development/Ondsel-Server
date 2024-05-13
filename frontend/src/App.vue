@@ -1,18 +1,20 @@
 <template>
   <v-app>
-    <AppBar v-if="!$route.meta.isWindowLoadedInIframe"/>
-    <v-main>
-      <router-view/>
+    <MainNavigationBar v-if="!$route.meta.isWindowLoadedInIframe"/>
+    <v-main class="my-4 mx-2">
+      <v-sheet class="fill-height" style="background: #ffffff;" border rounded="lg">
+        <router-view/>
+      </v-sheet>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import AppBar from './layouts/default/AppBar';
+import MainNavigationBar from '@/layouts/default/MainNavigationBar.vue';
 
 export default {
   name: 'App',
-  components: {AppBar},
+  components: { MainNavigationBar },
   data: () => ({
   }),
 }
