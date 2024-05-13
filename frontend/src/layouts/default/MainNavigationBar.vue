@@ -177,6 +177,12 @@ export default {
     mainItems() {
       return [
         [
+          'mdi-cube-outline',
+          'Models',
+          this.user,
+          { name: 'Models', params: { slug: this.user?.username }}
+        ],
+        [
           'mdi-view-dashboard-outline',  // icon
           `Public view of ${this.currentOrganization?.name}`,  // label
           this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',  // condition
@@ -187,12 +193,6 @@ export default {
           'Public View of Me',
           this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',
           { name: 'UserHome', params: { slug: this.user?.username }}
-        ],
-        [
-          'mdi-cube-outline',
-          'Models',
-          this.user,
-          { name: 'Models', params: { slug: this.user?.username }}
         ],
         [
           'mdi-dots-square',
