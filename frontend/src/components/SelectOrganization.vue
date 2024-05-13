@@ -27,7 +27,7 @@
             <template #title>
               <v-btn
                 color="secondary"
-                variant="elevated"
+                elevated
               >
                 {{ organization.name }}
                 <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
@@ -36,7 +36,7 @@
             <template #append>
               <v-btn
                 color="secondary"
-                variant="elevated"
+                elevated
                 icon="mdi-cog"
                 flat
                 @click.stop="goToOrganizationEdit(organization)"
@@ -48,12 +48,12 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          variant="elevated"
+          elevated
           @click="dialog = false"
         >Cancel</v-btn>
         <v-btn
           color="error"
-          variant="elevated"
+          elevated
           :hidden="!user.constraint.canCreatePrivateOrganization && !user.constraint.canCreateOpenOrganization"
           :to="{ name: 'CreateOrganization'}"
           @click="dialog = false"

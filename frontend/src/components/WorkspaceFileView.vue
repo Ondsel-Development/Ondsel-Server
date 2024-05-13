@@ -10,11 +10,12 @@
       >
         <v-btn
           color="secondary"
-          variant="elevated"
+          elevated
         >Explore</v-btn>
       </a>
       <v-btn
         v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
+        class="mx-2"
         color="decoration"
         flat
         :disabled="!canUserWrite"
@@ -23,6 +24,7 @@
       ></v-btn>
       <v-btn
         v-if="!publicView && workspace.curation?.representativeFile?._id === file._id"
+        class="mx-2"
         color="decoration"
         flat
         :disabled="!canUserWrite"
@@ -30,8 +32,9 @@
         icon="mdi-camera"
       ></v-btn>
       <v-btn
+        class="mx-2"
         color="secondary"
-        variant="elevated"
+        elevated
         :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
@@ -40,6 +43,7 @@
       </v-btn>
       <v-btn
         v-if="!publicView"
+        class="mx-2"
         color="secondary"
         elevated
         :disabled="!canUserWrite"
@@ -49,6 +53,7 @@
       </v-btn>
       <v-btn
         v-if="!publicView"
+        class="mx-2"
         color="secondary"
         elevated
         :disabled="!canUserWrite"

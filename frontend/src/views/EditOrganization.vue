@@ -31,7 +31,7 @@
             <v-list-item-action>
               <v-btn
                 v-if="isLoggedInUserAdminOfOrganization"
-                variant="elevated"
+                elevated
                 color="secondary"
                 size="small"
                 @click.stop="openOrgChangeNameDialog()"
@@ -67,7 +67,7 @@
           <template #append>
             <v-list-item-action>
               <v-btn
-                variant="elevated"
+                elevated
                 color="secondary"
                 size="small"
                 @click.stop="openEditDescriptionDialog()"
@@ -98,7 +98,7 @@
           <template #append>
             <v-list-item-action>
               <v-btn
-                variant="elevated"
+                elevated
                 color="secondary"
                 size="small"
                 @click.stop="openEditLongDescriptionMdDialog()"
@@ -130,7 +130,7 @@
           <template #append>
             <v-list-item-action>
               <v-btn
-                variant="elevated"
+                elevated
                 color="secondary"
                 size="small"
                 @click.stop="openEditTagsDialog()"
@@ -176,7 +176,7 @@
               <v-btn
                 v-if="userIsOwner"
                 color="secondary"
-                variant="elevated"
+                elevated
                 size="small"
                 @click.stop="openDeleteOrgDialog()"
               >
