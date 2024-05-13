@@ -35,14 +35,20 @@
         <v-card-actions class="justify-center">
           <v-btn
             v-if="label && label.type === 'success'"
-            color="primary"
+            color="cancel"
+            variant="elevated"
             @click="dialog = false;"
           >Close</v-btn>
           <template v-else>
-            <v-btn @click="dialog = false;">Cancel</v-btn>
+            <v-btn
+              color="cancel"
+              variant="elevated"
+              @click="dialog = false;"
+            >Cancel</v-btn>
             <v-btn
               type="submit"
               color="primary"
+              variant="elevated"
               :disabled="isCreatePending"
             >Send</v-btn>
           </template>

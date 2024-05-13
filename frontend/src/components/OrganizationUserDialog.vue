@@ -38,12 +38,17 @@
         </div>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn :disabled="isPatchPending" @click="dialog = false">Close</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          :disabled="isPatchPending"
+          @click="dialog = false"
+        >Close</v-btn>
         <template v-if="!isUserOwner && isLoggedInUserAdmin(organization)">
           <v-btn
             v-if="!user.isAdmin"
             color="error"
-            variant="outlined"
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="makeOrganizationAdmin"
@@ -51,14 +56,14 @@
           <v-btn
             v-else
             color="error"
-            variant="outlined"
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="revokeOrganizationAdmin"
           >Revoke Admin Access</v-btn>
           <v-btn
             color="error"
-            variant="outlined"
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="confirmationDialog = true;"
@@ -82,9 +87,14 @@
         </div>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="confirmationDialog = false">No</v-btn>
         <v-btn
-          color="primary"
+          color="cancel"
+          variant="elevated"
+          @click="confirmationDialog = false"
+        >No</v-btn>
+        <v-btn
+          color="error"
+          variant="elevated"
           @click="removeUserFromOrganization"
         >Yes</v-btn>
       </v-card-actions>
