@@ -28,12 +28,12 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          elevated
+          variant="elevated"
           @click="this.dialog = false;"
         >Cancel</v-btn>
         <v-btn
           color="primary"
-          elevated
+          variant="elevated"
           :disabled="isPatchPending"
           @click="addUsersToGroup"
         >Update</v-btn>

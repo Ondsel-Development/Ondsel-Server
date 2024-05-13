@@ -36,19 +36,19 @@
           <v-btn
             v-if="label && label.type === 'success'"
             color="cancel"
-            elevated
+            variant="elevated"
             @click="dialog = false;"
           >Close</v-btn>
           <template v-else>
             <v-btn
               color="cancel"
-              elevated
+              variant="elevated"
               @click="dialog = false;"
             >Cancel</v-btn>
             <v-btn
               type="submit"
               color="primary"
-              elevated
+              variant="elevated"
               :disabled="isCreatePending"
             >Send</v-btn>
           </template>

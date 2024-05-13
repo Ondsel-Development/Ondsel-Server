@@ -38,20 +38,20 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          elevated
+          variant="elevated"
           @click="dialog = false"
         >Cancel</v-btn>
         <v-btn
           @click="editPromotion(true)"
           color="primary"
-          elevated
+          variant="elevated"
           :disabled="isPatchPending"
           :loading="isPatchPending"
         >Yes</v-btn>
         <v-btn
           @click="editPromotion(false)"
           color="primary"
-          elevated
+          variant="elevated"
           :disabled="isPatchPending"
           :loading="isPatchPending"
         >No</v-btn>

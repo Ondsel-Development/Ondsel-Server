@@ -27,13 +27,13 @@
         <v-card-actions class="justify-center">
           <v-btn
             color="cancel"
-            elevated
+            variant="elevated"
             @click="dialog = false;"
           >Cancel</v-btn>
           <v-btn
             type="submit"
             color="primary"
-            elevated
+            variant="elevated"
             :disabled="isCreatePending"
           >Create</v-btn>
         </v-card-actions>

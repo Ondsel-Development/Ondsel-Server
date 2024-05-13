@@ -41,12 +41,12 @@
         <v-card-actions class="justify-center">
           <v-btn
             color="cancel"
-            elevated
+            variant="elevated"
             :disabled="isCreatePending"
             class="mt-2"
             @click="$router.go(-1)"
           >Go Back</v-btn>
-          <v-btn type="submit" color="primary" elevated :disabled="isCreatePending" class="mt-2">Create</v-btn>
+          <v-btn type="submit" color="primary" variant="elevated" :disabled="isCreatePending" class="mt-2">Create</v-btn>
         </v-card-actions>
       </v-form>
       <v-snackbar

@@ -10,7 +10,7 @@
       >
         <v-btn
           color="secondary"
-          elevated
+          variant="elevated"
         >Explore</v-btn>
       </a>
       <v-btn
@@ -34,7 +34,7 @@
       <v-btn
         class="mx-2"
         color="secondary"
-        elevated
+        variant="elevated"
         :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
@@ -45,7 +45,7 @@
         v-if="!publicView"
         class="mx-2"
         color="secondary"
-        elevated
+        variant="elevated"
         :disabled="!canUserWrite"
         @click="$refs.deleteFile.openDeleteFileDialog();"
       >
@@ -55,7 +55,7 @@
         v-if="!publicView"
         class="mx-2"
         color="secondary"
-        elevated
+        variant="elevated"
         :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>

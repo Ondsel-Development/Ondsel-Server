@@ -18,7 +18,7 @@
         <v-spacer></v-spacer>
         <v-btn
           color="secondary"
-          elevated
+          variant="elevated"
           class="mb-2"
           :hidden="!isLoggedInUserAdmin(organization)"
           @click="() => $refs.inviteUserDialog.openDialog()"

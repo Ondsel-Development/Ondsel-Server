@@ -6,7 +6,7 @@
       <div class="align-end">
         <v-btn
           color="secondary"
-          elevated
+          variant="elevated"
           @click="$refs.createWorkspace.$data.dialog = true;"
         >Create new Workspace</v-btn>
       </div>

@@ -40,7 +40,7 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          elevated
+          variant="elevated"
           :disabled="isPatchPending"
           @click="dialog = false"
         >Close</v-btn>
@@ -48,7 +48,7 @@
           <v-btn
             v-if="!user.isAdmin"
             color="error"
-            elevated
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="makeOrganizationAdmin"
@@ -56,14 +56,14 @@
           <v-btn
             v-else
             color="error"
-            elevated
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="revokeOrganizationAdmin"
           >Revoke Admin Access</v-btn>
           <v-btn
             color="error"
-            elevated
+            variant="elevated"
             :disabled="isPatchPending"
             :loading="isPatchPending"
             @click="confirmationDialog = true;"
@@ -89,12 +89,12 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          elevated
+          variant="elevated"
           @click="confirmationDialog = false"
         >No</v-btn>
         <v-btn
           color="error"
-          elevated
+          variant="elevated"
           @click="removeUserFromOrganization"
         >Yes</v-btn>
       </v-card-actions>

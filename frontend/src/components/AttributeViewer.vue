@@ -130,12 +130,12 @@
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
-          elevated
+          variant="elevated"
           @click="dialog = false" :disabled="!isObjGenerated"
         >Cancel</v-btn>
         <v-btn
           color="primary"
-          elevated
+          variant="elevated"
           v-if="canUpdate && Object.keys(attributes).length"
           :disabled="(user && !constraints.canUpdateModelParameters) || !isObjGenerated || !isAuthenticated"
           @click="$emit('updateModel')"

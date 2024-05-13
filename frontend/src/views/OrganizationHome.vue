@@ -83,7 +83,7 @@
           >
             <v-sheet
               class="mx-auto"
-              elevated
+              variant="elevated"
               link
               @click.stop="goToUserHome(member)"
             >
