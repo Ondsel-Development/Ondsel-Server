@@ -5,7 +5,8 @@
       :key="entry.curation._id"
     >
       <v-sheet>
-        <v-sheet
+        <v-card
+          elevation="8"
           min-width="22em"
           max-width="40em"
           class="ma-2 align-self-stretch"
@@ -13,7 +14,7 @@
           :border="entry.read ? 'background xl' : 'info xl'"
         >
           <curated-item-sheet :curation="entry.curation" :message="entry.description" :from-user="entry.createdBy" :from-org="entry.onBehalfOf" :from-date="entry.createdAt"></curated-item-sheet>
-        </v-sheet>
+        </v-card>
       </v-sheet>
       <v-sheet class="d-flex justify-space-between">
         <div>

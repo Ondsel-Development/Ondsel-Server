@@ -22,6 +22,7 @@ const customLightTheme = {
     error: '#B71C1C',
     cancel: '#9E9E9E',
     success: '#00C853',
+    background: '#FAFAFA',
   },
 };
 
