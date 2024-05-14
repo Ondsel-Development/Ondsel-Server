@@ -128,22 +128,47 @@
         <v-list-item v-else>
           <span class="d-flex flex-row justify-center">
             <v-btn
-              v-if="currentRouteName !== 'Login'"
-              variant="outlined"
-              class="ma-1"
-              :to="{ name: 'Login' }"
-            >
-              Login
-            </v-btn>
-            <v-btn
-              v-if="currentRouteName !== 'SignUp'"
-              variant="tonal"
-              color="primary"
-              class="ma-1"
-              :to="{ name: 'SignUp' }"
-            >
-              SignUp
-            </v-btn>
+              v-if="rail && currentRouteName !== 'Login' && currentRouteName !== 'SignUp'"
+              variant="plain"
+              icon="mdi-account"
+              @click="rail = false;"
+            />
+            <template v-else>
+              <template v-if="currentRouteName !== 'Login'">
+                <v-btn
+                  v-if="!rail"
+                  variant="outlined"
+                  class="ma-1"
+                  :to="{ name: 'Login' }"
+                >
+                  Login
+                </v-btn>
+                <v-btn
+                  v-else
+                  variant="plain"
+                  icon="mdi-login"
+                  :to="{ name: 'Login' }"
+                />
+              </template>
+              <template v-if="currentRouteName !== 'SignUp'">
+                <v-btn
+                  v-if="!rail"
+                  variant="tonal"
+                  color="primary"
+                  class="ma-1"
+                  :to="{ name: 'SignUp' }"
+                >
+                  SignUp
+                </v-btn>
+                <v-btn
+                  v-else
+                  variant="plain"
+                  color="primary"
+                  icon="mdi-account-plus-outline"
+                  :to="{ name: 'SignUp' }"
+                />
+              </template>
+            </template>
           </span>
         </v-list-item>
       </v-list>
