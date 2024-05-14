@@ -45,9 +45,14 @@
         ></v-select>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false; isExportInProgress = false">Cancel</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false; isExportInProgress = false"
+        >Cancel</v-btn>
         <v-btn
           color="primary"
+          variant="elevated"
           @click="runExportCmd"
           :disabled="!format || isExportInProgress || (!isAuthenticated && !(format === exportDefaultModelLabel())) || (user && !constraints.canExportModel && !(format === exportDefaultModelLabel()))"
         >Download</v-btn>
@@ -208,6 +213,7 @@ export default {
           document.body.appendChild(docUrl);
           docUrl.click();
           this.isExportInProgress = false;
+          this.dialog = false;
         });
       });
     },

@@ -25,16 +25,22 @@
         </v-table>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
         <v-btn
-          color="primary"
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          color="secondary"
+          variant="elevated"
           :disabled="isFileDownloadInProgress || !user"
           :loading="isFileDownloadInProgress"
-          @click="downloadFile(selectedFileVersion.uniqueFileName, `${selectedFileVersion._id.substr(-6)}_${file.custFileName}`)"
+          @click="downloadFile(selectedFileVersion.uniqueFileName, `${selectedFileVersion._id.substr(-6)}_${file.custFileName}`); dialog = false"
         >Download Copy</v-btn>
         <v-btn
           v-if="!publicView"
-          color="primary"
+          color="secondary"
+          variant="elevated"
           :disabled="!canUserWrite"
           :loading="isPatchPending"
           @click="checkoutToVersion"
