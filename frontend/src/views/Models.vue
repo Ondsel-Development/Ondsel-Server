@@ -138,16 +138,16 @@
       </v-row>
     </template>
 
-    <v-navigation-drawer
-      v-model="manageSharedModelsDrawer"
-      location="right"
-      width="1100"
-      temporary
-    >
-      <MangeSharedModels :model="activeModel"/>
-    </v-navigation-drawer>
-
   </Main>
+  <v-navigation-drawer
+    v-model="manageSharedModelsDrawer"
+    location="right"
+    width="1100"
+    temporary
+  >
+    <MangeSharedModels :model="activeModel"/>
+  </v-navigation-drawer>
+
 </template>
 
 <script>
