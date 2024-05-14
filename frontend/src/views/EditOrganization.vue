@@ -175,7 +175,7 @@
             <v-list-item-action>
               <v-btn
                 v-if="userIsOwner"
-                color="secondary"
+                color="error"
                 variant="elevated"
                 size="small"
                 @click.stop="openDeleteOrgDialog()"

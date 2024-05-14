@@ -18,8 +18,8 @@
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openUserChangeNameDialog()"
             >
@@ -54,8 +54,8 @@
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openEditDescriptionDialog()"
             >
@@ -82,8 +82,8 @@
           </v-list-item-media>
           <v-list-item-action class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openEditLongDescriptionMdDialog()"
             >
@@ -111,8 +111,8 @@
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openEditTagsDialog()"
             >
@@ -154,8 +154,8 @@
           </v-list-item-subtitle>
           <v-list-item-action v-if="!user.isVerified" class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openVerifyEmailDialog()"
             >
@@ -177,8 +177,8 @@
           </v-list-item-subtitle>
           <v-list-item-action v-if="user.isVerified" class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click.stop="openResetPasswordDialog()"
               :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
@@ -218,15 +218,20 @@
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
             <v-btn
-              variant="outlined"
-              color="default"
+              color="secondary"
+              variant="elevated"
               size="small"
               @click="gotoChooseTier()"
               :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
             >
               Choose New Tier
             </v-btn>
-            <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
+            <v-btn
+              color="secondary"
+              variant="elevated"
+              size="small"
+              @click="gotoAccountHistory()"
+            >
               View Account History
             </v-btn>
           </v-list-item-action>

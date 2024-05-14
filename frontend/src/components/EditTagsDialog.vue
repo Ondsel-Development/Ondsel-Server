@@ -40,8 +40,18 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doSaveTags()" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Save</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doSaveTags()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+          :loading="isPatchPending"
+        >Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

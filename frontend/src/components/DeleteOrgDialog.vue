@@ -43,8 +43,17 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doDeleteOrg()" color="primary" :disabled="pendingDeleteOrg">Delete</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doDeleteOrg()"
+          color="primary"
+          variant="elevated"
+          :disabled="pendingDeleteOrg"
+        >Delete</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

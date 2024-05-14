@@ -83,13 +83,16 @@
                 <v-card-actions style="background: #fafafa;">
                   <v-spacer />
                   <v-btn
+                    color="decoration"
+                    flat
                     icon="mdi-bookmark"
                     size="small"
                     @click.stop="openManageBookmarkDialog(bookmark.collectionSummary)"
                   ></v-btn>
                   <v-btn
+                    color="secondary"
+                    variant="elevated"
                     prepend-icon="mdi-share"
-                    variant="text"
                   >
                     <template v-slot:prepend>
                       <v-icon></v-icon>
