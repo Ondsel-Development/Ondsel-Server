@@ -16,7 +16,8 @@
         ></v-divider>
         <v-spacer></v-spacer>
         <v-btn
-          dark
+          color="secondary"
+          variant="elevated"
           class="mb-2"
           :hidden="!isLoggedInUserAdmin(organization)"
           @click="openManageWorkspaceUsersDialog"

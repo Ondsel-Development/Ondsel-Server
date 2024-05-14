@@ -26,9 +26,15 @@
         ></v-data-table-virtual>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn :disabled="isPatchPending" @click="this.dialog = false;">Close</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          :disabled="isPatchPending"
+          @click="this.dialog = false;"
+        >Close</v-btn>
         <v-btn
           color="primary"
+          variant="elevated"
           :disabled="isPatchPending"
           :loading="isPatchPending"
           @click="updateWorkspaceGroups"

@@ -1,7 +1,7 @@
 <template>
   <v-container v-if="organization">
     <v-row class="align-center">
-      <div class="text-h6">Workspaces</div>
+      <div class="text-h6">{{organization.name}} Workspaces</div>
       <v-spacer />
       <div class="align-end">
         <v-btn

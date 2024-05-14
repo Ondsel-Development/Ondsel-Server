@@ -1,71 +1,60 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    width="auto"
-  >
-    <v-card width="500" max-height="800">
-      <template v-slot:title>
-        <div class="text-center">Your Organizations</div>
-      </template>
-      <v-progress-linear
-        :active="false"
-        indeterminate
-        absolute
-        bottom
-      ></v-progress-linear>
-      <v-card-text>
-        <v-list>
-          <v-list-item
-            v-for="(organization, i) in user.organizations"
-            :key="i"
-            variant="text"
-            flat
-            :value="organization"
-            :active="currentOrganization ? organization._id === currentOrganization._id : false"
-            @click.stop="goToOrganization(organization)"
-          >
-            <template #title>
-              <v-btn
-                color="secondary"
-                variant="elevated"
-              >
-                {{ organization.name }}
-                <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
-              </v-btn>
+  <v-sheet>
+    <v-menu location="bottom">
+      <template v-slot:activator="{ props }">
+        <v-list class="my-2" nav>
+          <v-divider />
+          <v-list-item v-bind="props" height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user">
+            <template #prepend>
+              <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
+                {{ getInitials(currentOrganization?.name || '') }}
+              </v-sheet>
             </template>
-            <template #append>
-              <v-btn
-                color="secondary"
-                variant="elevated"
-                icon="mdi-cog"
-                flat
-                @click.stop="goToOrganizationEdit(organization)"
-              />
+            <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
+              <span class="text-caption">Organization</span>
+              <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
+            </v-sheet>
+            <template v-slot:append>
+              <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
             </template>
           </v-list-item>
+          <v-divider />
         </v-list>
-      </v-card-text>
-      <v-card-actions class="justify-center">
-        <v-btn
-          color="cancel"
-          variant="elevated"
-          @click="dialog = false"
-        >Cancel</v-btn>
-        <v-btn
-          color="error"
-          variant="elevated"
-          :hidden="!user.constraint.canCreatePrivateOrganization && !user.constraint.canCreateOpenOrganization"
-          :to="{ name: 'CreateOrganization'}"
-          @click="dialog = false"
-        >Create Organization</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </template>
+      <v-list>
+        <v-list-item
+          v-for="(organization, i) in user.organizations"
+          :key="i"
+          variant="text"
+          flat
+          :value="organization"
+          :active="currentOrganization ? organization._id === currentOrganization._id : false"
+          @click.stop="goToOrganization(organization)"
+        >
+          <template #title>
+            <v-sheet>
+              {{ organization.name }}
+              <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+            </v-sheet>
+          </template>
+          <template #append>
+            <v-btn
+              color="decorative"
+              flat
+              icon="mdi-cog"
+              @click.stop="goToOrganizationEdit(organization)"
+            ></v-btn>
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+  </v-sheet>
 </template>
 
 <script>
 import { mapActions, mapState } from 'vuex';
 import { models } from '@feathersjs/vuex';
+import {getInitials} from "../genericHelpers";
 
 export default {
   name: "SelectOrganization",
@@ -74,7 +63,6 @@ export default {
   },
   data: () => {
     return {
-      dialog: false,
     }
   },
   computed: {
@@ -82,6 +70,7 @@ export default {
     ...mapState('auth', ['user']),
   },
   methods: {
+    getInitials,
     ...mapActions('app', ['setCurrentOrganization']),
     async goToOrganization(organization) {
       const { Organization } = models.api;
@@ -92,7 +81,6 @@ export default {
       } else {
         this.$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } });
       }
-      this.dialog = false;
     },
     async goToOrganizationEdit(organization) {
       const { Organization } = models.api;
@@ -103,7 +91,6 @@ export default {
       } else {
         this.$router.push({ name: 'EditOrganization', params: { id: organization.refName } });
       }
-      this.dialog = false;
     }
   }
 }

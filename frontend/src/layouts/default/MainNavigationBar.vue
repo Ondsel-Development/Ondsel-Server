@@ -1,23 +1,6 @@
 <template>
   <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
-    <v-list class="my-2" nav>
-      <v-divider />
-      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user" @click="$refs.selectedOrganization.$data.dialog = true;">
-        <template #prepend>
-          <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
-            {{ getInitials(currentOrganization?.name || '') }}
-          </v-sheet>
-        </template>
-        <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
-          <span class="text-caption">Organization</span>
-          <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
-        </v-sheet>
-        <template v-slot:append>
-          <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
-        </template>
-      </v-list-item>
-      <v-divider />
-    </v-list>
+    <select-organization :current-organization="currentOrganization"></select-organization>
     <v-text-field
       v-model="searchText"
       class="ma-4"
@@ -150,12 +133,12 @@
     </template>
     <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click="rail = !rail"></v-btn>
   </v-navigation-drawer>
-  <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import SelectOrganization from '@/components/SelectOrganization.vue';
+import {getInitials} from "../../genericHelpers";
 
 export default {
   name: "MainNavigationBar",
@@ -234,6 +217,7 @@ export default {
     }
   },
   methods: {
+    getInitials,
     ...mapActions('auth', {authLogout: 'logout'}),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
@@ -255,15 +239,6 @@ export default {
       if (this.searchText) {
         this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
       }
-    },
-    getInitials(name) {
-      const nameArray = name.split(' ');
-      const firstName = nameArray[0].charAt(0).toUpperCase();
-      const lastName = nameArray[nameArray.length - 1].charAt(0).toUpperCase();
-      if (nameArray.length === 1) {
-        return firstName;
-      }
-      return firstName + lastName;
     },
   },
 }
