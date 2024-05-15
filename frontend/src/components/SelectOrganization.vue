@@ -29,10 +29,9 @@
           flat
           :value="organization"
           :active="currentOrganization ? organization._id === currentOrganization._id : false"
-          @click="goToOrganization(organization)"
         >
           <template #title>
-            <v-sheet>
+            <v-sheet @click="goToOrganization(organization)">
               {{ organization.name }}
               <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
             </v-sheet>
