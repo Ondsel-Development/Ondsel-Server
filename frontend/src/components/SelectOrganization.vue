@@ -29,7 +29,7 @@
           flat
           :value="organization"
           :active="currentOrganization ? organization._id === currentOrganization._id : false"
-          @click.stop="goToOrganization(organization)"
+          @click="goToOrganization(organization)"
         >
           <template #title>
             <v-sheet>
@@ -42,7 +42,7 @@
               color="decorative"
               flat
               icon="mdi-cog"
-              @click.stop="goToOrganizationEdit(organization)"
+              @click="goToOrganizationEdit(organization)"
             ></v-btn>
           </template>
         </v-list-item>
@@ -61,10 +61,8 @@ export default {
   props: {
     currentOrganization: Object,
   },
-  data: () => {
-    return {
-    }
-  },
+  data: () => ({
+  }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
     ...mapState('auth', ['user']),
