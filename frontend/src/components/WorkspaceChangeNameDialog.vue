@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceNameDialogForm" @submit.prevent="doNameChange">
         <v-card-text>
           <v-text-field
             v-if="allowNameChange"
