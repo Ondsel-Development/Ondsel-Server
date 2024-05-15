@@ -28,7 +28,7 @@
             <td class="font-weight-medium">Created By</td>
             <td>
               <v-btn
-                flat
+                color="link"
                 variant="plain"
                 append-icon="mdi-open-in-new"
                 class="text-body-1 font-weight-medium pa-0"
@@ -44,7 +44,7 @@
             <td class="font-weight-medium">Organization</td>
             <td>
               <v-btn
-                flat
+                color="link"
                 variant="plain"
                 append-icon="mdi-open-in-new"
                 class="text-body-1 font-weight-medium pa-0"
@@ -65,7 +65,7 @@
             <td class="font-weight-medium">Workspace</td>
             <td>
               <v-btn
-                flat
+                color="link"
                 variant="plain"
                 append-icon="mdi-open-in-new"
                 class="text-body-1 font-weight-medium pa-0"

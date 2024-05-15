@@ -19,6 +19,7 @@ const customLightTheme = {
     primary: '#0D47A1',
     secondary: '#607D8B',
     decoration: '#EFEBE9',
+    link: '#263238',
     error: '#B71C1C',
     cancel: '#9E9E9E',
     success: '#00C853',

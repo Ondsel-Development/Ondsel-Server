@@ -11,6 +11,7 @@
         <v-btn
           color="secondary"
           variant="elevated"
+          append-icon="mdi-open-in-new"
         >Explore</v-btn>
       </a>
       <v-btn
