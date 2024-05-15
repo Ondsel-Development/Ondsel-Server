@@ -1,243 +1,250 @@
 <template>
-  <v-container v-if="organization" class="mt-4">
-    <div class="d-flex flex-row mb-8" style="align-items: center">
-      <div class="text-body-1">Organization&nbsp;</div>
-      <v-btn
-        flat
-        variant="plain"
-        class="text-body-1 font-weight-bold pl-0"
-        style="text-decoration: none;"
-        @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } })"
-      >
-        {{ organization.name }}
-      </v-btn>
-    </div>
-
-    <v-tabs
-      v-model="tab"
-      align-tabs="center"
-    >
-      <v-tab value="1">Public Details</v-tab>
-      <v-tab value="2">Private Details</v-tab>
-      <v-tab value="3">Users</v-tab>
-      <v-tab value="4">Groups</v-tab>
-      <v-tab value="5">Public Promoted Items</v-tab>
-    </v-tabs>
-
-    <v-tabs-window v-model="tab">
-      <v-tabs-window-item value="1">
-        <v-card
-          variant="flat"
-          :border="true"
-          class="mx-auto my-6"
+  <Main>
+    <template #title>
+      <div class="d-flex flex-row" style="align-items: center">
+        <div class="text-body-1">Organization&nbsp;</div>
+        <v-btn
+          v-if="organization"
+          flat
+          variant="plain"
+          class="text-body-1 font-weight-bold pl-0"
+          style="text-decoration: none;"
+          @click="$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } })"
         >
-          <v-list lines="three">
-            <v-list-subheader class="mb-2">Public Details</v-list-subheader>
+          {{ organization.name }}
+        </v-btn>
+      </div>
+    </template>
+    <template #content>
+      <v-container v-if="organization">
+        <v-tabs
+          v-model="tab"
+          align-tabs="center"
+        >
+          <v-tab value="1">Public Details</v-tab>
+          <v-tab value="2">Private Details</v-tab>
+          <v-tab value="3">Users</v-tab>
+          <v-tab value="4">Groups</v-tab>
+          <v-tab value="5">Public Promoted Items</v-tab>
+        </v-tabs>
 
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Name</v-list-item-title>
-              <v-list-item-subtitle>
-                {{ organization.name }}
-              </v-list-item-subtitle>
-              <template #append>
-                <v-list-item-action>
-                  <v-btn
-                    v-if="isLoggedInUserAdminOfOrganization"
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    @click.stop="openOrgChangeNameDialog()"
-                  >
-                    Change Name
-                  </v-btn>
-                  <div v-else>
-                    <i>not admin</i>
-                  </div>
-                </v-list-item-action>
-              </template>
-            </v-list-item>
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item value="1">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
+            >
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">Public Details</v-list-subheader>
 
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Nature</v-list-item-title>
-              <v-list-item-subtitle>
-                {{organization.type}}
-              </v-list-item-subtitle>
-            </v-list-item>
-
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Short Description</v-list-item-title>
-              <v-list-item-subtitle>
-                <div v-if="organization.description">
-                  {{ organization.description }}
-                </div>
-                <div v-else>
-                  <i>none supplied</i>
-                </div>
-              </v-list-item-subtitle>
-              <template #append>
-                <v-list-item-action>
-                  <v-btn
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    @click.stop="openEditDescriptionDialog()"
-                  >
-                    Edit Description
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <EditDescriptionDialog
-                    :is-active="isOrgChangeDescriptionDialogActive"
-                    :long-description-md="organization.description || ''"
-                    ref="editDescriptionDialog"
-                    @save-description="saveDescriptionDialog"
-                  />
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Long Description</v-list-item-title>
-              <v-list-item-media>
-                <v-card>
-                  <v-card-text>
-                    <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
-                  </v-card-text>
-                </v-card>
-              </v-list-item-media>
-              <template #append>
-                <v-list-item-action>
-                  <v-btn
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    @click.stop="openEditLongDescriptionMdDialog()"
-                  >
-                    Edit Long Description
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <EditLongDescriptionMdDialog
-                    :is-active="isOrgChangeLongDescriptionMdDialogActive"
-                    :long-description-md="organization.curation?.longDescriptionMd || ''"
-                    ref="editLongDescriptionMdDialog"
-                    @save-long-description-md="saveLongDescriptionMdDialog"
-                  />
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Tags</v-list-item-title>
-              <v-list-item-subtitle>
-                <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
-                  <v-chip-group>
-                    <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
-                  </v-chip-group>
-                </div>
-                <span v-else><i>None</i></span>
-              </v-list-item-subtitle>
-              <template #append>
-                <v-list-item-action>
-                  <v-btn
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    @click.stop="openEditTagsDialog()"
-                  >
-                    Edit Tags
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <EditTagsDialog
-                    :is-active="isOrgChangeTagsDialogActive"
-                    :tagList="organization.curation?.tags || []"
-                    ref="editTagsDialog"
-                    @save-tags="saveTags"
-                  />
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Public Links</v-list-item-title>
-              <v-list>
+                <v-divider />
                 <v-list-item>
-                  <p class="text-body-1">Public Org Summary: <a :href="`${homepageUrl}`">{{homepageUrl}}</a></p>
+                  <v-list-item-title>Name</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ organization.name }}
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        v-if="isLoggedInUserAdminOfOrganization"
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        @click.stop="openOrgChangeNameDialog()"
+                      >
+                        Change Name
+                      </v-btn>
+                      <div v-else>
+                        <i>not admin</i>
+                      </div>
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Nature</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{organization.type}}
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Short Description</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <div v-if="organization.description">
+                      {{ organization.description }}
+                    </div>
+                    <div v-else>
+                      <i>none supplied</i>
+                    </div>
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        @click.stop="openEditDescriptionDialog()"
+                      >
+                        Edit Description
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <EditDescriptionDialog
+                        :is-active="isOrgChangeDescriptionDialogActive"
+                        :long-description-md="organization.description || ''"
+                        ref="editDescriptionDialog"
+                        @save-description="saveDescriptionDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Long Description</v-list-item-title>
+                  <v-list-item-media>
+                    <v-card>
+                      <v-card-text>
+                        <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
+                      </v-card-text>
+                    </v-card>
+                  </v-list-item-media>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        @click.stop="openEditLongDescriptionMdDialog()"
+                      >
+                        Edit Long Description
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <EditLongDescriptionMdDialog
+                        :is-active="isOrgChangeLongDescriptionMdDialogActive"
+                        :long-description-md="organization.curation?.longDescriptionMd || ''"
+                        ref="editLongDescriptionMdDialog"
+                        @save-long-description-md="saveLongDescriptionMdDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Tags</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
+                      <v-chip-group>
+                        <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
+                      </v-chip-group>
+                    </div>
+                    <span v-else><i>None</i></span>
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        @click.stop="openEditTagsDialog()"
+                      >
+                        Edit Tags
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <EditTagsDialog
+                        :is-active="isOrgChangeTagsDialogActive"
+                        :tagList="organization.curation?.tags || []"
+                        ref="editTagsDialog"
+                        @save-tags="saveTags"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Public Links</v-list-item-title>
+                  <v-list>
+                    <v-list-item>
+                      <p class="text-body-1">Public Org Summary: <a :href="`${homepageUrl}`">{{homepageUrl}}</a></p>
+                    </v-list-item>
+                  </v-list>
                 </v-list-item>
               </v-list>
-            </v-list-item>
-          </v-list>
-        </v-card>
+            </v-card>
 
-      </v-tabs-window-item>
+          </v-tabs-window-item>
 
-      <v-tabs-window-item value="2">
-        <v-card
-          variant="flat"
-          :border="true"
-          class="mx-auto my-6"
-        >
-          <v-list lines="three">
-            <v-list-subheader class="mb-2">Private</v-list-subheader>
+          <v-tabs-window-item value="2">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
+            >
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">Private</v-list-subheader>
 
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Admin</v-list-item-title>
-              <template #append>
-                <v-list-item-action>
-                  <v-btn
-                    v-if="userIsOwner"
-                    variant="outlined"
-                    size="small"
-                    @click.stop="openDeleteOrgDialog()"
-                  >
-                    Delete Organization
-                  </v-btn>
-                  <div v-else>
-                    <i>not admin</i>
-                  </div>
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-            <v-list-item>
-              <v-list-item-title>Links</v-list-item-title>
-              <v-list>
+                <v-divider />
                 <v-list-item>
-                  <p class="text-body-1">Workspaces: <a :href="`${workspacesUrl}`">{{workspacesUrl}}</a></p>
+                  <v-list-item-title>Admin</v-list-item-title>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        v-if="userIsOwner"
+                        variant="outlined"
+                        size="small"
+                        @click.stop="openDeleteOrgDialog()"
+                      >
+                        Delete Organization
+                      </v-btn>
+                      <div v-else>
+                        <i>not admin</i>
+                      </div>
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Links</v-list-item-title>
+                  <v-list>
+                    <v-list-item>
+                      <p class="text-body-1">Workspaces: <a :href="`${workspacesUrl}`">{{workspacesUrl}}</a></p>
+                    </v-list-item>
+                  </v-list>
                 </v-list-item>
               </v-list>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-tabs-window-item>
+            </v-card>
+          </v-tabs-window-item>
 
-      <v-tabs-window-item value="3">
-        <organization-users-table :organization="organization" />
-      </v-tabs-window-item>
-      <v-tabs-window-item value="4">
-        <organization-groups-table :organization="organization" />
-      </v-tabs-window-item>
-      <v-tabs-window-item value="5">
-        <organization-promotions-table :organization="organization" />
-      </v-tabs-window-item>
-    </v-tabs-window>
-    <OrgChangeNameDialog
-      :is-active="isOrgChangeNameDialogActive"
-      :org="organization"
-      ref="orgChangeNameDialog"
-    />
-    <DeleteOrgDialog
-      :is-active="isDeleteOrgDialogActive"
-      :org="organization"
-      ref="deleteOrgDialog"
-    />
-  </v-container>
+          <v-tabs-window-item value="3">
+            <organization-users-table :organization="organization" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="4">
+            <organization-groups-table :organization="organization" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="5">
+            <organization-promotions-table :organization="organization" />
+          </v-tabs-window-item>
+        </v-tabs-window>
+        <OrgChangeNameDialog
+          :is-active="isOrgChangeNameDialogActive"
+          :org="organization"
+          ref="orgChangeNameDialog"
+        />
+        <DeleteOrgDialog
+          :is-active="isDeleteOrgDialogActive"
+          :org="organization"
+          ref="deleteOrgDialog"
+        />
+      </v-container>
+    </template>
+  </Main>
+
 </template>
 
 <script>
