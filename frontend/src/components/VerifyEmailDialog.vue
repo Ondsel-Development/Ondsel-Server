@@ -19,8 +19,17 @@
         a link (containing a security code) allowing you to verify the email account.
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="sendVerifyEmail()" color="primary" :disabled="pendingVerifyEmail">Send Email</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="sendVerifyEmail()"
+          color="primary"
+          variant="elevated"
+          :disabled="pendingVerifyEmail"
+        >Send Email</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

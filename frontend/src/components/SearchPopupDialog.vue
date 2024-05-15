@@ -16,10 +16,13 @@
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn
+            color="cancel"
+            variant="elevated"
             @click="dialog = false"
           >Close</v-btn>
           <v-btn
             color="primary"
+            variant="elevated"
             type="submit"
             @click="doSearch()"
           >Find</v-btn>
