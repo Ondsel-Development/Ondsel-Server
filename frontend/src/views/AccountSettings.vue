@@ -250,6 +250,16 @@
     <v-card>
       <v-card-title>Organization Memberships</v-card-title>
       <v-card-text>
+        <v-btn
+          class="float-right"
+          color="secondary"
+          variant="elevated"
+          prepend-icon="mdi-plus"
+          :hidden="!user.constraint.canCreatePrivateOrganization && !user.constraint.canCreateOpenOrganization"
+          :to="{ name: 'CreateOrganization'}"
+        >
+          Create New Organization
+        </v-btn>
         <v-table>
           <thead>
             <tr>

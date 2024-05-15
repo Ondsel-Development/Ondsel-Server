@@ -18,7 +18,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editTagsDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editTagsDialogForm">
         <v-card>
           <v-card-text>
             <v-text-field

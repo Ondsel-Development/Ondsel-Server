@@ -24,18 +24,17 @@
       </v-card-text>
       <v-card-actions v-if="orgInvite.active">
         <v-btn
-          variant="plain"
-          color="red"
+          color="error"
+          variant="elevated"
           :disabled="isPatchPending"
           @click="rejectInvite"
         >Reject</v-btn>
         <v-btn
-          variant="outlined"
           color="primary"
+          variant="elevated"
           :disabled="isPatchPending"
           @click="acceptInvite"
         >Accept</v-btn>
-
       </v-card-actions>
     </v-card>
   </v-container>

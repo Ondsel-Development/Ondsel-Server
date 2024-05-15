@@ -7,6 +7,8 @@
     <template #subtitle>Browse popular models ready to be integrated with FreeCAD</template>
     <template #actions>
       <v-btn
+        color="success"
+        variant="elevated"
         min-width="200"
         prepend-icon="mdi-plus"
         :to="{ name: 'Home'}"
@@ -65,13 +67,15 @@
               <v-spacer></v-spacer>
               <v-btn
                 v-if="isAuthenticated"
+                variant="text"
                 icon="mdi-bookmark"
                 size="small"
                 @click.stop="openManageBookmarkDialog(sharedModel)"
               ></v-btn>
               <v-btn
+                color="secondary"
+                variant="elevated"
                 prepend-icon="mdi-share"
-                variant="text"
                 @click.stop="openShareLinkDialog(sharedModel)"
               >
                 <template v-slot:prepend>
