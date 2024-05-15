@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editDescriptionDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editDescriptionDialogForm" @submit.prevent="doSaveDescription">
         <v-card-text>
           <v-text-field
             v-model.trim="newDescription"

@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editTagsDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editTagsDialogForm" @submit.prevent="doSaveTags">
         <v-card-text>
           <p>Press enter to add a new tag. To delete a tag, use arrow keys to highlight and press Delete on keyboard.</p>
           <v-combobox
