@@ -35,16 +35,16 @@
       <v-row>
         <!-- Added text-field for copy URL to clipboard when hosted domain is not https or localhost -->
         <v-responsive max-width="1px">
-          <v-text-field :ref="'textField_' + item.raw._id" variant="plain" readonly :value="sharedModelUrl(item.raw._id)" type="hidden"></v-text-field>
+          <v-text-field :ref="'textField_' + item._id" variant="plain" readonly :value="sharedModelUrl(item._id)" type="hidden"></v-text-field>
         </v-responsive>
         <v-chip color="dark-grey" class="ml-2">
-          {{ (item.raw._id) }}
+          {{ (item._id) }}
           <v-btn
             end
             color="decoration"
             flat
             icon="mdi-open-in-new"
-            :to="{ name: 'Share', params: { id: item.raw._id }}"
+            :to="{ name: 'Share', params: { id: item._id }}"
             target="_blank"
           ></v-btn>
           <v-btn
@@ -52,54 +52,54 @@
             color="decoration"
             flat
             icon="mdi-share"
-            @click.stop="openShareLinkDialog(item.raw._id)"
+            @click.stop="openShareLinkDialog(item._id)"
           ></v-btn>
           <v-btn
             end
             color="decoration"
             flat
             icon="mdi-delete-forever"
-            @click.stop="deleteSharedModel(item.raw._id)"
-            :disabled="item.raw.isSystemGenerated"
+            @click.stop="deleteSharedModel(item._id)"
+            :disabled="item.isSystemGenerated"
           ></v-btn>
         </v-chip>
       </v-row>
     </template>
 
     <template v-slot:item.description="{ item }">
-      <v-form :ref="'description_' + item.raw._id">
+      <v-form :ref="'description_' + item._id">
       <v-text-field
         density="compact"
         counter="20"
-        v-model="item.raw.description"
+        v-model="item.description"
         variant="plain"
         append-inner-icon="mdi-check"
-        :disabled="item.raw.isSystemGenerated"
+        :disabled="item.isSystemGenerated"
         :rules="[
           v => !!v || 'Description is required',
           v => (v && v.length <= 20) || 'Description must be less than 20 characters'
         ]"
-        @click:append-inner="updateDescription(item.raw._id, item.raw.description)"></v-text-field>
+        @click:append-inner="updateDescription(item._id, item.description)"></v-text-field>
       </v-form>
     </template>
 
     <template v-slot:item.createdAt="{ item }">
-      <span>{{ dateFormat(item.raw.createdAt) }}</span>
+      <span>{{ dateFormat(item.createdAt) }}</span>
     </template>
     <template v-slot:item.isActive="{ item }">
       <v-switch
-        v-model="item.raw.isActive"
+        v-model="item.isActive"
         hide-details
-        :disabled="item.raw.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
-        @update:modelValue="updateSharedModel(item.raw._id, {isActive: item.raw.isActive})"
+        :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
+        @update:modelValue="updateSharedModel(item._id, {isActive: item.isActive})"
       ></v-switch>
     </template>
     <template v-slot:item.showInPublicGallery="{ item }">
       <v-switch
-        v-model="item.raw.showInPublicGallery"
+        v-model="item.showInPublicGallery"
         hide-details
-        :disabled="item.raw.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
-        @update:modelValue="updateSharedModel(item.raw._id, {showInPublicGallery: item.raw.showInPublicGallery})"
+        :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
+        @update:modelValue="updateSharedModel(item._id, {showInPublicGallery: item.showInPublicGallery})"
       ></v-switch>
     </template>
 
@@ -108,56 +108,56 @@
       <v-container>
         <v-row>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canViewModel" :disabled="!item.raw.isActive" readonly hide-details>
+            <v-checkbox v-model="item.canViewModel" :disabled="!item.isActive" readonly hide-details>
               <template v-slot:label>
                 <div>Can view model</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canViewModelAttributes" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canViewModelAttributes" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can view model attributes</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canUpdateModel" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canUpdateModel" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can update model attributes</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canDownloadDefaultModel" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canDownloadDefaultModel" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can download original model</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canExportFCStd" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canExportFCStd" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can export FCStd</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canExportSTEP" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canExportSTEP" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can export STEP</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canExportSTL" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canExportSTL" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can export STL</div>
               </template>
             </v-checkbox>
           </v-col>
           <v-col cols="3">
-            <v-checkbox v-model="item.raw.canExportOBJ" :disabled="!item.raw.isActive" hide-details>
+            <v-checkbox v-model="item.canExportOBJ" :disabled="!item.isActive" hide-details>
               <template v-slot:label>
                 <div>Can export OBJ
                 </div>
@@ -170,17 +170,17 @@
               color="secondary"
               variant="elevated"
               class="mt-2"
-              :disabled="!item.raw.isActive"
+              :disabled="!item.isActive"
               @click.stop="updateSharedModel(
-                item.raw._id,
+                item._id,
                 {
-                  canViewModelAttributes: item.raw.canViewModelAttributes,
-                  canUpdateModel: item.raw.canUpdateModel,
-                  canExportFCStd: item.raw.canExportFCStd,
-                  canExportSTEP: item.raw.canExportSTEP,
-                  canExportSTL: item.raw.canExportSTL,
-                  canExportOBJ: item.raw.canExportOBJ,
-                  canDownloadDefaultModel: item.raw.canDownloadDefaultModel,
+                  canViewModelAttributes: item.canViewModelAttributes,
+                  canUpdateModel: item.canUpdateModel,
+                  canExportFCStd: item.canExportFCStd,
+                  canExportSTEP: item.canExportSTEP,
+                  canExportSTL: item.canExportSTL,
+                  canExportOBJ: item.canExportOBJ,
+                  canDownloadDefaultModel: item.canDownloadDefaultModel,
                 }
               )"
             >Update Permissions</v-btn>
@@ -192,9 +192,9 @@
             <span>Search tags:</span>
           </v-col>
           <v-col cols="9" class="text-left">
-            <div v-if="item.raw.curation?.tags && item.raw.curation?.tags?.length > 0">
+            <div v-if="item.curation?.tags && item.curation?.tags?.length > 0">
               <v-chip-group>
-                <v-chip v-for="(tag) in item.raw.curation?.tags">{{tag}}</v-chip>
+                <v-chip v-for="(tag) in item.curation?.tags">{{tag}}</v-chip>
               </v-chip-group>
             </div>
             <span v-else><i>None</i></span>
@@ -207,8 +207,8 @@
               variant="elevated"
               flag
               class="mt-2"
-              :disabled="!item.raw.isActive || !item.raw.curation"
-              @click.stop="openEditTagsDialog(item.raw._id, item.raw.curation)"
+              :disabled="!item.isActive || !item.curation"
+              @click.stop="openEditTagsDialog(item._id, item.curation)"
             >
               Update Tags
             </v-btn>

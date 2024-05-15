@@ -10,8 +10,8 @@ import '@/styles/main.scss'
 
 // Composables
 import { createVuetify } from 'vuetify';
-import { VSkeletonLoader } from 'vuetify/labs/VSkeletonLoader';
-import { VDataTable, VDataTableVirtual } from 'vuetify/labs/VDataTable';
+import * as components from 'vuetify/components'
+import * as labsComponents from 'vuetify/labs/components'
 
 const customLightTheme = {
   dark: false,
@@ -36,6 +36,6 @@ export default createVuetify({
     }
   },
   components: {
-    VSkeletonLoader, VDataTable, VDataTableVirtual
+    ...components, ...labsComponents
   }
 })

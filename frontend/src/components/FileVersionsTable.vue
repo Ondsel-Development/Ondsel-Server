@@ -9,29 +9,29 @@
     fixed-header
   >
     <template v-slot:item._id="{ item }">
-      {{ refLabel(item.value._id) }}
+      {{ refLabel(item._id) }}
     </template>
     <template v-slot:item.createdAt="{ item }">
-      {{ dateFormat(item.value.createdAt) }}
+      {{ dateFormat(item.createdAt) }}
     </template>
     <template v-slot:item.userRealName="{ item }">
-      {{ getUserLabel(item.value.userId, file.relatedUserDetails) }}
+      {{ getUserLabel(item.userId, file.relatedUserDetails) }}
     </template>
     <template v-slot:item.active="{ item }">
-      <v-icon v-if="file.currentVersionId === item.value._id" icon="mdi-check"/>
+      <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/>
     </template>
     <template v-slot:item.actions="{ item }">
       <v-icon
         v-if="!publicView"
         size="small"
-        @click="selectedFileVersion = item.value; $refs.fileInfoDialog.$data.dialog = true;"
+        @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
       >
         mdi-pencil
       </v-icon>
       <v-icon
         v-if="publicView"
         size="small"
-        @click="selectedFileVersion = item.value; $refs.fileInfoDialog.$data.dialog = true;"
+        @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
       >
         mdi-eye
       </v-icon>

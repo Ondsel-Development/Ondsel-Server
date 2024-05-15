@@ -28,19 +28,19 @@
       <v-progress-linear indeterminate v-if="isPatchPending"></v-progress-linear>
     </template>
     <template #item.name="{ item }">
-      {{ item.value.groupOrUser.name }}
+      {{ item.groupOrUser.name }}
     </template>
     <template #item.username="{ item }">
-      {{ item.value.groupOrUser.username }}
+      {{ item.groupOrUser.username }}
     </template>
     <template #item.permission="{ item }">
       <v-combobox
-        v-model="item.value.permission"
+        v-model="item.permission"
         :items="['read', 'write']"
         variant="plain"
         append-icon="mdi-check"
-        :disabled="!isLoggedInUserAdmin(organization) || item.value.groupOrUser._id === workspace.createdBy"
-        @click:append="updatePermission(item.value)"
+        :disabled="!isLoggedInUserAdmin(organization) || item.groupOrUser._id === workspace.createdBy"
+        @click:append="updatePermission(item)"
       />
     </template>
   </v-data-table>
