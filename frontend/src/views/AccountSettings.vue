@@ -1,297 +1,326 @@
 <template>
-  <v-container v-if="user">
-    <h1 class="text-h5 font-weight-bold mb-2">Account Settings</h1>
+  <Main>
+    <template #title>
+      <div class="d-flex flex-row justify-center" style="align-items: center;">
+        Account Settings
+      </div>
+    </template>
+    <template #content>
+      <v-container v-if="user">
 
-    <v-card
-      variant="flat"
-      :border="true"
-      class="mx-auto my-6"
-    >
-      <v-list lines="three">
-        <v-list-subheader class="mb-2">Public</v-list-subheader>
+        <v-tabs
+          v-model="tab"
+          align-tabs="center"
+        >
+          <v-tab value="1">Public Details</v-tab>
+          <v-tab value="2">Private Details</v-tab>
+          <v-tab value="3">Account</v-tab>
+          <v-tab value="4">Organization Memberships</v-tab>
+          <v-tab value="5">Public Promoted Items</v-tab>
+        </v-tabs>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Name</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ user.name }}
-          </v-list-item-subtitle>
-          <v-list-item-action class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openUserChangeNameDialog()"
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item value="1">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
             >
-              Change Name
-            </v-btn>
-            <UserChangeNameDialog
-              :is-active="isUserChangeNameDialogActive"
-              :user="user"
-              ref="userChangeNameDialog"
-            />
-          </v-list-item-action>
-        </v-list-item>
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">Public</v-list-subheader>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Username</v-list-item-title>
-          <v-list-item-subtitle>
-            <code>{{ user.username }}</code>
-          </v-list-item-subtitle>
-        </v-list-item>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Name</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ user.name }}
+                  </v-list-item-subtitle>
+                  <v-list-item-action class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openUserChangeNameDialog()"
+                    >
+                      Change Name
+                    </v-btn>
+                    <UserChangeNameDialog
+                      :is-active="isUserChangeNameDialogActive"
+                      :user="user"
+                      ref="userChangeNameDialog"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Short Description</v-list-item-title>
-          <v-list-item-subtitle>
-            <div v-if="organization.description">
-              {{ organization.description }}
-            </div>
-            <div v-else>
-              <i>none supplied</i>
-            </div>
-          </v-list-item-subtitle>
-          <v-list-item-action class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openEditDescriptionDialog()"
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Username</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <code>{{ user.username }}</code>
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Short Description</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <div v-if="organization.description">
+                      {{ organization.description }}
+                    </div>
+                    <div v-else>
+                      <i>none supplied</i>
+                    </div>
+                  </v-list-item-subtitle>
+                  <v-list-item-action class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openEditDescriptionDialog()"
+                    >
+                      Edit Description
+                    </v-btn>
+                    <EditDescriptionDialog
+                      :is-active="isChangeDescriptionDialogActive"
+                      :description="organization.description || ''"
+                      ref="editDescriptionDialog"
+                      @save-description="saveDescriptionDialog"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Long Description</v-list-item-title>
+                  <v-list-item-media>
+                    <v-card>
+                      <v-card-text>
+                        <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
+                      </v-card-text>
+                    </v-card>
+                  </v-list-item-media>
+                  <v-list-item-action class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openEditLongDescriptionMdDialog()"
+                    >
+                      Edit Long Description
+                    </v-btn>
+                    <EditLongDescriptionMdDialog
+                      :is-active="isOrgChangeLongDescriptionMdDialogActive"
+                      :long-description-md="organization.curation?.longDescriptionMd || ''"
+                      ref="editLongDescriptionMdDialog"
+                      @save-long-description-md="saveLongDescriptionMd"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Tags</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
+                      <v-chip-group>
+                        <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
+                      </v-chip-group>
+                    </div>
+                    <span v-else><i>None</i></span>
+                  </v-list-item-subtitle>
+                  <v-list-item-action class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openEditTagsDialog()"
+                    >
+                      Edit Tags
+                    </v-btn>
+                    <EditTagsDialog
+                      :is-active="isEditTagsDialogActive"
+                      :tagList="organization.curation?.tags || []"
+                      ref="editTagsDialog"
+                      @save-tags="saveTags"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Links</v-list-item-title>
+                  <v-list-item-subtitle>
+                    Public Summary: <a :href="userHomeUrl">{{userHomeUrl}}</a>
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="2">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
             >
-              Edit Description
-            </v-btn>
-            <EditDescriptionDialog
-              :is-active="isChangeDescriptionDialogActive"
-              :description="organization.description || ''"
-              ref="editDescriptionDialog"
-              @save-description="saveDescriptionDialog"
-            />
-          </v-list-item-action>
-        </v-list-item>
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">Private</v-list-subheader>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Long Description</v-list-item-title>
-          <v-list-item-media>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Email</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ user.email }}
+                    <v-chip v-if="user.isVerified">Verified</v-chip>
+                    <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
+                  </v-list-item-subtitle>
+                  <v-list-item-action v-if="!user.isVerified" class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openVerifyEmailDialog()"
+                    >
+                      Resend Verification
+                    </v-btn>
+                    <VerifyEmailDialog
+                      :is-active="isVerifyEmailDialogActive"
+                      :user="user"
+                      ref="verifyEmailDialog"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Password</v-list-item-title>
+                  <v-list-item-subtitle>
+                    **********
+                  </v-list-item-subtitle>
+                  <v-list-item-action v-if="user.isVerified" class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click.stop="openResetPasswordDialog()"
+                      :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+                    >
+                      Reset Password
+                    </v-btn>
+                    <ResetPasswordDialog
+                      :is-active="isResetPasswordDialogActive"
+                      :user="user"
+                      ref="resetPasswordDialog"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Links</v-list-item-title>
+                  <v-list-item-subtitle>
+                    Workspace Management: <a :href="userWorkspaceUrl">{{userWorkspaceUrl}}</a>
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="3">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
+            >
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">Account</v-list-subheader>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Current Tier</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ user.fullTierName }}
+                  </v-list-item-subtitle>
+                  <v-list-item-action class="justify-end">
+                    <v-btn
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      @click="gotoChooseTier()"
+                      :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
+                    >
+                      Choose New Tier
+                    </v-btn>
+                    <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
+                      View Account History
+                    </v-btn>
+                  </v-list-item-action>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Remaining Models</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ remainingFiles }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+              </v-list>
+            </v-card>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="4">
             <v-card>
+              <v-card-title>Organization Memberships</v-card-title>
               <v-card-text>
-                <markdown-viewer :markdown-html="longDescriptionHtml"></markdown-viewer>
+                <v-table>
+                  <thead>
+                  <tr>
+                    <th class="text-left">
+                      Name
+                    </th>
+                    <th class="text-left">
+                      Type
+                    </th>
+                    <th class="text-left">
+                      Send Email Notifications
+                    </th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr
+                    v-for="item in user.organizations"
+                    :key="item.name"
+                  >
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>
+                      {{ item.notificationByEmailCadence || "Immediately" }}
+                      <v-icon
+                        size="small"
+                        @click.stop="openNotificationByEmailCadenceDialog(item)"
+                      >
+                        mdi-pencil
+                      </v-icon>
+                    </td>
+                  </tr>
+                  </tbody>
+                </v-table>
+                <generic-selection-dialog
+                  :currentSelection="notificationCadenceSelection"
+                  :selectionList="notificationCadenceOptions"
+                  :title="notificationCadenceTitle"
+                  :subtitle="notificationCadenceSubTitle"
+                  ref="notificationByEmailCadenceDialog"
+                  @save-generic-selection="saveNotificationByEmailCadenceSelection"
+                ></generic-selection-dialog>
               </v-card-text>
             </v-card>
-          </v-list-item-media>
-          <v-list-item-action class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openEditLongDescriptionMdDialog()"
-            >
-              Edit Long Description
-            </v-btn>
-            <EditLongDescriptionMdDialog
-              :is-active="isOrgChangeLongDescriptionMdDialogActive"
-              :long-description-md="organization.curation?.longDescriptionMd || ''"
-              ref="editLongDescriptionMdDialog"
-              @save-long-description-md="saveLongDescriptionMd"
-            />
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Tags</v-list-item-title>
-          <v-list-item-subtitle>
-            <div v-if="organization.curation?.tags && organization.curation?.tags?.length > 0">
-              <v-chip-group>
-                <v-chip v-for="(tag) in organization.curation?.tags">{{tag}}</v-chip>
-              </v-chip-group>
-            </div>
-            <span v-else><i>None</i></span>
-          </v-list-item-subtitle>
-          <v-list-item-action class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openEditTagsDialog()"
-            >
-              Edit Tags
-            </v-btn>
-            <EditTagsDialog
-              :is-active="isEditTagsDialogActive"
-              :tagList="organization.curation?.tags || []"
-              ref="editTagsDialog"
-              @save-tags="saveTags"
-            />
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Links</v-list-item-title>
-          <v-list-item-subtitle>
-            Public Summary: <a :href="userHomeUrl">{{userHomeUrl}}</a>
-          </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
-    </v-card>
-    <v-card
-      variant="flat"
-      :border="true"
-      class="mx-auto my-6"
-    >
-      <v-list lines="three">
-        <v-list-subheader class="mb-2">Private</v-list-subheader>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Email</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ user.email }}
-            <v-chip v-if="user.isVerified">Verified</v-chip>
-            <v-chip v-else color="red" text-color="white">Not Verified</v-chip>
-          </v-list-item-subtitle>
-          <v-list-item-action v-if="!user.isVerified" class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openVerifyEmailDialog()"
-            >
-              Resend Verification
-            </v-btn>
-            <VerifyEmailDialog
-              :is-active="isVerifyEmailDialogActive"
-              :user="user"
-              ref="verifyEmailDialog"
-            />
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Password</v-list-item-title>
-          <v-list-item-subtitle>
-            **********
-          </v-list-item-subtitle>
-          <v-list-item-action v-if="user.isVerified" class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click.stop="openResetPasswordDialog()"
-              :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
-            >
-              Reset Password
-            </v-btn>
-            <ResetPasswordDialog
-              :is-active="isResetPasswordDialogActive"
-              :user="user"
-              ref="resetPasswordDialog"
-            />
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Links</v-list-item-title>
-          <v-list-item-subtitle>
-            Workspace Management: <a :href="userWorkspaceUrl">{{userWorkspaceUrl}}</a>
-          </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
-    </v-card>
-    <v-card
-      variant="flat"
-      :border="true"
-      class="mx-auto my-6"
-    >
-      <v-list lines="three">
-        <v-list-subheader class="mb-2">Account</v-list-subheader>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Current Tier</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ user.fullTierName }}
-          </v-list-item-subtitle>
-          <v-list-item-action class="justify-end">
-            <v-btn
-              variant="outlined"
-              color="default"
-              size="small"
-              @click="gotoChooseTier()"
-              :disabled="loggedInUser.user.tier===SubscriptionTypeMap.unverified"
-            >
-              Choose New Tier
-            </v-btn>
-            <v-btn variant="outlined" color="default" size="small" @click="gotoAccountHistory()">
-              View Account History
-            </v-btn>
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Remaining Models</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ remainingFiles }}
-          </v-list-item-subtitle>
-        </v-list-item>
-
-      </v-list>
-    </v-card>
-    <v-card>
-      <v-card-title>Organization Memberships</v-card-title>
-      <v-card-text>
-        <v-table>
-          <thead>
-            <tr>
-              <th class="text-left">
-                Name
-              </th>
-              <th class="text-left">
-                Type
-              </th>
-              <th class="text-left">
-                Send Email Notifications
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="item in user.organizations"
-              :key="item.name"
-            >
-              <td>{{ item.name }}</td>
-              <td>{{ item.type }}</td>
-              <td>
-                {{ item.notificationByEmailCadence || "Immediately" }}
-                <v-icon
-                  size="small"
-                  @click.stop="openNotificationByEmailCadenceDialog(item)"
-                >
-                  mdi-pencil
-                </v-icon>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-        <generic-selection-dialog
-          :currentSelection="notificationCadenceSelection"
-          :selectionList="notificationCadenceOptions"
-          :title="notificationCadenceTitle"
-          :subtitle="notificationCadenceSubTitle"
-          ref="notificationByEmailCadenceDialog"
-          @save-generic-selection="saveNotificationByEmailCadenceSelection"
-        ></generic-selection-dialog>
-      </v-card-text>
-    </v-card>
-    <v-row class="mt-12">
-      <organization-promotions-table :organization="organization" />
-    </v-row>
-  </v-container>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="5">
+            <organization-promotions-table :organization="organization" />
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </v-container>
+    </template>
+  </Main>
 </template>
 
 <script>
@@ -310,12 +339,14 @@ import EditDescriptionDialog from "@/components/EditDescriptionDialog.vue";
 import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTable.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import GenericSelectionDialog from "@/components/GenericSelectionDialog.vue";
+import Main from '@/layouts/default/Main.vue';
 
 const { Model, Organization, User } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    Main,
     GenericSelectionDialog,
     MarkdownViewer,
     OrganizationPromotionsTable,
@@ -341,6 +372,7 @@ export default {
       notificationCadenceSubTitle: '',
       notificationCadenceSelection: '',
       notificationCadenceOrgId: null,
+      tab: null,
     }
   },
   computed: {

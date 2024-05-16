@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editLongDescriptionMdDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="editLongDescriptionMdDialogForm" @submit.prevent="doSaveLongDescriptionMd">
         <v-card-text>
           <p>Enter a longer description. You can use Markdown formatting and multiple lines. Limited to 4096 characters.</p>
           <v-textarea
