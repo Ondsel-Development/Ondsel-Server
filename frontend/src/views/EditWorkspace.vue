@@ -7,6 +7,7 @@
           v-if="workspace"
           flat
           variant="plain"
+          color="link"
           class="text-body-1 font-weight-bold pa-0"
           style="text-decoration: none;"
           @click="goHome()"
@@ -45,8 +46,8 @@
                     <v-list-item-action>
                       <v-btn
                         v-if="!forbidNameChange"
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openWorkspaceChangeNameDialog()"
                       >
@@ -72,8 +73,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openWorkspaceOpenSelectDialog()"
                         v-if="changableVisibility === true"
@@ -102,8 +103,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openWorkspaceChangeLicenseDialog()"
                       >
@@ -128,8 +129,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openWorkspaceChangeDescDialog()"
                       >
@@ -175,8 +176,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openEditTagsDialog()"
                       >
