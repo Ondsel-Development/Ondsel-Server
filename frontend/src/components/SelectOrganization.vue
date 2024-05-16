@@ -2,7 +2,7 @@
   <v-sheet>
     <v-menu location="bottom">
       <template v-slot:activator="{ props }">
-        <v-list class="my-2" nav>
+        <v-list class="my-2">
           <v-divider />
           <v-list-item v-bind="props" height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user">
             <template #prepend>

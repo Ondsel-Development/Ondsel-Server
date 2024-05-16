@@ -1,6 +1,17 @@
 <template>
   <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
-    <select-organization :current-organization="currentOrganization"></select-organization>
+    <select-organization :current-organization="currentOrganization" v-if="!rail" nav></select-organization>
+    <v-list class="my-2" v-if="rail">
+      <v-divider />
+      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user">
+        <template #prepend>
+          <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
+            {{ getInitials(currentOrganization?.name || '') }}
+          </v-sheet>
+        </template>
+      </v-list-item>
+      <v-divider />
+    </v-list>
     <v-text-field
       v-model="searchText"
       class="ma-4"
