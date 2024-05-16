@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceDescDialogForm" @submit.prevent="doDescChange">
         <v-card-text>
           <v-text-field
             v-model.trim="newWorkspaceDesc"
