@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
-    <select-organization :current-organization="currentOrganization" v-if="!rail" nav></select-organization>
+    <select-organization :current-organization="currentOrganization" v-if="!rail"></select-organization>
     <v-list class="my-2" v-if="rail">
       <v-divider />
       <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user">
