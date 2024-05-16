@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="doLicenseChange">
         <v-card-text>
           <v-radio-group
             label="License terms if shared with the general public"

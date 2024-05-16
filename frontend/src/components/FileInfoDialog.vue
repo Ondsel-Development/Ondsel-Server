@@ -19,7 +19,7 @@
               :key="item.name"
             >
               <td style="text-align: right">{{ item.name }}</td>
-              <td>{{ item.value }}</td>
+              <td>{{ item }}</td>
             </tr>
           </tbody>
         </v-table>

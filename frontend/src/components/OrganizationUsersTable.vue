@@ -28,9 +28,9 @@
     </template>
     <template #item.isAdmin="{ item }">
       <div class="text-capitalize">
-        {{ item.value.isAdmin }}
+        {{ item.isAdmin }}
         &nbsp; &nbsp;
-        <span v-if="item.value._id===organization.owner._id">
+        <span v-if="item._id===organization.owner._id">
           <v-icon size="small">
               mdi-account-key
           </v-icon>
@@ -46,7 +46,7 @@
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
-        @click="openEditUserDialog(item.value)"
+        @click="openEditUserDialog(item)"
       >
         mdi-pencil
       </v-icon>

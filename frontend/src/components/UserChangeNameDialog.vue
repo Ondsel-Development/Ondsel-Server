@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="changeNameDialogForm" @submit.prevent="pendingChangeName">
+      <v-form ref="changeNameDialogForm" @submit.prevent="doNameChange">
         <v-card-text>
           <v-text-field
             v-model.trim="newUserName"

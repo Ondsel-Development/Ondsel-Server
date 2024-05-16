@@ -241,7 +241,7 @@ export default {
     },
     async deletePromotion(item) {
       let newCurrent = this.lensSiteDocument.current;
-      newCurrent.curation.promoted = newCurrent.curation.promoted.filter(promo => promo.curation._id.toString() !== item.value);
+      newCurrent.curation.promoted = newCurrent.curation.promoted.filter(promo => promo.curation._id.toString() !== item);
       await this.lensSiteDocument.patch({
         current: newCurrent,
       })
