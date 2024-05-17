@@ -1,47 +1,5 @@
 <template>
-  <v-list v-if="rootDirectory" density="compact">
-    <v-list-item
-      variant="flat"
-      class="show-indent"
-    >
-      <template v-slot:prepend>
-        <v-btn
-          color="decoration"
-          flat
-          :icon="openRootDirectory ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-          size="x-small"
-          @click="toggleRootDirectory"
-        ></v-btn>
-      </template>
-      <v-list-item-title
-        @click="$emit('selectedDirectory', rootDirectory, rootDirectory.name);"
-      >
-        {{ rootDirectory.name }}
-      </v-list-item-title>
-    </v-list-item>
-    <directory-list-view
-      v-if="openRootDirectory"
-      :directory="rootDirectory"
-      :parent-directory-path="rootDirectory.name"
-      @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
-      @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
-    />
-  </v-list>
   <v-list v-if="directory" density="compact" class="ml-2">
-    <v-list-item
-      v-for="file in directory.files"
-      :key="file._id"
-      :value="file"
-      variant="flat"
-      class="show-indent"
-    >
-      <v-list-item-title
-        class="text-body-2"
-        @click="$emit('selectedFile', file, getItemPath(file.custFileName))"
-      >
-        {{ file.custFileName }}
-      </v-list-item-title>
-    </v-list-item>
     <template
       v-for="dir in directory.directories"
       :key="dir._id"
@@ -59,18 +17,28 @@
             @click="toggleDirectory(dir)"
           ></v-btn>
         </template>
-        <v-list-item-title
-          class="text-body-2"
-          @click="$emit('selectedDirectory', dir, getItemPath(dir.name));"
-        >
-          {{ dir.name }}
-        </v-list-item-title>
+        <template v-slot:append>
+          <v-btn
+            color="decoration"
+            flat
+            icon="mdi-dots-vertical"
+            size="x-small"
+          ></v-btn>
+        </template>
+        <v-list-item-media>
+          <v-card
+            @click="$emit('selectedDirectory', dir, getItemPath(dir.name));"
+          >
+            <v-card-text>
+              <span class="text-body-2">{{ dir.name }}</span>
+            </v-card-text>
+          </v-card>
+        </v-list-item-media>
       </v-list-item>
       <directory-list-view
         v-if="openDirectories.find(d => d._id === dir._id)"
         :directory="openDirectories.find(d => d._id === dir._id)"
         :parent-directory-path="getItemPath(dir.name)+'/'"
-        @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
         @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
       />
     </template>
@@ -82,12 +50,8 @@ import {mapActions} from "vuex";
 
 export default {
   name: 'DirectoryListView',
-  emits: ['selectedFile', 'selectedDirectory'],
+  emits: ['selectedDirectory'],
   props: {
-    rootDirectory: {
-      required: false,
-      type: Object,
-    },
     directory: Object,
     parentDirectoryPath: String,
   },

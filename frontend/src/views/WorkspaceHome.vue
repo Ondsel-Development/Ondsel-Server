@@ -1,128 +1,50 @@
-<template xmlns="http://www.w3.org/1999/html">
-  <v-container v-if="workspace">
-    <v-btn
-      flat
-      size="small"
-      icon="mdi-arrow-left"
-      @click="goHome()"
-    />
-    <span class="text-body-2">workspace </span>
-    <span class="text-body-1 font-weight-bold">{{ workspace.name }}</span>
-    <span v-if="!publicView">
-      <v-btn
-        class="ms-1"
-        icon="mdi-cog"
-        size="small"
-        color="decoration"
-        flat
-        @click.stop="goToWorkspaceEdit(workspace)"
-        id="editWorkspaceButton"
-      ></v-btn>
-      <v-tooltip
-        activator="#editWorkspaceButton"
-      >edit this workspace's settings</v-tooltip>
-    </span>
-    <span v-else>
-      <v-btn
-        class="ms-1"
-        icon="mdi-cog"
-        size="small"
-        color="decoration"
-        flat
-        id="disabledEditWorkspaceButton"
-      ></v-btn>
-      <v-tooltip
-        v-if="!currentOrganization"
-        activator="#disabledEditWorkspaceButton"
-      >you cannot edit anything when not logged in</v-tooltip>
-      <v-tooltip
-        v-if="currentOrganization && currentOrganization._id !== workspace?.organization?._id"
-        activator="#disabledEditWorkspaceButton"
-      >you are currently representing {{selfName}} and not {{ownerDescription}}</v-tooltip>
-    </span>
-    <span v-if="workspace.open === true">
-      <span v-if="promotionPossible">
-        <v-btn
-          icon="mdi-bullhorn"
-          size="small"
-          color="decoration"
-          flat
-          @click.stop="openEditPromotionDialog()"
-          id="promotionButton"
-        ></v-btn>
-        <v-tooltip
-          activator="#promotionButton"
-        >should {{selfPronoun}} promote this workspace</v-tooltip>
-      </span>
-      <span v-else>
-        <v-btn
-          size="small"
-          icon="mdi-bullhorn"
-          color="decoration"
-          flat
-          id="disabledPromotionButton"
-        >
-        </v-btn>
-        <v-tooltip
-          v-if="!currentOrganization"
-          activator="#disabledPromotionButton"
-        >must be logged in to promote anything</v-tooltip>
-        <v-tooltip
-          v-if="defaultWorkspaceFlag"
-          activator="#disabledPromotionButton"
-        >cannot promote a default workspace</v-tooltip>
-      </span>
-    </span>
-    <v-container class="d-flex flex-wrap">
-      <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
-      <v-card class="ma-2 flex-md-grow-1" min-width="22em" max-width="44em" max-height="20em" style="overflow-y:auto;">
-        <v-card-text>
-          <markdown-viewer v-if="longDescriptionHtml" :markdown-html="longDescriptionHtml"></markdown-viewer>
-          <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
-        </v-card-text>
-      </v-card>
-    </v-container>
-    <v-row class="mt-10">
-      <v-text-field
-        v-model="activePath"
-        variant="outlined"
-        label="Active Path"
-        density="compact"
-        readonly
-      />
-    </v-row>
-    <v-row no-gutters>
-      <v-col cols="3">
-        <directory-list-view
-          v-if="directory"
-          :root-directory="directory"
-          @selected-file="clickedFile"
-          @selected-directory="clickedDirectory"
-        />
-      </v-col>
-      <v-col cols="9">
-        <WorkspaceFileView
-          v-if="activeFile"
-          :file="activeFile"
-          :workspace="workspace"
-          :full-path="activePath"
-          :can-user-write="workspace.haveWriteAccess"
-          :public-view="publicView"
-          @open-directory="clickedDirectory"
-        />
-        <WorkspaceDirectoryView
-          v-else
-          :directory="activeDirectory || directory"
-          :directoryPath="activePath === '/' ? '' : activePath"
-          :can-user-write="workspace.haveWriteAccess"
-          :public-view="publicView"
-          @open-file="clickedFile"
-          @open-directory="clickedDirectory"
-        />
-      </v-col>
-    </v-row>
-  </v-container>
-  <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="workspaces" :item-id="workspace?._id" :item-name="workspace?.name"></edit-promotion-dialog>
+<template>
+  <Main>
+    <template #title>
+      <div class="d-flex flex-row justify-center" style="align-items: center;">
+        <span class="mr-2">Workspace</span> <b>{{ workspace.name }}</b>
+      </div>
+    </template>
+    <template #content>
+      <v-sheet class="d-flex flex-column flex-wrap" name="top-and-bottom-section">
+        <v-sheet class="d-flex flex-row justify-space-between flex-wrap" name="top-section">
+          <v-sheet class="d-flex flex-column flex-wrap" name="left-hand-column-on-top">
+            <v-card min-width="32em">
+              <v-card-title>
+                Directories
+              </v-card-title>
+              <v-card-text>
+                <p>
+                  /
+                </p>
+                <directory-list-view
+                  v-if="directory"
+                  :directory="directory"
+                  @selected-directory="clickedDirectory"
+                />
+              </v-card-text>
+            </v-card>
+            <v-card min-width="32em">
+              <v-card-title>Files in <code>/</code></v-card-title>
+              <v-card-text>stuff</v-card-text>
+            </v-card>
+          </v-sheet>
+          <v-sheet name="right-hand-column-on-top">
+            <v-card min-width="32em">
+              <v-card-title>Details</v-card-title>
+              <v-card-text>stuff</v-card-text>
+            </v-card>
+          </v-sheet>
+        </v-sheet>
+        <v-sheet name="bottom-section">
+          <v-card min-width="32em">
+            <v-card-title>markdown</v-card-title>
+            <v-card-text>stuff</v-card-text>
+          </v-card>
+        </v-sheet>
+      </v-sheet>
+    </template>
+  </Main>
 </template>
 
 <script>
@@ -136,12 +58,14 @@ import {marked} from "marked";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
+import Main from '@/layouts/default/Main.vue';
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
   components: {
+    Main,
     CuratedItemSheet,
     MarkdownViewer,
     EditPromotionDialog, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
@@ -158,6 +82,7 @@ export default {
       ownerDescription: 'unknown',
       publicViewDetail: false,
       defaultWorkspaceFlag: false,
+      parentDirectory: '/',
     };
   },
   async created() {
@@ -254,6 +179,7 @@ export default {
     publicView: vm => vm.publicViewDetail,
     longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || ""),
     promotionPossible: vm => vm.currentOrganization && !vm.defaultWorkspaceFlag,
+    canUserWrite: vm => vm.workspace.haveWriteAccess,
   },
   methods: {
     ...mapActions('app', [
@@ -312,6 +238,9 @@ export default {
     },
     async openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
+    },
+    async openCreateDirectoryDialog() {
+      this.$refs.createDirectoryDialog.$data.dialog = true;
     },
   },
 };

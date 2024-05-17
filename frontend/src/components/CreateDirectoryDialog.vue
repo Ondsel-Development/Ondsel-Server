@@ -4,7 +4,7 @@
     width="auto"
     persistent
   >
-    <v-card width="500" max-height="800">
+    <v-card width="34em" max-height="800">
       <template v-slot:title>
         <div class="text-center">Create a Directory</div>
       </template>
