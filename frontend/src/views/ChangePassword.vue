@@ -27,7 +27,14 @@
           ></v-text-field>
 
           <v-card-actions>
-            <v-btn type="submit" block class="mt-2" :disabled="!isValid || pendingPasswordChange" :loading="pendingPasswordChange">Submit</v-btn>
+            <v-btn
+              color="primary"
+              variant="elevated"
+              type="submit"
+              class="mt-2"
+              :disabled="!isValid || pendingPasswordChange"
+              :loading="pendingPasswordChange"
+            >Submit</v-btn>
           </v-card-actions>
         </v-form>
         <v-snackbar

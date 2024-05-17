@@ -22,8 +22,18 @@
         </v-select>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog=false">Close</v-btn>
-        <v-btn color="primary" :disabled="isPatchOrgSecondaryReferencesPending" :loading="isPatchOrgSecondaryReferencesPending" @click="updateBookmarks">Update Bookmarks</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog=false"
+        >Close</v-btn>
+        <v-btn
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchOrgSecondaryReferencesPending"
+          :loading="isPatchOrgSecondaryReferencesPending"
+          @click="updateBookmarks"
+        >Update Bookmarks</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -120,6 +130,7 @@ export default {
           }
         )
       }));
+      this.dialog = false;
     },
   },
 }

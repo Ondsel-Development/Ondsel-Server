@@ -20,7 +20,14 @@
           ></v-text-field>
 
           <v-card-actions>
-            <v-btn type="submit" block class="mt-2" :disabled="!isValid">Submit</v-btn>
+            <v-btn
+              type="submit"
+              color="primary"
+              variant="elevated"
+              block
+              class="mt-2"
+              :disabled="!isValid"
+            >Submit</v-btn>
           </v-card-actions>
         </v-form>
         <v-snackbar

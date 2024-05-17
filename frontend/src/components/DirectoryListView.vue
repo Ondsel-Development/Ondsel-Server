@@ -6,9 +6,10 @@
     >
       <template v-slot:prepend>
         <v-btn
+          color="decoration"
+          flat
           :icon="openRootDirectory ? 'mdi-chevron-down' : 'mdi-chevron-right'"
           size="x-small"
-          variant="text"
           @click="toggleRootDirectory"
         ></v-btn>
       </template>
@@ -51,9 +52,10 @@
       >
         <template v-slot:prepend>
           <v-btn
+            color="decoration"
+            flat
             :icon="openDirectories.find(d => d._id === dir._id) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
             size="x-small"
-            variant="text"
             @click="toggleDirectory(dir)"
           ></v-btn>
         </template>

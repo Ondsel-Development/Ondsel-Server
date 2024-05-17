@@ -19,7 +19,8 @@
           <v-spacer></v-spacer>
           <v-card-actions class="flex-column">
             <v-btn
-              variant="outlined"
+              :color="soloOptions.color"
+              variant="elevated"
             >{{soloOptions.text}}</v-btn>
             <p>&nbsp;</p>
           </v-card-actions>
@@ -41,7 +42,8 @@
           <v-card-actions class="flex-column">
             <v-btn
               class="float-left"
-              variant="outlined"
+              :color="peerOptions.color"
+              variant="elevated"
             >{{peerOptions.text}}</v-btn>
             <p>** billed annually</p>
           </v-card-actions>
@@ -63,7 +65,8 @@
           <v-spacer></v-spacer>
           <v-card-actions class="flex-column">
             <v-btn
-              variant="outlined"
+              :color="enterpriseOptions.color"
+              variant="elevated"
               disabled
             >{{enterpriseOptions.text}}</v-btn>
             <p>&nbsp;</p>
@@ -89,9 +92,9 @@ export default {
       result: {},
       stripePurchasePeerUrl: import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL,
       postSignUp: false,
-      soloOptions: {name: 'tbd', text: 'tbd'},
-      peerOptions: {name: 'tbd', text: 'tbd'},
-      enterpriseOptions: {name: 'tbd', text: 'tbd'},
+      soloOptions: {name: 'tbd', text: 'tbd', color: 'secondary'},
+      peerOptions: {name: 'tbd', text: 'tbd', color: 'secondary'},
+      enterpriseOptions: {name: 'tbd', text: 'tbd', color: 'cancel'},
     }
   },
   computed: {
@@ -151,22 +154,22 @@ export default {
     },
     soloResponse() {
       if (this.user.tier !== SubscriptionTypeMap.solo && this.user.nextTier !== SubscriptionTypeMap.solo) {
-        return {action: `downgradeToSolo`, text: `Downgrade to Solo ($0 / mo)`}
+        return {action: `downgradeToSolo`, text: `Downgrade to Solo ($0 / mo)`, color: 'secondary'}
       } else if (this.user.nextTier=== SubscriptionTypeMap.solo) {
-        return {action: 'cancelDowngrade', text: 'Cancel Switch to Solo'}
+        return {action: 'cancelDowngrade', text: 'Cancel Switch to Solo', color: 'success'}
       }
-      return {action: 'goAway', text: 'Continue'}
+      return {action: 'goAway', text: 'Continue', color: 'primary'}
     },
     peerResponse() {
       if (this.loggedInUser.nextTier=== SubscriptionTypeMap.peer) {
-        return {action: `tbd`, text: `Cancel the Switch to Peer`}
+        return {action: `tbd`, text: `Cancel the Switch to Peer`, color: 'success'}
       } else if (this.loggedInUser.user.tier !== SubscriptionTypeMap.peer) {
-        return {action: 'upgradeToPeer', text: 'Switch to Peer ($10 / mo)**'}
+        return {action: 'upgradeToPeer', text: 'Switch to Peer ($10 / mo)**', color: 'success'}
       }
-      return {action: 'goAway', text: 'Continue'}
+      return {action: 'goAway', text: 'Continue', color: 'primary'}
     },
     enterpriseResponse() {
-      return {action: 'nothing', text: 'COMING SOON'}
+      return {action: 'nothing', text: 'COMING SOON', color: 'cancel'}
     },
   }
 }

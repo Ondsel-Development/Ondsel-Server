@@ -20,7 +20,11 @@
           vertical
         ></v-divider>
         <v-spacer />
-        <v-btn prepend-icon="mdi-plus" flat @click.stop="openShareModelDialog">
+        <v-btn
+          color="secondary"
+          variant="elevated"
+          prepend-icon="mdi-plus"
+          @click.stop="openShareModelDialog">
           Create Share Link
         </v-btn>
       </v-toolbar>
@@ -35,9 +39,29 @@
         </v-responsive>
         <v-chip color="dark-grey" class="ml-2">
           {{ (item._id) }}
-          <v-btn end variant="plain" icon="mdi-open-in-new" :to="{ name: 'Share', params: { id: item._id }}" target="_blank"></v-btn>
-          <v-btn end variant="plain" icon="mdi-share" @click.stop="openShareLinkDialog(item._id)"></v-btn>
-          <v-btn end variant="plain" icon="mdi-delete-forever" @click.stop="deleteSharedModel(item._id)" :disabled="item.isSystemGenerated"></v-btn>
+          <v-btn
+            end
+            color="decoration"
+            flat
+            icon="mdi-open-in-new"
+            :to="{ name: 'Share', params: { id: item._id }}"
+            target="_blank"
+          ></v-btn>
+          <v-btn
+            end
+            color="decoration"
+            flat
+            icon="mdi-share"
+            @click.stop="openShareLinkDialog(item._id)"
+          ></v-btn>
+          <v-btn
+            end
+            color="decoration"
+            flat
+            icon="mdi-delete-forever"
+            @click.stop="deleteSharedModel(item._id)"
+            :disabled="item.isSystemGenerated"
+          ></v-btn>
         </v-chip>
       </v-row>
     </template>
@@ -143,7 +167,8 @@
           <v-col cols="9" />
           <v-col cols="3">
             <v-btn
-              flat
+              color="secondary"
+              variant="elevated"
               class="mt-2"
               :disabled="!item.isActive"
               @click.stop="updateSharedModel(
@@ -178,6 +203,8 @@
           </v-col>
           <v-col cols="3" class="text-right">
             <v-btn
+              color="secondary"
+              variant="elevated"
               flag
               class="mt-2"
               :disabled="!item.isActive || !item.curation"

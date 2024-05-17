@@ -8,10 +8,16 @@
         target="blank"
         style="text-decoration: none; color: inherit;"
       >
-        <v-btn flat>Explore</v-btn>
+        <v-btn
+          color="secondary"
+          variant="elevated"
+          append-icon="mdi-open-in-new"
+        >Explore</v-btn>
       </a>
       <v-btn
         v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
+        class="mx-2"
+        color="decoration"
         flat
         :disabled="!canUserWrite"
         @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"
@@ -19,22 +25,28 @@
       ></v-btn>
       <v-btn
         v-if="!publicView && workspace.curation?.representativeFile?._id === file._id"
+        class="mx-2"
+        color="decoration"
         flat
         :disabled="!canUserWrite"
         @click="$refs.representWorkspace.openRepresentWorkspaceDialog();"
         icon="mdi-camera"
       ></v-btn>
       <v-btn
+        class="mx-2"
+        color="secondary"
+        variant="elevated"
         :disabled="isFileDownloadInProgress || !user"
         :loading="isFileDownloadInProgress"
         @click="downloadFile(file.currentVersion.uniqueFileName, file.custFileName)"
-        flat
       >
         Download Active
       </v-btn>
       <v-btn
         v-if="!publicView"
-        flat
+        class="mx-2"
+        color="secondary"
+        variant="elevated"
         :disabled="!canUserWrite"
         @click="$refs.deleteFile.openDeleteFileDialog();"
       >
@@ -42,7 +54,9 @@
       </v-btn>
       <v-btn
         v-if="!publicView"
-        flat
+        class="mx-2"
+        color="secondary"
+        variant="elevated"
         :disabled="!canUserWrite"
         @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
       >Upload New Version</v-btn>

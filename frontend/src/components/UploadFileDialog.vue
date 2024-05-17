@@ -38,7 +38,7 @@
           <v-card-item>
             <div class="text-center">
               <div class="text-h6 mt-6">
-                <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn id="dropzone-click-target">BROWSE</v-btn>
+                <v-icon icon="mdi-cloud-upload"></v-icon> Drag file to upload or <v-btn color="primary" variant="elevated" id="dropzone-click-target">BROWSE</v-btn>
               </div>
               <div class="text-caption mt-2 mb-6">Allowed extensions: .*</div>
               <div class="text-h7 mt-6">
@@ -48,7 +48,11 @@
           </v-card-item>
         </div>
         <v-card-actions class="justify-center">
-          <v-btn @click="errorMsg = ''; dialog = false">
+          <v-btn
+            color="decoration"
+            variant="flat"
+            @click="errorMsg = ''; dialog = false"
+          >
             <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
           </v-btn>
         </v-card-actions>

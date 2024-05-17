@@ -23,10 +23,15 @@
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="transactionRecorded">
+        <v-btn
+          color="link"
+          variant="text"
+          v-if="transactionRecorded">
           <a href="/">continue</a>
         </v-btn>
         <v-btn v-else
+               color="primary"
+               variant="elevated"
                @click="applySubscription"
         >
           try recording again

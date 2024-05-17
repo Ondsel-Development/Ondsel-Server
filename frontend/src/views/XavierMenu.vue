@@ -3,49 +3,48 @@
     <v-card-title><v-sheet color="success">Professor Xavier's School For The Hidden</v-sheet></v-card-title>
     <v-card-text>
       <v-list>
-        <v-list-item>
-          <v-list-item-title
-            @click="$router.push({ name: 'XavierModifyLensHomePageCuration', params: {} })"
-          >
-            <v-btn icon="mdi-gesture-tap"></v-btn> Modify Lens Home Page Curation
-          </v-list-item-title>
+        <v-list-item
+          color="link"
+          class="text-decoration-underline"
+          @click="$router.push({ name: 'XavierModifyLensHomePageCuration', params: {} })"
+        >
+          Modify Lens Home Page Curation
         </v-list-item>
         <v-list-item>
-          <v-list-item-title>
-            View/Modify Key Documents:
-            <v-list class="ms-4">
-              <v-list-item>
-                <v-list-item-title
-                  @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'privacy-policy'} })"
-                >
-                  <v-btn icon="mdi-gesture-tap"></v-btn> Privacy Policy Document
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title
-                  @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'terms-of-service'} })"
-                >
-                  <v-btn icon="mdi-gesture-tap"></v-btn> Terms of Service/Use
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-list-item-title>
+          View/Modify Key Documents:
+          <v-list class="ms-4">
+            <v-list-item
+              color="link"
+              class="text-decoration-underline"
+              @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'privacy-policy'} })"
+            >
+              Privacy Policy Document
+            </v-list-item>
+            <v-list-item
+              color="link"
+              class="text-decoration-underline"
+              @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'terms-of-service'} })"
+            >
+              Terms of Service/Use
+            </v-list-item>
+          </v-list>
         </v-list-item>
-        <v-list-item>
-          <v-list-item-title
-            @click="$router.push({ name: 'XavierRemoveUser', params: {} })"
-          >
-            <v-btn icon="mdi-gesture-tap"></v-btn> Remove User
-          </v-list-item-title>
+        <v-list-item
+          color="link"
+          class="text-decoration-underline"
+          @click="$router.push({ name: 'XavierRemoveUser', params: {} })"
+        >
+          Remove User
         </v-list-item>
       </v-list>
     </v-card-text>
     <v-card-actions>
       <v-btn
-        icon
+        flat
+        density="default"
+        icon="mdi-magnify"
         @click="$refs.searchPopupDialogXavier.$data.dialog = true;"
       >
-        <v-icon>mdi-magnify</v-icon>
       </v-btn>
     </v-card-actions>
   </v-card>

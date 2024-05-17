@@ -173,7 +173,7 @@
         </v-list-item>
       </v-list>
     </template>
-    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click="rail = !rail"></v-btn>
+    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click.stop="rail = !rail"></v-btn>
   </v-navigation-drawer>
   <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
 </template>
@@ -181,6 +181,7 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import SelectOrganization from '@/components/SelectOrganization.vue';
+import { getInitials } from "@/genericHelpers";
 
 export default {
   name: "MainNavigationBar",
@@ -259,6 +260,7 @@ export default {
     }
   },
   methods: {
+    getInitials,
     ...mapActions('auth', {authLogout: 'logout'}),
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
@@ -280,15 +282,6 @@ export default {
       if (this.searchText) {
         this.$router.push({ name: 'SearchResults', params: { text: this.searchText } });
       }
-    },
-    getInitials(name) {
-      const nameArray = name.split(' ');
-      const firstName = nameArray[0].charAt(0).toUpperCase();
-      const lastName = nameArray[nameArray.length - 1].charAt(0).toUpperCase();
-      if (nameArray.length === 1) {
-        return firstName;
-      }
-      return firstName + lastName;
     },
   },
 }

@@ -8,7 +8,7 @@
         <div class="text-body-1 mt-6">The page you are looking for does not exist.</div>
         <div class="text-body-1">Please check the URL or navigate back to the homepage.</div>
         <br>
-        <v-btn flat to="/">Go to Homepage</v-btn>
+        <v-btn color="link" variant="text" to="/">Go to Homepage</v-btn>
       </v-col>
     </v-row>
   </v-container>

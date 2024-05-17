@@ -34,8 +34,18 @@
         </v-snackbar>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="sendFinalSelection()" color="primary" :disabled="isPatchPending" :loading="isPatchPending">Change</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="sendFinalSelection()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+          :loading="isPatchPending"
+        >Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

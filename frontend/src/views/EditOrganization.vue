@@ -6,6 +6,7 @@
         <v-btn
           v-if="organization"
           flat
+          color="link"
           variant="plain"
           class="text-body-1 font-weight-bold pl-0"
           style="text-decoration: none;"
@@ -48,8 +49,8 @@
                     <v-list-item-action>
                       <v-btn
                         v-if="isLoggedInUserAdminOfOrganization"
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openOrgChangeNameDialog()"
                       >
@@ -84,8 +85,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openEditDescriptionDialog()"
                       >
@@ -115,8 +116,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openEditLongDescriptionMdDialog()"
                       >
@@ -147,8 +148,8 @@
                   <template #append>
                     <v-list-item-action>
                       <v-btn
-                        variant="outlined"
-                        color="default"
+                        variant="elevated"
+                        color="secondary"
                         size="small"
                         @click.stop="openEditTagsDialog()"
                       >
@@ -195,7 +196,8 @@
                     <v-list-item-action>
                       <v-btn
                         v-if="userIsOwner"
-                        variant="outlined"
+                        variant="elevated"
+                        color="error"
                         size="small"
                         @click.stop="openDeleteOrgDialog()"
                       >

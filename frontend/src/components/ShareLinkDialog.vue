@@ -16,7 +16,7 @@
           readonly
         >
           <template v-slot:append>
-            <v-btn icon flat @click="copyUrlToClipboard('sharedModelUrl')">
+            <v-btn icon color="decoration" flat @click="copyUrlToClipboard('sharedModelUrl')">
               <v-icon>
                 mdi-content-copy
               </v-icon>
@@ -35,7 +35,7 @@
           readonly
         >
           <template v-slot:append>
-            <v-btn icon flat @click="copyUrlToClipboard('freecadForumUrl')">
+            <v-btn icon color="decoration" flat @click="copyUrlToClipboard('freecadForumUrl')">
               <v-icon>
                 mdi-content-copy
               </v-icon>
@@ -55,7 +55,7 @@
           readonly
         >
           <template v-slot:append>
-            <v-btn icon flat @click="copyUrlToClipboard('iFrameUrl')">
+            <v-btn icon color="decoration" flat @click="copyUrlToClipboard('iFrameUrl')">
               <v-icon>
                 mdi-content-copy
               </v-icon>
@@ -69,7 +69,11 @@
 
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Close</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

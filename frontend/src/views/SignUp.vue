@@ -111,7 +111,14 @@
         </v-checkbox>
 
         <v-card-actions>
-          <v-btn type="submit" :disabled="isCreatePending" block class="mt-2" color="primary">Submit</v-btn>
+          <v-btn
+            type="submit"
+            :disabled="isCreatePending"
+            class="mt-2"
+            color="primary"
+            block
+            variant="elevated"
+          >Submit</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>

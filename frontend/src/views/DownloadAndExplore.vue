@@ -241,7 +241,7 @@
             <v-card-title>Links</v-card-title>
             <v-card-text>
               <v-list>
-                <v-list-item @click-once="goPublicModels()">
+                <v-list-item @click-once="goPublicModels()" color="link">
                   <v-list-item-title>Public CAD Models</v-list-item-title>
                   <v-list-item-subtitle>Browse the models made public by other users and organizations.</v-list-item-subtitle>
                 </v-list-item>

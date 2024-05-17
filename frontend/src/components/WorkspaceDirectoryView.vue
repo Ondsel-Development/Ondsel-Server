@@ -2,9 +2,29 @@
   <v-container v-if="directory" class="mt-4">
     <v-row>
       <v-spacer />
-      <v-btn v-if="!publicView" flat :disabled="!canUserWrite" @click="$refs.uploadFileDialog.openFileUploadDialog();" >Add New File</v-btn>
-      <v-btn v-if="!publicView" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.createDirectoryDialog.$data.dialog=true;" >Create Directory</v-btn>
-      <v-btn v-if="directory.name!=='/' && !publicView" flat class="ml-1" :disabled="!canUserWrite" @click="$refs.deleteDirectoryDialog.$data.dialog=true;">Delete Directory</v-btn>
+      <v-btn
+        v-if="!publicView"
+        color="primary"
+        variant="elevated"
+        :disabled="!canUserWrite"
+        @click="$refs.uploadFileDialog.openFileUploadDialog();"
+      >Add New File</v-btn>
+      <v-btn
+        v-if="!publicView"
+        color="secondary"
+        variant="elevated"
+        class="ml-1"
+        :disabled="!canUserWrite"
+        @click="$refs.createDirectoryDialog.$data.dialog=true;"
+      >Create Directory</v-btn>
+      <v-btn
+        v-if="directory.name!=='/' && !publicView"
+        color="error"
+        variant="elevated"
+        class="ml-1"
+        :disabled="!canUserWrite"
+        @click="$refs.deleteDirectoryDialog.$data.dialog=true;"
+      >Delete Directory</v-btn>
     </v-row>
     <v-row class="mt-10" dense>
       <v-col cols="3" v-for="file in directory.files" :key="file._id">

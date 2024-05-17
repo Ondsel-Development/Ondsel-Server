@@ -6,6 +6,8 @@
     </template>
     <template #actions>
       <v-btn
+        color="success"
+        variant="elevated"
         min-width="200"
         prepend-icon="mdi-plus"
         :to="{ name: 'Home'}"
@@ -14,6 +16,8 @@
         Upload New Model
       </v-btn>
       <v-btn
+        color="secondary"
+        variant="elevated"
         min-width="200"
         prepend-icon="mdi-plus"
         v-else
