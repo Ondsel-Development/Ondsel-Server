@@ -5,7 +5,10 @@
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container class="d-flex flex-wrap">
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="soloClicked()">
-          <v-card-title>Solo</v-card-title>
+          <v-card-title>
+            <v-icon icon="mdi-charity" />
+            Solo
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
           <v-card-item>
@@ -34,7 +37,10 @@
           </v-card-actions>
         </v-card>
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" color="primary" @click="peerClicked()">
-          <v-card-title>Peer</v-card-title>
+          <v-card-title>
+            <v-icon icon="mdi-account-hard-hat" />
+            Peer
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
           <v-card-item>
@@ -65,7 +71,10 @@
           </v-card-actions>
         </v-card>
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="enterpriseClicked()">
-          <v-card-title>Enterprise</v-card-title>
+          <v-card-title>
+            <v-icon icon="mdi-briefcase" />
+            Enterprise
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
           <v-card-item>
