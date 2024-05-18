@@ -343,9 +343,12 @@ const softDeleteFile = async (context) => {
   //
   // mark the file as deleted
   //
+  const redactedRelatedUserDetails = file.relatedUserDetails.map((user) => ({ ...user, username: '<REDACTED>', name: '<REDACTED>' }));
+  // note: even if the deletion is not for redaction, there is no benefit of keeping username or name as-is; the _id remains
   const fileAfterDelete = await context.service.patch(
     context.id,
     {
+      relatedUserDetails: redactedRelatedUserDetails,
       deleted: true,
     }
   );
