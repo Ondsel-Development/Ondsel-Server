@@ -202,7 +202,7 @@
     </template>
     <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click.stop="rail = !rail"></v-btn>
   </v-navigation-drawer>
-<!--  <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />-->
+  <!-- Wired: this comment is important to make navigation bar toggle working. Not sure why? -->
 </template>
 
 <script>
