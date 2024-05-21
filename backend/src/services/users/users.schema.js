@@ -18,6 +18,7 @@ import {
 import {refNameHasher} from "../../refNameFunctions.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 import {ObjectId} from "mongodb";
+import {BadRequest} from "@feathersjs/errors";
 
 // Main data model schema
 export const userSchema = Type.Object(
