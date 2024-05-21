@@ -18,21 +18,27 @@
           ></v-btn>
         </template>
         <template v-slot:append>
-          <v-btn
-            color="decoration"
-            flat
-            icon="mdi-dots-vertical"
-            size="x-small"
-          ></v-btn>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                color="decoration"
+                flat
+                icon="mdi-dots-vertical"
+                v-bind="props"
+                size="x-small"
+              ></v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="openCreateDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
         <v-list-item-media>
-          <v-card
-            @click="$emit('selectedDirectory', dir, getItemPath(dir.name));"
-          >
-            <v-card-text>
-              <span class="text-body-2">{{ dir.name }}</span>
-            </v-card-text>
-          </v-card>
+          <v-sheet @click="$emit('selectedDirectory', dir, getItemPath(dir.name));">
+            <span class="text-body-2 mx-3">{{ dir.name }}</span>
+          </v-sheet>
         </v-list-item-media>
       </v-list-item>
       <directory-list-view
@@ -40,24 +46,28 @@
         :directory="openDirectories.find(d => d._id === dir._id)"
         :parent-directory-path="getItemPath(dir.name)+'/'"
         @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
+        @create-directory="emitCreateDirectory"
       />
     </template>
   </v-list>
+  <create-directory-dialog ref="createDirectoryDialog" @create-directory="emitCreateDirectory" :parent-dir="targetDirectory"></create-directory-dialog>
 </template>
 
 <script>
 import {mapActions} from "vuex";
+import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
 
 export default {
   name: 'DirectoryListView',
-  emits: ['selectedDirectory'],
+  components: {CreateDirectoryDialog},
+  emits: ['selectedDirectory', 'createDirectory'],
   props: {
     directory: Object,
     parentDirectoryPath: String,
   },
   data: () => ({
     openDirectories: [],
-    openRootDirectory: true,
+    targetDirectory: {},
   }),
   computed: {
   },
@@ -77,8 +87,14 @@ export default {
       const directory = await this.getDirectoryByIdPublic(directorySubdocs._id);
       this.openDirectories.push(directory);
     },
-    toggleRootDirectory() {
-      this.openRootDirectory = !this.openRootDirectory;
+    async openCreateDirectoryDialog(newTargetDir) {
+      this.targetDirectory = newTargetDir;
+      this.$refs.createDirectoryDialog.$data.dialog = true;
+    },
+    async emitCreateDirectory(dirName, parentDir) {
+      // pass this up to the parent unmodified
+      this.$emit('createDirectory', dirName, parentDir);
+      this.$refs.createDirectoryDialog.$data.dialog = false;
     }
   },
 };

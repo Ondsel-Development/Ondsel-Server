@@ -14,13 +14,42 @@
                 Directories
               </v-card-title>
               <v-card-text>
-                <p>
-                  /
-                </p>
+
+                <v-list-item
+                  variant="flat"
+                  class="show-indent"
+                >
+                  <template v-slot:append>
+                    <v-menu>
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          color="decoration"
+                          flat
+                          icon="mdi-dots-vertical"
+                          v-bind="props"
+                          size="x-small"
+                        ></v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item @click="$refs.createDirectoryDialog.$data.dialog = true;">
+                          <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                  </template>
+                  <v-list-item-media>
+                    <v-card>
+                      <v-card-text>
+                        <span class="text-body-2">/</span>
+                      </v-card-text>
+                    </v-card>
+                  </v-list-item-media>
+                </v-list-item>
                 <directory-list-view
                   v-if="directory"
                   :directory="directory"
                   @selected-directory="clickedDirectory"
+                  @create-directory="createDirectory"
                 />
               </v-card-text>
             </v-card>
@@ -43,6 +72,7 @@
           </v-card>
         </v-sheet>
       </v-sheet>
+      <create-directory-dialog ref="createDirectoryDialog" @create-directory="createDirectory" :parent-dir="directory"></create-directory-dialog>
     </template>
   </Main>
 </template>
@@ -50,6 +80,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { models } from '@feathersjs/vuex';
+import _ from 'lodash';
 
 import DirectoryListView from '@/components/DirectoryListView.vue';
 import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
@@ -59,12 +90,14 @@ import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 import Main from '@/layouts/default/Main.vue';
+import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
 
 const { Directory, File, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
   components: {
+    CreateDirectoryDialog,
     Main,
     CuratedItemSheet,
     MarkdownViewer,
@@ -239,8 +272,22 @@ export default {
     async openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
-    async openCreateDirectoryDialog() {
-      this.$refs.createDirectoryDialog.$data.dialog = true;
+    async createDirectory(directoryName, parentDir) {
+      const workspaceSummary = _.pick(this.workspace, ["_id", "name", "refName", "open"]);
+      const parentDirSummary = _.pick(parentDir, ["_id", "name"])
+      try {
+        await Directory.create({
+          name: directoryName,
+          workspace: workspaceSummary,
+          parentDirectory: parentDirSummary,
+        });
+      } catch (e) {
+        const msg = e.message;
+        this.$refs.createDirectoryDialog.$data.snackerMsg = msg;
+        this.$refs.createDirectoryDialog.$data.showSnacker = true;
+        return;
+      }
+      this.$refs.createDirectoryDialog.$data.dialog = false;
     },
   },
 };

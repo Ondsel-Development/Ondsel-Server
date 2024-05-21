@@ -5,9 +5,12 @@
     persistent
   >
     <v-card width="34em" max-height="800">
-      <template v-slot:title>
+      <v-card-title>
         <div class="text-center">Create a Directory</div>
-      </template>
+      </v-card-title>
+      <v-card-subtitle>
+        Under directory <code class="text-teal">{{parentDir.name}}</code>
+      </v-card-subtitle>
       <v-progress-linear
         :active="isCreatePending || isPatchPending"
         indeterminate
@@ -58,6 +61,12 @@ import { mapState } from 'vuex';
 export default {
   name: "CreateDirectoryDialog",
   emits: ['createDirectory'],
+  props: {
+    parentDir: {
+      Type: Object,
+      required: true,
+    }
+  },
   data: () => ({
     dialog: false,
     directoryName: '',
@@ -76,7 +85,7 @@ export default {
       if (!valid) {
         return;
       }
-      this.$emit('createDirectory', this.directoryName);
+      this.$emit('createDirectory', this.directoryName, this.parentDir);
     }
   }
 }
