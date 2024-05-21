@@ -1,22 +1,49 @@
 <template>
   <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
     <v-list class="my-2" nav>
-      <v-divider />
-      <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user" @click="$refs.selectedOrganization.$data.dialog = true;">
-        <template #prepend>
-          <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
-            {{ getInitials(currentOrganization?.name || '') }}
-          </v-sheet>
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user" v-bind="props">
+            <template #prepend>
+              <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
+                {{ getInitials(currentOrganization?.name || '') }}
+              </v-sheet>
+            </template>
+            <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
+              <span class="text-caption">Organization</span>
+              <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
+            </v-sheet>
+            <template v-slot:append>
+              <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
+            </template>
+          </v-list-item>
         </template>
-        <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
-          <span class="text-caption">Organization</span>
-          <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
-        </v-sheet>
-        <template v-slot:append>
-          <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
-        </template>
-      </v-list-item>
-      <v-divider />
+        <v-list>
+          <v-list-item
+            v-for="(organization, i) in user.organizations"
+            :key="i"
+            variant="text"
+            flat
+            :value="organization"
+            :active="currentOrganization ? organization._id === currentOrganization._id : false"
+          >
+            <template #title>
+              <v-sheet @click="goToOrganization(organization)">
+                {{ organization.name }}
+                <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+              </v-sheet>
+            </template>
+            <template #append>
+              <v-btn
+                color="decorative"
+                flat
+                icon="mdi-cog"
+                @click="goToOrganizationEdit(organization)"
+              ></v-btn>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-list>
     <v-text-field
       v-model="searchText"
@@ -41,7 +68,7 @@
           :to="path"
           link
         >
-          <span class="text-body-2" style="color: black;">{{ text }}</span>
+          <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
         </v-list-item>
       </template>
     </v-list>
@@ -57,7 +84,7 @@
             :to="path"
             link
           >
-            <span class="text-body-2" style="color: black;">{{ text }}</span>
+            <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
           </v-list-item>
         </template>
       </v-list>
@@ -175,17 +202,17 @@
     </template>
     <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click.stop="rail = !rail"></v-btn>
   </v-navigation-drawer>
-  <SelectOrganization ref="selectedOrganization" :current-organization="currentOrganization" />
+  <!-- Wired: this comment is important to make navigation bar toggle working. Not sure why? -->
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import SelectOrganization from '@/components/SelectOrganization.vue';
-import { getInitials } from "@/genericHelpers";
+import { getInitials } from '@/genericHelpers';
+import OrganizationMixin from '@/mixins/organizationMixin';
 
 export default {
   name: "MainNavigationBar",
-  components: { SelectOrganization },
+  mixins: [ OrganizationMixin ],
   data: () => ({
     menu: false,
     searchText: '',
