@@ -22,7 +22,7 @@
             flat
             :value="organization"
             :active="currentOrganization ? organization._id === currentOrganization._id : false"
-            @click.stop="goToOrganization(organization)"
+            @click.stop="goToOrg(organization)"
           >
             <template #title>
               {{ organization.name }}
@@ -33,7 +33,7 @@
                 icon="mdi-cog"
                 variant="text"
                 flat
-                @click.stop="goToOrganizationEdit(organization)"
+                @click.stop="goToOrgEdit(organization)"
               />
             </template>
           </v-list-item>
@@ -53,11 +53,13 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
-import { models } from '@feathersjs/vuex';
+import { mapState } from 'vuex';
+import { getInitials } from '@/genericHelpers';
+import OrganizationMixin from '@/mixins/organizationMixin';
 
 export default {
   name: "SelectOrganization",
+  mixins: [ OrganizationMixin ],
   props: {
     currentOrganization: Object,
   },
@@ -71,27 +73,13 @@ export default {
     ...mapState('auth', ['user']),
   },
   methods: {
-    ...mapActions('app', ['setCurrentOrganization']),
-    async goToOrganization(organization) {
-      const { Organization } = models.api;
-      await Organization.get(organization._id);
-      await this.setCurrentOrganization(Organization.getFromStore(organization._id));
-      if (organization.type === 'Personal') {
-        this.$router.push({ name: 'UserWorkspaces', params: { id: this.user.username } });
-      } else {
-        this.$router.push({ name: 'OrganizationWorkspaces', params: { id: organization.refName } });
-      }
+    getInitials,
+    async goToOrg(organization) {
+      await this.goToOrganization(organization);
       this.dialog = false;
     },
-    async goToOrganizationEdit(organization) {
-      const { Organization } = models.api;
-      await Organization.get(organization._id);
-      await this.setCurrentOrganization(Organization.getFromStore(organization._id));
-      if (organization.type === 'Personal') {
-        this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
-      } else {
-        this.$router.push({ name: 'EditOrganization', params: { id: organization.refName } });
-      }
+    async goToOrgEdit(organization) {
+      await this.goToOrganizationEdit(organization)
       this.dialog = false;
     }
   }
