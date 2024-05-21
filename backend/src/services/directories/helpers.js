@@ -220,20 +220,26 @@ export const ifNeededAddRelatedUserDetails = async context => {
 
 export const removeFromParent = async context => {
   // remove the just-deleted directory from the parent directory via direct administrative patch
-  // this should only be called 'after' then 'remove' method
+  // this should only be called 'after' the 'remove' method
   const refDir = context.result;
   if (refDir.parentDirectory) {
-    const srcList = refDir.directories || [];
-    const newDirList = srcList.filter((d) => d._id.toString() !== refDir._id.toString());
-    await context.service.patch(
-      refDir.parentDirectory._id,
-      {
-        directories: newDirList
-      }
-    )
+    const directoryService = context.app.service('directories');
+    try {
+      const parentDir = await directoryService.get(refDir.parentDirectory._id);
+      const srcList = parentDir.directories || [];
+      const newDirList = srcList.filter((d) => d._id.toString() !== refDir._id.toString());
+      await context.service.patch(
+        refDir.parentDirectory._id,
+        {
+          directories: newDirList
+        }
+      )
+    } catch (e) {
+      console.log(`could not retrieve or update parent dir doc during deletion. ERROR: ${e.message}`);
+    }
   } else {
     // this should never happen given earlier 'before' checks
-    throw new BadRequest(`parent directory was missing when deleting directory ${refDir._id}.`)
+    throw new BadRequest(`parent directory field was missing when deleting directory ${refDir._id}.`)
   }
   return context;
 }
