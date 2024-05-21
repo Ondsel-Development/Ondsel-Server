@@ -68,7 +68,7 @@
           :to="path"
           link
         >
-          <span class="text-body-2" style="color: black;">{{ text }}</span>
+          <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
         </v-list-item>
       </template>
     </v-list>
@@ -84,7 +84,7 @@
             :to="path"
             link
           >
-            <span class="text-body-2" style="color: black;">{{ text }}</span>
+            <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
           </v-list-item>
         </template>
       </v-list>
