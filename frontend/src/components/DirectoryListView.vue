@@ -32,6 +32,9 @@
               <v-list-item @click="openCreateDirectoryDialog(dir)">
                 <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
         </template>
@@ -51,15 +54,20 @@
     </template>
   </v-list>
   <create-directory-dialog ref="createDirectoryDialog" @create-directory="emitCreateDirectory" :parent-dir="targetDirectory"></create-directory-dialog>
+  <delete-directory-dialog ref="deleteDirectoryDialog" @delete-directory="deleteDirectory" :directory-name="targetDirectory.name"></delete-directory-dialog>
 </template>
 
 <script>
 import {mapActions} from "vuex";
 import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
+import DeleteDirectoryDialog from "@/components/DeleteDirectoryDialog.vue";
+import {models} from "@feathersjs/vuex";
+const { Directory } = models.api;
+
 
 export default {
   name: 'DirectoryListView',
-  components: {CreateDirectoryDialog},
+  components: {DeleteDirectoryDialog, CreateDirectoryDialog},
   emits: ['selectedDirectory', 'createDirectory'],
   props: {
     directory: Object,
@@ -91,11 +99,25 @@ export default {
       this.targetDirectory = newTargetDir;
       this.$refs.createDirectoryDialog.$data.dialog = true;
     },
+    async openDeleteDirectoryDialog(newTargetDir) {
+      this.targetDirectory = newTargetDir;
+      this.$refs.deleteDirectoryDialog.$data.dialog = true;
+    },
     async emitCreateDirectory(dirName, parentDir) {
       // pass this up to the parent unmodified
       this.$emit('createDirectory', dirName, parentDir);
       this.$refs.createDirectoryDialog.$data.dialog = false;
-    }
+    },
+    async deleteDirectory() {
+      await Directory.remove(
+        this.targetDirectory._id
+      ).then(() => {
+        this.$refs.deleteDirectoryDialog.$data.dialog = false;
+      }).catch((e) => {
+        this.$refs.deleteDirectoryDialog.$data.snackerMsg = e.message;
+        this.$refs.deleteDirectoryDialog.$data.showSnacker = true;
+      });
+    },
   },
 };
 </script>

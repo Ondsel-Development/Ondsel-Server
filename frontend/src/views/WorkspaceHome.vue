@@ -38,11 +38,11 @@
                     </v-menu>
                   </template>
                   <v-list-item-media>
-                    <v-card>
-                      <v-card-text>
-                        <span class="text-body-2">/</span>
-                      </v-card-text>
-                    </v-card>
+                    <v-list-item-media>
+                      <v-sheet @click="console.log('tbd');">
+                        <span class="text-body-2 mx-3">{{directory.name}}</span>
+                      </v-sheet>
+                    </v-list-item-media>
                   </v-list-item-media>
                 </v-list-item>
                 <directory-list-view
