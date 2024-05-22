@@ -22,6 +22,7 @@
         <v-card
           v-for="file in fileList"
           :key="file._id"
+          @click="gotoFile(file)"
         >
           <v-img
             v-if="file.thumbnailUrlCache"
@@ -65,10 +66,21 @@ export default {
   }),
   computed: {
     fileList: vm => vm.directory.files || [],
+    userRouteFlag: vm => vm.$route.path.startsWith("/user"),
   },
   methods: {
     ...mapActions('app', [
     ]),
+    async gotoFile(fileSummary) {
+      const slug = this.$route.params.slug;
+      const wsName = this.$route.params.wsname;
+      const fileId = fileSummary._id.toString();
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserWorkspaceFile', params: { slug: slug, wsname: wsName, fileid: fileId } });
+      } else {
+        this.$router.push({ name: 'OrgWorkspaceFile', params: { slug: slug, wsname: wsName, fileid: fileId } });
+      }
+    }
   },
 };
 </script>

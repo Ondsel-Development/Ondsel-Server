@@ -42,6 +42,7 @@ import XavierSearchResults from "@/views/XavierSearchResults.vue";
 import XavierRemoveUser from "@/views/XavierRemoveUser.vue";
 import SharedWithMe from "@/views/SharedWithMe.vue";
 import MyNotifications from "@/views/MyNotifications.vue";
+import WorkspaceFile from "@/views/WorkspaceFile.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -156,6 +157,12 @@ const routes = [
     component: PageNotFound,
     name: 'PageNotFound',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/org/:slug/504/:urlCode',
+    component: PermissionError,
+    name: 'PermissionError',
+    meta: { requiresAuth: true },
   },
   {
     path: '/join-org/:token/:id',
@@ -299,6 +306,12 @@ const routes = [
     name: 'UserEditWorkspace',
     meta: { requiresAuth: true },
   },
+  {
+    path: '/user/:slug/workspace/:wsname/file/:fileid',
+    component: WorkspaceFile,
+    name: 'UserWorkspaceFile',
+    meta: { tryAuth: true },
+  },
   //
   // ORG pages
   //
@@ -339,11 +352,11 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/504/:urlCode',
-    component: PermissionError,
-    name: 'PermissionError',
-    meta: { requiresAuth: true },
-  }
+    path: '/org/:slug/workspace/:wsname/file/:fileid',
+    component: WorkspaceFile,
+    name: 'OrgWorkspaceFile',
+    meta: { tryAuth: true },
+  },
 ]
 
 const router = createRouter({
