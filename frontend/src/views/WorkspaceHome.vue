@@ -8,8 +8,8 @@
     <template #content>
       <v-sheet class="d-flex flex-column flex-wrap" name="top-and-bottom-section">
         <v-sheet class="d-flex flex-row justify-space-between flex-wrap" name="top-section">
-          <v-sheet class="d-flex flex-column flex-wrap" name="left-hand-column-on-top">
-            <v-card min-width="32em">
+          <v-sheet class="d-flex flex-column flex-wrap flex-grow-1" name="left-hand-column-on-top">
+            <v-card min-width="32em" border>
               <v-card-title>
                 Directories
               </v-card-title>
@@ -39,8 +39,15 @@
                   </template>
                   <v-list-item-media>
                     <v-list-item-media>
-                      <v-sheet @click="console.log('tbd');">
-                        <span class="text-body-2 mx-3">{{directory.name}}</span>
+                      <v-sheet @click="clickedDirectory(directory, '/')">
+                        <span
+                          v-if="activeDirectory?._id === directory?._id"
+                          class="text-body-2 mx-3"
+                        ><b>{{ directory.name }}</b></span>
+                        <span
+                          v-else
+                          class="text-body-2 mx-3"
+                        >{{ directory.name }}</span>
                       </v-sheet>
                     </v-list-item-media>
                   </v-list-item-media>
@@ -48,27 +55,35 @@
                 <directory-list-view
                   v-if="directory"
                   :directory="directory"
+                  :active-directory="activeDirectory"
+                  parent-directory-path="/"
                   @selected-directory="clickedDirectory"
                   @create-directory="createDirectory"
                 />
               </v-card-text>
             </v-card>
-            <v-card min-width="32em">
-              <v-card-title>Files in <code>/</code></v-card-title>
-              <v-card-text>stuff</v-card-text>
-            </v-card>
+            <file-list-view :directory="activeDirectory" :path="activePath"></file-list-view>
           </v-sheet>
           <v-sheet name="right-hand-column-on-top">
-            <v-card min-width="32em">
+            <v-card min-width="32em" border>
               <v-card-title>Details</v-card-title>
-              <v-card-text>stuff</v-card-text>
+              <v-card-text>
+                <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
+              </v-card-text>
             </v-card>
           </v-sheet>
         </v-sheet>
-        <v-sheet name="bottom-section">
+        <v-sheet name="bottom-section" border>
           <v-card min-width="32em">
             <v-card-title>markdown</v-card-title>
-            <v-card-text>stuff</v-card-text>
+            <v-card-text>
+              <v-card class="ma-2 flex-md-grow-1" min-width="22em" max-height="40em" style="overflow-y:auto;">
+                <v-card-text>
+                  <markdown-viewer v-if="longDescriptionHtml" :markdown-html="longDescriptionHtml"></markdown-viewer>
+                  <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
+                </v-card-text>
+              </v-card>
+            </v-card-text>
           </v-card>
         </v-sheet>
       </v-sheet>
@@ -82,31 +97,30 @@ import { mapActions, mapGetters } from 'vuex';
 import { models } from '@feathersjs/vuex';
 import _ from 'lodash';
 
+import Main from '@/layouts/default/Main.vue';
 import DirectoryListView from '@/components/DirectoryListView.vue';
-import WorkspaceFileView from '@/components/WorkspaceFileView.vue';
-import WorkspaceDirectoryView from '@/components/WorkspaceDirectoryView.vue';
 import {marked} from "marked";
-import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
+import FileListView from "@/components/FileListView.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
-import Main from '@/layouts/default/Main.vue';
-import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
 
-const { Directory, File, Organization } = models.api;
+const { Directory, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
   components: {
-    CreateDirectoryDialog,
-    Main,
     CuratedItemSheet,
     MarkdownViewer,
-    EditPromotionDialog, DirectoryListView, WorkspaceFileView, WorkspaceDirectoryView },
+    Main,
+    FileListView,
+    CreateDirectoryDialog,
+    DirectoryListView
+  },
   data() {
     return {
-      activeFile: null,
-      activeDirectory: null,
-      activePath: '',
+      activeDirectory: {name: "/"},
+      activePath: '/',
       workspaceDetail: {},
       directoryDetail: {},
       organizationDetail: undefined,
@@ -200,6 +214,7 @@ export default {
         }
       }
     }
+    this.activeDirectory = this.directoryDetail;
     this.activePath = this.directory.name;
   },
   computed: {
@@ -223,18 +238,6 @@ export default {
       'getOrgByIdOrNamePublic',
       'getFileByIdPublic',
     ]),
-    async clickedFile(fileSubDocs, filePath) {
-      let file = this.publicView
-        ? await this.getFileByIdPublic(fileSubDocs._id)
-        : File.getFromStore(fileSubDocs._id);
-      if (!file) {
-        await File.get(fileSubDocs._id);
-        file = File.getFromStore(fileSubDocs._id);
-      }
-      this.activeDirectory = null;
-      this.activeFile = file;
-      this.activePath = filePath;
-    },
     async clickedDirectory(directorySubDocs, dirPath) {
       let directory = this.publicView
         ? await this.getDirectoryByIdPublic(directorySubDocs._id)
@@ -243,7 +246,7 @@ export default {
         await Directory.get(directorySubDocs._id);
         directory = Directory.getFromStore(directorySubDocs._id);
       }
-      this.activeFile = null;
+      console.log(directory);
       this.activeDirectory = directory;
       this.activePath = dirPath;
     },

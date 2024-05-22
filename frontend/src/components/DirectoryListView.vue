@@ -40,7 +40,14 @@
         </template>
         <v-list-item-media>
           <v-sheet @click="$emit('selectedDirectory', dir, getItemPath(dir.name));">
-            <span class="text-body-2 mx-3">{{ dir.name }}</span>
+            <span
+              v-if="activeDirectory?._id === dir._id"
+              class="text-body-2 mx-3"
+            ><b>{{ dir.name }}</b></span>
+            <span
+              v-else
+              class="text-body-2 mx-3"
+            >{{ dir.name }}</span>
           </v-sheet>
         </v-list-item-media>
       </v-list-item>
@@ -48,6 +55,7 @@
         v-if="openDirectories.find(d => d._id === dir._id)"
         :directory="openDirectories.find(d => d._id === dir._id)"
         :parent-directory-path="getItemPath(dir.name)+'/'"
+        :active-directory="activeDirectory"
         @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
         @create-directory="emitCreateDirectory"
       />
@@ -72,6 +80,7 @@ export default {
   props: {
     directory: Object,
     parentDirectoryPath: String,
+    activeDirectory: Object,
   },
   data: () => ({
     openDirectories: [],
