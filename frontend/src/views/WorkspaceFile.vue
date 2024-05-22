@@ -14,7 +14,7 @@
                 <a
                   v-if="file.modelId"
                   :href="fileModelUrl"
-                  target="blank"
+                  target="_blank"
                   style="text-decoration: none; color: inherit;"
                 >
                   <v-btn
@@ -95,8 +95,16 @@
                   color="secondary"
                   variant="elevated"
                   @click="gotoWorkspace()"
+                  class="mr-2"
                 >
                   Go To Workspace
+                </v-btn>
+                <v-btn
+                  color="secondary"
+                  variant="elevated"
+                  @click="gotoDirectory()"
+                >
+                  Go To Directory
                 </v-btn>
               </v-sheet>
             </v-sheet>
@@ -162,14 +170,26 @@ export default {
     const slug = this.$route.params.slug;
     const wsName = this.$route.params.wsname;
     const fileId = this.$route.params.fileid;
+    let orgRefName = '';
+    if (this.userRouteFlag) {
+      const userDetail = await this.getUserByIdOrNamePublic(slug);
+      if (!userDetail) {
+        console.log(`No such user for ${slug}`);
+        this.$router.push({ name: 'PageNotFound' });
+        return;
+      }
+      orgRefName = userDetail._id.toString();
+    } else {
+      orgRefName = slug;
+    }
     this.file = await File.get(fileId);
-    this.workspace = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: slug} );
+    this.workspace = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
     if (this.workspace) {
-      // if (this.workspace.organization._id !== this.currentOrganization._id) {
-      //   // if the user has private access to the ws generically, but isn't actually representing that org, then
-      //   // set the publicView flag anyway
-      //   this.publicView = true;
-      // }
+      if (this.workspace.organization._id !== this.currentOrganization._id) {
+        // if the user has private access to the ws generically, but isn't actually representing that org, then
+        // set the publicView flag anyway
+        this.publicView = true;
+      }
     } else {
       this.publicView = true;
       this.workspace = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: slug} );
@@ -206,6 +226,7 @@ export default {
   },
   methods: {
     ...mapActions('app', [
+      'getUserByIdOrNamePublic',
       'getFileByIdPublic',
       'getWorkspaceByNamePrivate',
       'getWorkspaceByNamePublic',
@@ -221,7 +242,17 @@ export default {
       } else {
         this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: slug, wsname: wsName } });
       }
-    }
+    },
+    async gotoDirectory() {
+      const slug = this.$route.params.slug;
+      const wsName = this.$route.params.wsname;
+      const dirId = this.file.directory._id.toString();
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserWorkspaceDir', params: { slug: slug, wsname: wsName, dirid: dirId } });
+      } else {
+        this.$router.push({ name: 'OrgWorkspaceDir', params: { slug: slug, wsname: wsName, dirid: dirId } });
+      }
+    },
   },
 };
 </script>

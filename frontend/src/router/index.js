@@ -301,6 +301,12 @@ const routes = [
     meta: { tryAuth: true },
   },
   {
+    path: '/user/:slug/workspace/:wsname/dir/:dirid',
+    component: WorkspaceHome,
+    name: 'UserWorkspaceDir',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/user/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
     name: 'UserEditWorkspace',
@@ -343,6 +349,12 @@ const routes = [
     path: '/org/:slug/workspace/:wsname',
     component: WorkspaceHome,
     name: 'OrgWorkspaceHome',
+    meta: { tryAuth: true },
+  },
+  {
+    path: '/org/:slug/workspace/:wsname/dir/:dirid',
+    component: WorkspaceHome,
+    name: 'OrgWorkspaceDir',
     meta: { tryAuth: true },
   },
   {
