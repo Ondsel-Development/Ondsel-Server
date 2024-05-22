@@ -12,7 +12,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form @submit.prevent="isCreatePending">
+      <v-form @submit.prevent="interpretUrlAndCreatePromotion">
         <v-card-text>
           <v-text-field
             v-model="url"
@@ -97,12 +97,7 @@ export default {
             case 'user':
               obj = await this.getUserByIdOrNamePublic(id);
               personalOrg = await this.getOrgByIdOrNamePublic(obj._id.toString());
-              curation = {
-                _id: obj._id,
-                collection: 'users',
-                name: obj.name,
-                description: personalOrg.description || '',
-              };
+              curation = personalOrg.curation;
               break;
             case 'workspace':
               orgRefName = urlParts.pop();
