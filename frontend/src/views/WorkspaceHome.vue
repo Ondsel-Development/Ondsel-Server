@@ -14,6 +14,7 @@
               :path="activePath"
               :active-directory="activeDirectory"
               :public-view="publicView"
+              :full-path="fullPath"
               parent-directory-path="/"
               @selected-directory="clickedDirectory"
               @create-directory="createDirectory"
@@ -62,9 +63,7 @@ import { models } from '@feathersjs/vuex';
 import _ from 'lodash';
 
 import Main from '@/layouts/default/Main.vue';
-import DirectoryListView from '@/components/DirectoryListView.vue';
 import {marked} from "marked";
-import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
 import FileListView from "@/components/FileListView.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
@@ -78,8 +77,6 @@ export default {
     MarkdownViewer,
     Main,
     FileListView,
-    CreateDirectoryDialog,
-    DirectoryListView
   },
   data() {
     return {
@@ -93,93 +90,11 @@ export default {
       ownerDescription: 'unknown',
       publicViewDetail: false,
       defaultWorkspaceFlag: false,
-      parentDirectory: '/',
+      fullPath: [],
     };
   },
   async created() {
-    this.slug = this.$route.params.slug;
-    const wsName = this.$route.params.wsname;
-    let orgRefName = '';
-    let ownerRealName = '';
-    let userDetail = null;
-    if (this.userRouteFlag) {
-      userDetail = await this.getUserByIdOrNamePublic(this.slug);
-      if (!userDetail) {
-        console.log(`No such user for ${this.slug}`);
-        this.$router.push({ name: 'PageNotFound' });
-        return;
-      }
-      orgRefName = userDetail._id.toString();
-      ownerRealName = userDetail.name;
-    } else {
-      orgRefName = this.slug;
-    }
-    this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
-    if (this.workspaceDetail) {
-      if (this.workspaceDetail.organization._id !== this.currentOrganization._id) {
-        // if the user has private access to the ws generically, but isn't actually representing that org, then
-        // set the publicView flag anyway
-        this.publicViewDetail = true;
-      }
-    } else {
-      this.publicViewDetail = true;
-      this.workspaceDetail = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: orgRefName} );
-    }
-    //
-    if (!this.workspaceDetail) {
-      console.log(`Not found: ${this.slug} ${wsName} combo not found in workspaces.`);
-      this.$router.push({ name: 'PageNotFound' });
-      return;
-    }
-    if (this.userRouteFlag && userDetail) {
-      if (userDetail.defaultWorkspaceId.toString() === this.workspaceDetail._id.toString()) {
-        this.defaultWorkspaceFlag = true;
-      }
-    }
-    this.directoryDetail = this.publicViewDetail
-      ? await this.getDirectoryByIdPublic(this.workspaceDetail.rootDirectory._id)
-      : await Directory.get(this.workspace?.rootDirectory?._id);
-    if (!this.organization) {
-      this.organizationDetail = this.publicViewDetail
-        ? await this.getOrgByIdOrNamePublic(this.workspace.organizationId)
-        : await Organization.get(this.workspace.organizationId);
-    }
-
-    if (this.userRouteFlag) {
-      this.ownerDescription = `user ${ownerRealName}`;
-    } else {
-      this.ownerDescription = `organization ${this.organizationDetail.name}`;
-    }
-    if (this.workspaceDetail.open) {
-      this.generalDescription = "An open (shared with public) workspace"
-      if (this.workspace.license) {
-        this.generalDescription += " under license " + this.workspace.license;
-      }
-    } else {
-      this.generalDescription = "A proprietary workspace"
-    }
-    this.generalDescription += ` owned by ${this.ownerDescription}`
-
-    if (!this.publicViewDetail) {
-      if (this.organization._id !== this.currentOrganization._id) {
-        switch (this.organization.type) {
-          case 'Private':
-          case 'Personal':
-            if (this.workspaceDetail.open !== true) {
-              if (this.userRouteFlag) {
-                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
-              } else {
-                this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
-              }
-            }
-            break;
-          case 'Open':
-            break;
-        }
-      }
-    }
-    this.activeDirectory = this.directoryDetail;
-    this.activePath = this.directory.name;
+    await this.renew();
   },
   computed: {
     ...mapGetters('app', ['currentOrganization', 'selfPronoun', 'selfName']),
@@ -188,6 +103,7 @@ export default {
     workspace: vm => vm.workspaceDetail,
     organization: vm => vm.organizationDetail,
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
+    dirId: vm => vm.$route.params.dirid || null,
     publicView: vm => vm.publicViewDetail,
     longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || ""),
     promotionPossible: vm => vm.currentOrganization && !vm.defaultWorkspaceFlag,
@@ -202,6 +118,96 @@ export default {
       'getOrgByIdOrNamePublic',
       'getFileByIdPublic',
     ]),
+    async renew() {
+      this.slug = this.$route.params.slug;
+      const wsName = this.$route.params.wsname;
+      let orgRefName = '';
+      let ownerRealName = '';
+      let userDetail = null;
+      if (this.userRouteFlag) {
+        userDetail = await this.getUserByIdOrNamePublic(this.slug);
+        if (!userDetail) {
+          console.log(`No such user for ${this.slug}`);
+          this.$router.push({ name: 'PageNotFound' });
+          return;
+        }
+        orgRefName = userDetail._id.toString();
+        ownerRealName = userDetail.name;
+      } else {
+        orgRefName = this.slug;
+      }
+      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
+      if (this.workspaceDetail) {
+        if (this.workspaceDetail.organization._id !== this.currentOrganization._id) {
+          // if the user has private access to the ws generically, but isn't actually representing that org, then
+          // set the publicView flag anyway
+          this.publicViewDetail = true;
+        }
+      } else {
+        this.publicViewDetail = true;
+        this.workspaceDetail = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: orgRefName} );
+      }
+      //
+      if (!this.workspaceDetail) {
+        console.log(`Not found: ${this.slug} ${wsName} combo not found in workspaces.`);
+        this.$router.push({ name: 'PageNotFound' });
+        return;
+      }
+      if (this.userRouteFlag && userDetail) {
+        if (userDetail.defaultWorkspaceId.toString() === this.workspaceDetail._id.toString()) {
+          this.defaultWorkspaceFlag = true;
+        }
+      }
+      let targetDirectoryId = this.workspaceDetail.rootDirectory._id;
+      if (this.dirId) {
+        targetDirectoryId = this.dirId;
+      }
+      this.directoryDetail = this.publicViewDetail
+        ? await this.getDirectoryByIdPublic(targetDirectoryId)
+        : await Directory.get(targetDirectoryId);
+      if (!this.organization) {
+        this.organizationDetail = this.publicViewDetail
+          ? await this.getOrgByIdOrNamePublic(this.workspace.organizationId)
+          : await Organization.get(this.workspace.organizationId);
+      }
+
+      if (this.userRouteFlag) {
+        this.ownerDescription = `user ${ownerRealName}`;
+      } else {
+        this.ownerDescription = `organization ${this.organizationDetail.name}`;
+      }
+      if (this.workspaceDetail.open) {
+        this.generalDescription = "An open (shared with public) workspace"
+        if (this.workspace.license) {
+          this.generalDescription += " under license " + this.workspace.license;
+        }
+      } else {
+        this.generalDescription = "A proprietary workspace"
+      }
+      this.generalDescription += ` owned by ${this.ownerDescription}`
+
+      if (!this.publicViewDetail) {
+        if (this.organization._id !== this.currentOrganization._id) {
+          switch (this.organization.type) {
+            case 'Private':
+            case 'Personal':
+              if (this.workspaceDetail.open !== true) {
+                if (this.userRouteFlag) {
+                  this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/user/${this.slug}/workspace/${this.workspaceRefName}`}})
+                } else {
+                  this.$router.push({ name: 'PermissionError', params: {slug: this.slug, urlCode: `/org/${this.slug}/workspace/${this.workspaceRefName}`}})
+                }
+              }
+              break;
+            case 'Open':
+              break;
+          }
+        }
+      }
+      this.activeDirectory = this.directoryDetail;
+      this.activePath = this.directory.name;
+      await this.recursivelyBuildPath();
+    },
     async clickedDirectory(directorySubDocs, dirPath) {
       let directory = this.publicView
         ? await this.getDirectoryByIdPublic(directorySubDocs._id)
@@ -236,6 +242,22 @@ export default {
         this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
       }
     },
+    async recursivelyBuildPath() {
+      let currentDir = this.directoryDetail;
+      let newFullPath = []
+      newFullPath.unshift(_.pick(currentDir, ["_id", "name"]));
+      let safetyCtr = 0;
+      while (currentDir.parentDirectory) {
+        currentDir = await Directory.get(currentDir.parentDirectory._id);
+        newFullPath.unshift(_.pick(currentDir, ["_id", "name"]));
+        safetyCtr += 1;
+        if (safetyCtr > 30) {
+          console.log("ERROR: path recursion 30 entries long. Loop?");
+          break;
+        }
+      }
+      this.fullPath = newFullPath;
+    },
     async openEditPromotionDialog() {
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
@@ -256,6 +278,11 @@ export default {
       }
       this.$refs.createDirectoryDialog.$data.dialog = false;
     },
+  },
+  watch: {
+    async '$route'(to, from) {
+      await this.renew();
+    }
   },
 };
 </script>

@@ -2,7 +2,16 @@
   <v-card min-width="32em" max-width="64em" border>
     <v-card-title>
       <v-sheet class="d-flex flex-wrap justify-space-between">
-        <span>Files in <code class="text-teal-darken-4 ml-3">{{path}}</code></span>
+        <v-sheet class="d-flex flex-wrap flex-row">
+          <v-sheet
+            v-for="(dir, i) in fullPath"
+            :key="dir._id"
+          >
+            <v-btn
+              @click="gotoDirectory(dir)"
+            >{{dir.name}}</v-btn>
+          </v-sheet>
+        </v-sheet>
         <v-sheet>
           <v-btn
             :color="iconViewMode ? '#757575' : '#F5F5F5'"
@@ -45,7 +54,7 @@
           v-for="dir in dirList"
           :key="dir._id"
           class="ma-1"
-          @click="gotoFile({})"
+          @click="gotoDirectory(dir)"
         >
           <v-sheet
             color="BDBDBD"
@@ -103,10 +112,13 @@
             <div class="text-body-2 text-center">{{ file.custFileName }}</div>
           </v-card-text>
         </v-card>
-        <div v-if="fileList.length===0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
-          There are no files in this directory
-        </div>
       </v-sheet>
+      <div v-if="fileList.length===0 && dirList.length===0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
+        This directory is empty
+      </div>
+      <div v-if="fileList.length===0 && dirList.length>0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
+        There are no files in this directory
+      </div>
     </v-card-text>
   </v-card>
   <upload-file-dialog v-if="!publicView" ref="uploadFileDialog" :directory="directory" />
@@ -133,6 +145,7 @@ export default {
     parentDirectoryPath: String,
     activeDirectory: Object,
     publicView: Boolean,
+    fullPath: Array,
   },
   data: () => ({
     iconViewMode: true,
@@ -177,6 +190,17 @@ export default {
       } else {
         this.$router.push({ name: 'OrgWorkspaceFile', params: { slug: slug, wsname: wsName, fileid: fileId } });
       }
+    },
+    async gotoDirectory(dirSummary) {
+      const slug = this.$route.params.slug;
+      const wsName = this.$route.params.wsname;
+      const dirId = dirSummary._id.toString();
+      if (this.userRouteFlag) {
+        this.$router.push({ name: 'UserWorkspaceDir', params: { slug: slug, wsname: wsName, dirid: dirId } });
+      } else {
+        this.$router.push({ name: 'OrgWorkspaceDir', params: { slug: slug, wsname: wsName, dirid: dirId } });
+      }
+
     }
   },
 };
