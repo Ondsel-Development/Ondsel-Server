@@ -9,64 +9,29 @@
       <v-sheet class="d-flex flex-column flex-wrap" name="top-and-bottom-section">
         <v-sheet class="d-flex flex-row justify-space-between flex-wrap" name="top-section">
           <v-sheet class="d-flex flex-column flex-wrap flex-grow-1" name="left-hand-column-on-top">
-            <v-card min-width="32em" border>
-              <v-card-title>
-                Directories
-              </v-card-title>
-              <v-card-text>
-
-                <v-list-item
-                  variant="flat"
-                  class="show-indent"
-                >
-                  <template v-slot:append>
-                    <v-menu>
-                      <template v-slot:activator="{ props }">
-                        <v-btn
-                          color="decoration"
-                          flat
-                          icon="mdi-dots-vertical"
-                          v-bind="props"
-                          size="x-small"
-                        ></v-btn>
-                      </template>
-                      <v-list>
-                        <v-list-item @click="$refs.createDirectoryDialog.$data.dialog = true;">
-                          <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
-                  </template>
-                  <v-list-item-media>
-                    <v-list-item-media>
-                      <v-sheet @click="clickedDirectory(directory, '/')">
-                        <span
-                          v-if="activeDirectory?._id === directory?._id"
-                          class="text-body-2 mx-3"
-                        ><b>{{ directory.name }}</b></span>
-                        <span
-                          v-else
-                          class="text-body-2 mx-3"
-                        >{{ directory.name }}</span>
-                      </v-sheet>
-                    </v-list-item-media>
-                  </v-list-item-media>
-                </v-list-item>
-                <directory-list-view
-                  v-if="directory"
-                  :directory="directory"
-                  :active-directory="activeDirectory"
-                  parent-directory-path="/"
-                  @selected-directory="clickedDirectory"
-                  @create-directory="createDirectory"
-                />
-              </v-card-text>
-            </v-card>
-            <file-list-view :directory="activeDirectory" :path="activePath"></file-list-view>
+            <file-list-view
+              :directory="activeDirectory"
+              :path="activePath"
+              :active-directory="activeDirectory"
+              :public-view="publicView"
+              parent-directory-path="/"
+              @selected-directory="clickedDirectory"
+              @create-directory="createDirectory"
+            ></file-list-view>
           </v-sheet>
           <v-sheet name="right-hand-column-on-top">
             <v-card min-width="32em" border>
-              <v-card-title>Details</v-card-title>
+              <v-card-title>
+                <v-sheet class="d-flex flex-wrap justify-space-between">
+                  <span>Details</span>
+                  <v-btn
+                    color="decoration"
+                    flat
+                    icon="mdi-cog"
+                    @click="goToWorkspaceEdit(workspace)"
+                  ></v-btn>
+                </v-sheet>
+              </v-card-title>
               <v-card-text>
                 <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
               </v-card-text>
@@ -87,7 +52,6 @@
           </v-card>
         </v-sheet>
       </v-sheet>
-      <create-directory-dialog ref="createDirectoryDialog" @create-directory="createDirectory" :parent-dir="directory"></create-directory-dialog>
     </template>
   </Main>
 </template>

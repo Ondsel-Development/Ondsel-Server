@@ -1,27 +1,88 @@
 <template>
-  <v-card min-width="32em" border>
+  <v-card min-width="32em" max-width="64em" border>
     <v-card-title>
       <v-sheet class="d-flex flex-wrap justify-space-between">
         <span>Files in <code class="text-teal-darken-4 ml-3">{{path}}</code></span>
         <v-sheet>
           <v-btn
-            icon="mdi-view-grid"
-          ></v-btn>
+            :color="iconViewMode ? '#757575' : '#F5F5F5'"
+            @click="iconViewMode = true"
+          >
+            <v-icon>mdi-view-grid</v-icon>
+          </v-btn>
           <v-btn
-            icon="mdi-view-list"
-          ></v-btn>
+            :color="!iconViewMode ? '#757575' : '#F5F5F5'"
+            @click="iconViewMode = false"
+          >
+            <v-icon>mdi-view-list</v-icon>
+          </v-btn>
         </v-sheet>
-        <v-btn
-          icon="mdi-plus"
-        ></v-btn>
+
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn
+              color="decoration"
+              flat
+              icon="mdi-plus"
+              v-bind="props"
+            ></v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="openCreateDirectoryDialog()">
+              <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="$refs.uploadFileDialog.openFileUploadDialog();">
+              <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New File</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-sheet>
     </v-card-title>
     <v-card-text>
 
       <v-sheet class="d-flex flex-wrap">
         <v-card
+          v-for="dir in dirList"
+          :key="dir._id"
+          class="ma-1"
+          @click="gotoFile({})"
+        >
+          <v-sheet
+            color="BDBDBD"
+            height="8em"
+            class="d-flex justify-center align-center"
+          >
+            <v-icon
+              icon="mdi-folder"
+              style="color: #8D8D8D"
+              cover
+            />
+          </v-sheet>
+          <v-card-text>
+            <span class="text-body-2 text-center">{{ dir.name }}</span>
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  color="decoration"
+                  flat
+                  icon="mdi-dots-vertical"
+                  v-bind="props"
+                  size="x-small"
+                  class="ml-1"
+                ></v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                  <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card-text>
+        </v-card>
+        <v-card
           v-for="file in fileList"
           :key="file._id"
+          class="ma-1"
           @click="gotoFile(file)"
         >
           <v-img
@@ -48,29 +109,65 @@
       </v-sheet>
     </v-card-text>
   </v-card>
+  <upload-file-dialog v-if="!publicView" ref="uploadFileDialog" :directory="directory" />
+  <create-directory-dialog ref="createDirectoryDialog" @create-directory="emitCreateDirectory" :parent-dir="directory"></create-directory-dialog>
+  <delete-directory-dialog ref="deleteDirectoryDialog" @delete-directory="deleteDirectory" :directory-name="targetDirectory.name"></delete-directory-dialog>
 </template>
 
 <script>
 import {mapActions} from "vuex";
+import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
+import DeleteDirectoryDialog from "@/components/DeleteDirectoryDialog.vue";
+import {models} from "@feathersjs/vuex";
+import UploadFileDialog from "@/components/UploadFileDialog.vue";
+
+const { Directory } = models.api;
 
 export default {
   name: 'FileListView',
-  components: {},
-  emits: [],
+  components: {UploadFileDialog, DeleteDirectoryDialog, CreateDirectoryDialog},
+  emits: ['selectedDirectory', 'createDirectory'],
   props: {
     directory: Object,
     path: String,
+    parentDirectoryPath: String,
+    activeDirectory: Object,
+    publicView: Boolean,
   },
   data: () => ({
     iconViewMode: true,
+    targetDirectory: {},
   }),
   computed: {
     fileList: vm => vm.directory.files || [],
+    dirList: vm => vm.directory.directories || [],
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
   },
   methods: {
     ...mapActions('app', [
     ]),
+    async openCreateDirectoryDialog() {
+      this.$refs.createDirectoryDialog.$data.dialog = true;
+    },
+    async openDeleteDirectoryDialog(newTargetDir) {
+      this.targetDirectory = newTargetDir;
+      this.$refs.deleteDirectoryDialog.$data.dialog = true;
+    },
+    async emitCreateDirectory(dirName, parentDir) {
+      // pass this up to the parent unmodified
+      this.$emit('createDirectory', dirName, parentDir);
+      this.$refs.createDirectoryDialog.$data.dialog = false;
+    },
+    async deleteDirectory() {
+      await Directory.remove(
+        this.targetDirectory._id
+      ).then(() => {
+        this.$refs.deleteDirectoryDialog.$data.dialog = false;
+      }).catch((e) => {
+        this.$refs.deleteDirectoryDialog.$data.snackerMsg = e.message;
+        this.$refs.deleteDirectoryDialog.$data.showSnacker = true;
+      });
+    },
     async gotoFile(fileSummary) {
       const slug = this.$route.params.slug;
       const wsName = this.$route.params.wsname;
