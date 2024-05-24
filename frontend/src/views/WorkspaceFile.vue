@@ -182,7 +182,12 @@ export default {
     } else {
       orgRefName = slug;
     }
-    this.file = await File.get(fileId);
+    try {
+      this.file = await File.get(fileId);
+    } catch {}
+    if (!this.file?._id) { // a failure can return an empty object. So go further.
+      this.file = await this.getFileByIdPublic(fileId);
+    }
     this.workspace = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
     if (this.workspace) {
       if (this.workspace.organization._id !== this.currentOrganization._id) {
@@ -197,7 +202,7 @@ export default {
     this.properties = [
       {
         name: 'Id',
-        value: this.file._id.toString(),
+        value: fileId,
       },
       {
         name: 'Workspace',

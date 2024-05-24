@@ -1,5 +1,5 @@
 <template>
-  <v-card min-width="32em" max-width="64em" border>
+  <v-card min-width="32em" class="border-md">
     <v-card-title>
       <v-sheet class="d-flex flex-wrap justify-space-between">
         <v-sheet class="d-flex flex-wrap flex-row">
@@ -27,7 +27,7 @@
           </v-btn>
         </v-sheet>
 
-        <v-menu>
+        <v-menu v-if="canUserWrite">
           <template v-slot:activator="{ props }">
             <v-btn
               color="decoration"
@@ -45,11 +45,18 @@
             </v-list-item>
           </v-list>
         </v-menu>
+        <v-btn
+          v-else
+          color="decoration"
+          flat
+          icon="mdi-plus"
+          disabled
+        ></v-btn>
       </v-sheet>
     </v-card-title>
     <v-card-text>
 
-      <v-sheet class="d-flex flex-wrap">
+      <v-sheet class="d-flex flex-wrap" name="icon-view-version" v-if="iconViewMode">
         <v-card
           v-for="dir in dirList"
           :key="dir._id"
@@ -69,7 +76,7 @@
           </v-sheet>
           <v-card-text>
             <span class="text-body-2 text-center">{{ dir.name }}</span>
-            <v-menu>
+            <v-menu v-if="canUserWrite">
               <template v-slot:activator="{ props }">
                 <v-btn
                   color="decoration"
@@ -113,6 +120,47 @@
           </v-card-text>
         </v-card>
       </v-sheet>
+
+      <v-sheet class="d-flex flex-column" name="icon-view-version" v-if="!iconViewMode">
+        <v-card
+          v-for="dir in dirList"
+          :key="dir._id"
+          class="ma-1"
+          @click="gotoDirectory(dir)"
+        >
+          <v-card-text>
+            <v-icon icon="mdi-folder"></v-icon> <code>{{ dir.name }}</code>
+            <v-menu v-if="canUserWrite">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  color="decoration"
+                  flat
+                  icon="mdi-dots-vertical"
+                  v-bind="props"
+                  size="x-small"
+                  class="ml-1"
+                ></v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                  <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card-text>
+        </v-card>
+        <v-card
+          v-for="file in fileList"
+          :key="file._id"
+          class="ma-1"
+          @click="gotoFile(file)"
+        >
+          <v-card-text>
+            <v-icon icon="mdi-file"></v-icon> <code>{{ file.custFileName }}</code>
+          </v-card-text>
+        </v-card>
+      </v-sheet>
+
       <div v-if="fileList.length===0 && dirList.length===0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
         This directory is empty
       </div>
@@ -145,6 +193,7 @@ export default {
     parentDirectoryPath: String,
     activeDirectory: Object,
     publicView: Boolean,
+    canUserWrite: Boolean,
     fullPath: Array,
   },
   data: () => ({

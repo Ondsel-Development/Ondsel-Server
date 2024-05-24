@@ -6,53 +6,119 @@
       </div>
     </template>
     <template #content>
-      <v-sheet class="d-flex flex-column flex-wrap" name="top-and-bottom-section">
-        <v-sheet class="d-flex flex-row justify-space-between flex-wrap" name="top-section">
-          <v-sheet class="d-flex flex-column flex-wrap flex-grow-1" name="left-hand-column-on-top">
+      <v-sheet class="" max-width="76em" name="outer-wrapper">
+        <v-sheet class="d-flex flex-row flex-wrap flex-grow-1 align-self-center" max-width="76em" min-width="32em" name="top-to-bottom-section">
+          <v-sheet class="flex-grow-1" name="top-file-part">
             <file-list-view
               :directory="activeDirectory"
               :path="activePath"
               :active-directory="activeDirectory"
               :public-view="publicView"
+              :can-user-write="canUserWrite"
               :full-path="fullPath"
               parent-directory-path="/"
               @selected-directory="clickedDirectory"
               @create-directory="createDirectory"
             ></file-list-view>
           </v-sheet>
-          <v-sheet name="right-hand-column-on-top">
-            <v-card min-width="32em" border>
-              <v-card-title>
-                <v-sheet class="d-flex flex-wrap justify-space-between">
-                  <span>Details</span>
-                  <v-btn
-                    color="decoration"
-                    flat
-                    icon="mdi-cog"
-                    @click="goToWorkspaceEdit(workspace)"
-                  ></v-btn>
-                </v-sheet>
-              </v-card-title>
-              <v-card-text>
-                <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
-              </v-card-text>
-            </v-card>
-          </v-sheet>
-        </v-sheet>
-        <v-sheet name="bottom-section" border>
-          <v-card min-width="32em">
-            <v-card-title>markdown</v-card-title>
-            <v-card-text>
-              <v-card class="ma-2 flex-md-grow-1" min-width="22em" max-height="40em" style="overflow-y:auto;">
+          <v-sheet class="d-flex flex-row flex-wrap" name="bottom-info-section">
+            <v-sheet width="26em">
+              <v-card>
+                <v-card-title>
+                  <v-sheet class="d-flex flex-wrap justify-space-between">
+                    <span>Details</span>
+                    <v-sheet>
+                      <span v-if="!publicView">
+                        <v-btn
+                          class="ms-1"
+                          icon="mdi-cog"
+                          size="small"
+                          color="decoration"
+                          flat
+                          @click.stop="goToWorkspaceEdit(workspace)"
+                          id="editWorkspaceButton"
+                        ></v-btn>
+                        <v-tooltip
+                          activator="#editWorkspaceButton"
+                        >edit this workspace's settings</v-tooltip>
+                      </span>
+                      <span v-else>
+                        <v-btn
+                          class="ms-1"
+                          icon="mdi-cog"
+                          size="small"
+                          color="decoration"
+                          flat
+                          id="disabledEditWorkspaceButton"
+                        ></v-btn>
+                        <v-tooltip
+                          v-if="!currentOrganization"
+                          activator="#disabledEditWorkspaceButton"
+                        >you cannot edit anything when not logged in</v-tooltip>
+                        <v-tooltip
+                          v-if="currentOrganization && currentOrganization._id !== workspace?.organization?._id"
+                          activator="#disabledEditWorkspaceButton"
+                        >you are currently representing {{selfName}} and not {{ownerDescription}}</v-tooltip>
+                      </span>
+
+                      <span v-if="workspace.open === true">
+                        <span v-if="promotionPossible">
+                          <v-btn
+                            icon="mdi-bullhorn"
+                            size="small"
+                            color="decoration"
+                            flat
+                            @click.stop="openEditPromotionDialog()"
+                            id="promotionButton"
+                          ></v-btn>
+                          <v-tooltip
+                            activator="#promotionButton"
+                          >should {{selfPronoun}} promote this workspace</v-tooltip>
+                        </span>
+                        <span v-else>
+                          <v-btn
+                            size="small"
+                            icon="mdi-bullhorn"
+                            color="decoration"
+                            flat
+                            id="disabledPromotionButton"
+                          >
+                          </v-btn>
+                          <v-tooltip
+                            v-if="!currentOrganization"
+                            activator="#disabledPromotionButton"
+                          >must be logged in to promote anything</v-tooltip>
+                          <v-tooltip
+                            v-if="defaultWorkspaceFlag"
+                            activator="#disabledPromotionButton"
+                          >cannot promote a default workspace</v-tooltip>
+                        </span>
+                      </span>
+                    </v-sheet>
+                  </v-sheet>
+                </v-card-title>
                 <v-card-text>
-                  <markdown-viewer v-if="longDescriptionHtml" :markdown-html="longDescriptionHtml"></markdown-viewer>
-                  <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
+                  <curated-item-sheet class="ma-2" max-width="24em" :curation="workspace.curation" :message="generalDescription"></curated-item-sheet>
                 </v-card-text>
               </v-card>
-            </v-card-text>
-          </v-card>
+            </v-sheet>
+            <v-sheet min-width="32em" max-width="50em" class="flex-grow-1">
+              <v-card>
+                <v-card-title>README</v-card-title>
+                <v-card-text>
+                  <v-card class="ma-2 flex-md-grow-1" max-height="40em" style="overflow-y:auto;">
+                    <v-card-text>
+                      <markdown-viewer v-if="longDescriptionHtml" :markdown-html="longDescriptionHtml"></markdown-viewer>
+                      <div v-if="!longDescriptionHtml" class="text-disabled">no README.md</div>
+                    </v-card-text>
+                  </v-card>
+                </v-card-text>
+              </v-card>
+            </v-sheet>
+          </v-sheet>
         </v-sheet>
       </v-sheet>
+      <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="workspaces" :item-id="workspace?._id" :item-name="workspace?.name"></edit-promotion-dialog>
     </template>
   </Main>
 </template>
@@ -67,12 +133,14 @@ import {marked} from "marked";
 import FileListView from "@/components/FileListView.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
+import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 
 const { Directory, Organization } = models.api;
 
 export default {
   name: 'WorkspaceHome',
   components: {
+    EditPromotionDialog,
     CuratedItemSheet,
     MarkdownViewer,
     Main,
@@ -82,7 +150,7 @@ export default {
     return {
       activeDirectory: {name: "/"},
       activePath: '/',
-      workspaceDetail: {},
+      workspaceDetail: null,
       directoryDetail: {},
       organizationDetail: undefined,
       slug: '',
@@ -100,7 +168,7 @@ export default {
     ...mapGetters('app', ['currentOrganization', 'selfPronoun', 'selfName']),
     directory: vm => vm.directoryDetail,
     workspaceRefName: vm => vm.$route.params.wsname,
-    workspace: vm => vm.workspaceDetail,
+    workspace: vm => vm.workspaceDetail || {name: 'tbd'},
     organization: vm => vm.organizationDetail,
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     dirId: vm => vm.$route.params.dirid || null,
@@ -136,7 +204,9 @@ export default {
       } else {
         orgRefName = this.slug;
       }
-      this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
+      try {
+        this.workspaceDetail = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
+      } catch (e) {};
       if (this.workspaceDetail) {
         if (this.workspaceDetail.organization._id !== this.currentOrganization._id) {
           // if the user has private access to the ws generically, but isn't actually representing that org, then
@@ -248,7 +318,7 @@ export default {
       newFullPath.unshift(_.pick(currentDir, ["_id", "name"]));
       let safetyCtr = 0;
       while (currentDir.parentDirectory) {
-        currentDir = await Directory.get(currentDir.parentDirectory._id);
+        currentDir = await  this.getDirectoryByIdPublic(currentDir.parentDirectory._id);
         newFullPath.unshift(_.pick(currentDir, ["_id", "name"]));
         safetyCtr += 1;
         if (safetyCtr > 30) {
