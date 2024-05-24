@@ -75,22 +75,33 @@
     <v-card elevation="0" v-if="organization.type === 'Open'">
       <v-card-title>Membership</v-card-title>
       <v-card-text>
-        <v-row class="mt-6">
-          <v-col
-            cols="6"
-            v-for="member in organization.users"
-            :key="member._id"
-          >
-            <v-sheet
-              class="mx-auto"
-              variant="elevated"
-              link
-              @click.stop="goToUserHome(member)"
+        <v-list width="300">
+          <v-list-subheader>Users</v-list-subheader>
+          <v-list-item
+            v-for="(member, i) in organization.users"
+            :key="i"
+            :value="member"
+            color="primary"
+            @click="goToUserHome(member)"
             >
-              <curated-item-sheet :curation="member.curation"></curated-item-sheet>
-            </v-sheet>
-          </v-col>
-        </v-row>
+            <template v-slot:prepend>
+              <v-icon v-if="organization.createdBy === member.curation?._id" icon="mdi-account-tie-hat"></v-icon>
+              <v-icon v-else-if="member.isAdmin" icon="mdi-account-tie"></v-icon>
+              <v-icon v-else icon="mdi-account"></v-icon>
+            </template>
+
+            <v-list-item-title>
+              <div v-if="member.curation" class="d-flex flex-row align-center">
+                <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ma-1" width="25" height="25" rounded="circle" color="grey">
+                  {{ getInitials(member.curation.name) }}
+                </v-sheet>
+                {{ member.curation.name }}
+              </div>
+            </v-list-item-title>
+            <v-divider />
+          </v-list-item>
+        </v-list>
+
       </v-card-text>
     </v-card>
     <v-card v-if="organization.type === 'Private'">
@@ -105,12 +116,13 @@
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "@feathersjs/vuex";
-import ReprViewer from "@/components/ReprViewer.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import { getInitials } from '@/genericHelpers';
+
 const { Workspace } = models.api;
 
 export default {
@@ -141,6 +153,7 @@ export default {
   },
   methods: {
     ...mapActions('app', ['getOrgByIdOrNamePublic']),
+    getInitials,
     async goToWorkspaceHome(workspace) {
       this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: this.organization.refName, wsname: workspace.refName } });
     },
