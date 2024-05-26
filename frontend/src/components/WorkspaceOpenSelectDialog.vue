@@ -21,8 +21,8 @@
             v-model="newOpenSelect"
             :disabled="isPatchPending"
           >
-            <v-radio label="Visible to Public (true)" value="true"></v-radio>
-            <v-radio label="Not Visible (false)" value="false"></v-radio>
+            <v-radio label="Visible to Public (public = true)" value="true"></v-radio>
+            <v-radio label="Not Visible (public = false)" value="false"></v-radio>
           </v-radio-group>
         </v-card-text>
       </v-form>
@@ -33,8 +33,17 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doOpenSelectChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doOpenSelectChange()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+        >Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

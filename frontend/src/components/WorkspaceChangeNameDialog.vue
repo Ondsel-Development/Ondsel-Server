@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceNameDialogForm" @submit.prevent="doNameChange">
         <v-card-text>
           <v-text-field
             v-if="allowNameChange"
@@ -41,8 +41,17 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doNameChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doNameChange()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+        >Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

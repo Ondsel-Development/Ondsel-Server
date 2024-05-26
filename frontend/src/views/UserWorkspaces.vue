@@ -4,7 +4,7 @@
       <div class="text-h6">Personal Workspaces</div>
       <v-spacer />
       <div class="align-end">
-        <v-btn flat @click="$refs.createWorkspace.$data.dialog = true;">Create new Workspace</v-btn>
+        <v-btn color="secondary" variant="elevated" @click="$refs.createWorkspace.$data.dialog = true;">Create new Workspace</v-btn>
       </div>
     </v-row>
     <v-row class="mt-6">
@@ -32,7 +32,7 @@
             <repr-viewer :curation="workspace.curation"/>
           </template>
           <template v-slot:append>
-            <v-btn icon="mdi-cog" flat @click.stop="goToWorkspaceEdit(workspace)"/>
+            <v-btn icon="mdi-cog" color="decoration" flat @click.stop="goToWorkspaceEdit(workspace)"></v-btn>
           </template>
         </v-card>
       </v-col>

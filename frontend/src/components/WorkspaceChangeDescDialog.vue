@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceDescDialogForm" @submit.prevent="doDescChange">
         <v-card-text>
           <v-text-field
             v-model.trim="newWorkspaceDesc"
@@ -34,8 +34,17 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doDescChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doDescChange()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+        >Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

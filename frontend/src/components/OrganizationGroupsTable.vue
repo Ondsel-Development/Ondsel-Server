@@ -17,7 +17,8 @@
         ></v-divider>
         <v-spacer></v-spacer>
         <v-btn
-          dark
+          color="secondary"
+          variant="elevated"
           class="mb-2"
           :hidden="!isLoggedInUserAdmin(organization)"
           @click="$refs.createGroupDialog.$data.dialog = true;"
@@ -29,7 +30,7 @@
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
-        @click="$router.push({ name: 'EditGroup', params: { slug: organization.refName, id: item.value._id } })"
+        @click="$router.push({ name: 'EditGroup', params: { slug: organization.refName, id: item._id } })"
       >
         mdi-pencil
       </v-icon>

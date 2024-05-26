@@ -21,6 +21,8 @@
           </v-list-item-subtitle>
           <v-list-item-action class="justify-end">
             <v-btn
+              color="secondary"
+              variant="elevated"
               class="ma-2"
               @click.stop="$refs.editDescription.$data.dialog=true"
             >
@@ -41,6 +43,8 @@
           </v-list-item-media>
           <v-list-item-action class="justify-end">
             <v-btn
+              color="secondary"
+              variant="elevated"
               class="ma-2"
               @click.stop="$refs.editLongDescriptionMd.$data.dialog=true"
             >
@@ -73,6 +77,8 @@
           </v-list-item-media>
           <v-list-item-action class="justify-end">
             <v-btn
+              color="secondary"
+              variant="elevated"
               class="ma-2"
               @click.stop="$refs.createPromotion.$data.dialog=true"
             >
@@ -98,6 +104,8 @@
           </v-list-item-media>
           <v-list-item-action class="justify-end">
             <v-btn
+              color="secondary"
+              variant="elevated"
               class="ma-2"
               @click.stop="$refs.takeSnapshotDialog.$data.dialog=true"
             >
@@ -241,7 +249,7 @@ export default {
     },
     async deletePromotion(item) {
       let newCurrent = this.lensSiteDocument.current;
-      newCurrent.curation.promoted = newCurrent.curation.promoted.filter(promo => promo.curation._id.toString() !== item.value);
+      newCurrent.curation.promoted = newCurrent.curation.promoted.filter(promo => promo.curation._id.toString() !== item);
       await this.lensSiteDocument.patch({
         current: newCurrent,
       })

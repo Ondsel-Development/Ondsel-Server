@@ -16,7 +16,8 @@
         ></v-divider>
         <v-spacer></v-spacer>
         <v-btn
-          dark
+          color="secondary"
+          variant="elevated"
           class="mb-2"
           :hidden="!isLoggedInUserAdmin(organization)"
           @click="openManageWorkspaceGroupsDialog"
@@ -27,16 +28,16 @@
       <v-progress-linear indeterminate v-if="isPatchPending"></v-progress-linear>
     </template>
     <template #item.name="{ item }">
-      {{ item.value.groupOrUser.name }}
+      {{ item.groupOrUser.name }}
     </template>
     <template #item.permission="{ item }">
       <v-combobox
-        v-model="item.value.permission"
+        v-model="item.permission"
         :items="['read', 'write']"
         variant="plain"
         append-icon="mdi-check"
         :disabled="!isLoggedInUserAdmin(organization)"
-        @click:append="updatePermission(item.value)"
+        @click:append="updatePermission(item)"
       />
     </template>
   </v-data-table>

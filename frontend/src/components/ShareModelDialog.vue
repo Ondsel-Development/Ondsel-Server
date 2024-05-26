@@ -100,7 +100,12 @@
 
           <v-text-field ref="sharedUrl" variant="outlined" hide-details readonly :value="sharedModelUrl" :disabled="!sharedModelUrl">
             <template v-slot:append>
-              <v-btn icon flat @click="copyUrlToClipboard">
+              <v-btn
+                color="decoration"
+                icon
+                flat
+                @click="copyUrlToClipboard"
+              >
                 <v-icon>
                   mdi-content-copy
                 </v-icon>
@@ -113,8 +118,17 @@
           </v-text-field>
         </v-card-text>
         <v-card-actions class="justify-center">
-          <v-btn @click="dialog = false">Cancel</v-btn>
-          <v-btn type="submit" color="primary" :disabled="isGeneratingLink">Generate Link</v-btn>
+          <v-btn
+            color="cancel"
+            variant="elevated"
+            @click="dialog = false"
+          >Stop Making Links</v-btn>
+          <v-btn
+            type="submit"
+            color="primary"
+            variant="elevated"
+            :disabled="isGeneratingLink"
+          >Generate Link</v-btn>
         </v-card-actions>
       </v-form>
     </v-card>

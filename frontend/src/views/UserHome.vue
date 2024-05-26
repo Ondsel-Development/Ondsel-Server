@@ -3,11 +3,14 @@
     <v-sheet class="ma-1">
       <span class="text-h6">User {{ userSum.name }}</span>
       <span v-if="promotionPossible" class="ms-2">
-        <v-icon
+        <v-btn
+          color="decoration"
+          flat
           size="small"
+          icon="mdi-bullhorn"
           @click.stop="openEditPromotionDialog()"
           id="promotionButton"
-        >mdi-bullhorn</v-icon>
+        ></v-btn>
         <v-tooltip
           activator="#promotionButton"
         >should {{selfPronoun}} promote this user</v-tooltip>
@@ -85,7 +88,7 @@ export default {
   name: 'UserHome',
   components: {CuratedItemSheet, MarkdownViewer, PromotionsViewer, EditPromotionDialog},
   data: () => ({
-    userSumDetail: {name: 'locating...', username: ''},
+    userSumDetail: {_id: '', name: 'locating...', username: ''},
     organizationDetail: {},
     publicWorkspacesDetail: [],
   }),

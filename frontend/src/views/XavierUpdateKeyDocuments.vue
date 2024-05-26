@@ -30,6 +30,8 @@
           </v-list-item-media>
           <v-list-item-action class="justify-end">
             <v-btn
+              color="error"
+              variant="elevated"
               class="ma-2"
               @click.stop="$refs.editKeyDocument.$data.dialog=true"
             >

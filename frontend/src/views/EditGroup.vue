@@ -2,12 +2,13 @@
   <v-container v-if="group">
     <v-row class="align-center">
       <v-btn
+        color="decoration"
         flat
         size="small"
         icon="mdi-arrow-left"
         @click="$router.push({ name: 'EditOrganization', params: { id: organization.refName } })"
-      />
-      <div class="text-body-1">Group&nbsp</div>
+      ></v-btn>
+      <div class="text-body-1">&nbsp; Group &nbsp;</div>
       <div class="text-body-1 font-weight-bold">{{ group.name }}</div>
       <v-spacer />
       <div class="align-end">

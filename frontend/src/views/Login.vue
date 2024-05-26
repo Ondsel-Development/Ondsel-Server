@@ -27,14 +27,21 @@
           ></v-text-field>
 
           <v-card-actions>
-            <v-btn type="submit" v-bind:disabled="isAuthenticatePending" color="blue" variant="flat" class="mt-2">Submit</v-btn>
+            <v-btn
+              type="submit"
+              v-bind:disabled="isAuthenticatePending"
+              color="primary"
+              variant="elevated"
+              class="mt-2"
+            >Submit</v-btn>
           </v-card-actions>
 
           <v-row justify="end">
             <v-col class="text-right">
               <v-btn
                 size="x-small"
-                variant="outlined"
+                color="secondary"
+                variant="elevated"
                 @click.stop="openForgotPasswordDialog()">
                 Forgot Password?
               </v-btn>

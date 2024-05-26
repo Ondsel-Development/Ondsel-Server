@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="doLicenseChange">
         <v-card-text>
           <v-radio-group
             label="License terms if shared with the general public"
@@ -42,8 +42,17 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doLicenseChange()" color="primary" :disabled="isPatchPending">Change</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="dialog = false"
+        >Cancel</v-btn>
+        <v-btn
+          @click="doLicenseChange()"
+          color="primary"
+          variant="elevated"
+          :disabled="isPatchPending"
+        >Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

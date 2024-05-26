@@ -1,216 +1,235 @@
 <template>
-  <v-container v-if="workspace">
-    <v-row align="center">
-      <div class="text-body-1">Workspace&nbsp;</div>
-      <v-btn
-        flat
-        variant="plain"
-        class="text-body-1 font-weight-bold pa-0"
-        style="text-decoration: none;"
-        @click="goHome()"
-      >
-        {{ workspace.name }}
-      </v-btn>
-    </v-row>
+  <Main>
+    <template #title>
+      <div class="d-flex flex-row" style="align-items: center;">
+        <div class="text-body-1">Workspace&nbsp;</div>
+        <v-btn
+          v-if="workspace"
+          flat
+          variant="plain"
+          color="link"
+          class="text-body-1 font-weight-bold pa-0"
+          style="text-decoration: none;"
+          @click="goHome()"
+        >
+          {{ workspace.name }}
+        </v-btn>
+      </div>
+    </template>
+    <template #content>
+      <v-container v-if="workspace">
+        <v-tabs
+          v-model="tab"
+          align-tabs="center"
+        >
+          <v-tab value="1">General Details</v-tab>
+          <v-tab v-if="!userRouteFlag" value="2">Users</v-tab>
+          <v-tab v-if="!userRouteFlag" value="3">Groups</v-tab>
+        </v-tabs>
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item value="1">
+            <v-card
+              variant="flat"
+              :border="true"
+              class="mx-auto my-6"
+            >
+              <v-list lines="three">
+                <v-list-subheader class="mb-2">General Details</v-list-subheader>
 
-    <v-card
-      variant="flat"
-      :border="true"
-      class="mx-auto my-6"
-    >
-      <v-list lines="three">
-        <v-list-subheader class="mb-2">General Details</v-list-subheader>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Name</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ workspace.name }}
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        v-if="!forbidNameChange"
+                        variant="elevated"
+                        color="secondary"
+                        size="small"
+                        @click.stop="openWorkspaceChangeNameDialog()"
+                      >
+                        Change Name
+                      </v-btn>
+                      <div v-if="forbidNameChange"><i>{{forbidNameChangeReason}}</i></div>
+                      <v-spacer></v-spacer>
+                      <WorkspaceChangeNameDialog
+                        :is-active="isWorkspaceChangeNameDialogActive"
+                        :workspace="workspace"
+                        ref="workspaceChangeNameDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Name</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspace.name }}
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                v-if="!forbidNameChange"
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openWorkspaceChangeNameDialog()"
-              >
-                Change Name
-              </v-btn>
-              <div v-if="forbidNameChange"><i>{{forbidNameChangeReason}}</i></div>
-              <v-spacer></v-spacer>
-              <WorkspaceChangeNameDialog
-                :is-active="isWorkspaceChangeNameDialogActive"
-                :workspace="workspace"
-                ref="workspaceChangeNameDialog"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Open to Public View</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ workspace.open }}
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="elevated"
+                        color="secondary"
+                        size="small"
+                        @click.stop="openWorkspaceOpenSelectDialog()"
+                        v-if="changableVisibility === true"
+                      >
+                        Change Visibility
+                      </v-btn>
+                      <div v-if="changableVisibility === false">
+                        <i> {{ changableVisibilityReason }} </i>
+                      </div>
+                      <v-spacer></v-spacer>
+                      <WorkspaceOpenSelectDialog
+                        :is-active="isWorkspaceOpenSelectDialogActive"
+                        :workspace="workspace"
+                        ref="workspaceOpenSelectDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Open to Public View</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspace.open }}
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openWorkspaceOpenSelectDialog()"
-                v-if="changableVisibility === true"
-              >
-                Change Visibility
-              </v-btn>
-              <div v-if="changableVisibility === false">
-                <i> {{ changableVisibilityReason }} </i>
-              </div>
-              <v-spacer></v-spacer>
-              <WorkspaceOpenSelectDialog
-                :is-active="isWorkspaceOpenSelectDialogActive"
-                :workspace="workspace"
-                ref="workspaceOpenSelectDialog"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Share License (if any)</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ workspace.license || 'none assigned' }}
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="elevated"
+                        color="secondary"
+                        size="small"
+                        @click.stop="openWorkspaceChangeLicenseDialog()"
+                      >
+                        Change License
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <WorkspaceChangeLicenseDialog
+                        :is-active="isWorkspaceChangeLicenseDialogActive"
+                        :workspace="workspace"
+                        ref="workspaceChangeLicenseDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Share License (if any)</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspace.license || 'none assigned' }}
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openWorkspaceChangeLicenseDialog()"
-              >
-                Change License
-              </v-btn>
-              <v-spacer></v-spacer>
-              <WorkspaceChangeLicenseDialog
-                :is-active="isWorkspaceChangeLicenseDialogActive"
-                :workspace="workspace"
-                ref="workspaceChangeLicenseDialog"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Short Description</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ workspaceDetail.description }}
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="elevated"
+                        color="secondary"
+                        size="small"
+                        @click.stop="openWorkspaceChangeDescDialog()"
+                      >
+                        Change Description
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <WorkspaceChangeDescDialog
+                        :is-active="isWorkspaceChangeDescDialogActive"
+                        :workspace="workspace"
+                        ref="workspaceChangeDescDialog"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Short Description</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ workspaceDetail.description }}
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openWorkspaceChangeDescDialog()"
-              >
-                Change Description
-              </v-btn>
-              <v-spacer></v-spacer>
-              <WorkspaceChangeDescDialog
-                :is-active="isWorkspaceChangeDescDialogActive"
-                :workspace="workspace"
-                ref="workspaceChangeDescDialog"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Long Description</v-list-item-title>
+                  <v-list-item-media>
+                    <v-card>
+                      <v-card-text>
+                        <div v-html="longDescriptionHtml"></div>
+                      </v-card-text>
+                    </v-card>
+                  </v-list-item-media>
+                  <v-list-item-action>
+                    <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root
+                      directory of the workspace. The first 40 lines (or 2000 characters) are used for searching and display.</i>
+                  </v-list-item-action>
+                </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Long Description</v-list-item-title>
-          <v-list-item-media>
-            <v-card>
-              <v-card-text>
-                <div v-html="longDescriptionHtml"></div>
-              </v-card-text>
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Tags</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <div v-if="workspace.curation?.tags && workspace.curation?.tags?.length > 0">
+                      <v-chip-group>
+                        <v-chip v-for="(tag) in workspace.curation?.tags">{{tag}}</v-chip>
+                      </v-chip-group>
+                    </div>
+                    <span v-else><i>None</i></span>
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="elevated"
+                        color="secondary"
+                        size="small"
+                        @click.stop="openEditTagsDialog()"
+                      >
+                        Edit Tags
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <EditTagsDialog
+                        :is-active="isEditTagsDialogActive"
+                        :tagList="workspace.curation?.tags || []"
+                        ref="editTagsDialog"
+                        @save-tags="saveTags"
+                      />
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{workspace.curation?.representativeFile?.custFileName}}
+                  </v-list-item-subtitle>
+                  <v-list-item-media>
+                    <v-card>
+                      <v-card-text>
+                        <repr-viewer :curation="workspace.curation"></repr-viewer>
+                        <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
+                      </v-card-text>
+                    </v-card>
+                  </v-list-item-media>
+                  <v-list-item-action>
+                    <i>To change this, visit the workspace, select the file, and click on the "camera" icon button.</i>
+                  </v-list-item-action>
+                </v-list-item>
+
+              </v-list>
             </v-card>
-          </v-list-item-media>
-          <v-list-item-action>
-            <i>The long description is pulled from the <code>README.md</code> file (if there is one) in the root
-              directory of the workspace. The first 40 lines (or 2000 characters) are used for searching and display.</i>
-          </v-list-item-action>
-        </v-list-item>
 
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Tags</v-list-item-title>
-          <v-list-item-subtitle>
-            <div v-if="workspace.curation?.tags && workspace.curation?.tags?.length > 0">
-              <v-chip-group>
-                <v-chip v-for="(tag) in workspace.curation?.tags">{{tag}}</v-chip>
-              </v-chip-group>
-            </div>
-            <span v-else><i>None</i></span>
-          </v-list-item-subtitle>
-          <template #append>
-            <v-list-item-action>
-              <v-btn
-                variant="outlined"
-                color="default"
-                size="small"
-                @click.stop="openEditTagsDialog()"
-              >
-                Edit Tags
-              </v-btn>
-              <v-spacer></v-spacer>
-              <EditTagsDialog
-                :is-active="isEditTagsDialogActive"
-                :tagList="workspace.curation?.tags || []"
-                ref="editTagsDialog"
-                @save-tags="saveTags"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
-
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>File Used To Represent The Workspace</v-list-item-title>
-          <v-list-item-subtitle>
-            {{workspace.curation?.representativeFile?.custFileName}}
-          </v-list-item-subtitle>
-          <v-list-item-media>
-            <v-card>
-              <v-card-text>
-                <repr-viewer :curation="workspace.curation"></repr-viewer>
-                <span v-if="!workspace.curation?.representativeFile"><i>None</i></span>
-              </v-card-text>
-            </v-card>
-          </v-list-item-media>
-          <v-list-item-action>
-            <i>To change this, visit the workspace, select the file, and click on the "camera" icon button.</i>
-          </v-list-item-action>
-        </v-list-item>
-
-      </v-list>
-    </v-card>
-
-    <v-row class="mt-12" v-if="!userRouteFlag">
-      <manage-workspace-users-table :workspace="workspace" />
-    </v-row>
-    <v-row class="mt-12" v-if="!userRouteFlag">
-      <manage-workspace-groups-table :workspace="workspace" />
-    </v-row>
-    <v-row class="mt-12" v-if="userRouteFlag">
-      <i>user and group rights do not apply here</i>
-    </v-row>
-  </v-container>
+          </v-tabs-window-item>
+          <v-tabs-window-item v-if="!userRouteFlag" value="2">
+            <manage-workspace-users-table :workspace="workspace" />
+          </v-tabs-window-item>
+          <v-tabs-window-item v-if="!userRouteFlag" value="3">
+            <manage-workspace-groups-table :workspace="workspace" />
+          </v-tabs-window-item>
+        </v-tabs-window>
+        <v-row class="mt-12" v-if="userRouteFlag">
+          <i>user and group rights do not apply here</i>
+        </v-row>
+      </v-container>
+    </template>
+  </Main>
 </template>
 
 <script>
@@ -224,6 +243,7 @@ import WorkspaceOpenSelectDialog from "@/components/WorkspaceOpenSelectDialog.vu
 import WorkspaceChangeLicenseDialog from "@/components/WorkspaceChangeLicenseDialog.vue";
 import ReprViewer from "@/components/ReprViewer.vue";
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import Main from '@/layouts/default/Main.vue';
 import _ from 'lodash';
 import {marked} from "marked";
 
@@ -234,6 +254,7 @@ const { Organization } = models.api;
 export default {
   name: "EditWorkspace",
   components: {
+    Main,
     EditTagsDialog,
     ReprViewer,
     WorkspaceChangeLicenseDialog,
@@ -251,6 +272,7 @@ export default {
     isWorkspaceOpenSelectDialogActive: false,
     isWorkspaceChangeLicenseDialogActive: false,
     isEditTagsDialogActive: false,
+    tab: null,
   }),
   async created() {
     this.slug = this.$route.params.slug;

@@ -26,9 +26,14 @@
         ></v-data-table-virtual>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="this.dialog = false;">Cancel</v-btn>
+        <v-btn
+          color="cancel"
+          variant="elevated"
+          @click="this.dialog = false;"
+        >Cancel</v-btn>
         <v-btn
           color="primary"
+          variant="elevated"
           :disabled="isPatchPending"
           @click="addUsersToGroup"
         >Update</v-btn>

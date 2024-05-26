@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="changeNameDialogForm" @submit.prevent="pendingChangeName">
+      <v-form ref="changeNameDialogForm" @submit.prevent="doNameChange">
         <v-card-text>
           <v-text-field
             v-model.trim="newUserName"
@@ -32,8 +32,8 @@
         {{ snackerMsg }}
       </v-snackbar>
       <v-card-actions class="justify-center">
-        <v-btn @click="dialog = false">Cancel</v-btn>
-        <v-btn @click="doNameChange()" color="primary" :disabled="pendingChangeName">Change</v-btn>
+        <v-btn color="cancel" variant="elevated" @click="dialog = false">Cancel</v-btn>
+        <v-btn @click="doNameChange()" color="primary" variant="elevated" :disabled="pendingChangeName">Change</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -32,13 +32,18 @@
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="transactionRecorded">
-          <v-btn v-if="transactionRecorded">
+        <v-btn
+          v-if="transactionRecorded"
+          color="link"
+          variant="text"
+        >
             <a href="/download-and-explore">continue</a>
-          </v-btn>
         </v-btn>
-        <v-btn v-else
-               @click="applySubscription"
+        <v-btn
+          v-else
+          color="primary"
+          variant="elevated"
+          @click="applySubscription"
         >
           try recording again
         </v-btn>

@@ -13,6 +13,7 @@
         class="ms-1"
         icon="mdi-cog"
         size="small"
+        color="decoration"
         flat
         @click.stop="goToWorkspaceEdit(workspace)"
         id="editWorkspaceButton"
@@ -26,8 +27,8 @@
         class="ms-1"
         icon="mdi-cog"
         size="small"
+        color="decoration"
         flat
-        color="grey"
         id="disabledEditWorkspaceButton"
       ></v-btn>
       <v-tooltip
@@ -44,6 +45,7 @@
         <v-btn
           icon="mdi-bullhorn"
           size="small"
+          color="decoration"
           flat
           @click.stop="openEditPromotionDialog()"
           id="promotionButton"
@@ -56,8 +58,8 @@
         <v-btn
           size="small"
           icon="mdi-bullhorn"
+          color="decoration"
           flat
-          color="grey"
           id="disabledPromotionButton"
         >
         </v-btn>

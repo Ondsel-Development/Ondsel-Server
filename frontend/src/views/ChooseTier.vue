@@ -5,9 +5,20 @@
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container class="d-flex flex-wrap">
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="soloClicked()">
-          <v-card-title>Solo</v-card-title>
+          <v-card-title>
+            <v-icon icon="mdi-charity" />
+            Solo
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.solo">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-item>
+            <v-chip color="secondary" class="text-uppercase">
+              Free
+            </v-chip>
+          </v-card-item>
+          <v-card-title class="text-h4">$0</v-card-title>
+          <v-card-subtitle>&nbsp;</v-card-subtitle>
+          <v-divider class="mx-4" />
           <v-card-text>
             <v-list>
               <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Full 3D CAD design suite for the desktop</v-list-item>
@@ -19,17 +30,29 @@
           <v-spacer></v-spacer>
           <v-card-actions class="flex-column">
             <v-btn
+              :color="soloOptions.color"
               variant="outlined"
             >{{soloOptions.text}}</v-btn>
             <p>&nbsp;</p>
           </v-card-actions>
         </v-card>
-        <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="peerClicked()">
-          <v-card-title>Peer</v-card-title>
+        <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" color="primary" @click="peerClicked()">
+          <v-card-title>
+            <v-icon icon="mdi-account-hard-hat" />
+            Peer
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.peer">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-item>
+            <v-chip color="primary" class="text-uppercase">
+              Essential
+            </v-chip>
+          </v-card-item>
+          <v-card-title class="text-h4">$10</v-card-title>
+          <v-card-subtitle><span class="pt-n4">Per month</span></v-card-subtitle>
+          <v-divider class="mx-4"/>
           <v-card-text>
-            <v-list>
+            <v-list style="background: inherit;">
               <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Solo</v-list-item>
               <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Upload up to 10GB to the online vault. 100 compute minutes</v-list-item>
               <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Open organizations for team management</v-list-item>
@@ -41,15 +64,27 @@
           <v-card-actions class="flex-column">
             <v-btn
               class="float-left"
-              variant="outlined"
+              :color="peerOptions.color"
+              variant="elevated"
             >{{peerOptions.text}}</v-btn>
             <p>** billed annually</p>
           </v-card-actions>
         </v-card>
         <v-card class="ma-2 d-flex flex-column" width="22em" variant="tonal" @click="enterpriseClicked()">
-          <v-card-title>Enterprise</v-card-title>
+          <v-card-title>
+            <v-icon icon="mdi-briefcase" />
+            Enterprise
+          </v-card-title>
           <v-card-subtitle v-if="loggedInUser.user.tier === SubscriptionTypeMap.enterprise">current</v-card-subtitle>
           <v-card-subtitle v-else>&nbsp;</v-card-subtitle>
+          <v-card-item>
+            <v-chip color="secondary" class="text-uppercase">
+              Business
+            </v-chip>
+          </v-card-item>
+          <v-card-title class="text-h4">N/A</v-card-title>
+          <v-card-subtitle>&nbsp;</v-card-subtitle>
+          <v-divider class="mx-4"/>
           <v-card-text>
             <v-list>
               <v-list-item><template v-slot:prepend><v-icon icon="mdi-check-outline"/>&nbsp;</template>Everything in Peer</v-list-item>
@@ -63,7 +98,8 @@
           <v-spacer></v-spacer>
           <v-card-actions class="flex-column">
             <v-btn
-              variant="outlined"
+              :color="enterpriseOptions.color"
+              variant="elevated"
               disabled
             >{{enterpriseOptions.text}}</v-btn>
             <p>&nbsp;</p>
@@ -89,9 +125,9 @@ export default {
       result: {},
       stripePurchasePeerUrl: import.meta.env.VITE_STRIPE_PURCHASE_PEER_URL,
       postSignUp: false,
-      soloOptions: {name: 'tbd', text: 'tbd'},
-      peerOptions: {name: 'tbd', text: 'tbd'},
-      enterpriseOptions: {name: 'tbd', text: 'tbd'},
+      soloOptions: {name: 'tbd', text: 'tbd', color: 'cancel'},
+      peerOptions: {name: 'tbd', text: 'tbd', color: 'secondary'},
+      enterpriseOptions: {name: 'tbd', text: 'tbd', color: 'cancel'},
     }
   },
   computed: {
@@ -151,22 +187,22 @@ export default {
     },
     soloResponse() {
       if (this.user.tier !== SubscriptionTypeMap.solo && this.user.nextTier !== SubscriptionTypeMap.solo) {
-        return {action: `downgradeToSolo`, text: `Downgrade to Solo ($0 / mo)`}
+        return {action: `downgradeToSolo`, text: `Downgrade to Solo`, color: 'secondary'}
       } else if (this.user.nextTier=== SubscriptionTypeMap.solo) {
-        return {action: 'cancelDowngrade', text: 'Cancel Switch to Solo'}
+        return {action: 'cancelDowngrade', text: 'Cancel Switch to Solo', color: 'success'}
       }
-      return {action: 'goAway', text: 'Continue'}
+      return {action: 'goAway', text: 'Continue', color: 'primary'}
     },
     peerResponse() {
       if (this.loggedInUser.nextTier=== SubscriptionTypeMap.peer) {
-        return {action: `tbd`, text: `Cancel the Switch to Peer`}
+        return {action: `tbd`, text: `Cancel the Switch to Peer`, color: 'success'}
       } else if (this.loggedInUser.user.tier !== SubscriptionTypeMap.peer) {
-        return {action: 'upgradeToPeer', text: 'Switch to Peer ($10 / mo)**'}
+        return {action: 'upgradeToPeer', text: 'Switch to Peer', color: 'primary'}
       }
-      return {action: 'goAway', text: 'Continue'}
+      return {action: 'goAway', text: 'Continue', color: 'primary'}
     },
     enterpriseResponse() {
-      return {action: 'nothing', text: 'COMING SOON'}
+      return {action: 'nothing', text: 'COMING SOON', color: 'cancel'}
     },
   }
 }

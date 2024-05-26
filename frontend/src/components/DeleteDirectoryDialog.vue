@@ -21,10 +21,15 @@
           </v-card-text>
         </v-card-text>
         <v-card-actions class="justify-center">
-          <v-btn @click="dialog = false">Cancel</v-btn>
+          <v-btn
+            color="cancel"
+            variant="elevated"
+            @click="dialog = false"
+          >Cancel</v-btn>
           <v-btn
             type="submit"
             color="primary"
+            variant="elevated"
             :disabled="isDeletePending || isPatchPending"
           >Delete</v-btn>
         </v-card-actions>
