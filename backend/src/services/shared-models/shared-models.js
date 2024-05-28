@@ -29,6 +29,7 @@ import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
+import { canUserAccessSharedModelGetMethod, validateSharedModelCreatePayload } from './helpers.js';
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -47,6 +48,30 @@ export const sharedModels = (app) => {
         description: 'A model service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ID of SharedModels to return",
+                "in": "path",
+                "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "Pass PIN only if shared-model protection is \"Pin\" type",
+                "in": "query",
+                "name": "pin",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          }
+        }
       }
     })
   })
@@ -116,9 +141,14 @@ export const sharedModels = (app) => {
           context => context.params.authentication,
           authenticate('jwt'),
         ),
+        iff(
+          isProvider('external'),
+          canUserAccessSharedModelGetMethod,
+        )
       ],
       create: [
         canUserCreateShareLink,
+        validateSharedModelCreatePayload,
         iff(
           context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,

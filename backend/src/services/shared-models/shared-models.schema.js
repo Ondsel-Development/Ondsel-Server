@@ -9,6 +9,7 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
+import { ProtectionType } from './shared-models.subdocs.schema.js';
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -37,6 +38,8 @@ export const sharedModelsSchema = Type.Object(
     curation: Type.Optional(curationSchema),
     messages: Type.Array(messageSchema),
     messagesParticipants: Type.Array(userSummarySchema),
+    protection: ProtectionType,
+    pin: Type.Optional(Type.String({ minLength: 6, maxLength: 6 })),
 
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -102,7 +105,9 @@ export const sharedModelsResolver = resolve({
   }),
 })
 
-export const sharedModelsExternalResolver = resolve({})
+export const sharedModelsExternalResolver = resolve({
+  pin: async () => undefined,
+})
 
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
@@ -120,6 +125,8 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'isSystemGenerated',
   'showInPublicGallery',
   'isThumbnailGenerated',
+  'protection',
+  'pin'
 ], {
   $id: 'SharedModelsData'
 })
@@ -238,6 +245,8 @@ export const sharedModelsQueryProperties = Type.Pick(
     'showInPublicGallery',
     'messages',
     'messagesParticipants',
+    'protection',
+    'pin'
   ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(
