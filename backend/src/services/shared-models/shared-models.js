@@ -179,7 +179,6 @@ export const sharedModels = (app) => {
             'description',
             'canDownloadDefaultModel',
             'isSystemGenerated',
-            'showInPublicGallery',
             'isThumbnailGenerated',
             'protection',
             'pin',

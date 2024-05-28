@@ -32,7 +32,7 @@ export const sharedModelsSchema = Type.Object(
     canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
-    showInPublicGallery: Type.Optional(Type.Boolean({default: false})),
+    showInPublicGallery: Type.Optional(Type.Boolean({default: false})),  // deprecated
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
     curation: Type.Optional(curationSchema),
@@ -121,7 +121,6 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canDownloadDefaultModel',
   'dummyModelId',
   'isSystemGenerated',
-  'showInPublicGallery',
   'isThumbnailGenerated',
   'protection',
   'pin'
@@ -197,12 +196,6 @@ export const sharedModelsDataResolver = resolve({
       return _value;
     }
     return sharedModelsSchema.properties.isSystemGenerated.default
-  },
-  showInPublicGallery: async (_value, _message, context) => {
-    if (_value) {
-      return _value;
-    }
-    return sharedModelsSchema.properties.showInPublicGallery.default
   },
   isThumbnailGenerated: async (_value, _message, context) => {
     if (_value) {
