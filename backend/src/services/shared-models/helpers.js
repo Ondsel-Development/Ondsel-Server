@@ -10,8 +10,10 @@ export const validateSharedModelCreatePayload = async context => {
 
 
 export const canUserAccessSharedModelGetMethod = async context => {
-  const { protection, pin } = await context.service.get(context.id, { query: { $select: ['protection', 'pin'] } });
-  console.log(protection, pin);
+  const { protection, pin, userId } = await context.service.get(context.id, { query: { $select: ['protection', 'pin', 'userId'] } });
+  if (context.params.user && context.params.user._id.equals(userId)) {
+    return context;
+  }
 
   if (protection === ProtectionTypeMap.listed || protection === ProtectionTypeMap.unlisted) {
     return context;
