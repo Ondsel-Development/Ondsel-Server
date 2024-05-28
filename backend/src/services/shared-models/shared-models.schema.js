@@ -105,9 +105,7 @@ export const sharedModelsResolver = resolve({
   }),
 })
 
-export const sharedModelsExternalResolver = resolve({
-  pin: async () => undefined,
-})
+export const sharedModelsExternalResolver = resolve({})
 
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [

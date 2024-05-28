@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
+import {discard, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -176,6 +176,13 @@ export const sharedModels = (app) => {
             'canExportOBJ',
             'dummyModelId',
             'isActive',
+            'description',
+            'canDownloadDefaultModel',
+            'isSystemGenerated',
+            'showInPublicGallery',
+            'isThumbnailGenerated',
+            'protection',
+            'pin',
           )
         ),
         preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
@@ -206,7 +213,15 @@ export const sharedModels = (app) => {
       remove: []
     },
     after: {
-      all: [],
+      all: [
+        iff(
+          isProvider('external'),
+          iff(
+            async context => !(context.params.user && context.params.user._id.equals(context.result.userId)),
+            discard('pin')
+          ),
+        )
+      ],
       create: [
         iff(
           context => context.data.cloneModelId,
