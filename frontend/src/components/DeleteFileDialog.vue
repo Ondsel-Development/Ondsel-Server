@@ -31,7 +31,7 @@
           @click="cancelDelete"
         >Cancel</v-btn>
         <v-btn
-          color="primary"
+          color="error"
           variant="elevated"
           :loading="isRemovePending"
           @click="deleteObject"

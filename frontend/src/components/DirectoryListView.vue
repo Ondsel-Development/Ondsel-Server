@@ -1,47 +1,5 @@
 <template>
-  <v-list v-if="rootDirectory" density="compact">
-    <v-list-item
-      variant="flat"
-      class="show-indent"
-    >
-      <template v-slot:prepend>
-        <v-btn
-          color="decoration"
-          flat
-          :icon="openRootDirectory ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-          size="x-small"
-          @click="toggleRootDirectory"
-        ></v-btn>
-      </template>
-      <v-list-item-title
-        @click="$emit('selectedDirectory', rootDirectory, rootDirectory.name);"
-      >
-        {{ rootDirectory.name }}
-      </v-list-item-title>
-    </v-list-item>
-    <directory-list-view
-      v-if="openRootDirectory"
-      :directory="rootDirectory"
-      :parent-directory-path="rootDirectory.name"
-      @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
-      @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
-    />
-  </v-list>
   <v-list v-if="directory" density="compact" class="ml-2">
-    <v-list-item
-      v-for="file in directory.files"
-      :key="file._id"
-      :value="file"
-      variant="flat"
-      class="show-indent"
-    >
-      <v-list-item-title
-        class="text-body-2"
-        @click="$emit('selectedFile', file, getItemPath(file.custFileName))"
-      >
-        {{ file.custFileName }}
-      </v-list-item-title>
-    </v-list-item>
     <template
       v-for="dir in directory.directories"
       :key="dir._id"
@@ -59,41 +17,74 @@
             @click="toggleDirectory(dir)"
           ></v-btn>
         </template>
-        <v-list-item-title
-          class="text-body-2"
-          @click="$emit('selectedDirectory', dir, getItemPath(dir.name));"
-        >
-          {{ dir.name }}
-        </v-list-item-title>
+        <template v-slot:append>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                color="decoration"
+                flat
+                icon="mdi-dots-vertical"
+                v-bind="props"
+                size="x-small"
+              ></v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="openCreateDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </template>
+        <v-list-item-media>
+          <v-sheet @click="$emit('selectedDirectory', dir, getItemPath(dir.name));">
+            <span
+              v-if="activeDirectory?._id === dir._id"
+              class="text-body-2 mx-3"
+            ><b>{{ dir.name }}</b></span>
+            <span
+              v-else
+              class="text-body-2 mx-3"
+            >{{ dir.name }}</span>
+          </v-sheet>
+        </v-list-item-media>
       </v-list-item>
       <directory-list-view
         v-if="openDirectories.find(d => d._id === dir._id)"
         :directory="openDirectories.find(d => d._id === dir._id)"
         :parent-directory-path="getItemPath(dir.name)+'/'"
-        @selected-file="(file, filePath) => $emit('selectedFile', file, filePath)"
+        :active-directory="activeDirectory"
         @selected-directory="(dir, dirPath) => $emit('selectedDirectory', dir, dirPath)"
+        @create-directory="emitCreateDirectory"
       />
     </template>
   </v-list>
+  <create-directory-dialog ref="createDirectoryDialog" @create-directory="emitCreateDirectory" :parent-dir="targetDirectory"></create-directory-dialog>
+  <delete-directory-dialog ref="deleteDirectoryDialog" @delete-directory="deleteDirectory" :directory-name="targetDirectory.name"></delete-directory-dialog>
 </template>
 
 <script>
 import {mapActions} from "vuex";
+import CreateDirectoryDialog from "@/components/CreateDirectoryDialog.vue";
+import DeleteDirectoryDialog from "@/components/DeleteDirectoryDialog.vue";
+import {models} from "@feathersjs/vuex";
+const { Directory } = models.api;
+
 
 export default {
   name: 'DirectoryListView',
-  emits: ['selectedFile', 'selectedDirectory'],
+  components: {DeleteDirectoryDialog, CreateDirectoryDialog},
+  emits: ['selectedDirectory', 'createDirectory'],
   props: {
-    rootDirectory: {
-      required: false,
-      type: Object,
-    },
     directory: Object,
     parentDirectoryPath: String,
+    activeDirectory: Object,
   },
   data: () => ({
     openDirectories: [],
-    openRootDirectory: true,
+    targetDirectory: {},
   }),
   computed: {
   },
@@ -113,9 +104,29 @@ export default {
       const directory = await this.getDirectoryByIdPublic(directorySubdocs._id);
       this.openDirectories.push(directory);
     },
-    toggleRootDirectory() {
-      this.openRootDirectory = !this.openRootDirectory;
-    }
+    async openCreateDirectoryDialog(newTargetDir) {
+      this.targetDirectory = newTargetDir;
+      this.$refs.createDirectoryDialog.$data.dialog = true;
+    },
+    async openDeleteDirectoryDialog(newTargetDir) {
+      this.targetDirectory = newTargetDir;
+      this.$refs.deleteDirectoryDialog.$data.dialog = true;
+    },
+    async emitCreateDirectory(dirName, parentDir) {
+      // pass this up to the parent unmodified
+      this.$emit('createDirectory', dirName, parentDir);
+      this.$refs.createDirectoryDialog.$data.dialog = false;
+    },
+    async deleteDirectory() {
+      await Directory.remove(
+        this.targetDirectory._id
+      ).then(() => {
+        this.$refs.deleteDirectoryDialog.$data.dialog = false;
+      }).catch((e) => {
+        this.$refs.deleteDirectoryDialog.$data.snackerMsg = e.message;
+        this.$refs.deleteDirectoryDialog.$data.showSnacker = true;
+      });
+    },
   },
 };
 </script>

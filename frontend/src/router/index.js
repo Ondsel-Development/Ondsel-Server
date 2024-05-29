@@ -42,6 +42,7 @@ import XavierSearchResults from "@/views/XavierSearchResults.vue";
 import XavierRemoveUser from "@/views/XavierRemoveUser.vue";
 import SharedWithMe from "@/views/SharedWithMe.vue";
 import MyNotifications from "@/views/MyNotifications.vue";
+import WorkspaceFile from "@/views/WorkspaceFile.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -156,6 +157,12 @@ const routes = [
     component: PageNotFound,
     name: 'PageNotFound',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/org/:slug/504/:urlCode',
+    component: PermissionError,
+    name: 'PermissionError',
+    meta: { requiresAuth: true },
   },
   {
     path: '/join-org/:token/:id',
@@ -294,10 +301,22 @@ const routes = [
     meta: { tryAuth: true },
   },
   {
+    path: '/user/:slug/workspace/:wsname/dir/:dirid',
+    component: WorkspaceHome,
+    name: 'UserWorkspaceDir',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/user/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
     name: 'UserEditWorkspace',
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/:slug/workspace/:wsname/file/:fileid',
+    component: WorkspaceFile,
+    name: 'UserWorkspaceFile',
+    meta: { tryAuth: true },
   },
   //
   // ORG pages
@@ -333,17 +352,23 @@ const routes = [
     meta: { tryAuth: true },
   },
   {
+    path: '/org/:slug/workspace/:wsname/dir/:dirid',
+    component: WorkspaceHome,
+    name: 'OrgWorkspaceDir',
+    meta: { tryAuth: true },
+  },
+  {
     path: '/org/:slug/workspace/:wsname/edit',
     component: EditWorkspace,
     name: 'OrgEditWorkspace',
     meta: { requiresAuth: true },
   },
   {
-    path: '/org/:slug/504/:urlCode',
-    component: PermissionError,
-    name: 'PermissionError',
-    meta: { requiresAuth: true },
-  }
+    path: '/org/:slug/workspace/:wsname/file/:fileid',
+    component: WorkspaceFile,
+    name: 'OrgWorkspaceFile',
+    meta: { tryAuth: true },
+  },
 ]
 
 const router = createRouter({
