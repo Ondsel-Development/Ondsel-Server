@@ -16,7 +16,7 @@
           </div>
         </td>
         <td>{{ item.curation.description }}</td>
-        <td>{{ item.curation.message }}</td>
+        <td>{{ item.notation.message }}</td>
         <td><v-btn icon="mdi-arrow-right" flat @click.stop="goToUserProfile(item)"></v-btn></td>
       </tr>
     </template>
