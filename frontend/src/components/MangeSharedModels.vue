@@ -94,13 +94,15 @@
         @update:modelValue="updateSharedModel(item._id, {isActive: item.isActive})"
       ></v-switch>
     </template>
-    <template v-slot:item.showInPublicGallery="{ item }">
-      <v-switch
-        v-model="item.showInPublicGallery"
+    <template v-slot:item.protection="{ item }">
+      <v-combobox
+        v-model="item.protection"
+        density="compact"
         hide-details
+        :items="['Listed', 'Unlisted']"
         :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
-        @update:modelValue="updateSharedModel(item._id, {showInPublicGallery: item.showInPublicGallery})"
-      ></v-switch>
+        @update:modelValue="updateSharedModel(item._id, { protection: item.protection })"
+      ></v-combobox>
     </template>
 
     <template v-slot:expanded-row="{ columns, item }">
@@ -269,7 +271,7 @@ export default {
         },
         { title: 'Description', key: 'description', sortable: false, width: '270px'},
         { title: 'Created At', key: 'createdAt', sortable: true},
-        { title: 'Display In Public Gallery', key: 'showInPublicGallery', sortable: true},
+        { title: 'Protection', key: 'protection', sortable: true, width: '170px'},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
       isShareModelDialogActive: false,

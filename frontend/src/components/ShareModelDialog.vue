@@ -4,7 +4,7 @@
     width="auto"
     persistent
   >
-    <v-card width="600" max-height="800">
+    <v-card width="600" max-height="820">
       <template v-slot:title>
         <div class="text-center">Share Model</div>
       </template>
@@ -35,11 +35,11 @@
             :counter="20"
             :rules="descriptionRules"
           ></v-text-field>
-          <v-checkbox v-model="showInPublicGallery" :disabled="isGeneratingLink" hide-details>
-            <template v-slot:label>
-              Display In Public Gallery
-            </template>
-          </v-checkbox>
+          <v-combobox
+            v-model="protection"
+            label="Protection"
+            :items="['Listed', 'Unlisted']"
+          ></v-combobox>
           <div class="text-subtitle-2">Select permissions user can perform</div>
           <v-checkbox v-model="permissions.canViewModel" :disabled="isGeneratingLink" readonly hide-details>
             <template v-slot:label>
@@ -151,7 +151,7 @@ export default {
     dialog: false,
     valid: false,
     description: '',
-    showInPublicGallery: false,
+    protection: 'Unlisted',
     permissions: {
       canViewModel: true,
       canViewModelAttributes: false,
@@ -190,8 +190,8 @@ export default {
       this.isGeneratingLink = true;
       this.sharedModel = null;
       const sharedModel = new SharedModel();
+      sharedModel.protection = this.protection;
       sharedModel.description = this.description;
-      sharedModel.showInPublicGallery = this.showInPublicGallery;
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;
