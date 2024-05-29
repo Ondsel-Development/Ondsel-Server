@@ -11,8 +11,12 @@
     </v-card>
     <v-card class="ma-4">
       <v-card-text>
-        <promotions-viewer :promoted="promoted"></promotions-viewer>
+        <promotions-viewer :promoted="promotedFiltered"></promotions-viewer>
       </v-card-text>
+    </v-card>
+    <v-card v-if="promotedUsers && promotedUsers.length" flat>
+      <v-card-title>Users</v-card-title>
+      <promoted-users-table :promoted-users="promotedUsers" />
     </v-card>
   </v-container>
 </template>
@@ -23,32 +27,31 @@ import {models} from "@feathersjs/vuex";
 import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import PromotedUsersTable from "@/components/PromotedUsersTable.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'LensHome',
-  components: {MarkdownViewer, PromotionsViewer},
+  components: {PromotedUsersTable, MarkdownViewer, PromotionsViewer},
   data: () => ({
-    lensSiteCuration: {},
+    lensSiteCuration: null,
     markdownHtml: 'missing data',
     title: 'missing title',
-    promoted: [],
   }),
   async created() {
-    models.api.Agreements.find({
+    const response = await models.api.Agreements.find({
       query: {category: 'lens-site-curation'}
-    }).then(response => {
-      if (response.data.length > 0) {
-        this.lensSiteCuration = response.data[0];
-        this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
-        this.promoted = this.lensSiteCuration.current.curation.promoted || [];
-        this.title = this.lensSiteCuration.current.curation.description || '';
-      }
     });
-  },
-  async mounted() {
+    if (response.data.length > 0) {
+      this.lensSiteCuration = response.data[0];
+      this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
+      this.title = this.lensSiteCuration.current.curation.description || '';
+    }
   },
   computed: {
+    promoted: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted || [],
+    promotedFiltered: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted.filter(p => p.curation.collection !== 'users') || [],
+    promotedUsers: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted.filter(p => p.curation.collection === 'users'),
   },
   methods: {
   }
