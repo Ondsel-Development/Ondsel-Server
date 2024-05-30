@@ -219,5 +219,27 @@ export default {
         return undefined;
       }
     },
+    retrieveFileByUniqueName: async (context, detail) => {
+      const uniqueFileName = detail.uniqueFileName;
+      const accessToken = detail.accessToken;
+      const uploadEndpoint = `${import.meta.env.VITE_APP_API_URL}upload`
+      const fileEndpoint = `${uploadEndpoint}/${uniqueFileName}`;
+      const res = await axios(
+        {
+          method: 'GET',
+          url: fileEndpoint,
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      )
+      const resBlob = await axios({
+        url: res.data.url,
+        method: 'GET',
+        responseType: 'blob',
+      })
+      const content = await resBlob.data.text();
+      return content;
+    },
   }
 }

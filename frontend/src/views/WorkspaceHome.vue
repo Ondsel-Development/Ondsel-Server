@@ -124,7 +124,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import _ from 'lodash';
 
@@ -134,6 +134,7 @@ import FileListView from "@/components/FileListView.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CuratedItemSheet from "@/components/CuratedItemSheet.vue";
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
+import axios from "axios";
 
 const { Directory, Organization } = models.api;
 
@@ -159,6 +160,7 @@ export default {
       publicViewDetail: false,
       defaultWorkspaceFlag: false,
       fullPath: [],
+      fullLongDescription: null,
     };
   },
   async created() {
@@ -166,6 +168,7 @@ export default {
   },
   computed: {
     ...mapGetters('app', ['currentOrganization', 'selfPronoun', 'selfName']),
+    ...mapState('auth', ['accessToken']),
     directory: vm => vm.directoryDetail,
     workspaceRefName: vm => vm.$route.params.wsname,
     workspace: vm => vm.workspaceDetail || {name: 'tbd'},
@@ -173,7 +176,7 @@ export default {
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     dirId: vm => vm.$route.params.dirid || null,
     publicView: vm => vm.publicViewDetail,
-    longDescriptionHtml: vm => marked(vm.workspace?.curation?.longDescriptionMd || ""),
+    longDescriptionHtml: vm => marked(vm.fullLongDescription || vm.workspace?.curation?.longDescriptionMd || ""),
     promotionPossible: vm => vm.currentOrganization && !vm.defaultWorkspaceFlag,
     canUserWrite: vm => vm.workspace.haveWriteAccess,
   },
@@ -185,6 +188,7 @@ export default {
       'getDirectoryByIdPublic',
       'getOrgByIdOrNamePublic',
       'getFileByIdPublic',
+      'retrieveFileByUniqueName',
     ]),
     async renew() {
       this.slug = this.$route.params.slug;
@@ -277,6 +281,7 @@ export default {
       this.activeDirectory = this.directoryDetail;
       this.activePath = this.directory.name;
       await this.recursivelyBuildPath();
+      this.fullLongDescription = await this.getFullLongDescription();
     },
     async clickedDirectory(directorySubDocs, dirPath) {
       let directory = this.publicView
@@ -289,6 +294,20 @@ export default {
       console.log(directory);
       this.activeDirectory = directory;
       this.activePath = dirPath;
+    },
+    async getFullLongDescription() {
+      let content = null;
+      for (const fileSum of this.directoryDetail.files) {
+        if (fileSum.custFileName === 'README.md') {
+          const file = await this.getFileByIdPublic(fileSum._id);
+          let uName = file.currentVersion.uniqueFileName;
+          let contentResult = this.retrieveFileByUniqueName({uniqueFileName: uName, accessToken: this.accessToken});
+          if (contentResult) {
+            content = contentResult;
+          }
+        }
+      }
+      return content;
     },
     async goHome() {
       if (this.publicView) {
