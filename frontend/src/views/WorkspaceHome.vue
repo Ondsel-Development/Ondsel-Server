@@ -301,7 +301,7 @@ export default {
         if (fileSum.custFileName === 'README.md') {
           const file = await this.getFileByIdPublic(fileSum._id);
           let uName = file.currentVersion.uniqueFileName;
-          let contentResult = this.retrieveFileByUniqueName({uniqueFileName: uName, accessToken: this.accessToken});
+          let contentResult = await this.retrieveFileByUniqueName({uniqueFileName: uName, accessToken: this.accessToken});
           if (contentResult) {
             content = contentResult;
           }
