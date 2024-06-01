@@ -1,9 +1,12 @@
 import { ProtectionTypeMap } from './shared-models.subdocs.schema.js';
 import {BadRequest} from "@feathersjs/errors";
+import _ from 'lodash';
 
 export const validateSharedModelCreatePayload = async context => {
   if (context.data.pin) {
     context.data.protection = ProtectionTypeMap.pin;
+  } else {
+    context.data = _.omit(context.data, 'pin');
   }
   return context;
 }
@@ -22,7 +25,7 @@ export const canUserAccessSharedModelGetMethod = async context => {
   if (protection === ProtectionTypeMap.pin) {
     const queryPin = context.params.query.pin;
     if (!queryPin) {
-      throw new BadRequest('pin is missing in query parameters')
+      throw new BadRequest('MissingPin')
     }
     if (queryPin === pin) {
       return context;

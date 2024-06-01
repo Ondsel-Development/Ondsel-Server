@@ -212,15 +212,7 @@ export const sharedModels = (app) => {
       remove: []
     },
     after: {
-      all: [
-        iff(
-          isProvider('external'),
-          iff(
-            async context => !(context.params.user && context.params.user._id.equals(context.result.userId)),
-            discard('pin')
-          ),
-        )
-      ],
+      all: [],
       create: [
         iff(
           context => context.data.cloneModelId,
