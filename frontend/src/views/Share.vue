@@ -99,6 +99,17 @@
             >
               <span>Oops! The share link you're looking for could not be found.</span>
             </v-alert>
+            <v-alert
+              variant="outlined"
+              type="error"
+              border="top"
+              class="text-left"
+              v-if="error === 'IncorrectPin'"
+            >
+              <span>Incorrect PIN</span>
+            </v-alert>
+            <span class="text-subtitle-2">Enter PIN to access model</span>
+            <v-otp-input v-model="pin" type="text" @finish="fetchShareLink"></v-otp-input>
           </v-card-item>
           <v-card-item v-if="model">
             <v-alert
@@ -178,7 +189,7 @@
     ref="shareLinkDialog"
   />
   <share-with-user-dialog
-    v-if="sharedModel"
+    v-if="sharedModel && user"
     :curation="sharedModel.curation"
     ref="shareWithUserDialog"
     @save-share-with-user="saveShareWithUser"
@@ -245,14 +256,47 @@ export default {
     name: '',
     viewer: null,
     drawerActiveWindow: null,
+    pin: null,
+    sharedModelId: null,
   }),
   async created() {
-    const shareModelId = this.$route.params.id;
-    if (shareModelId) {
+    this.sharedModelId = this.$route.params.id;
+    if (this.$route.query.pin) {
+      this.pin = this.$route.query.pin;
+    }
+    await this.fetchShareLink();
+  },
+  computed: {
+    ...mapState('auth', ['accessToken', 'user']),
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('app', ['selfPronoun', 'selfName', 'currentOrganization']),
+    isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
+  },
+  methods: {
+    async fetchShareLink() {
+      this.error = null;
+      if (!this.sharedModelId) {
+        return;
+      }
       try {
-        this.sharedModel = await SharedModel.get(shareModelId, {query: {isActive: true}});
+        const extraQueryArgs = this.pin ? { pin: this.pin } : {};
+        this.sharedModel = await SharedModel.get(
+          this.sharedModelId,
+          {
+            query: {
+              isActive: true,
+              ...extraQueryArgs
+            }
+          }
+        );
       } catch (error) {
-        this.error = 'NotFound';
+        if (error.toString().includes('MissingPin')) {
+          this.error = 'MissingPin';
+        } else if (error.toString().includes('IncorrectPin')) {
+          this.error = 'IncorrectPin';
+        } else {
+          this.error = 'NotFound';
+        }
         return;
       }
 
@@ -272,15 +316,7 @@ export default {
         this.model = this.sharedModel.model;
       }
       this.name = this.model.file?.custFileName || '';
-    }
-  },
-  computed: {
-    ...mapState('auth', ['accessToken', 'user']),
-    ...mapGetters('auth', ['isAuthenticated']),
-    ...mapGetters('app', ['selfPronoun', 'selfName', 'currentOrganization']),
-    isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
-  },
-  methods: {
+    },
     fitModelToScreen() {
       this.$refs.modelViewer.fitModelToScreen();
     },
