@@ -99,7 +99,7 @@
         v-model="item.protection"
         density="compact"
         hide-details
-        :items="['Listed', 'Unlisted']"
+        :items="['Listed', 'Unlisted', 'Pin']"
         :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
         @update:modelValue="updateSharedModel(item._id, { protection: item.protection })"
       ></v-combobox>
@@ -166,6 +166,14 @@
               </template>
             </v-checkbox>
           </v-col>
+          <v-row>
+            <v-col v-if="item.protection === 'Pin'" cols="6">
+              <div class="d-flex flex-row align-center">
+                <span class="text-body-1">PIN</span>
+                <v-otp-input v-model="item.pin" type="text" disabled></v-otp-input>
+              </div>
+            </v-col>
+          </v-row>
           <v-col cols="9" />
           <v-col cols="3">
             <v-btn
