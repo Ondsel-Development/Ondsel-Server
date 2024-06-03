@@ -9,6 +9,7 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
+import {fileDetailSchema, RevisionFollowType, RevisionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -16,6 +17,7 @@ export const sharedModelsSchema = Type.Object(
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    revisionFollowing: RevisionFollowType,
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
@@ -34,6 +36,7 @@ export const sharedModelsSchema = Type.Object(
     showInPublicGallery: Type.Optional(Type.Boolean({default: false})),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    fileDetail: fileDetailSchema,
     curation: Type.Optional(curationSchema),
     messages: Type.Array(messageSchema),
     messagesParticipants: Type.Array(userSummarySchema),
@@ -125,6 +128,12 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
+  revisionFollowing: async (value, _message, _context) => {
+    if (value) {
+      return value;
+    }
+    return RevisionFollowTypeMap.locked;  // default to locked
+  },
   userId: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
