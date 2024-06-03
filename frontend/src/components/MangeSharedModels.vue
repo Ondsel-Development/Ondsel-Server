@@ -52,7 +52,7 @@
             color="decoration"
             flat
             icon="mdi-share"
-            @click.stop="openShareLinkDialog(item._id)"
+            @click.stop="openShareLinkDialog(item)"
           ></v-btn>
           <v-btn
             end
@@ -231,7 +231,7 @@
   />
   <ShareLinkDialog
     :is-active="isShareLinkDialogActive"
-    :shared-model-id="activeShareModelId"
+    :shared-model="activeShareModel"
     ref="shareLinkDialog"
   />
   <EditTagsDialog
@@ -279,6 +279,7 @@ export default {
       isShareLinkDialogActive: false,
       isEditTagsDialogActive: false,
       activeShareModelId: '',
+      activeShareModel: null,
       activeCuration: {},
     }
   },
@@ -321,9 +322,10 @@ export default {
     openShareModelDialog() {
       this.$refs.shareModelDialog.$data.dialog = true;
     },
-    openShareLinkDialog(sharedModelId) {
+    openShareLinkDialog(sharedModel) {
       this.isShareLinkDialogActive = true;
-      this.activeShareModelId = sharedModelId;
+      this.activeShareModel = sharedModel;
+      this.activeShareModelId = sharedModel._id;
       this.$refs.shareLinkDialog.$data.dialog = true;
     },
     openEditTagsDialog(sharedModelId, curation) {
