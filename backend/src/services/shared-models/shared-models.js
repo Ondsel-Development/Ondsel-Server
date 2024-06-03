@@ -180,11 +180,10 @@ export const sharedModels = (app) => {
             'canDownloadDefaultModel',
             'isSystemGenerated',
             'isThumbnailGenerated',
-            'protection',
             'pin',
           )
         ),
-        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
+        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants', 'protection'),
         iff(
           isProvider('external'),
           iff(

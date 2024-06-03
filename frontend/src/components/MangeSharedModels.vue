@@ -95,14 +95,7 @@
       ></v-switch>
     </template>
     <template v-slot:item.protection="{ item }">
-      <v-combobox
-        v-model="item.protection"
-        density="compact"
-        hide-details
-        :items="['Listed', 'Unlisted', 'Pin']"
-        :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
-        @update:modelValue="updateSharedModel(item._id, { protection: item.protection })"
-      ></v-combobox>
+      {{ item.protection }}
     </template>
 
     <template v-slot:expanded-row="{ columns, item }">
