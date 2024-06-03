@@ -210,6 +210,7 @@ const commitNewVersion = async (context) => {
     uniqueFileName: context.data.version.uniqueFileName,
     message: context.data.version.message || '',
     userId: context.params.user._id,
+    lockedSharedModels: [],
     additionalData: _.omit(context.data.version, ['uniqueFileName', 'message'])
   }
 

@@ -1,9 +1,12 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import _ from 'lodash';
+import {addSharedModelToFile} from "../file/file.distrib.js";
+import {VersionFollowType} from "./shared-models.subdocs.schema.js";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    versionFollowing: VersionFollowType,
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
     custFileName: Type.String(),
@@ -26,6 +29,7 @@ export function buildSharedModelSummary(sharedModel) {
     if (sharedModel) {
       summary = {
         _id: sharedModel._id,
+        versionFollowing: sharedModel.versionFollowing,
         custFileName: sharedModel.model?.file?.custFileName || '',
         isThumbnailGenerated: sharedModel.isThumbnailGenerated,
         thumbnailUrl: sharedModel.thumbnailUrl,
@@ -33,4 +37,23 @@ export function buildSharedModelSummary(sharedModel) {
       };
     }
     return summary;
+}
+
+export async function distributeSharedModelCreation(context){
+  // for now, only file is updated
+  try {
+    let sharedModel = context.result;
+    if (!sharedModel.model?.file) {
+      const fileId = sharedModel.fileDetail.fileId;
+      const realFile = await context.app.service('file').get(fileId);
+      if (realFile) {
+        sharedModel.model = {file: realFile};
+      }
+    }
+    const sharedModelSummary = buildSharedModelSummary(sharedModel);
+    await addSharedModelToFile(context.app, sharedModel.fileDetail, sharedModelSummary)
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
 }

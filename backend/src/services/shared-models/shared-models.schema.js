@@ -220,7 +220,7 @@ export const sharedModelsDataResolver = resolve({
   messagesParticipants: async (_value, _message, _context) => {
     return [];
   },
-  fileDetails: async (value, _message, context) => {
+  fileDetail: async (value, _message, context) => {
     if (value) {
       return value;
     }

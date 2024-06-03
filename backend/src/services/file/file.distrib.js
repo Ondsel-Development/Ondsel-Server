@@ -10,6 +10,7 @@
 //
 
 import {forDirectoryRemoveFileSummary, forDirectoryUpdateFileSummary} from "../directories/helpers.js";
+import {VersionFollowType, VersionFollowTypeMap} from "../shared-models/shared-models.subdocs.schema.js";
 
 export function buildFileSummary(file) {
   let summary = {
@@ -110,4 +111,34 @@ export async function updateWorkspaceSummaryToFile(context, fileId, wsSummary) {
       workspace: wsSummary,
     }
   );
+}
+
+export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) {
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (sharedModelSummary.versionFollowing) {
+    case VersionFollowTypeMap.active:
+      await fileDb.updateOne(
+        { _id: fileDetail.fileId },
+        {
+          $push: {followingActiveSharedModels: sharedModelSummary},
+        }
+      );
+      break;
+    case VersionFollowTypeMap.locked:
+      await fileDb.updateOne(
+        { _id: fileDetail.fileId },
+        {
+          $push : {
+            "versions.$[x].lockedSharedModels": sharedModelSummary,
+          },
+        },
+        {
+          arrayFilters: [
+            {"x._id": fileDetail.versionId}
+          ]
+        }
+      );
+      break;
+  }
 }
