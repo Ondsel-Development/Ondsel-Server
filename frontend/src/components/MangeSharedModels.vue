@@ -163,7 +163,8 @@
             <v-col v-if="item.protection === 'Pin'" cols="6">
               <div class="d-flex flex-row align-center">
                 <span class="text-body-1">PIN</span>
-                <v-otp-input v-model="item.pin" type="text" disabled></v-otp-input>
+                <v-otp-input v-model="item.pin" :type="showPin ? 'text' : 'password'" disabled></v-otp-input>
+                <v-btn variant="plain" density="compact" :icon="showPin ? 'mdi-eye' : 'mdi-eye-off'" @click.stop="showPin = !showPin" />
               </div>
             </v-col>
           </v-row>
@@ -261,6 +262,7 @@ export default {
   },
   data () {
     return {
+      showPin: false,
       expanded: [],
       singleExpand: false,
       headers: [
