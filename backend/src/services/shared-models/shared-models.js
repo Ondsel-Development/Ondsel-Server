@@ -29,6 +29,8 @@ import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
+import {app} from "../../app.js";
+import {VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -404,3 +406,26 @@ const createUserInstance = async (context) => {
 
   context.data = _.omit(data, 'shouldCreateInstance');
 }
+
+// const onCreateFillFileDetailsIfMissing = async (context) => {
+//   if (!context.data.fileDetails) {
+//     const fileService = context.app.service('file');
+//     const modelService = context.app.service('models');
+//     let modelId = context.data.cloneModelId;
+//     if (!modelId) {
+//       modelId = context.data.dummyModelId;
+//     }
+//     const model = await modelService.get(modelId);
+//     const fileId = model.fileId;
+//     let versionId = null;
+//     if (context.data.versionFollowing !== VersionFollowTypeMap.active) {
+//       const file = await fileService.get(model.fileId);
+//       versionId = file.currentVersionId;
+//     }
+//     context.data.fileDetails = {
+//       fileId: fileId,
+//       versionId: versionId,
+//     }
+//   }
+//   return context;
+// }

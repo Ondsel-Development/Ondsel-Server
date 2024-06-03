@@ -1,21 +1,21 @@
 import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
 
 
-export const RevisionFollowTypeMap = {
+export const VersionFollowTypeMap = {
   locked: 'Locked',
   active: 'Active',
 }
 
-export const RevisionFollowType = StringEnum(
+export const VersionFollowType = StringEnum(
   [
-    RevisionFollowTypeMap.locked,
-    RevisionFollowTypeMap.active,
+    VersionFollowTypeMap.locked,
+    VersionFollowTypeMap.active,
   ]
 )
 
 export const fileDetailSchema = Type.Object(
   {
     fileId: ObjectIdSchema(),
-    revisionId: Type.Union([Type.Null(), ObjectIdSchema()]), // if revisionFollow == 'Active' then this is null
+    versionId: Type.Union([Type.Null(), ObjectIdSchema()]), // if versionFollow == 'Active' then this is null
   }
 )

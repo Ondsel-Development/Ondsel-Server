@@ -9,7 +9,7 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
-import {fileDetailSchema, RevisionFollowType, RevisionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -17,7 +17,7 @@ export const sharedModelsSchema = Type.Object(
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    revisionFollowing: RevisionFollowType,
+    versionFollowing: VersionFollowType,
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
@@ -128,11 +128,11 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
-  revisionFollowing: async (value, _message, _context) => {
+  versionFollowing: async (value, _message, _context) => {
     if (value) {
       return value;
     }
-    return RevisionFollowTypeMap.locked;  // default to locked
+    return VersionFollowTypeMap.locked;  // default to locked
   },
   userId: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
@@ -219,6 +219,28 @@ export const sharedModelsDataResolver = resolve({
   },
   messagesParticipants: async (_value, _message, _context) => {
     return [];
+  },
+  fileDetails: async (value, _message, context) => {
+    if (value) {
+      return value;
+    }
+    const fileService = context.app.service('file');
+    const modelService = context.app.service('models');
+    let modelId = context.data.cloneModelId;
+    if (!modelId) {
+      modelId = context.data.dummyModelId;
+    }
+    const model = await modelService.get(modelId);
+    const fileId = model.fileId;
+    let versionId = null;
+    if (context.data.versionFollowing !== VersionFollowTypeMap.active) {
+      const file = await fileService.get(model.fileId);
+      versionId = file.currentVersionId;
+    }
+    return {
+      fileId: fileId,
+      versionId: versionId,
+    }
   },
 })
 
