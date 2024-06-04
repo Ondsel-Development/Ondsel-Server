@@ -70,23 +70,7 @@
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
               </v-sheet>
-              <v-sheet name="view-port">
-                <v-img
-                  v-if="file.model && file.model.thumbnailUrlCache"
-                  height="30em"
-                  :src="file.model.thumbnailUrlCache"
-                  cover
-                ></v-img>
-                <v-sheet
-                  v-else
-                  color="#F4F4F4"
-                  height="30em"
-                  width="100%"
-                  class="d-flex justify-center align-center"
-                >
-                  <v-icon icon="mdi-file" style="color: #8D8D8D" cover />
-                </v-sheet>
-              </v-sheet>
+              <file-view-port :file="file"></file-view-port>
               <v-sheet name="tables">
                 <file-versions-table :file="file" :can-user-write="canUserWrite" :public-view="publicView" />
               </v-sheet>
@@ -144,12 +128,14 @@ import UploadNewVersionFileDialog from "@/components/UploadNewVersionFileDialog.
 import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue";
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
+import FileViewPort from "@/components/FileViewPort.vue";
 
 const { File } = models.api;
 
 export default {
   name: 'WorkspaceFile',
   components: {
+    FileViewPort,
     FileVersionsTable, RepresentWorkspaceDialog, UploadNewVersionFileDialog, DeleteFileDialog,
     Main
   },

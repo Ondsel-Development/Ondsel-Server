@@ -75,24 +75,26 @@
             />
           </v-sheet>
           <v-card-text>
-            <span class="text-body-2 text-center">{{ dir.name }}</span>
-            <v-menu v-if="canUserWrite">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  color="decoration"
-                  flat
-                  icon="mdi-dots-vertical"
-                  v-bind="props"
-                  size="x-small"
-                  class="ml-1"
-                ></v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="openDeleteDirectoryDialog(dir)">
-                  <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+            <v-sheet width="8em" class="d-flex justify-center">
+              <span class="text-body-2 text-center">{{ dir.name }}</span>
+              <v-menu v-if="canUserWrite">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    color="decoration"
+                    flat
+                    icon="mdi-dots-vertical"
+                    v-bind="props"
+                    size="x-small"
+                    class="ml-1"
+                  ></v-btn>
+                </template>
+                <v-list>
+                  <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                    <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-sheet>
           </v-card-text>
         </v-card>
         <v-card
@@ -116,7 +118,9 @@
             <v-icon icon="mdi-file" style="color: #8D8D8D" cover />
           </v-sheet>
           <v-card-text>
-            <div class="text-body-2 text-center">{{ file.custFileName }}</div>
+            <v-sheet width="8em" class="d-flex justify-center">
+              <div class="text-body-2 text-center">{{ file.custFileName }}</div>
+            </v-sheet>
           </v-card-text>
         </v-card>
       </v-sheet>

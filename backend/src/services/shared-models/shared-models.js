@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import {iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
+import { discard, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -33,6 +33,7 @@ import {
   distributeSharedModelCreation
 } from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
+import { canUserAccessSharedModelGetMethod, validateSharedModelCreatePayload } from './helpers.js';
 import {app} from "../../app.js";
 import {VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 
@@ -53,6 +54,30 @@ export const sharedModels = (app) => {
         description: 'A model service',
         idType: 'string',
         securities: ['all'],
+        operations: {
+          get: {
+            "parameters": [
+              {
+                "description": "ID of SharedModels to return",
+                "in": "path",
+                "name": "_id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "Pass PIN only if shared-model protection is \"Pin\" type",
+                "in": "query",
+                "name": "pin",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          }
+        }
       }
     })
   })
@@ -122,9 +147,14 @@ export const sharedModels = (app) => {
           context => context.params.authentication,
           authenticate('jwt'),
         ),
+        iff(
+          isProvider('external'),
+          canUserAccessSharedModelGetMethod,
+        )
       ],
       create: [
         canUserCreateShareLink,
+        validateSharedModelCreatePayload,
         iff(
           context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,
@@ -152,9 +182,14 @@ export const sharedModels = (app) => {
             'canExportOBJ',
             'dummyModelId',
             'isActive',
+            'description',
+            'canDownloadDefaultModel',
+            'isSystemGenerated',
+            'isThumbnailGenerated',
+            'pin',
           )
         ),
-        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
+        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants', 'protection'),
         iff(
           isProvider('external'),
           iff(
@@ -414,26 +449,3 @@ const createUserInstance = async (context) => {
 
   context.data = _.omit(data, 'shouldCreateInstance');
 }
-
-// const onCreateFillFileDetailsIfMissing = async (context) => {
-//   if (!context.data.fileDetails) {
-//     const fileService = context.app.service('file');
-//     const modelService = context.app.service('models');
-//     let modelId = context.data.cloneModelId;
-//     if (!modelId) {
-//       modelId = context.data.dummyModelId;
-//     }
-//     const model = await modelService.get(modelId);
-//     const fileId = model.fileId;
-//     let versionId = null;
-//     if (context.data.versionFollowing !== VersionFollowTypeMap.active) {
-//       const file = await fileService.get(model.fileId);
-//       versionId = file.currentVersionId;
-//     }
-//     context.data.fileDetails = {
-//       fileId: fileId,
-//       versionId: versionId,
-//     }
-//   }
-//   return context;
-// }

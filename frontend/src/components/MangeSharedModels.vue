@@ -52,7 +52,7 @@
             color="decoration"
             flat
             icon="mdi-share"
-            @click.stop="openShareLinkDialog(item._id)"
+            @click.stop="openShareLinkDialog(item)"
           ></v-btn>
           <v-btn
             end
@@ -94,13 +94,8 @@
         @update:modelValue="updateSharedModel(item._id, {isActive: item.isActive})"
       ></v-switch>
     </template>
-    <template v-slot:item.showInPublicGallery="{ item }">
-      <v-switch
-        v-model="item.showInPublicGallery"
-        hide-details
-        :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
-        @update:modelValue="updateSharedModel(item._id, {showInPublicGallery: item.showInPublicGallery})"
-      ></v-switch>
+    <template v-slot:item.protection="{ item }">
+      {{ item.protection }}
     </template>
 
     <template v-slot:expanded-row="{ columns, item }">
@@ -164,6 +159,15 @@
               </template>
             </v-checkbox>
           </v-col>
+          <v-row>
+            <v-col v-if="item.protection === 'Pin'" cols="6">
+              <div class="d-flex flex-row align-center">
+                <span class="text-body-1">PIN</span>
+                <v-otp-input v-model="item.pin" :type="showPin ? 'text' : 'password'" disabled></v-otp-input>
+                <v-btn variant="plain" density="compact" :icon="showPin ? 'mdi-eye' : 'mdi-eye-off'" @click.stop="showPin = !showPin" />
+              </div>
+            </v-col>
+          </v-row>
           <v-col cols="9" />
           <v-col cols="3">
             <v-btn
@@ -228,7 +232,7 @@
   />
   <ShareLinkDialog
     :is-active="isShareLinkDialogActive"
-    :shared-model-id="activeShareModelId"
+    :shared-model="activeShareModel"
     ref="shareLinkDialog"
   />
   <EditTagsDialog
@@ -258,6 +262,7 @@ export default {
   },
   data () {
     return {
+      showPin: false,
       expanded: [],
       singleExpand: false,
       headers: [
@@ -269,13 +274,14 @@ export default {
         },
         { title: 'Description', key: 'description', sortable: false, width: '270px'},
         { title: 'Created At', key: 'createdAt', sortable: true},
-        { title: 'Display In Public Gallery', key: 'showInPublicGallery', sortable: true},
+        { title: 'Protection', key: 'protection', sortable: true, width: '170px'},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
       isShareModelDialogActive: false,
       isShareLinkDialogActive: false,
       isEditTagsDialogActive: false,
       activeShareModelId: '',
+      activeShareModel: null,
       activeCuration: {},
     }
   },
@@ -318,9 +324,10 @@ export default {
     openShareModelDialog() {
       this.$refs.shareModelDialog.$data.dialog = true;
     },
-    openShareLinkDialog(sharedModelId) {
+    openShareLinkDialog(sharedModel) {
       this.isShareLinkDialogActive = true;
-      this.activeShareModelId = sharedModelId;
+      this.activeShareModel = sharedModel;
+      this.activeShareModelId = sharedModel._id;
       this.$refs.shareLinkDialog.$data.dialog = true;
     },
     openEditTagsDialog(sharedModelId, curation) {
