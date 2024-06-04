@@ -134,7 +134,8 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'isSystemGenerated',
   'isThumbnailGenerated',
   'protection',
-  'pin'
+  'pin',
+  'versionFollowing',
 ], {
   $id: 'SharedModelsData'
 })

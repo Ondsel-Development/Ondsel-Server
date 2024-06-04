@@ -4,7 +4,7 @@
     width="auto"
     persistent
   >
-    <v-card width="600" max-height="850">
+    <v-card width="40em" max-height="60em">
       <template v-slot:title>
         <div class="text-center">Share Model</div>
       </template>
@@ -52,10 +52,21 @@
           ></v-combobox>
           <div v-if="protection === 'Pin'" class="d-flex flex-row align-center">
             <span class="text-body-1">Set PIN</span>
-            <v-otp-input v-model="pin" type="text"></v-otp-input>
+            <v-otp-input
+              v-model="pin"
+              type="text"
+              class="mb-2"
+            ></v-otp-input>
           </div>
+          <v-combobox
+            v-model="versionFollowing"
+            label="Version Change Handling"
+            :items="['Locked', 'Active']"
+            hide-details
+            class="mt-2 mb-6"
+          ></v-combobox>
 
-          <div class="text-subtitle-2">Select permissions user can perform</div>
+          <div class="text-subtitle-2 mt-2">Select permissions user can perform</div>
           <v-checkbox v-model="permissions.canViewModel" :disabled="isGeneratingLink" readonly hide-details>
             <template v-slot:label>
               Can view model
@@ -167,6 +178,7 @@ export default {
     valid: false,
     description: '',
     protection: 'Unlisted',
+    versionFollowing: 'Locked',
     pin: null,
     permissions: {
       canViewModel: true,
@@ -215,6 +227,7 @@ export default {
       this.isGeneratingLink = true;
       this.sharedModel = null;
       const sharedModel = new SharedModel();
+      sharedModel.versionFollowing = this.versionFollowing;
       sharedModel.protection = this.protection;
       sharedModel.pin = this.pin;
       sharedModel.description = this.description;
