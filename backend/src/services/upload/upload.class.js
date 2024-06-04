@@ -80,7 +80,7 @@ class UploadService {
 
     let url = '';
     if (isFileExist) {
-      if (_params.query.fileContent === 'true') {
+      if (_params.query?.fileContent === 'true') {
         return this.getFileContent(bucketName, id);
       }
       if (id.includes('public/')) {
