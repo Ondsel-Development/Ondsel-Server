@@ -180,11 +180,10 @@ export const sharedModels = (app) => {
             'canDownloadDefaultModel',
             'isSystemGenerated',
             'isThumbnailGenerated',
-            'protection',
             'pin',
           )
         ),
-        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
+        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants', 'protection'),
         iff(
           isProvider('external'),
           iff(
@@ -212,15 +211,7 @@ export const sharedModels = (app) => {
       remove: []
     },
     after: {
-      all: [
-        iff(
-          isProvider('external'),
-          iff(
-            async context => !(context.params.user && context.params.user._id.equals(context.result.userId)),
-            discard('pin')
-          ),
-        )
-      ],
+      all: [],
       create: [
         iff(
           context => context.data.cloneModelId,

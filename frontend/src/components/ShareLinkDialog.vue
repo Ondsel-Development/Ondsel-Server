@@ -28,6 +28,27 @@
           </template>
         </v-text-field>
         <v-divider class="mx-4 mb-1"></v-divider>
+        <div v-if="sharedModel.protection === 'Pin'">
+          <v-card-title>Direct link with PIN</v-card-title>
+          <v-text-field
+            v-model="sharedModelUrlWithPin"
+            ref="sharedModelUrlWithPin"
+            readonly
+          >
+            <template v-slot:append>
+              <v-btn icon color="decoration" flat @click="copyUrlToClipboard('sharedModelUrlWithPin')">
+                <v-icon>
+                  mdi-content-copy
+                </v-icon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >{{ toolTipMsg }}</v-tooltip>
+              </v-btn>
+            </template>
+          </v-text-field>
+          <v-divider class="mx-4 mb-1"></v-divider>
+        </div>
         <v-card-title>Share in FreeCAD Forum</v-card-title>
         <v-text-field
           v-model="freecadForumUrl"
@@ -84,10 +105,7 @@ export default {
   name: 'ShareLinkDialog',
   props: {
     isActive: Boolean,
-    sharedModelId: {
-      type: String,
-      default: '',
-    },
+    sharedModel: Object,
   },
   data: () => ({
     dialog: false,
@@ -95,19 +113,25 @@ export default {
   }),
   computed: {
     sharedModelUrl: (vm) => {
-      if (vm.sharedModelId) {
-        return window.location.origin + '/share/' + vm.sharedModelId;
+      if (vm.sharedModel) {
+        return window.location.origin + '/share/' + vm.sharedModel._id;
+      }
+      return ''
+    },
+    sharedModelUrlWithPin: (vm) => {
+      if (vm.sharedModel) {
+        return window.location.origin + '/share/' + vm.sharedModel._id + '?pin=' + vm.sharedModel.pin;
       }
       return ''
     },
     freecadForumUrl: (vm) => {
-      if (vm.sharedModelId) {
-        return `[ondsel]${vm.sharedModelId}[/ondsel]`;
+      if (vm.sharedModel) {
+        return `[ondsel]${vm.sharedModel._id}[/ondsel]`;
       }
       return ''
     },
     iFrameUrl: (vm) => {
-      if (vm.sharedModelId) {
+      if (vm.sharedModel) {
         return `<iframe width="560" height="315" src="${vm.sharedModelUrl}" title="Ondsel"></iframe>`
       }
       return ''

@@ -105,7 +105,14 @@ export const sharedModelsResolver = resolve({
   }),
 })
 
-export const sharedModelsExternalResolver = resolve({})
+export const sharedModelsExternalResolver = resolve({
+  pin: async (_v, data, context) => {
+    if(!(context.params.user && context.params.user._id.equals(data.userId))) {
+      return undefined;
+    }
+    return data.pin;
+  }
+})
 
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
