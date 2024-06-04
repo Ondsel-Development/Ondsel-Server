@@ -2,6 +2,7 @@ import _ from 'lodash';
 import mongodb from 'mongodb';
 import { BadRequest } from '@feathersjs/errors';
 import { buildUserSummary } from '../users/users.distrib.js';
+import {ProtectionTypeMap} from "./shared-models.subdocs.schema.js";
 
 const validateMessagePayload = message => {
   if (!message) {
@@ -16,9 +17,9 @@ export const commitMessage = async context => {
   const messagePayload = context.data.message;
   validateMessagePayload(messagePayload);
 
-  const { messages, messagesParticipants, showInPublicGallery } = await context.service.get(context.id, { query: { $select: ['messages', 'messagesParticipants'] } });
+  const { messages, messagesParticipants, protection } = await context.service.get(context.id, { query: { $select: ['messages', 'messagesParticipants', 'protection'] } });
 
-  if (showInPublicGallery) {
+  if (protection === ProtectionTypeMap.listed) {
     throw new BadRequest('Public gallery models not allowed to post messages');
   }
 

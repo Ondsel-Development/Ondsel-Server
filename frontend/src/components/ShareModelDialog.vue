@@ -4,7 +4,7 @@
     width="auto"
     persistent
   >
-    <v-card width="600" max-height="800">
+    <v-card width="600" max-height="850">
       <template v-slot:title>
         <div class="text-center">Share Model</div>
       </template>
@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-card-item>
+      <v-card-item v-if="error">
         <v-alert
           variant="outlined"
           type="error"
@@ -24,9 +24,18 @@
         >
           <span>Please upgrade your tier.</span>
         </v-alert>
+        <v-alert
+          variant="outlined"
+          type="error"
+          border="top"
+          class="text-left"
+          v-if="error === 'PinValidationError'"
+        >
+          <span>PIN must be 6 characters</span>
+        </v-alert>
       </v-card-item>
       <v-form ref="form" @submit.prevent="generateSharedModelUrl">
-        <v-card-text>
+        <v-card-text class="mt-0">
           <v-text-field
             v-model.trim="description"
             label="Description"
@@ -35,11 +44,17 @@
             :counter="20"
             :rules="descriptionRules"
           ></v-text-field>
-          <v-checkbox v-model="showInPublicGallery" :disabled="isGeneratingLink" hide-details>
-            <template v-slot:label>
-              Display In Public Gallery
-            </template>
-          </v-checkbox>
+          <v-combobox
+            v-model="protection"
+            label="Protection"
+            :items="['Listed', 'Unlisted', 'Pin']"
+            hide-details
+          ></v-combobox>
+          <div v-if="protection === 'Pin'" class="d-flex flex-row align-center">
+            <span class="text-body-1">Set PIN</span>
+            <v-otp-input v-model="pin" type="text"></v-otp-input>
+          </div>
+
           <div class="text-subtitle-2">Select permissions user can perform</div>
           <v-checkbox v-model="permissions.canViewModel" :disabled="isGeneratingLink" readonly hide-details>
             <template v-slot:label>
@@ -151,7 +166,8 @@ export default {
     dialog: false,
     valid: false,
     description: '',
-    showInPublicGallery: false,
+    protection: 'Unlisted',
+    pin: null,
     permissions: {
       canViewModel: true,
       canViewModelAttributes: false,
@@ -171,6 +187,10 @@ export default {
       v => !!v || 'Description is required',
       v => (v && v.length <= 20) || 'Description must be less than 20 characters'
     ],
+    pinRules: [
+      v => !!v || 'PIN is required',
+      v => (v && v.length === 6) || 'PIN must be 6 characters'
+    ],
     error: ''
   }),
   computed: {
@@ -187,11 +207,17 @@ export default {
       if (!valid) {
         return;
       }
+      if (this.protection === 'Pin' && this.pin?.length !== 6) {
+        this.error = 'PinValidationError';
+        return;
+      }
+      this.error = null;
       this.isGeneratingLink = true;
       this.sharedModel = null;
       const sharedModel = new SharedModel();
+      sharedModel.protection = this.protection;
+      sharedModel.pin = this.pin;
       sharedModel.description = this.description;
-      sharedModel.showInPublicGallery = this.showInPublicGallery;
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;

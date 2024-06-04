@@ -1,5 +1,12 @@
 import feathersClient, { makeServicePlugin, BaseModel } from '@/plugins/feathers-client'
 
+export const ProtectionTypeMap = {
+  listed: 'Listed',
+  unlisted: 'Unlisted',
+  pin: 'Pin',
+  direct: 'Direct',
+}
+
 class SharedModel extends BaseModel {
   constructor(data, options) {
     super(data, options)
@@ -11,7 +18,7 @@ class SharedModel extends BaseModel {
     return {
       cloneModelId: '',
       description: '',
-      showInPublicGallery: false,
+      protection: ProtectionTypeMap.unlisted,
       canViewModel: true,
       canViewModelAttributes: false,
       canUpdateModel: false,
@@ -21,6 +28,10 @@ class SharedModel extends BaseModel {
       canExportOBJ: false,
       canDownloadDefaultModel: false,
     }
+  }
+
+  get showInPublicGallery() {
+    return this.protection === ProtectionTypeMap.listed;
   }
 }
 const servicePath = 'shared-models'
