@@ -181,3 +181,35 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
     break;
   }
 }
+
+export async function deleteSharedModelFromFile(app, sharedModel) {
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (sharedModel.versionFollowing) {
+    case VersionFollowTypeMap.active:
+      await fileDb.updateOne(
+        { _id: sharedModel.fileDetail.fileId },
+        {
+          $pull: {
+            followingActiveSharedModels: { _id: sharedModel._id }
+          }
+        },
+      );
+      break;
+    case VersionFollowTypeMap.locked:
+      await fileDb.updateOne(
+        { _id: sharedModel.fileDetail.fileId },
+        {
+          $pull: {
+            "versions.$[ver].lockedSharedModels": { _id: sharedModel._id }
+          }
+        },
+        {
+          arrayFilters: [
+            {"ver._id": sharedModel.fileDetail.versionId},
+          ]
+        }
+      );
+      break;
+  }
+}

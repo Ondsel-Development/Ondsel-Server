@@ -30,7 +30,7 @@ import {buildNewCurationForOrganization} from "../organizations/organizations.cu
 import {
   copySharedModelBeforePatch,
   distributeSharedModelChanges,
-  distributeSharedModelCreation
+  distributeSharedModelCreation, distributeSharedModelDeletion
 } from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
 import { canUserAccessSharedModelGetMethod, validateSharedModelCreatePayload } from './helpers.js';
@@ -229,6 +229,9 @@ export const sharedModels = (app) => {
       patch: [
         distributeSharedModelChanges
       ],
+      remove: [
+        distributeSharedModelDeletion
+      ]
     },
     error: {
       all: []

@@ -1,11 +1,12 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import _ from 'lodash';
-import {addSharedModelToFile, updateSharedModelToFile} from "../file/file.distrib.js";
+import {addSharedModelToFile, deleteSharedModelFromFile, updateSharedModelToFile} from "../file/file.distrib.js";
 import {VersionFollowType} from "./shared-models.subdocs.schema.js";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    description: Type.String(),
     versionFollowing: VersionFollowType,
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
@@ -27,6 +28,7 @@ export function buildSharedModelSummary(sharedModel) {
     if (sharedModel) {
       summary = {
         _id: sharedModel._id,
+        description: sharedModel.description,
         versionFollowing: sharedModel.versionFollowing,
         custFileName: sharedModel.model?.file?.custFileName || '',
         isThumbnailGenerated: sharedModel.isThumbnailGenerated,
@@ -67,6 +69,16 @@ export async function distributeSharedModelChanges(context){
       const limitedSharedModelSummary = buildSharedModelSummary(sharedModel);
       await updateSharedModelToFile(context.app, sharedModel.fileDetail, limitedSharedModelSummary)
     }
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
+
+export async function distributeSharedModelDeletion(context){
+  try {
+    let sharedModel = context.result;
+    await deleteSharedModelFromFile(context.app, sharedModel)
   } catch (error) {
     console.log(error);
   }
