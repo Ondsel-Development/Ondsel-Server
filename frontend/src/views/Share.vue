@@ -185,7 +185,7 @@
   <ShareLinkDialog
     v-if="sharedModel"
     :is-active="isShareLinkDialogActive"
-    :shared-model-id="sharedModel._id"
+    :shared-model="sharedModel"
     ref="shareLinkDialog"
   />
   <share-with-user-dialog
