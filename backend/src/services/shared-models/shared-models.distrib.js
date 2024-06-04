@@ -1,6 +1,6 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import _ from 'lodash';
-import {addSharedModelToFile} from "../file/file.distrib.js";
+import {addSharedModelToFile, updateSharedModelToFile} from "../file/file.distrib.js";
 import {VersionFollowType} from "./shared-models.subdocs.schema.js";
 
 export const sharedModelsSummarySchema = Type.Object(
@@ -14,7 +14,6 @@ export const sharedModelsSummarySchema = Type.Object(
   },
 )
 
-
 export const copySharedModelBeforePatch = async (context) => {
     // store a copy of the Org in `context.beforePatchCopy` to help detect true changes
     const smService = context.app.service('shared-models');
@@ -22,7 +21,6 @@ export const copySharedModelBeforePatch = async (context) => {
     context.beforePatchCopy = await smService.get(smId);
     return context;
 }
-
 
 export function buildSharedModelSummary(sharedModel) {
     let summary = {};
@@ -52,6 +50,23 @@ export async function distributeSharedModelCreation(context){
     }
     const sharedModelSummary = buildSharedModelSummary(sharedModel);
     await addSharedModelToFile(context.app, sharedModel.fileDetail, sharedModelSummary)
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
+
+export async function distributeSharedModelChanges(context){
+  try {
+    let changeDetected = false;
+    let sharedModel = context.result;
+    if (sharedModel.description !== context.beforePatchCopy.description) {
+      changeDetected = true;
+    }
+    if (changeDetected) {
+      const limitedSharedModelSummary = buildSharedModelSummary(sharedModel);
+      await updateSharedModelToFile(context.app, sharedModel.fileDetail, limitedSharedModelSummary)
+    }
   } catch (error) {
     console.log(error);
   }

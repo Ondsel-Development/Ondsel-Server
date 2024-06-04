@@ -117,28 +117,67 @@ export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) 
   const fileService = app.service('file');
   const fileDb = await fileService.options.Model;
   switch (sharedModelSummary.versionFollowing) {
-    case VersionFollowTypeMap.active:
-      await fileDb.updateOne(
-        { _id: fileDetail.fileId },
-        {
-          $push: {followingActiveSharedModels: sharedModelSummary},
-        }
-      );
-      break;
-    case VersionFollowTypeMap.locked:
-      await fileDb.updateOne(
-        { _id: fileDetail.fileId },
-        {
-          $push : {
-            "versions.$[x].lockedSharedModels": sharedModelSummary,
-          },
+  case VersionFollowTypeMap.active:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $push: {followingActiveSharedModels: sharedModelSummary},
+      }
+    );
+    break;
+  case VersionFollowTypeMap.locked:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $push : {
+          "versions.$[ver].lockedSharedModels": sharedModelSummary,
         },
-        {
-          arrayFilters: [
-            {"x._id": fileDetail.versionId}
-          ]
+      },
+      {
+        arrayFilters: [
+          {"ver._id": fileDetail.versionId}
+        ]
+      }
+    );
+    break;
+  }
+}
+
+export async function updateSharedModelToFile(app, fileDetail, limitedSharedModelSummary){
+  // the summary is limited in that only the 'description' field is relevant
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (limitedSharedModelSummary.versionFollowing) {
+  case VersionFollowTypeMap.active:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $set: {
+          "followingActiveSharedModels.$[entry].description": limitedSharedModelSummary.description,
         }
-      );
-      break;
+      },
+      {
+        arrayFilters: [
+          {"entry._id": limitedSharedModelSummary._id},
+        ]
+      }
+    );
+    break;
+  case VersionFollowTypeMap.locked:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $set: {
+          "versions.$[ver].lockedSharedModels.$[entry].description": limitedSharedModelSummary.description,
+        }
+      },
+      {
+        arrayFilters: [
+          {"ver._id": fileDetail.versionId},
+          {"entry._id": limitedSharedModelSummary._id},
+        ]
+      }
+    );
+    break;
   }
 }

@@ -27,7 +27,11 @@ import {getConstraint} from "../users/users.subdocs.schema.js";
 import {afterCreateHandleSharedModelCuration, buildNewCurationForSharedModel} from "./shared-models.curation.js";
 import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
-import {copySharedModelBeforePatch, distributeSharedModelCreation} from "./shared-models.distrib.js";
+import {
+  copySharedModelBeforePatch,
+  distributeSharedModelChanges,
+  distributeSharedModelCreation
+} from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
 import {app} from "../../app.js";
 import {VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
@@ -186,6 +190,9 @@ export const sharedModels = (app) => {
         ),
         distributeSharedModelCreation,
         afterCreateHandleSharedModelCuration,
+      ],
+      patch: [
+        distributeSharedModelChanges
       ],
     },
     error: {
