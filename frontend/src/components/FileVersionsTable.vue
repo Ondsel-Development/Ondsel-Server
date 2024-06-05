@@ -4,18 +4,15 @@
   >
     <thead>
     <tr>
-      <th style="max-width: 3em"></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th style="max-width: 3em"></th>
+      <th>Ref</th>
+      <th>Detail</th>
+      <th>Who/Why</th>
+      <th>Link(s)</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-      <td colspan="7">
+      <td colspan="4">
         <br>
         <span class="align-center text-h5 my-4">versions and their share links</span>
       </td>
@@ -24,8 +21,8 @@
       v-for="item in blendedRows"
       :key="item._id"
     >
-      <td v-if="item.nature==='ver'" colspan="2" >
-        {{ refLabel(item._id) }}
+      <td v-if="item.nature==='ver'">
+        <code>{{ refLabel(item._id) }}</code>
         <v-icon
           v-if="!publicView"
           size="small"
@@ -41,34 +38,49 @@
           mdi-eye
         </v-icon>
       </td>
-      <td v-if="item.nature==='ver'" colspan="2">
+      <td v-if="item.nature==='ver'">
         {{ dateFormat(item.createdAt) }}
+        <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/><span v-if="file.currentVersionId === item._id"><b>Active</b></span>
       </td>
-      <td v-if="item.nature==='ver'" colspan="2">
+      <td v-if="item.nature==='ver'">
         {{ getUserLabel(item.userId, file.relatedUserDetails) }}: {{item.message}}
       </td>
       <td v-if="item.nature==='ver'">
-        <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/><span v-if="file.currentVersionId === item._id">Active</span>
+        <v-icon size="small">
+          mdi-plus
+        </v-icon>
       </td>
       <td v-if="item.nature==='link'">
       </td>
-      <td v-if="item.nature==='link'" colspan="2">
+      <td v-if="item.nature==='link'">
         <span>/share/{{item._id}}</span>
         <span class="ml-4">"{{item.description}}"</span>
       </td>
-      <td v-if="item.nature==='link'" colspan="2">
+      <td v-if="item.nature==='link'">
+      </td>
+      <td v-if="item.nature==='link'">
         <v-icon
           size="small"
         >
-          mdi-pencil
+          mdi-dots-vertical
         </v-icon>
+        {{item.protection}}
+        <span v-if="item.isActive">(enabled)</span>
+        <span v-if="!item.isActive">(disabled)</span>
       </td>
-      <td v-if="item.nature==='link'" colspan="2">
-        PIN (enabled)
-      </td>
-      <td v-if="item.nature==='follow_title'" colspan="7">
+      <td v-if="item.nature==='follow_title'" colspan="3">
         <br>
         <span class="align-center text-h5">share links following the active version</span>
+      </td>
+      <td v-if="item.nature==='follow_title'" colspan="1">
+        <v-icon size="small">
+          mdi-plus
+        </v-icon>
+      </td>
+      <td v-if="item.nature==='none'">
+      </td>
+      <td v-if="item.nature==='none'" colspan="3">
+        <span class="text-body-2"><i>no links</i></span>
       </td>
     </tr>
     </tbody>
@@ -108,14 +120,18 @@ export default {
             for (const sm of item.lockedSharedModels) {
               result.push({nature: 'link', ...sm});
             }
+          } else {
+            result.push({nature: 'none'});
           }
         }
       }
-      if (vm.file?.followingActiveSharedModels) {
-        result.push({nature: 'follow_title'});
+      result.push({nature: 'follow_title'});
+      if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
         for (const sm of vm.file.followingActiveSharedModels) {
           result.push({nature: 'link', ...sm});
         }
+      } else {
+        result.push({nature: 'none'});
       }
       return result;
     },

@@ -1,13 +1,15 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import _ from 'lodash';
 import {addSharedModelToFile, deleteSharedModelFromFile, updateSharedModelToFile} from "../file/file.distrib.js";
-import {VersionFollowType} from "./shared-models.subdocs.schema.js";
+import {ProtectionType, VersionFollowType} from "./shared-models.subdocs.schema.js";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    isActive: Type.Boolean({default: true}),
     description: Type.String(),
     versionFollowing: VersionFollowType,
+    protection: ProtectionType,
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.Any(),
     custFileName: Type.String(),
@@ -28,8 +30,10 @@ export function buildSharedModelSummary(sharedModel) {
     if (sharedModel) {
       summary = {
         _id: sharedModel._id,
+        isActive: sharedModel.isActive,
         description: sharedModel.description,
         versionFollowing: sharedModel.versionFollowing,
+        protection: sharedModel.protection,
         custFileName: sharedModel.model?.file?.custFileName || '',
         isThumbnailGenerated: sharedModel.isThumbnailGenerated,
         thumbnailUrl: sharedModel.thumbnailUrl,
