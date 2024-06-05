@@ -1,42 +1,78 @@
 <template>
-  <v-data-table-virtual
-    :headers="headers"
-    :items="file.versions"
-    class="text-body-2"
-    height="200"
-    :item-value="file.versions"
+  <v-table
     density="compact"
-    fixed-header
   >
-    <template v-slot:item._id="{ item }">
-      {{ refLabel(item._id) }}
-    </template>
-    <template v-slot:item.createdAt="{ item }">
-      {{ dateFormat(item.createdAt) }}
-    </template>
-    <template v-slot:item.userRealName="{ item }">
-      {{ getUserLabel(item.userId, file.relatedUserDetails) }}
-    </template>
-    <template v-slot:item.active="{ item }">
-      <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/>
-    </template>
-    <template v-slot:item.actions="{ item }">
-      <v-icon
-        v-if="!publicView"
-        size="small"
-        @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        v-if="publicView"
-        size="small"
-        @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-      >
-        mdi-eye
-      </v-icon>
-    </template>
-  </v-data-table-virtual>
+    <thead>
+    <tr>
+      <th style="max-width: 3em"></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th style="max-width: 3em"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td colspan="7">
+        <br>
+        <span class="align-center text-h5 my-4">versions and their share links</span>
+      </td>
+    </tr>
+    <tr
+      v-for="item in blendedRows"
+      :key="item._id"
+    >
+      <td v-if="item.nature==='ver'" colspan="2" >
+        {{ refLabel(item._id) }}
+        <v-icon
+          v-if="!publicView"
+          size="small"
+          @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
+        >
+          mdi-pencil
+        </v-icon>
+        <v-icon
+          v-if="publicView"
+          size="small"
+          @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
+        >
+          mdi-eye
+        </v-icon>
+      </td>
+      <td v-if="item.nature==='ver'" colspan="2">
+        {{ dateFormat(item.createdAt) }}
+      </td>
+      <td v-if="item.nature==='ver'" colspan="2">
+        {{ getUserLabel(item.userId, file.relatedUserDetails) }}: {{item.message}}
+      </td>
+      <td v-if="item.nature==='ver'">
+        <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/><span v-if="file.currentVersionId === item._id">Active</span>
+      </td>
+      <td v-if="item.nature==='link'">
+      </td>
+      <td v-if="item.nature==='link'" colspan="2">
+        <span>/share/{{item._id}}</span>
+        <span class="ml-4">"{{item.description}}"</span>
+      </td>
+      <td v-if="item.nature==='link'" colspan="2">
+        <v-icon
+          size="small"
+        >
+          mdi-pencil
+        </v-icon>
+      </td>
+      <td v-if="item.nature==='link'" colspan="2">
+        PIN (enabled)
+      </td>
+      <td v-if="item.nature==='follow_title'" colspan="7">
+        <br>
+        <span class="align-center text-h5">share links following the active version</span>
+      </td>
+    </tr>
+    </tbody>
+  </v-table>
   <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" />
 </template>
 
@@ -63,44 +99,26 @@ export default {
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    headers: () => ([
-      {
-        title: 'Ref',
-        align: 'start',
-        sortable: true,
-        key: '_id',
-      },
-      {
-        title: 'Date',
-        align: 'start',
-        sortable: true,
-        key: 'createdAt',
-      },
-      {
-        title: 'Committer',
-        align: 'start',
-        sortable: true,
-        key: 'userRealName',
-      },
-      {
-        title: 'Message',
-        align: 'start',
-        sortable: true,
-        key: 'message',
-      },
-      {
-        title: 'Active',
-        align: 'start',
-        sortable: true,
-        key: 'active',
-      },
-      {
-        title: 'Actions',
-        align: 'end',
-        key: 'actions',
-        sortable: false
-      },
-    ])
+    blendedRows: (vm) => {
+      let result = [];
+      if (vm.file?.versions) {
+        for (const item of vm.file.versions) {
+          result.push({nature: 'ver', ...item});
+          if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
+            for (const sm of item.lockedSharedModels) {
+              result.push({nature: 'link', ...sm});
+            }
+          }
+        }
+      }
+      if (vm.file?.followingActiveSharedModels) {
+        result.push({nature: 'follow_title'});
+        for (const sm of vm.file.followingActiveSharedModels) {
+          result.push({nature: 'link', ...sm});
+        }
+      }
+      return result;
+    },
   },
   methods: {
     dateFormat(number) {

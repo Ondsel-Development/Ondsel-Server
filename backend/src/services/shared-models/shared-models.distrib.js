@@ -9,7 +9,7 @@ export const sharedModelsSummarySchema = Type.Object(
     description: Type.String(),
     versionFollowing: VersionFollowType,
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
-    thumbnailUrl: Type.String(),
+    thumbnailUrl: Type.Any(),
     custFileName: Type.String(),
     createdAt: Type.Number(),
   },
