@@ -69,6 +69,9 @@ export async function distributeSharedModelChanges(context){
     if (sharedModel.description !== context.beforePatchCopy.description) {
       changeDetected = true;
     }
+    if (sharedModel.isActive !== context.beforePatchCopy.isActive) {
+      changeDetected = true;
+    }
     if (changeDetected) {
       const limitedSharedModelSummary = buildSharedModelSummary(sharedModel);
       await updateSharedModelToFile(context.app, sharedModel.fileDetail, limitedSharedModelSummary)
