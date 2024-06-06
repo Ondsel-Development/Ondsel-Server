@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
-import { tryToAuthenticate } from '../../hooks/handle-public-info-query.js';
+import {authenticateJwtWhenPrivate, tryToAuthenticate} from '../../hooks/handle-public-info-query.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -68,7 +68,7 @@ export const model = (app) => {
         schemaHooks.resolveResult(modelResolver)
       ],
       find: [authenticate('jwt')],
-      get: [tryToAuthenticate()],
+      get: [authenticateJwtWhenPrivate()],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],
@@ -102,10 +102,11 @@ export const model = (app) => {
         )
       ],
       get: [
-        iff(
-          isProvider('external'),
-          canUserAccessModelGetMethod
-        )
+        // iff(
+        //   isProvider('external'),
+        //   canUserAccessModelGetMethod
+        // )
+        // TODO: add a filter instead???
       ],
       create: [
         iff(
@@ -155,6 +156,13 @@ export const model = (app) => {
     },
     after: {
       all: [],
+      get: [
+        // iff(
+        //   isProvider('external'),
+        //   filterGetResults,
+        // )
+        // TODO
+      ],
       create: [
         iff(
           context => context.data.shouldStartObjGeneration,

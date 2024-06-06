@@ -17,6 +17,7 @@ export const modelSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     user: Type.Ref(userSchema),
     uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
+    isOriginalModelForFile: Type.Boolean(),
     fileId: ObjectIdSchema(),
     file: Type.Ref(fileSchema),
     createdAt: Type.Number(),
@@ -126,6 +127,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'sharedModelId',
   'isSharedModelAnonymousType',
   'fileUpdatedAt',
+  'isOriginalModelForFile',
   'fileId',
 ], {
   $id: 'ModelData'

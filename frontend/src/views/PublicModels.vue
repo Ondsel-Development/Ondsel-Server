@@ -55,7 +55,7 @@
 
             <v-card-title style="background: #fafafa;">
               <span class="text-body-1">
-                {{ sharedModel.model.custFileName || sharedModel.model.file.custFileName }}
+                {{ sharedModel.model?.custFileName || sharedModel.model?.file?.custFileName }}
               </span>
             </v-card-title>
 

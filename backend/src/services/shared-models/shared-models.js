@@ -250,7 +250,9 @@ const createClone = async (context) => {
   }
 
   if ( data.cloneModelId ) {
+    console.log("JINN-B1");
     const model = await modelService.get(data.cloneModelId);
+    console.log("JINN-B2");
 
     let isObjGenerated = false;
     let shouldStartObjGeneration = true;
@@ -420,7 +422,9 @@ const createUserInstance = async (context) => {
   );
   if (!result.data.length) {
     const sharedModel = await context.service.get(context.id);
+    console.log("JINN-A1");
     const dummyModel = await modelService.get(sharedModel.dummyModelId);
+    console.log("JINN-A2");
 
     const isFcstdExists = await uploadService.checkFileExists(
       context.app.get('awsClientModelBucket'),

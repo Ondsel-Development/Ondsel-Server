@@ -7,7 +7,7 @@ export const canUserAccessModelGetMethod = async context => {
     return context;
   }
 
-  const { file } = await context.service.get(context.id, { query: {$select: ['fileId', 'file']}});
+  const { file } = await context.service.get(context.id, { query: {$select: ['fileId', 'file', 'workspace']}});
 
   if (context.params.user) {
     try {

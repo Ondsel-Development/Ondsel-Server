@@ -40,6 +40,7 @@ import { addMessagesFieldsToSharedModelsCommand } from './add-messages-fields-to
 import { createOndselOrganizationCommand } from './create-ondsel-organization.command.js';
 import {addNotificationsIdToUsersCommand} from "./add-notificationsId-to-users.command.js";
 import { addProtectionFieldToSharedModelCommand } from "./addProtectionFieldToSharedModel.js";
+import {addFollowSupportToSharedModels} from "./add-follow-support-to-sharedmodels.command.js";
 
 
 async function runMigration() {
@@ -159,6 +160,9 @@ async function runMigration() {
       break;
     case 'addProtectionFieldToSharedModel':
       await addProtectionFieldToSharedModelCommand(app);
+      break;
+    case 'addFollowSupportToSharedModels':
+      await addFollowSupportToSharedModels(app);
       break;
     default:
       console.error('Please specify the migration command.')

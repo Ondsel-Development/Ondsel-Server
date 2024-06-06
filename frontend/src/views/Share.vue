@@ -311,7 +311,10 @@ export default {
           this.sharedModel = await this.sharedModel.patch({ data: { shouldCreateInstance: true }});
         }
         // Need to fetch model separately for reactivity for watcher
-        this.model = await Model.get(this.sharedModel.model._id, {query: {isSharedModel: true}});
+        console.log("JINNNNN-A1");
+        console.log(this.sharedModel);
+        this.model = await Model.get(this.sharedModel.model._id); //, {query: {isSharedModel: true}});
+        console.log("JINNNNN-A2");
       } else {
         this.model = this.sharedModel.model;
       }
