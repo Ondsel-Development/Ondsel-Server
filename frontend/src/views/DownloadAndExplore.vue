@@ -126,7 +126,7 @@
           <v-card class="mt-4" width="30em">
             <v-card-title>Pre-Releases</v-card-title>
             <v-card-text class="overflow-y-auto" >
-              <b>The latest pre-release version of Ondsel ES was built on {{weeklyBuildDate}}</b>
+              <b>The latest pre-release version of Ondsel ES was built on {{weeklyBuildDate.slice(0, 10)}}</b>
               <p>
                 ⚠️ These are intended for testing purposes only. Please don't use them for regular work. ⚠️
               </p>
@@ -149,7 +149,10 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
-                          x86_64 AppImage
+                          <span>
+                            x86_64 AppImage<br>
+                            <span class="text-sm-caption">{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                         <p/>
                         <v-btn
@@ -159,7 +162,10 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
-                          aarch64 AppImage
+                          <span>
+                            aarch64 AppImage<br>
+                            <span class="text-sm-caption">{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -186,7 +192,10 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
-                          Apple Silicon dmg
+                          <span>
+                            Apple Silicon dmg<br>
+                            <span class="text-sm-caption">{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                         <p/>
                         <v-btn
@@ -196,7 +205,10 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
-                          Intel dmg
+                          <span>
+                            Intel dmg<br>
+                            <span class="text-sm-caption">{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -222,7 +234,10 @@
                           min-width="14em"
                           :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
-                          x86_64.7z
+                          <span>
+                            x86_64.7z<br>
+                            <span class="text-sm-caption">{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -318,6 +333,13 @@ export default {
         // wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
         wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
         wd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
+        for (const [k, v] of Object.entries(wd)) {
+          if (v.created_at) {
+            if (v.created_at > buildDate) {
+              buildDate = v.created_at;
+            }
+          }
+        }
       })
       .catch(function (error) {
         console.log(error);
