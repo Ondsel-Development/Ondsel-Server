@@ -126,7 +126,7 @@
           <v-card class="mt-4" width="30em">
             <v-card-title>Pre-Releases</v-card-title>
             <v-card-text class="overflow-y-auto" >
-              <b>The latest pre-release version of Ondsel ES was built on {{weeklyBuildDate.slice(0, 10)}}</b>
+              <b>The latest pre-release version of Ondsel ES was built on {{weeklyBuildDate}}</b>
               <p>
                 ⚠️ These are intended for testing purposes only. Please don't use them for regular work. ⚠️
               </p>
@@ -150,8 +150,11 @@
                           :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
                           <span>
-                            x86_64 AppImage<br>
-                            <span class="text-sm-caption">{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            x86_64 AppImage
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -163,8 +166,11 @@
                           :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
                           <span>
-                            aarch64 AppImage<br>
-                            <span class="text-sm-caption">{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            aarch64 AppImage
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -193,8 +199,11 @@
                           :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
                           <span>
-                            Apple Silicon dmg<br>
-                            <span class="text-sm-caption">{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
+                            Apple Silicon dmg
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -206,8 +215,11 @@
                           :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
                           <span>
-                            Intel dmg<br>
-                            <span class="text-sm-caption">{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
+                            Intel dmg
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -235,8 +247,11 @@
                           :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
                           <span>
-                            x86_64.7z<br>
-                            <span class="text-sm-caption">{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
+                            x86_64.7z
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -347,7 +362,7 @@ export default {
     this.ondselSeDownload = osd;
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
-    this.weeklyBuildDate = buildDate;
+    this.weeklyBuildDate = buildDate.slice(0,10);
   },
   methods: {
     async goPublicModels() {
