@@ -28,7 +28,10 @@ import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {distributeModelSummaries} from "./models.distrib.js";
 import { canUserAccessModelGetMethod, userBelongingModels, canUserAccessModelPatchMethod } from './helpers.js';
-import {ProtectionTypeMap} from "../shared-models/shared-models.subdocs.schema.js";
+import {
+  ProtectionTypeMap,
+  VersionFollowTypeMap as versionFollowTypeMap
+} from "../shared-models/shared-models.subdocs.schema.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -408,6 +411,7 @@ const createSharedModelObject = async (context) => {
     dummyModelId: newModel._id.toString(),
     description: 'System Generated',
     isSystemGenerated: true,
+    versionFollowing: versionFollowTypeMap.locked,
     protection: ProtectionTypeMap.listed,
     canViewModel: true,
     canViewModelAttributes: true,

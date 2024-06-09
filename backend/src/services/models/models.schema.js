@@ -7,10 +7,14 @@ import { userSchema } from '../users/users.schema.js'
 import { fileSchema } from '../file/file.schema.js';
 import { NotFound } from '@feathersjs/errors'
 
-
 export const logErrorIdType = Type.Optional(Type.Union([ObjectIdSchema(), Type.Null()]))
 
 // Main data model schema
+//
+// A "Model" is a snapshot in time for a specific combination of:
+//   1. File Version
+//   2. SharedModel (Link)
+//   3. User Parameters for the File Revision's attributes (if any)
 export const modelSchema = Type.Object(
   {
     _id: ObjectIdSchema(),

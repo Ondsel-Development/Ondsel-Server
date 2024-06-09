@@ -16,6 +16,7 @@ export const fileVersionSchema = Type.Object({
   userId: ObjectIdSchema(),
   message: Type.Optional(Type.String()),
   createdAt: Type.Number(),
+  // referenceModelId: ObjectIdSchema(),
   fileUpdatedAt: Type.Optional(Type.Number()),
   lockedSharedModels: Type.Optional(Type.Array(sharedModelsSummarySchema)),
   additionalData: Type.Object({}),
@@ -28,7 +29,7 @@ export const fileSchema = Type.Object(
     custFileName: Type.String(),
     currentVersionId: ObjectIdSchema(),
     userId: ObjectIdSchema(),
-    modelId: Type.Optional(ObjectIdSchema()),
+    modelId: Type.Optional(ObjectIdSchema()), // reference Model at File creation
     model: modelSummarySchema,
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
     createdAt: Type.Number(),

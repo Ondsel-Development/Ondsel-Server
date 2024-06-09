@@ -59,31 +59,22 @@ export const sharedModelsSchema = Type.Object(
   { $id: 'SharedModels', additionalProperties: false }
 )
 
-// SharedModel explaining `model`, `cloneModelId`, and `dummyModelId`
-//
-// - model is a Ref field, so it is not stored in the database, but is instead a placeholder for the
-//   SharedModel's current 'model in context'.
-//
-// - cloneModelId is the official model for a logged-in user.
-//   It is used when the user (if there is one) does not have a specific parameter variant to pull up instead.
-//   Logged in users always see the same model BUT the S3 image shown is always pointing to the Active file version.
-//
-// - dummyModelId is the official model for an anonymous user.
-//   It is called a "dummy" because the Model it points to is an alias, it in turn, has a `fileId` pointing to an
-//   ALIAS file. These are files marked "isSystemGenerated = true"; and have no directory or workspace. They are
-//   "empty mimics". They exist so that the File's version table can supply the correct `uniqueFileName` to allow an
-//   S3 download.
-//
-//   Anonymous users see the SharedModel forever linked to the initial and first version of the file uploaded. So the
-//   S3 image never updates.
-
 export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValidator)
 export const sharedModelsResolver = resolve({
   model: virtual(async (message, context) => {
     if (message.canViewModel && message.dummyModelId) {
       const modelService = context.app.service('models');
+
+      // if a logged-in user has his/her own attribute/parameter variant, return that specific Model
+      // the first one is used rather than the most-recent; which might be the same thing on a single MongoDB server
       if (context.params.user) {
-        const result = await modelService.find({ query: { sharedModelId: message._id, userId: context.params.user._id, isSharedModelAnonymousType: false }});
+        const result = await modelService.find({
+          query: {
+            sharedModelId: message._id,
+            userId: context.params.user._id,
+            isSharedModelAnonymousType: false
+          }
+        });
         if (result.data.length) {
           if (!(message.canUpdateModel || message.canViewModelAttributes)) {
             return _.omit(result.data[0], 'attributes')
@@ -92,7 +83,7 @@ export const sharedModelsResolver = resolve({
         }
       }
 
-      // When anonymous user access share model to view the model
+      // otherwise, everyone (logged-in or not) uses the default dummyModelId Model
       try {
         const m = await modelService.get(message.dummyModelId);
         if (!(message.canUpdateModel || message.canViewModelAttributes)) {
