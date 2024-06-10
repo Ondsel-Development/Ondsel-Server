@@ -47,7 +47,7 @@
           <v-combobox
             v-model="protection"
             label="Protection"
-            :items="['Listed', 'Unlisted', 'Pin']"
+            :items="['Listed', 'Unlisted', 'Pin', 'Direct']"
             hide-details
           ></v-combobox>
           <div v-if="protection === 'Pin'" class="d-flex flex-row align-center">
