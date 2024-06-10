@@ -1,6 +1,7 @@
 import { ProtectionTypeMap } from './shared-models.subdocs.schema.js';
 import {BadRequest} from "@feathersjs/errors";
 import _ from 'lodash';
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export const validateSharedModelCreatePayload = async context => {
   if (context.data.pin) {
@@ -13,7 +14,7 @@ export const validateSharedModelCreatePayload = async context => {
 
 
 export const canUserAccessSharedModelGetMethod = async context => {
-  const { protection, pin, userId } = await context.service.get(context.id, { query: { $select: ['protection', 'pin', 'userId'] } });
+  const { protection, pin, userId, directSharedTo } = await context.service.get(context.id, { query: { $select: ['protection', 'pin', 'userId', 'directSharedTo'] } });
   if (context.params.user && context.params.user._id.equals(userId)) {
     return context;
   }
@@ -30,12 +31,41 @@ export const canUserAccessSharedModelGetMethod = async context => {
     if (queryPin === pin) {
       return context;
     }
-    throw new BadRequest('incorrect pin');
+    throw new BadRequest('IncorrectPin');
   }
 
   if (protection === ProtectionTypeMap.direct) {
-    throw new BadRequest('not implemented yet');
+    if (directSharedTo.some(user => user._id.equals(context.params.user._id))) {
+      return context;
+    }
+    throw new BadRequest('UserNotHaveAccess');
   }
 
   throw new BadRequest('Not able to recognised protection type on share link');
+}
+
+export const handleDirectSharedToUsers = async context => {
+  if (context.data.directSharedToUserIds) {
+    if (context.id) {
+      const { protection } = await context.service.get(context.id);
+      if (protection !== ProtectionTypeMap.direct) {
+        context.data = _.omit(context.data, 'directSharedToUserIds');
+        return context;
+      }
+    } else {
+      if (context.data.protection !== ProtectionTypeMap.direct) {
+        context.data = _.omit(context.data, 'directSharedToUserIds');
+        return context;
+      }
+    }
+    const directSharedTo = [];
+    const userService = context.app.service('users');
+    for (let userId of context.data.directSharedToUserIds) {
+      const user = await userService.get(userId);
+      directSharedTo.push(buildUserSummary(user));
+    }
+    context.data.directSharedTo = directSharedTo;
+  }
+  context.data = _.omit(context.data, 'directSharedToUserIds');
+  return context;
 }
