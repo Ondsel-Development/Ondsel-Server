@@ -5,7 +5,7 @@
     width="400"
   >
     <v-card max-width="40em" min-width="22em">
-      <v-card-title class="text-center">Give Access to Users</v-card-title>
+      <v-card-title class="text-center">Manage Users Access</v-card-title>
       <v-progress-linear
         :active="isPatchPending"
         indeterminate
