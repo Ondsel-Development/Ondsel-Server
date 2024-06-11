@@ -9,8 +9,9 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
-import { ProtectionType } from './shared-models.subdocs.schema.js';
+import {ProtectionType, VersionFollowTypeMap as versionFollowTypeMap} from './shared-models.subdocs.schema.js';
 import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl} from "./helpers.js";
 
 
 // Main data model schema
@@ -63,10 +64,14 @@ export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValida
 export const sharedModelsResolver = resolve({
   model: virtual(async (message, context) => {
     if (message.canViewModel && message.dummyModelId) {
-      const modelService = context.app.service('models');
+      // if the model is versionFollowing type "Active", then get virtual in-memory false Models and Files
+      if (message.versionFollowing === versionFollowTypeMap.active) {
+        return await buildFakeModelAndFileForActiveVersion(message, context);
+      }
 
       // if a logged-in user has his/her own attribute/parameter variant, return that specific Model
       // the first one is used rather than the most-recent; which might be the same thing on a single MongoDB server
+      const modelService = context.app.service('models');
       if (context.params.user) {
         const result = await modelService.find({
           query: {
@@ -100,6 +105,9 @@ export const sharedModelsResolver = resolve({
   }),
   thumbnailUrl: virtual(async(message, context) => {
     const { app } = context;
+    if (message.versionFollowing === versionFollowTypeMap.active) {
+       return await buildFakeModelUrl(message, context);
+    }
     if (message.isThumbnailGenerated) {
       const r = await app.service('upload').get(`public/${message.dummyModelId.toString()}_thumbnail.PNG`);
       return r.url

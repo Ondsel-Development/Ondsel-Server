@@ -311,8 +311,10 @@ export default {
           this.sharedModel = await this.sharedModel.patch({ data: { shouldCreateInstance: true }});
         }
         // Need to fetch model separately for reactivity for watcher
-        this.model = await Model.get(this.sharedModel.model._id, {query: {isSharedModel: true}});
+        // this.model = await Model.get(this.sharedModel.model._id, {query: {isSharedModel: true}}); // TODO why need isSharedModel?
+        this.model = await Model.get(this.sharedModel.model._id);
       } else {
+        console.log("ziggo")
         this.model = this.sharedModel.model;
       }
       this.name = this.model.file?.custFileName || '';
