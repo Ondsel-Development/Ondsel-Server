@@ -46,9 +46,14 @@
         {{ getUserLabel(item.userId, file.relatedUserDetails) }}: {{item.message}}
       </td>
       <td v-if="item.nature==='ver'">
-        <v-icon size="small">
-          mdi-plus
-        </v-icon>
+        <v-btn
+          v-if="!publicView"
+          size="small"
+          color="decoration"
+          icon="mdi-plus"
+          @click="startSharedModelDialogForVersion(item)"
+        >
+        </v-btn>
       </td>
       <td v-if="item.nature==='link'">
       </td>
@@ -70,12 +75,17 @@
       </td>
       <td v-if="item.nature==='follow_title'" colspan="3">
         <br>
-        <span class="align-center text-h5">share links following the active version</span>
+        <span class="align-center text-h5">shares following the active version</span>
       </td>
       <td v-if="item.nature==='follow_title'" colspan="1">
-        <v-icon size="small">
-          mdi-plus
-        </v-icon>
+        <v-btn
+          v-if="!publicView"
+          size="small"
+          color="decoration"
+          icon="mdi-plus"
+          @click="startSharedModelDialogFollowingActive()"
+        >
+        </v-btn>
       </td>
       <td v-if="item.nature==='none'">
       </td>
@@ -86,15 +96,17 @@
     </tbody>
   </v-table>
   <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" />
+  <share-model-dialog v-if="!publicView" ref="sharedModelDialogRef" :is-active='somethingTrue' :model-id="file.modelId"></share-model-dialog>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
+import ShareModelDialog from "@/components/ShareModelDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: { FileInfoDialog },
+  components: {ShareModelDialog, FileInfoDialog },
   props: {
     file: Object,
     canUserWrite: {
@@ -106,6 +118,7 @@ export default {
   data: () => ({
     isFileInfoDialogActive: false,
     selectedFileVersion: null,
+    somethingTrue: true,
   }),
   async created() {
   },
@@ -116,21 +129,31 @@ export default {
       if (vm.file?.versions) {
         for (const item of vm.file.versions) {
           result.push({nature: 'ver', ...item});
+          let linksFound = false;
           if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
             for (const sm of item.lockedSharedModels) {
-              result.push({nature: 'link', ...sm});
+              if (sm.protection === "Listed" || !vm.publicView) {
+                linksFound = true;
+                result.push({nature: 'link', ...sm});
+              }
             }
-          } else {
+          }
+          if (!linksFound) {
             result.push({nature: 'none'});
           }
         }
       }
       result.push({nature: 'follow_title'});
+      let linksFound = false;
       if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
         for (const sm of vm.file.followingActiveSharedModels) {
-          result.push({nature: 'link', ...sm});
+          if (sm.protection === "Listed" || !vm.publicView) {
+            linksFound = true;
+            result.push({nature: 'link', ...sm});
+          }
         }
-      } else {
+      }
+      if (!linksFound) {
         result.push({nature: 'none'});
       }
       return result;
@@ -151,7 +174,22 @@ export default {
     },
     refLabel(refId) {
       return ".." + refId.substr(-6);
-    }
+    },
+    async startSharedModelDialogFollowingActive() {
+      let data = this.$refs.sharedModelDialogRef.$data;
+      data.dialog = true;
+      data.versionFollowing = 'Active';
+      data.versionFollowingPreset = true;
+      data.versionDescription = "Always Shows Active Version Of File";
+    },
+    async startSharedModelDialogForVersion(version) {
+      const name = this.getUserLabel(version.userId, this.file.relatedUserDetails)
+      let data = this.$refs.sharedModelDialogRef.$data;
+      data.dialog = true;
+      data.versionFollowing = 'Locked';
+      data.versionFollowingPreset = true;
+      data.versionDescription = `ver ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
+    },
   }
 }
 </script>

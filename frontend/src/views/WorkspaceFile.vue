@@ -129,6 +129,7 @@ import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue"
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
 import FileViewPort from "@/components/FileViewPort.vue";
+import ShareModelDialog from "@/components/ShareModelDialog.vue";
 
 const { File } = models.api;
 
@@ -150,6 +151,7 @@ export default {
         { title: 'Value', align: 'start', key: 'value'},
       ],
       properties: [],
+      somethingTrue: true,
     };
   },
   async created() {

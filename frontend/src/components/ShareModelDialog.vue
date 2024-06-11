@@ -8,6 +8,7 @@
       <template v-slot:title>
         <div class="text-center">Share Model</div>
       </template>
+      <v-card-subtitle v-if="versionDescription">{{versionDescription}}</v-card-subtitle>
       <v-progress-linear
         :active="isGeneratingLink"
         indeterminate
@@ -58,13 +59,14 @@
               class="mb-2"
             ></v-otp-input>
           </div>
-          <v-combobox
+          <v-select
             v-model="versionFollowing"
             label="Version Change Handling"
-            :items="['Locked', 'Active']"
+            :items="versionFollowingItems"
             hide-details
+            :disabled="versionFollowingPreset"
             class="mt-2 mb-6"
-          ></v-combobox>
+          ></v-select>
 
           <div class="text-subtitle-2 mt-2">Select permissions user can perform</div>
           <v-checkbox v-model="permissions.canViewModel" :disabled="isGeneratingLink" readonly hide-details>
@@ -77,7 +79,7 @@
               Can view model attributes
             </template>
           </v-checkbox>
-          <v-checkbox v-model="permissions.canUpdateModel" :disabled="isGeneratingLink" hide-details>
+          <v-checkbox v-model="permissions.canUpdateModel" :disabled="isGeneratingLink || permissionLocks.canUpdateModel" hide-details>
             <template v-slot:label>
               <div>Can update model attributes</div>
             </template>
@@ -93,28 +95,28 @@
                 </v-checkbox>
               </v-col>
               <v-col cols="6">
-                <v-checkbox v-model="permissions.canExportFCStd" :disabled="isGeneratingLink" hide-details>
+                <v-checkbox v-model="permissions.canExportFCStd" :disabled="isGeneratingLink || permissionLocks.canExportFCStd" hide-details>
                   <template v-slot:label>
                     <div>Can export FCStd</div>
                   </template>
                 </v-checkbox>
               </v-col>
               <v-col cols="6">
-                <v-checkbox v-model="permissions.canExportSTEP" :disabled="isGeneratingLink" hide-details>
+                <v-checkbox v-model="permissions.canExportSTEP" :disabled="isGeneratingLink || permissionLocks.canExportSTEP" hide-details>
                   <template v-slot:label>
                     <div>Can export STEP</div>
                   </template>
                 </v-checkbox>
               </v-col>
               <v-col cols="6">
-                <v-checkbox v-model="permissions.canExportSTL" :disabled="isGeneratingLink" hide-details>
+                <v-checkbox v-model="permissions.canExportSTL" :disabled="isGeneratingLink || permissionLocks.canExportSTL" hide-details>
                   <template v-slot:label>
                     <div>Can export STL</div>
                   </template>
                 </v-checkbox>
               </v-col>
               <v-col cols="6">
-                <v-checkbox v-model="permissions.canExportOBJ" :disabled="isGeneratingLink" hide-details>
+                <v-checkbox v-model="permissions.canExportOBJ" :disabled="isGeneratingLink || permissionLocks.canExportOBJ" hide-details>
                   <template v-slot:label>
                     <div>Can export OBJ
                     </div>
@@ -179,6 +181,8 @@ export default {
     description: '',
     protection: 'Unlisted',
     versionFollowing: 'Locked',
+    versionFollowingPreset: false,
+    versionDescription: null,
     pin: null,
     permissions: {
       canViewModel: true,
@@ -189,6 +193,13 @@ export default {
       canExportSTL: false,
       canExportOBJ: false,
       canDownloadDefaultModel: false,
+    },
+    permissionLocks: {
+      canUpdateModel: false,
+      canExportFCStd: false,
+      canExportSTEP: false,
+      canExportSTL: false,
+      canExportOBJ: false,
     },
     tmpSharedModel: null,
     tmpModel: null,
@@ -203,7 +214,11 @@ export default {
       v => !!v || 'PIN is required',
       v => (v && v.length === 6) || 'PIN must be 6 characters'
     ],
-    error: ''
+    error: '',
+    versionFollowingItems: [
+      {title: "Share this specific version of the file.", value: "Locked"},
+      {title: "Always show the file version that is active.", value: "Active"},
+    ],
   }),
   computed: {
     sharedModelUrl: (vm) => {
@@ -242,7 +257,7 @@ export default {
       sharedModel.cloneModelId = this.modelId;
       try {
         this.tmpSharedModel = await sharedModel.create();
-        this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
+        this.tmpModel = await Model.get(this.tmpSharedModel.model._id); // TODO why?: , { query: { isSharedModel: true }});
       } catch (e) {
         this.error = 'UpgradeTier';
         this.isGeneratingLink = false;
@@ -276,6 +291,28 @@ export default {
         this.tmpSharedModel = null;
         this.tmpModel = null;
         this.isGeneratingLink = false;
+      }
+    },
+    'versionFollowing'(v) {
+      if (v) {
+        if (v === 'Locked') {
+          this.permissionLocks.canExportFCStd = false;
+          this.permissionLocks.canExportSTEP = false;
+          this.permissionLocks.canExportSTL = false;
+          this.permissionLocks.canExportOBJ = false;
+          this.permissionLocks.canUpdateModel = false;
+        } else {
+          this.permissionLocks.canExportFCStd = true;
+          this.permissionLocks.canExportSTEP = true;
+          this.permissionLocks.canExportSTL = true;
+          this.permissionLocks.canExportOBJ = true;
+          this.permissionLocks.canUpdateModel = true;
+          this.permissions.canExportFCStd = false;
+          this.permissions.canExportSTEP = false;
+          this.permissions.canExportSTL = false;
+          this.permissions.canExportOBJ = false;
+          this.permissions.canUpdateModel = false;
+        }
       }
     }
   }

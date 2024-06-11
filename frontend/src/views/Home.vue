@@ -181,7 +181,7 @@
     <v-navigation-drawer
       v-model="isDrawerOpen"
       location="right"
-      width="1100"
+      width="48em"
       temporary
     >
       <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>

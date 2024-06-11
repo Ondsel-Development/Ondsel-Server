@@ -1,5 +1,4 @@
 <template>
-
   <v-data-table-virtual
     v-model:expanded="expanded"
     :headers="headers"
@@ -8,6 +7,7 @@
     show-expand
     single-expand="true"
     height="100%"
+    density="compact"
   >
     <template v-slot:top>
       <v-toolbar flat>
@@ -38,7 +38,7 @@
           <v-text-field :ref="'textField_' + item._id" variant="plain" readonly :value="sharedModelUrl(item._id)" type="hidden"></v-text-field>
         </v-responsive>
         <v-chip color="dark-grey" class="ml-2">
-          {{ (item._id) }}
+          {{ ".." + item._id.substr(-6) }}
           <v-btn
             end
             color="decoration"
@@ -67,20 +67,33 @@
     </template>
 
     <template v-slot:item.description="{ item }">
-      <v-form :ref="'description_' + item._id">
-      <v-text-field
-        density="compact"
-        counter="20"
-        v-model="item.description"
-        variant="plain"
-        append-inner-icon="mdi-check"
-        :disabled="item.isSystemGenerated"
-        :rules="[
-          v => !!v || 'Description is required',
-          v => (v && v.length <= 20) || 'Description must be less than 20 characters'
-        ]"
-        @click:append-inner="updateDescription(item._id, item.description)"></v-text-field>
+      <v-form :ref="'description_' + item._id" class="mt-4">
+        <v-sheet class="d-flex">
+          <v-text-field
+            density="compact"
+            counter="20"
+            variant="outlined"
+            v-model="item.description"
+            :disabled="item.isSystemGenerated"
+            :rules="[
+              v => !!v || 'Description is required',
+              v => (v && v.length <= 20) || 'Description must be less than 20 characters'
+            ]"
+            @click="item.descriptionFieldClicked=true"
+            @click:append-inner="updateDescription(item._id, item.description)"></v-text-field>
+          <v-btn
+            v-if="item.descriptionFieldClicked"
+            color="primary"
+            icon="mdi-check"
+            @click.stop="item.descriptionFieldClicked=false"
+          ></v-btn>
+        </v-sheet>
       </v-form>
+    </template>
+
+    <template v-slot:item.versionFollowing="{ item }">
+      <span v-if="item.versionFollowing === 'Locked'">Locked to {{ (item.fileDetail?.versionId || '??').substr(-6) }}</span>
+      <span v-if="item.versionFollowing === 'Active'">Show Active Version</span>
     </template>
 
     <template v-slot:item.createdAt="{ item }">
@@ -272,9 +285,10 @@ export default {
           sortable: false,
           key: 'link',
         },
-        { title: 'Description', key: 'description', sortable: false, width: '270px'},
+        { title: 'Description', key: 'description', sortable: false, width: '20em'},
+        { title: 'Version', key: 'versionFollowing', sortable: true},
         { title: 'Created At', key: 'createdAt', sortable: true},
-        { title: 'Protection', key: 'protection', sortable: true, width: '170px'},
+        { title: 'Protection', key: 'protection', sortable: true, width: '10em'},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
       isShareModelDialogActive: false,
