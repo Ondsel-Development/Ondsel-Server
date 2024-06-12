@@ -38,6 +38,13 @@ const eventNameMapping = {
 const eventsToTrack = {
   socketio: {
     authentication: ['create', 'remove'],
+    workspaces: ['create', 'get', 'find', 'remove'],
+    organizations: ['create', 'get', 'find', 'remove'],
+    'shared-models': ['create', 'get', 'find', 'remove'],
+    models: ['create', 'get', 'find', 'remove'],
+    preferences: ['create', 'get', 'find', 'remove'],
+    file: ['create', 'get', 'find', 'remove'],
+    directories: ['create', 'get', 'find', 'remove'],
   },
   rest: {
     authentication: ['create', 'remove'],
