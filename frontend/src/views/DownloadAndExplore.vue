@@ -149,7 +149,13 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
                         >
-                          x86_64 AppImage
+                          <span>
+                            x86_64 AppImage
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                         <p/>
                         <v-btn
@@ -159,7 +165,13 @@
                           min-width="14em"
                           :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
                         >
-                          aarch64 AppImage
+                          <span>
+                            aarch64 AppImage
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -186,7 +198,13 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
                         >
-                          Apple Silicon dmg
+                          <span>
+                            Apple Silicon dmg
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                         <p/>
                         <v-btn
@@ -196,7 +214,13 @@
                           min-width="14em"
                           :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
                         >
-                          Intel dmg
+                          <span>
+                            Intel dmg
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -222,7 +246,13 @@
                           min-width="14em"
                           :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
                         >
-                          x86_64.7z
+                          <span>
+                            x86_64.7z
+                            <span
+                              class="text-sm-caption"
+                              v-if="weeklyBuildDate !== weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)"
+                            ><br>{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
+                          </span>
                         </v-btn>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -318,6 +348,13 @@ export default {
         // wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
         wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
         wd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
+        for (const [k, v] of Object.entries(wd)) {
+          if (v.created_at) {
+            if (v.created_at > buildDate) {
+              buildDate = v.created_at;
+            }
+          }
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -325,7 +362,7 @@ export default {
     this.ondselSeDownload = osd;
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
-    this.weeklyBuildDate = buildDate;
+    this.weeklyBuildDate = buildDate.slice(0,10);
   },
   methods: {
     async goPublicModels() {
