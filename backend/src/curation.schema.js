@@ -13,6 +13,7 @@ import {modelPath} from "./services/models/models.shared.js";
 import {BadRequest} from "@feathersjs/errors";
 import err from "mocha/lib/pending.js";
 import {getProperty} from "./helpers.js";
+import { ProtectionTypeMap } from './services/shared-models/shared-models.subdocs.schema.js';
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -508,7 +509,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           isOpenEnoughForKeywords = true; // the purposeful curation of an org/user, even 'Private' ones, are public details of that org
           break;
         case navTargetMap.sharedModels:
-          isOpenEnoughForKeywords = context.beforePatchCopy.showInPublicGallery;
+          isOpenEnoughForKeywords = context.beforePatchCopy.protection === ProtectionTypeMap.listed;
           break;
         case navTargetMap.ondsel:
           isOpenEnoughForKeywords = false; // the curation itself is public; but it is way too meta for keyword search

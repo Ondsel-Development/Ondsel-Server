@@ -244,7 +244,7 @@ export default {
         [
           'mdi-earth',
           'Public View of Me',
-          this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',
+          this.user && this.currentOrganization && this.currentOrganization?.type === 'Personal',
           { name: 'UserHome', params: { slug: this.user?.username }}
         ],
         [

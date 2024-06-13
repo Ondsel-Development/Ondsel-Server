@@ -59,7 +59,7 @@
   </v-card>
   <p></p>
   <v-card class="ma-2 mx-auto">
-    <v-card-tile>RESULTS:</v-card-tile>
+    <v-card-title>RESULTS:</v-card-title>
     <v-card-text>
       <pre>{{ results }}</pre>
     </v-card-text>
@@ -90,6 +90,13 @@ export default {
     if (!this.user || !this.user.isTripe) {
       console.log("alert-33235-ru");
       this.$router.push({name: 'LensHome', params: {}});
+    }
+    if (this.$route.query.i) {
+      this.userId = this.$route.query.i;
+    }
+    if (this.$route.query.e) {
+      let e = this.$route.query.e || "";
+      this.email = decodeURIComponent(e.replace(/\s+/g, '').replace(/[0-9a-f]{2}/g, '%$&'));
     }
   },
   computed: {

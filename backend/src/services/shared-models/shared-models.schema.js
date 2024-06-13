@@ -9,6 +9,7 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
+import { ProtectionType } from './shared-models.subdocs.schema.js';
 
 // Main data model schema
 export const sharedModelsSchema = Type.Object(
@@ -31,12 +32,14 @@ export const sharedModelsSchema = Type.Object(
     canDownloadDefaultModel: Type.Boolean({default: false}),
     isActive: Type.Boolean({default: true}),
     isSystemGenerated: Type.Optional(Type.Boolean({default: false})),
-    showInPublicGallery: Type.Optional(Type.Boolean({default: false})),
+    showInPublicGallery: Type.Optional(Type.Boolean({default: false})),  // deprecated
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
     curation: Type.Optional(curationSchema),
     messages: Type.Array(messageSchema),
     messagesParticipants: Type.Array(userSummarySchema),
+    protection: ProtectionType,
+    pin: Type.Optional(Type.String({ minLength: 6, maxLength: 6 })),
 
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -102,7 +105,14 @@ export const sharedModelsResolver = resolve({
   }),
 })
 
-export const sharedModelsExternalResolver = resolve({})
+export const sharedModelsExternalResolver = resolve({
+  pin: async (_v, data, context) => {
+    if(!(context.params.user && context.params.user._id.equals(data.userId))) {
+      return undefined;
+    }
+    return data.pin;
+  }
+})
 
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
@@ -118,8 +128,9 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'canDownloadDefaultModel',
   'dummyModelId',
   'isSystemGenerated',
-  'showInPublicGallery',
   'isThumbnailGenerated',
+  'protection',
+  'pin'
 ], {
   $id: 'SharedModelsData'
 })
@@ -193,12 +204,6 @@ export const sharedModelsDataResolver = resolve({
     }
     return sharedModelsSchema.properties.isSystemGenerated.default
   },
-  showInPublicGallery: async (_value, _message, context) => {
-    if (_value) {
-      return _value;
-    }
-    return sharedModelsSchema.properties.showInPublicGallery.default
-  },
   isThumbnailGenerated: async (_value, _message, context) => {
     if (_value) {
       return _value;
@@ -238,6 +243,8 @@ export const sharedModelsQueryProperties = Type.Pick(
     'showInPublicGallery',
     'messages',
     'messagesParticipants',
+    'protection',
+    'pin'
   ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(

@@ -116,7 +116,7 @@ export default {
       return userSum.name;
     },
     refLabel(refId) {
-      return refId.substr(-6);
+      return ".." + refId.substr(-6);
     }
   }
 }

@@ -37,6 +37,20 @@ class UploadService {
     return await getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
+  async getFileContent(bucketName, fileName) {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+    });
+    const { Body } = await this.s3Client.send(command)
+    const chunks = [];
+    for await (const chunk of Body) {
+      chunks.push(chunk);
+    }
+    const fileContent = Buffer.concat(chunks).toString('utf-8');
+    return fileContent
+  }
+
   async checkFileExists(bucketName, fileName) {
     try {
       const params = {
@@ -63,8 +77,12 @@ class UploadService {
   async get(id, _params) {
     const bucketName = this.options.app.get('awsClientModelBucket');
     const isFileExist = await this.checkFileExists(bucketName, id);
+
     let url = '';
     if (isFileExist) {
+      if (_params.query?.fileContent === 'true') {
+        return this.getFileContent(bucketName, id);
+      }
       if (id.includes('public/')) {
         url = this.getPublicUrl(id, bucketName);
       } else {

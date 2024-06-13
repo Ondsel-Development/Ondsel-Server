@@ -64,7 +64,7 @@ export default {
   },
   methods: {
     async deleteDirectory() {
-      this.$emit('deleteDirectory', this.directoryName);
+      this.$emit('deleteDirectory');
     }
   }
 }

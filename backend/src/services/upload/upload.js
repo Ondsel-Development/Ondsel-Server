@@ -54,6 +54,28 @@ export const upload = (app) => {
           update: false,
           remove: false,
           patch: false,
+          get: {
+            "parameters": [
+              {
+                "description": "ID of Upload to return",
+                "in": "path",
+                "name": "id",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+              },
+              {
+                "description": "Pass \"true\" to get file content string",
+                "in": "query",
+                "name": "fileContent",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false,
+              },
+            ],
+          },
           create: {
             description: 'Upload file',
             requestBody: {
