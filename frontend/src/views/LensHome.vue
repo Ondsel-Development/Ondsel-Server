@@ -1,23 +1,47 @@
 <template>
   <v-container class="ma-2">
-    <v-container>
-      <h2>LENS</h2>
-    </v-container>
-    <v-card class="ma-4">
-      <v-card-title>{{ title }}</v-card-title>
-      <v-card-text>
-        <markdown-viewer :markdown-html="markdownHtml"></markdown-viewer>
-      </v-card-text>
-    </v-card>
-    <v-card class="ma-4">
-      <v-card-text>
-        <promotions-viewer :promoted="promotedFiltered"></promotions-viewer>
-      </v-card-text>
-    </v-card>
-    <v-card v-if="promotedUsers && promotedUsers.length" flat>
-      <v-card-title>Users</v-card-title>
-      <promoted-users-table :promoted-users="promotedUsers" />
-    </v-card>
+    <v-sheet class="d-flex flex-row">
+      <v-sheet
+        name="left_side"
+      >
+        <v-container>
+          <h2>
+            <v-img
+              src="https://ondsel.com/img/logo.png"
+              width="10em"
+            ></v-img>
+            LENS
+          </h2>
+        </v-container>
+        <v-card class="ma-4">
+          <v-card-title>{{ title }}</v-card-title>
+          <v-card-text>
+            <markdown-viewer :markdown-html="markdownHtml"></markdown-viewer>
+          </v-card-text>
+        </v-card>
+        <v-card class="ma-4">
+          <v-card-text>
+            <promotions-viewer :promoted="promotedFiltered"></promotions-viewer>
+          </v-card-text>
+        </v-card>
+        <v-card v-if="promotedUsers && promotedUsers.length" flat>
+          <v-card-title>Users to Watch</v-card-title>
+          <promoted-users-table :promoted-users="promotedUsers" />
+        </v-card>
+      </v-sheet>
+
+      <v-sheet
+        name="right_side"
+        width="32em"
+      >
+        <v-card
+        >
+          <v-card-text>
+            <vue-rss-feed feed-url="https://ondsel.com/blog/rss" name="Latest Ondsel Blog" limit="7"></vue-rss-feed>
+          </v-card-text>
+        </v-card>
+      </v-sheet>
+    </v-sheet>
   </v-container>
 </template>
 
@@ -28,30 +52,33 @@ import {marked} from "marked";
 import PromotionsViewer from "@/components/PromotionsViewer.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import PromotedUsersTable from "@/components/PromotedUsersTable.vue";
+import VueRssFeed from "@/components/VueRssFeed.vue";
+
+const { Organization } = models.api;
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'LensHome',
-  components: {PromotedUsersTable, MarkdownViewer, PromotionsViewer},
+  components: {PromotedUsersTable, MarkdownViewer, PromotionsViewer, VueRssFeed},
   data: () => ({
     lensSiteCuration: null,
     markdownHtml: 'missing data',
     title: 'missing title',
   }),
   async created() {
-    const response = await models.api.Agreements.find({
-      query: {category: 'lens-site-curation'}
+    const response = await Organization.find({
+      query: {type: 'Ondsel'}
     });
     if (response.data.length > 0) {
-      this.lensSiteCuration = response.data[0];
-      this.markdownHtml =  marked.parse(this.lensSiteCuration.current.markdownContent);
-      this.title = this.lensSiteCuration.current.curation.description || '';
+      this.lensSiteCuration = response.data[0].curation;
+      this.markdownHtml =  marked.parse(this.lensSiteCuration.longDescriptionMd || 'no markdown');
+      this.title = this.lensSiteCuration.description || 'no title';
     }
   },
   computed: {
-    promoted: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted || [],
-    promotedFiltered: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted.filter(p => p.curation.collection !== 'users') || [],
-    promotedUsers: vm => vm.lensSiteCuration && vm.lensSiteCuration.current.curation.promoted.filter(p => p.curation.collection === 'users'),
+    promoted: vm => vm.lensSiteCuration && vm.lensSiteCuration.promoted || [],
+    promotedFiltered: vm => vm.lensSiteCuration && vm.lensSiteCuration.promoted.filter(p => p.curation.collection !== 'users') || [],
+    promotedUsers: vm => vm.lensSiteCuration && vm.lensSiteCuration.promoted.filter(p => p.curation.collection === 'users'),
   },
   methods: {
   }
