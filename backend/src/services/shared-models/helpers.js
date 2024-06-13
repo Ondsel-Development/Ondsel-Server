@@ -3,6 +3,9 @@ import {BadRequest} from "@feathersjs/errors";
 import _ from 'lodash';
 
 export const validateSharedModelCreatePayload = async context => {
+  if (!context.data.protection) {
+    context.data.protection = ProtectionTypeMap.unlisted;
+  }
   if (context.data.pin) {
     context.data.protection = ProtectionTypeMap.pin;
   } else {
