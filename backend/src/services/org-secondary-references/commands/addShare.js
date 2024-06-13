@@ -6,6 +6,7 @@ import {CollectionNameMappingWithSummaryBuildMethods, validatePayloadBookmarkObj
 import {buildNavUrl, cleanedCuration} from "../../../curation.schema.js";
 import {buildOrganizationSummary} from "../../organizations/organizations.distrib.js";
 import {BadRequest} from "@feathersjs/errors";
+import {strEqual} from "../../../helpers.js";
 
 export const addShare = async context => {
   // adds a share entry to the user passed in with 'toUserId'
@@ -30,9 +31,12 @@ export const addShare = async context => {
   const doc = await context.app.service(CollectionNameMap[bookmark.collectionName]).get(bookmark.collectionId);
   const docSummary = CollectionNameMappingWithSummaryBuildMethods[CollectionNameMap[bookmark.collectionName]](doc);
   const currentOrganizationId = context.params.user.currentOrganizationId;
-  let userOrgSummary = context.params.user.organizations.find((org) => _.isEqual(org._id, currentOrganizationId));
-  if (userOrgSummary) {
-    userOrgSummary = buildOrganizationSummary(userOrgSummary);
+  let userOrgSummary = {}
+  const passedUserOrgSummary = context.params.user.organizations.find((org) => strEqual(org._id, currentOrganizationId));
+  if (passedUserOrgSummary) {
+    userOrgSummary = buildOrganizationSummary(passedUserOrgSummary);
+  } else {
+    throw new BadRequest(`unable to locate onBehalfOf org ${currentOrganizationId}`);
   }
   let curation;
   if (bookmark.collectionName === CollectionNameMap.users) {

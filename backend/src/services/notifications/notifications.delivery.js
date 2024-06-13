@@ -8,6 +8,7 @@ import {
 } from "./notifications.subdocs.js";
 import {Type} from "@feathersjs/typebox";
 import {navTargetMap} from "../../curation.schema.js";
+import {strEqual} from "../../helpers.js";
 
 export function translateCollection(collection) {
   let tr = '';
@@ -63,7 +64,7 @@ export async function performExternalNotificationDelivery(targetUserId, ntf, con
   const userService = context.app.service('users');
   const user = await userService.get(targetUserId);
   const orgId = user.personalOrganization._id;
-  const settings = user.organizations.find((userOrg) => _.isEqual(userOrg._id, orgId));
+  const settings = user.organizations.find((userOrg) => strEqual(userOrg._id, orgId));
   // we only do email right now
   const emailCadence = settings.notificationByEmailCadence || NotificationCadenceTypeMap.live;
   if (emailCadence) {
