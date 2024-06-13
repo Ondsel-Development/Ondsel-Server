@@ -70,9 +70,16 @@
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
               </v-sheet>
-              <file-view-port :file="file"></file-view-port>
+              <file-view-port :file="file" :version-id="viewPortVersionId"></file-view-port>
               <v-sheet name="tables">
-                <file-versions-table :file="file" :can-user-write="canUserWrite" :public-view="publicView" />
+                <file-versions-table
+                  :file="file"
+                  :can-user-write="canUserWrite"
+                  :public-view="publicView"
+                  :visible-version-id="viewPortVersionId"
+                  @change-visible-version="changeViewPort"
+                >
+                </file-versions-table>
               </v-sheet>
               <v-sheet name="return buttons">
                 <v-btn
@@ -152,6 +159,7 @@ export default {
       ],
       properties: [],
       somethingTrue: true,
+      viewPortVersionId: null, // default to null on first load; which defaults to Active
     };
   },
   async created() {
@@ -176,6 +184,7 @@ export default {
     if (!this.file?._id) { // a failure can return an empty object. So go further.
       this.file = await this.getFileByIdPublic(fileId);
     }
+    this.viewPortVersionId = this.file.currentVersion._id.toString();
     this.workspace = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
     if (this.workspace) {
       if (this.workspace.organization._id !== this.currentOrganization._id) {
@@ -205,7 +214,7 @@ export default {
         value: this.file.versions.length || 0,
       },
       {
-        name: 'Active Revision',
+        name: 'Active Version',
         value: this.refLabel(this.file.currentVersionId.toString()),
       },
     ]
@@ -246,6 +255,9 @@ export default {
         this.$router.push({ name: 'OrgWorkspaceDir', params: { slug: slug, wsname: wsName, dirid: dirId } });
       }
     },
+    async changeViewPort(versionId) {
+      this.viewPortVersionId = versionId;
+    }
   },
 };
 </script>

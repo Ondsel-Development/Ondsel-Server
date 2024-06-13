@@ -22,6 +22,23 @@
       :key="item._id"
     >
       <td v-if="item.nature==='ver'">
+        <span
+          v-if="item._id.toString() === visibleVersionId"
+          class="mx-1"
+        >
+          <v-icon
+            size="small"
+            class="ma-2"
+          >
+            mdi-eye-outline
+          </v-icon>
+        </span>
+        <v-btn
+          v-if="item._id.toString() !== visibleVersionId"
+          size="small"
+          icon="mdi-eye-off-outline"
+          @click="doChangeVisibleVersion(item._id.toString())"
+        ></v-btn>
         <code>{{ refLabel(item._id) }}</code>
         <v-icon
           v-if="!publicView"
@@ -35,7 +52,7 @@
           size="small"
           @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
         >
-          mdi-eye
+          mdi-help
         </v-icon>
       </td>
       <td v-if="item.nature==='ver'">
@@ -107,6 +124,7 @@ import ShareModelDialog from "@/components/ShareModelDialog.vue";
 export default {
   name: "FileVersionsTable",
   components: {ShareModelDialog, FileInfoDialog },
+  emits: ['changeVisibleVersion'],
   props: {
     file: Object,
     canUserWrite: {
@@ -114,6 +132,7 @@ export default {
       default: false,
     },
     publicView: Boolean,
+    visibleVersionId: String,
   },
   data: () => ({
     isFileInfoDialogActive: false,
@@ -190,6 +209,9 @@ export default {
       data.versionFollowingPreset = true;
       data.versionDescription = `ver ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
     },
+    async doChangeVisibleVersion(versionId) {
+      this.$emit('changeVisibleVersion', versionId);
+    }
   }
 }
 </script>

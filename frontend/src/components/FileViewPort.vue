@@ -1,11 +1,34 @@
 <template>
   <v-sheet name="view-port">
-    <v-img
+    <v-sheet
       v-if="viewChosen === viewEnum.thumbnail"
       height="30em"
-      :src="file.model.thumbnailUrlCache"
-      cover
-    ></v-img>
+      width="100%"
+      class="d-flex justify-space-between"
+    >
+      <v-sheet></v-sheet>
+      <v-img
+        v-if="properUrl"
+        :src="properUrl"
+        cover
+      ></v-img>
+      <v-sheet
+        v-else
+        class="ma-16"
+      >
+        Image Not Generated Yet
+      </v-sheet>
+      <v-sheet
+        width="6em"
+      >
+        <v-icon
+          size="small"
+        >
+          mdi-eye-outline
+        </v-icon>
+        ..{{(versionId || "").substr(-6)}}
+      </v-sheet>
+    </v-sheet>
     <v-sheet
       v-if="viewChosen === viewEnum.default"
       color="#F4F4F4"
@@ -33,6 +56,9 @@
 import {mapActions, mapState} from "vuex";
 import {marked} from "marked";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import {models} from "@feathersjs/vuex";
+
+const { Upload } = models.api;
 
 export default {
   name: 'FileViewPort',
@@ -40,6 +66,10 @@ export default {
   props: {
     file: {
       type: Object,
+      default: null,
+    },
+    versionId: {
+      type: String,
       default: null,
     }
   },
@@ -50,6 +80,7 @@ export default {
       markdown: 3,
     },
     htmlContent: 'tbd',
+    properUrl: null,
   }),
   computed: {
     ...mapState('auth', ['accessToken']),
@@ -57,6 +88,7 @@ export default {
   },
   async created() {
     await this.getMarkdownHtml();
+    await this.getProperUrl();
   },
   methods: {
     ...mapActions('app', [
@@ -90,11 +122,24 @@ export default {
       }
       this.htmlContent = marked(content);
     },
+    async getProperUrl() {
+      let url = this.file?.model?.thumbnailUrlCache; // the default fallback
+      if (this.file?.versions) {
+        const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId);
+        if (viewedVersion) {
+          url = viewedVersion.thumbnailUrlCache;
+        } else {
+          console.log("FAIL cannot locate visible version in File");
+        }
+      }
+      this.properUrl = url;
+    }
   },
   watch: {
     async 'viewChosen'(to, from) {
       if (to === this.viewEnum.markdown) {
         await this.getMarkdownHtml();
+        await this.getProperUrl();
       }
     }
   },

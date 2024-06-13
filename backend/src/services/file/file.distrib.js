@@ -83,12 +83,32 @@ export async function distributeFileDeletion(context){
 //
 
 export async function applyModelSummaryToFile(app, fileId, modelSummary) {
-  await app.service('file').patch(
-    fileId,
+  // TODO: add the url in version ref next
+  const fileService = app.service('file');
+  const fDb = await fileService.options.Model;
+
+  await fDb.updateOne(
+    { _id: fileId },
     {
-      model: modelSummary,
+      $set: {
+        model: modelSummary,
+        "versions.$[ver].thumbnailUrlCache": modelSummary.thumbnailUrlCache,
+      },
+    },
+    {
+      arrayFilters: [
+        {"ver._id": "$currentVersionId"}
+      ]
     }
-  );
+  )
+  console.log("did it");
+
+  // await app.service('file').patch(
+  //   fileId,
+  //   {
+  //     model: modelSummary,
+  //   }
+  // );
 }
 
 export async function updateWorkspaceSummaryToMatchingFiles(context, wsSummary) {
