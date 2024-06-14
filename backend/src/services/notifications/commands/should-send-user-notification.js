@@ -5,6 +5,7 @@ import {buildOrganizationSummary} from "../../organizations/organizations.distri
 import {notificationMessageMap, specificDeliveryMethodMap} from "../notifications.subdocs.js";
 import {BadRequest} from "@feathersjs/errors";
 import {generateGenericBodySummaryTxt, performExternalNotificationDelivery} from "../notifications.delivery.js";
+import {strEqual} from "../../../helpers.js";
 
 // example of messageDetail:
 // {
@@ -33,7 +34,7 @@ export const shouldSendUserNotification = async (context) => {
   ntf.to = new ObjectId(ntf.to);
   ntf.createdBy = buildUserSummary(context.params.user);
   const currentOrgId = context.params.user.currentOrganizationId;
-  const currentUserOrg = context.params.user.organizations.find((org) => _.isEqual(org._id, currentOrgId));
+  const currentUserOrg = context.params.user.organizations.find((org) => strEqual(org._id, currentOrgId));
   ntf.from = buildOrganizationSummary(currentUserOrg);
   ntf.when = Date.now();
   ntf.bodySummaryTxt = await generateGenericBodySummaryTxt(ntf);

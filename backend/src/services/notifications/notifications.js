@@ -20,7 +20,7 @@ import swagger from "feathers-swagger";
 import {BadRequest} from "@feathersjs/errors";
 import _ from "lodash";
 import {shouldSendUserNotification} from "./commands/should-send-user-notification.js";
-import {copyBeforePatch} from "../../helpers.js";
+import {copyBeforePatch, strEqual} from "../../helpers.js";
 import {shouldMarkReadOrUnread} from "./commands/should-mark-read-or-unread.js";
 import {isAdminUser} from "../../hooks/is-user.js";
 import {shouldDelete} from "./commands/should-delete.js";
@@ -109,7 +109,7 @@ const isProperUser = async (context) => {
   if (provider === undefined) {
     return context;
   }
-  if (!_.isEqual(context.beforePatchCopy.userId, context.params.user._id)) {
+  if (!strEqual(context.beforePatchCopy.userId, context.params.user._id)) {
     throw new BadRequest(`User ${context.params.user._id} does not have permission to patch ${context.id}`);
   }
 }
@@ -119,7 +119,7 @@ const wasProperUser = async (context) => {
   if (provider === undefined) {
     return context;
   }
-  if (!_.isEqual(context.result.userId, context.params.user._id)) {
+  if (!strEqual(context.result.userId, context.params.user._id)) {
     throw new BadRequest(`User ${context.params.user._id} does not have permission to patch ${context.id}`);
   }
 }
