@@ -2,6 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="promotedUsers"
+    density="compact"
     hover
     item-selectable
   >
@@ -15,12 +16,13 @@
             {{ item.curation.name }}
           </div>
         </td>
-        <td>{{ item.curation.description }}</td>
-        <td>{{ item.notation.message }}</td>
-        <td><v-btn icon="mdi-arrow-right" flat @click.stop="goToUserProfile(item)"></v-btn></td>
+        <td>
+          {{ item.curation.description }}<br>
+          <span style="color: blue">{{ item.notation.message }}</span>
+        </td>
       </tr>
     </template>
-
+    <template #bottom></template>
   </v-data-table>
 </template>
 
@@ -40,17 +42,7 @@ export default {
         sortable: true,
       },
       {
-        title: 'Description',
-        align: 'start',
-        sortable: false,
-      },
-      {
-        title: 'Message',
-        align: 'start',
-        sortable: false,
-      },
-      {
-        title: 'Action',
+        title: 'Detail',
         align: 'start',
         sortable: false,
       },
@@ -58,9 +50,6 @@ export default {
   }),
   methods: {
     getInitials,
-    goToUserProfile(item) {
-      this.$router.push({ name: 'UserHome', params: { slug: item.curation.nav.username } });
-    }
   }
 }
 </script>

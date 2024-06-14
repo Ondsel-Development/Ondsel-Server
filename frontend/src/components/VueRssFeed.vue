@@ -16,7 +16,7 @@ export default {
   props: {
     feedUrl: String,
     name: String,
-    limit: Number
+    limit: String,
   }
 };
 </script>

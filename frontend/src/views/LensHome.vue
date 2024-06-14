@@ -1,6 +1,6 @@
 <template>
   <v-container class="ma-2">
-    <v-sheet class="d-flex flex-row">
+    <v-sheet class="d-flex flex-wrap flex-row">
       <v-sheet
         name="left_side"
       >
@@ -26,20 +26,16 @@
         </v-card>
         <v-card v-if="promotedUsers && promotedUsers.length" flat>
           <v-card-title>Users to Watch</v-card-title>
-          <promoted-users-table :promoted-users="promotedUsers" />
+          <promoted-users-table :promoted-users="promotedUsers"></promoted-users-table>
         </v-card>
       </v-sheet>
 
       <v-sheet
         name="right_side"
-        width="32em"
+        width="24em"
+        border
       >
-        <v-card
-        >
-          <v-card-text>
-            <vue-rss-feed feed-url="https://ondsel.com/blog/rss" name="Latest Ondsel Blog" limit="7"></vue-rss-feed>
-          </v-card-text>
-        </v-card>
+        <vue-rss-feed feed-url="https://ondsel.com/blog/rss" name="Latest Ondsel Blog" limit="7"></vue-rss-feed>
       </v-sheet>
     </v-sheet>
   </v-container>

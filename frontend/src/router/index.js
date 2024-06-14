@@ -35,7 +35,6 @@ import SearchResults from "@/views/SearchResults.vue";
 import DownloadAndExplore from "@/views/DownloadAndExplore.vue";
 import GettingStarted from "@/views/GettingStarted.vue";
 import XavierMenu from "@/views/XavierMenu.vue";
-import XavierModifyLensHomePageCuration from "@/views/XavierModifyLensHomePageCuration.vue";
 import XavierUpdateKeyDocuments from "@/views/XavierUpdateKeyDocuments.vue";
 import Bookmarks from "@/views/Bookmarks.vue";
 import XavierSearchResults from "@/views/XavierSearchResults.vue";
@@ -220,12 +219,6 @@ const routes = [
     path: '/xavier-68373833',
     component: XavierMenu,
     name: 'XavierMenu',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/xavier-95684395856',
-    component: XavierModifyLensHomePageCuration,
-    name: 'XavierModifyLensHomePageCuration',
     meta: { requiresAuth: true },
   },
   {

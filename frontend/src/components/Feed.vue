@@ -30,7 +30,7 @@ export default {
   props: {
     feedUrl: String,
     name: String,
-    limit: Number,
+    limit: String,
     loadMore: Boolean
   },
   data() {
@@ -39,6 +39,9 @@ export default {
       error: "",
       feed: {}
     };
+  },
+  computed: {
+    limitNumber: vm => isNaN(parseInt(vm.limit)) ? 5 : parseInt(vm.limit),
   },
   created() {
     this.fetchData();
@@ -86,7 +89,7 @@ export default {
     },
     getArticles() {
       if (this.feed.items && this.feed.items) {
-        return this.feed.items.slice(0, this.limit);
+        return this.feed.items.slice(0, this.limitNumber);
       }
     }
   }
