@@ -52,3 +52,7 @@ export function getProperty( propertyName, object ) {
 
   return property;
 }
+
+export function strEqual(itemA, ItemB) {
+  return itemA.toString() === ItemB.toString();
+}
