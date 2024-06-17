@@ -12,6 +12,8 @@ import express, {
 import configuration from '@feathersjs/configuration'
 import socketio from '@feathersjs/socketio'
 import swagger from 'feathers-swagger';
+import { iff, isProvider } from 'feathers-hooks-common';
+import {createUserEngagementEntry, saveContextQueryState} from './services/hooks/userEngagements.js';
 
 import { configurationValidator } from './configuration.js'
 import { logger } from './logger.js'
@@ -81,8 +83,16 @@ app.hooks({
   around: {
     all: [logError]
   },
-  before: {},
-  after: {},
+  before: {
+    all: [saveContextQueryState],
+  },
+  after: {
+    all: [
+      iff(isProvider('external'), createUserEngagementEntry),
+    ],
+    create: [
+    ],
+  },
   error: {}
 })
 // Register application setup and teardown hooks here
