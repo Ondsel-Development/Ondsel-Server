@@ -16,7 +16,15 @@
         v-else
         class="ma-16"
       >
-        Image Not Generated Yet
+        <p class="text-center">
+          Image Not Generated Yet
+        </p>
+        <p v-if="file.currentVersion._id.toString() === versionId" class="text-center">
+          Click on "Explore" to create image
+        </p>
+        <p v-if="file.currentVersion._id.toString() !== versionId" class="text-center">
+          You can only create new Images on the active version.
+        </p>
       </v-sheet>
       <v-sheet
         width="6em"
@@ -81,12 +89,13 @@ export default {
     },
     htmlContent: 'tbd',
     properUrl: null,
+    viewChosen: 1,
   }),
   computed: {
     ...mapState('auth', ['accessToken']),
-    viewChosen: vm => vm.chooseViewer(vm.file),
   },
   async created() {
+    await this.chooseViewer(this.file);
     await this.getMarkdownHtml();
     await this.getProperUrl();
   },
@@ -94,18 +103,21 @@ export default {
     ...mapActions('app', [
       'retrieveFileByUniqueName',
     ]),
-    chooseViewer(file) {
+    async chooseViewer(file) {
       if (!file) {
-        return this.viewEnum.default;
+        this.viewChosen = this.viewEnum.default;
+        return;
       }
-      if (file.model && file.model.thumbnailUrlCache) {
-        return this.viewEnum.thumbnail;
+      if (file.model) {
+        this.viewChosen = this.viewEnum.thumbnail;
+        return;
       }
       let fileName = file.custFileName || '';
       if (fileName.endsWith(".md")) {
-        return this.viewEnum.markdown;
+        this.viewChosen = this.viewEnum.markdown;
+        return;
       }
-      return this.viewEnum.default;
+      this.viewChosen = this.viewEnum.default;
     },
     async getMarkdownHtml() {
       let content = "unable to retrieve";
@@ -123,29 +135,28 @@ export default {
       this.htmlContent = marked(content);
     },
     async getProperUrl() {
-      let url = this.file?.model?.thumbnailUrlCache; // the default fallback
-      if (this.file?.versions) {
-        const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
-        if (viewedVersion) {
-          url = viewedVersion.thumbnailUrlCache || undefined;
-          console.log(url);
-        } else {
-          console.log("FAIL cannot locate visible version in File");
+      let url = null;
+      if (this.viewChosen === this.viewEnum.thumbnail) {
+        if (this.file?.versions) {
+          const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
+          if (viewedVersion) {
+            url = viewedVersion.thumbnailUrlCache || undefined;
+          } else {
+            console.log("FAIL cannot locate visible version in File");
+          }
         }
       }
       this.properUrl = url;
     }
   },
   watch: {
-    async 'viewChosen'(to, from) {
-      await this.getMarkdownHtml();
-      await this.getProperUrl();
-    },
     async 'file'(to, from) {
+      await this.chooseViewer(this.file)
       await this.getMarkdownHtml();
       await this.getProperUrl();
     },
     async 'versionId'(to, from) {
+      await this.chooseViewer(this.file)
       await this.getMarkdownHtml();
       await this.getProperUrl();
     }

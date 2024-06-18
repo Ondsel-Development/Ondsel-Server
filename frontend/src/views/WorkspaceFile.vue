@@ -78,6 +78,7 @@
                   :public-view="publicView"
                   :visible-version-id="viewPortVersionId"
                   @change-visible-version="changeViewPort"
+                  @changed-file="reloadFileAndWorkspace"
                 >
                 </file-versions-table>
               </v-sheet>
@@ -100,7 +101,12 @@
               </v-sheet>
             </v-sheet>
             <represent-workspace-dialog v-if="!publicView" ref="representWorkspace" :file="file" :workspace="workspace" />
-            <upload-new-version-file-dialog v-if="!publicView" ref="uploadNewVersionFile" :file="file" />
+            <upload-new-version-file-dialog
+              v-if="!publicView"
+              ref="uploadNewVersionFile"
+              :file="file"
+              @changed-file="reloadFileAndWorkspace"
+            ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
           </v-card-text>
         </v-card>
@@ -136,7 +142,6 @@ import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue"
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
 import FileViewPort from "@/components/FileViewPort.vue";
-import ShareModelDialog from "@/components/ShareModelDialog.vue";
 
 const { File } = models.api;
 
@@ -160,42 +165,28 @@ export default {
       properties: [],
       somethingTrue: true,
       viewPortVersionId: null, // default to null on first load; which defaults to Active
+      wsName: '',
+      orgRefName: '',
+      slug: '',
     };
   },
   async created() {
-    const slug = this.$route.params.slug;
-    const wsName = this.$route.params.wsname;
+    this.slug = this.$route.params.slug;
+    this.wsName = this.$route.params.wsname;
     const fileId = this.$route.params.fileid;
-    let orgRefName = '';
+    this.orgRefName = '';
     if (this.userRouteFlag) {
-      const userDetail = await this.getUserByIdOrNamePublic(slug);
+      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
-        console.log(`No such user for ${slug}`);
+        console.log(`No such user for ${this.slug}`);
         this.$router.push({ name: 'PageNotFound' });
         return;
       }
-      orgRefName = userDetail._id.toString();
+      this.orgRefName = userDetail._id.toString();
     } else {
-      orgRefName = slug;
+      this.orgRefName = this.slug;
     }
-    try {
-      this.file = await File.get(fileId);
-    } catch {}
-    if (!this.file?._id) { // a failure can return an empty object. So go further.
-      this.file = await this.getFileByIdPublic(fileId);
-    }
-    this.viewPortVersionId = this.file.currentVersion._id.toString();
-    this.workspace = await this.getWorkspaceByNamePrivate({wsName: wsName, orgName: orgRefName} );
-    if (this.workspace) {
-      if (this.workspace.organization._id !== this.currentOrganization._id) {
-        // if the user has private access to the ws generically, but isn't actually representing that org, then
-        // set the publicView flag anyway
-        this.publicView = true;
-      }
-    } else {
-      this.publicView = true;
-      this.workspace = await this.getWorkspaceByNamePublic({wsName: wsName, orgName: slug} );
-    }
+    await this.reloadFileAndWorkspace();
     this.properties = [
       {
         name: 'Id',
@@ -236,6 +227,29 @@ export default {
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
+    async reloadFileAndWorkspace() {
+      const fileId = this.$route.params.fileid;
+      try {
+        this.file = await File.get(fileId);
+      } catch {
+        // do nothing
+      }
+      if (!this.file?._id) { // a failure can return an empty object. So go further.
+        this.file = await this.getFileByIdPublic(fileId);
+      }
+      this.workspace = await this.getWorkspaceByNamePrivate({wsName: this.wsName, orgName: this.orgRefName} );
+      if (this.workspace) {
+        if (this.workspace.organization._id !== this.currentOrganization._id) {
+          // if the user has private access to the ws generically, but isn't actually representing that org, then
+          // set the publicView flag anyway
+          this.publicView = true;
+        }
+      } else {
+        this.publicView = true;
+        this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
+      }
+      this.viewPortVersionId = this.file.currentVersion._id.toString();
+    },
     async gotoWorkspace() {
       const slug = this.$route.params.slug;
       const wsName = this.$route.params.wsname;
@@ -257,7 +271,7 @@ export default {
     },
     async changeViewPort(versionId) {
       this.viewPortVersionId = versionId;
-    }
+    },
   },
 };
 </script>

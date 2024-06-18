@@ -103,7 +103,7 @@ export async function applyThumbnailToFile(app, modelId, fileId) {
   try {
     const currentFile = await fDb.findOne({ _id: fileId });
     if (currentFile) {
-      const currentVersionId = currentFile.versions.at(-1)._id;
+      const currentVersionId = currentFile.currentVersionId;
       // first attempt to duplicate the file
       const uploadService = app.service('upload');
       const fromUrl = `public/${modelId.toString()}_thumbnail.PNG`;

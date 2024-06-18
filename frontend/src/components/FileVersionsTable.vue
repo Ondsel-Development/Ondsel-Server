@@ -23,37 +23,45 @@
     >
       <td v-if="item.nature==='ver'">
         <span
-          v-if="item._id.toString() === visibleVersionId"
+          v-if="item._id.toString() === visibleVersionId || !isFileModel(file)"
           class="mx-1"
         >
           <v-icon
+            v-if="item._id.toString() === visibleVersionId"
             size="small"
             class="ma-2"
           >
             mdi-eye-outline
           </v-icon>
+          <v-icon
+            v-else
+            size="small"
+            class="ma-2"
+          >
+            mdi-space
+          </v-icon>
         </span>
         <v-btn
-          v-if="item._id.toString() !== visibleVersionId"
+          v-if="isFileModel(file) && item._id.toString() !== visibleVersionId"
           size="small"
           icon="mdi-eye-off-outline"
           @click="doChangeVisibleVersion(item._id.toString())"
         ></v-btn>
-        <code>{{ refLabel(item._id) }}</code>
-        <v-icon
+        <code class="mr-2">{{ refLabel(item._id) }}</code>
+        <v-btn
           v-if="!publicView"
           size="small"
+          color="decoration"
+          icon="mdi-pencil"
           @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-        >
-          mdi-pencil
-        </v-icon>
-        <v-icon
+        ></v-btn>
+        <v-btn
           v-if="publicView"
           size="small"
+          color="decoration"
+          icon="mdi-help"
           @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-        >
-          mdi-help
-        </v-icon>
+        ></v-btn>
       </td>
       <td v-if="item.nature==='ver'">
         {{ dateFormat(item.createdAt) }}
@@ -64,7 +72,7 @@
       </td>
       <td v-if="item.nature==='ver'">
         <v-btn
-          v-if="!publicView"
+          v-if="!publicView && isFileModel(file)"
           size="small"
           color="decoration"
           icon="mdi-plus"
@@ -112,7 +120,7 @@
     </tr>
     </tbody>
   </v-table>
-  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" />
+  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile" />
   <share-model-dialog v-if="!publicView" ref="sharedModelDialogRef" :is-active='somethingTrue' :model-id="file.modelId"></share-model-dialog>
 </template>
 
@@ -124,7 +132,7 @@ import ShareModelDialog from "@/components/ShareModelDialog.vue";
 export default {
   name: "FileVersionsTable",
   components: {ShareModelDialog, FileInfoDialog },
-  emits: ['changeVisibleVersion'],
+  emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
     canUserWrite: {
@@ -148,32 +156,36 @@ export default {
       if (vm.file?.versions) {
         for (const item of vm.file.versions) {
           result.push({nature: 'ver', ...item});
-          let linksFound = false;
-          if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
-            for (const sm of item.lockedSharedModels) {
-              if (sm.protection === "Listed" || !vm.publicView) {
-                linksFound = true;
-                result.push({nature: 'link', ...sm});
+          if (vm.isFileModel(vm.file)) {
+            let linksFound = false;
+            if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
+              for (const sm of item.lockedSharedModels) {
+                if (sm.protection === "Listed" || !vm.publicView) {
+                  linksFound = true;
+                  result.push({nature: 'link', ...sm});
+                }
               }
             }
-          }
-          if (!linksFound) {
-            result.push({nature: 'none'});
-          }
-        }
-      }
-      result.push({nature: 'follow_title'});
-      let linksFound = false;
-      if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
-        for (const sm of vm.file.followingActiveSharedModels) {
-          if (sm.protection === "Listed" || !vm.publicView) {
-            linksFound = true;
-            result.push({nature: 'link', ...sm});
+            if (!linksFound) {
+              result.push({nature: 'none'});
+            }
           }
         }
       }
-      if (!linksFound) {
-        result.push({nature: 'none'});
+      if (vm.isFileModel(vm.file)) {
+        result.push({nature: 'follow_title'});
+        let linksFound = false;
+        if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
+          for (const sm of vm.file.followingActiveSharedModels) {
+            if (sm.protection === "Listed" || !vm.publicView) {
+              linksFound = true;
+              result.push({nature: 'link', ...sm});
+            }
+          }
+        }
+        if (!linksFound) {
+          result.push({nature: 'none'});
+        }
       }
       return result;
     },
@@ -190,6 +202,12 @@ export default {
         return "ref:" + userId.substr(-6);
       }
       return userSum.name;
+    },
+    isFileModel(file) {
+      if (file.modelId) {
+        return true;
+      }
+      return false;
     },
     refLabel(refId) {
       return ".." + refId.substr(-6);
@@ -211,8 +229,11 @@ export default {
     },
     async doChangeVisibleVersion(versionId) {
       this.$emit('changeVisibleVersion', versionId);
-    }
-  }
+    },
+    async changedFile() {
+      this.$emit('changedFile');
+    },
+  },
 }
 </script>
 
