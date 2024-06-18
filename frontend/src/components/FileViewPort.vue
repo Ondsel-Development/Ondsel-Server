@@ -127,13 +127,13 @@ export default {
       if (this.file?.versions) {
         const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
         if (viewedVersion) {
-          url = viewedVersion.thumbnailUrlCache;
+          url = viewedVersion.thumbnailUrlCache || undefined;
+          console.log(url);
         } else {
           console.log("FAIL cannot locate visible version in File");
         }
       }
       this.properUrl = url;
-      console.log(this.properUrl);
     }
   },
   watch: {
@@ -142,6 +142,10 @@ export default {
       await this.getProperUrl();
     },
     async 'file'(to, from) {
+      await this.getMarkdownHtml();
+      await this.getProperUrl();
+    },
+    async 'versionId'(to, from) {
       await this.getMarkdownHtml();
       await this.getProperUrl();
     }

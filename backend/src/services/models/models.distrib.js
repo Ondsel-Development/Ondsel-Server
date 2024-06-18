@@ -86,13 +86,21 @@ export const distributeModelThumbnails = async (context) => {
   if (context.result.isSharedModel) { // this is only for the main model
     return context;
   }
-  if (context.result.isObjGenerated === context.beforePatchCopy.isObjGenerated) { // only after file generation
+  if (context.result.deleted) {
     return context;
   }
-  if (context.result.isObjGenerated === false) { // only when file generation finished
-    return context;
+  console.log("HERE: ", JSON.stringify(context.result, null, 2));
+  // if (context.result.isObjGenerated === context.beforePatchCopy.isObjGenerated) {
+  //   // only after thumbnail generation on new versions
+  //   return context;
+  // }
+  if (context.result.isThumbnailGenerated === true) {
+    console.log("doit");
+    await applyThumbnailToFile(context.app, context.id, context.result.fileId);
   }
-  await applyThumbnailToFile(context.app, context.id, context.result.fileId);
+  // if (context.result.isObjGenerated === false) { // only when file generation finished
+  //   return context;
+  // }
   return context;
 }
 

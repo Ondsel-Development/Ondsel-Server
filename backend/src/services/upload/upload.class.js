@@ -139,6 +139,27 @@ class UploadService {
 
     return await this.s3Client.send(copyCommand);
   }
+
+  async upsert(sourceKey, destinationKey, _params) {
+    const bucketName = this.options.app.get('awsClientModelBucket');
+    const isSourceFileExist = await this.checkFileExists(bucketName, sourceKey);
+    if (!isSourceFileExist) {
+      throw new BadRequest(`File (${sourceKey}) does not exist!`);
+    }
+
+    // const isDestinationFileExist = await this.checkFileExists(bucketName, destinationKey);
+    // if (isDestinationFileExist) {
+    // }
+
+    // Create a copy operation using the CopyObjectCommand
+    const copyCommand = new CopyObjectCommand({
+      CopySource: `/${bucketName}/${sourceKey}`,
+      Bucket: bucketName,
+      Key: destinationKey,
+    });
+
+    return await this.s3Client.send(copyCommand);
+  }
 }
 
 const getOptions = (app) => {

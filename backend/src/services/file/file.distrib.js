@@ -108,7 +108,7 @@ export async function applyThumbnailToFile(app, modelId, fileId) {
       const uploadService = app.service('upload');
       const fromUrl = `public/${modelId.toString()}_thumbnail.PNG`;
       const toUrl = `public/${modelId.toString()}_${currentVersionId.toString()}_versionthumbnail.PNG`;
-      await uploadService.copy(fromUrl, toUrl);
+      await uploadService.upsert(fromUrl, toUrl);
       const finalUrlObj = await uploadService.get(toUrl);
       const finalUrl = finalUrlObj?.url;
       // now save in the File document
@@ -126,7 +126,7 @@ export async function applyThumbnailToFile(app, modelId, fileId) {
             ]
           }
         )
-        if (result.modifiedCount !== 1) {
+        if (result.matchedCount !== 1) {
           console.log(`ERROR: failed to modify File ${fileId.toString()} version ${currentVersionId.toString()} with thumbnail`);
         }
       } else {

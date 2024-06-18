@@ -468,8 +468,6 @@ const feedSystemGeneratedSharedModel = async (context) => {
     if (context.data.isThumbnailGenerated && !systemGeneratedSharedModel.model.isThumbnailGenerated) {
       uploadService.copy(`public/${context.id.toString()}_thumbnail.PNG`, `public/${systemGeneratedSharedModel.model._id.toString()}_thumbnail.PNG`);
       patchData['isThumbnailGenerated'] = true;
-      // console.log("zeego");
-      // context.result.isThumbnailGenerated = true;
     }
     if (Object.keys(patchData).length) {
       context.app.service('shared-models').patch(
