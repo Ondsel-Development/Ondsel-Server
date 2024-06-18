@@ -9,11 +9,12 @@ import { BadRequest } from '@feathersjs/errors'
 const customerFileNameRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.([a-z]+)$/i;
 const generatedObjRegex = /^[0-9a-fA-F]{24}_generated\.(:?OBJ|BREP|FCSTD)$/;
 const generatedThumbnailRegex = /^[0-9a-fA-F]{24}_thumbnail\.PNG$/;
+const copiedVersionThumbnailRegex = /^[0-9a-fA-F]{24}_[0-9a-fA-F]{24}_versionthumbnail\.PNG$/;
 const exportedFileRegex = /^[0-9a-fA-F]{24}_export\.(?:fcstd|obj|step|stl)$/i;
 
 const isValidFileName = fileName => {
   return [
-    customerFileNameRegex, generatedObjRegex, generatedThumbnailRegex, exportedFileRegex
+    customerFileNameRegex, generatedObjRegex, generatedThumbnailRegex, copiedVersionThumbnailRegex, exportedFileRegex
   ].some(regex => regex.test(fileName))
 }
 
@@ -121,12 +122,12 @@ class UploadService {
     const bucketName = this.options.app.get('awsClientModelBucket');
     const isDestinationFileExist = await this.checkFileExists(bucketName, destinationKey);
     if (isDestinationFileExist) {
-      throw new BadRequest(`File (${destinationKey})  already exists!`);
+      throw new BadRequest(`File (${destinationKey}) already exists!`);
     }
 
     const isSourceFileExist = await this.checkFileExists(bucketName, sourceKey);
     if (!isSourceFileExist) {
-      throw new BadRequest(`File (${sourceKey})  already exists!`);
+      throw new BadRequest(`File (${sourceKey}) does not exist!`);
     }
 
     // Create a copy operation using the CopyObjectCommand

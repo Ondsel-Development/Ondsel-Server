@@ -125,7 +125,7 @@ export default {
     async getProperUrl() {
       let url = this.file?.model?.thumbnailUrlCache; // the default fallback
       if (this.file?.versions) {
-        const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId);
+        const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
         if (viewedVersion) {
           url = viewedVersion.thumbnailUrlCache;
         } else {
@@ -133,14 +133,17 @@ export default {
         }
       }
       this.properUrl = url;
+      console.log(this.properUrl);
     }
   },
   watch: {
     async 'viewChosen'(to, from) {
-      if (to === this.viewEnum.markdown) {
-        await this.getMarkdownHtml();
-        await this.getProperUrl();
-      }
+      await this.getMarkdownHtml();
+      await this.getProperUrl();
+    },
+    async 'file'(to, from) {
+      await this.getMarkdownHtml();
+      await this.getProperUrl();
     }
   },
 

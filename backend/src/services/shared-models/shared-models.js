@@ -36,6 +36,7 @@ import { commitMessage } from './message.hooks.js';
 import { canUserAccessSharedModelGetMethod, validateSharedModelCreatePayload } from './helpers.js';
 import {app} from "../../app.js";
 import {VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {applyThumbnailToFile} from "../file/file.distrib.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'

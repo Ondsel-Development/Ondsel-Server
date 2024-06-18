@@ -83,7 +83,6 @@ export async function distributeFileDeletion(context){
 //
 
 export async function applyModelSummaryToFile(app, fileId, modelSummary) {
-  // TODO: add the url in version ref next
   const fileService = app.service('file');
   const fDb = await fileService.options.Model;
 
@@ -92,23 +91,56 @@ export async function applyModelSummaryToFile(app, fileId, modelSummary) {
     {
       $set: {
         model: modelSummary,
-        "versions.$[ver].thumbnailUrlCache": modelSummary.thumbnailUrlCache,
       },
     },
-    {
-      arrayFilters: [
-        {"ver._id": "$currentVersionId"}
-      ]
-    }
   )
-  console.log("did it");
+}
 
-  // await app.service('file').patch(
-  //   fileId,
-  //   {
-  //     model: modelSummary,
-  //   }
-  // );
+export async function applyThumbnailToFile(app, modelId, fileId) {
+  const fileService = app.service('file');
+  const fDb = await fileService.options.Model;
+
+  try {
+    const currentFile = await fDb.findOne({ _id: fileId });
+    if (currentFile) {
+      const currentVersionId = currentFile.versions.at(-1)._id;
+      // first attempt to duplicate the file
+      const uploadService = app.service('upload');
+      const fromUrl = `public/${modelId.toString()}_thumbnail.PNG`;
+      const toUrl = `public/${modelId.toString()}_${currentVersionId.toString()}_versionthumbnail.PNG`;
+      await uploadService.copy(fromUrl, toUrl);
+      const finalUrlObj = await uploadService.get(toUrl);
+      const finalUrl = finalUrlObj?.url;
+      // now save in the File document
+      if (finalUrl) {
+        const result = await fDb.updateOne(
+          { _id: fileId },
+          {
+            $set: {
+              "versions.$[ver].thumbnailUrlCache": finalUrl,
+            },
+          },
+          {
+            arrayFilters: [
+              {"ver._id": currentVersionId}
+            ]
+          }
+        )
+        if (result.modifiedCount !== 1) {
+          console.log(`ERROR: failed to modify File ${fileId.toString()} version ${currentVersionId.toString()} with thumbnail`);
+        }
+      } else {
+        console.log(`Failed to get/generate url of thumbnail file ${toUrl}.`);
+      }
+      // console.log(finalUrl);
+      // console.log(currentVersionId);
+      // console.log("did it");
+    } else {
+      console.log(`THUMBNAIL DIST PROBLEM: unable to locate file ${fileId}`)
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 export async function updateWorkspaceSummaryToMatchingFiles(context, wsSummary) {

@@ -16,7 +16,7 @@ export const fileVersionSchema = Type.Object({
   userId: ObjectIdSchema(),
   message: Type.Optional(Type.String()),
   createdAt: Type.Number(),
-  thumbnailUrlCache: Type.Optional(ObjectIdSchema()),
+  thumbnailUrlCache: Type.Optional(Type.String()),
   fileUpdatedAt: Type.Optional(Type.Number()),
   lockedSharedModels: Type.Optional(Type.Array(sharedModelsSummarySchema)),
   additionalData: Type.Object({}),
