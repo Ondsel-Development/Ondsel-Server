@@ -17,7 +17,7 @@
           <repr-viewer :curation="curation"/>
         </v-sheet>
         <v-sheet class="d-flex flex-column">
-          <v-sheet class="align-start">
+          <v-sheet class="align-start" max-width="22em">
             <p class="text-h6">{{ curation.name }}</p>
             <p><code class="text-blue">{{curation.slug}}</code></p>
             <p class="text-body-2">{{ curation.description }}</p>
