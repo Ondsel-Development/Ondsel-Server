@@ -63,7 +63,10 @@ export default {
   }),
   async created() {
     const response = await Organization.find({
-      query: {type: 'Ondsel'}
+      query: {
+        type: 'Ondsel',
+        publicInfo: 'true',
+      }
     });
     if (response.data.length > 0) {
       this.lensSiteCuration = response.data[0].curation;
