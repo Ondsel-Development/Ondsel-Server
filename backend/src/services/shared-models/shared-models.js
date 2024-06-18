@@ -29,7 +29,11 @@ import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
-import { canUserAccessSharedModelGetMethod, validateSharedModelCreatePayload } from './helpers.js';
+import {
+  canUserAccessSharedModelGetMethod,
+  handleDirectSharedToUsers,
+  validateSharedModelCreatePayload
+} from './helpers.js';
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -149,6 +153,7 @@ export const sharedModels = (app) => {
       create: [
         canUserCreateShareLink,
         validateSharedModelCreatePayload,
+        handleDirectSharedToUsers,
         iff(
           context => context.data.cloneModelId && !context.data.dummyModelId,
           createClone,
@@ -184,6 +189,7 @@ export const sharedModels = (app) => {
           )
         ),
         preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants', 'protection'),
+        handleDirectSharedToUsers,
         iff(
           isProvider('external'),
           iff(

@@ -108,8 +108,10 @@
             >
               <span>Incorrect PIN</span>
             </v-alert>
-            <span class="text-subtitle-2">Enter PIN to access model</span>
-            <v-otp-input v-model="pin" type="text" @finish="fetchShareLink"></v-otp-input>
+            <template v-if="error === 'IncorrectPin' || error === 'MissingPin'">
+              <span class="text-subtitle-2">Enter PIN to access model</span>
+              <v-otp-input v-model="pin" type="text" @finish="fetchShareLink"></v-otp-input>
+            </template>
           </v-card-item>
           <v-card-item v-if="model">
             <v-alert
@@ -290,10 +292,13 @@ export default {
           }
         );
       } catch (error) {
+        console.log(error);
         if (error.toString().includes('MissingPin')) {
           this.error = 'MissingPin';
         } else if (error.toString().includes('IncorrectPin')) {
           this.error = 'IncorrectPin';
+        } else if (error.toString().includes('UserNotHaveAccess')) {
+          this.error = 'NotFound';
         } else {
           this.error = 'NotFound';
         }
