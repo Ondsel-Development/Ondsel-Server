@@ -243,6 +243,7 @@ export default {
         this.error = 'NotFound';
       }
       if (this.model && !this.model.objUrl && !this.model.isThumbnailGenerated) {
+        console.log("SPIN FROM MODEL (3)");
         await this.model.patch({
           data: {
             shouldStartObjGeneration: true,
@@ -288,6 +289,7 @@ export default {
             try {
               await file.model.save();
               vm.$router.replace(`/model/${vm.model._id}`);
+              console.log("SPIN FROM MODEL (1)");
               await vm.model.patch({
                 id: vm.model._id,
                 data: {
@@ -361,6 +363,7 @@ export default {
       this.model.isObjGenerated = false;
       this.isModelLoaded = false;
       this.model.shouldStartObjGeneration = true;
+      console.log("SPIN FROM MODEL (2)");
       this.model = await this.model.save();
     },
     uploadThumbnail() {
@@ -375,6 +378,7 @@ export default {
           const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
           const fd = new FormData();
+          console.log("TN SAVE FROM MODEL");
           fd.append('file', image, `${this.model._id}_thumbnail.PNG`);
           const uploadUrl = `${import.meta.env.VITE_APP_API_URL}upload`;
 

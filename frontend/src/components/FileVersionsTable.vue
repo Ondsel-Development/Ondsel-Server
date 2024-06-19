@@ -74,7 +74,7 @@
       </td>
       <td v-if="item.nature==='ver'">
         <v-btn
-          v-if="!publicView && isFileModel(file)"
+          v-if="!publicView && isFileModel(file) && file.currentVersionId === item._id"
           size="small"
           color="decoration"
           icon="mdi-plus"
@@ -85,7 +85,18 @@
       <td v-if="item.nature==='link'">
       </td>
       <td v-if="item.nature==='link'">
-        <span>/share/{{item._id}}</span>
+        <a
+          :href="'/share/' + item._id.toString()"
+          target="_blank"
+          style="text-decoration: none; color: inherit;"
+        >
+          <span class="text-blue-darken-4">
+            <v-icon>
+              mdi-open-in-new
+            </v-icon>
+            /share/{{item._id}}
+          </span>
+        </a>
         <span class="ml-4">"{{item.description}}"</span>
       </td>
       <td v-if="item.nature==='link'">
