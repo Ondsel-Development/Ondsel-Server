@@ -14,7 +14,9 @@
     <tr>
       <td colspan="4">
         <br>
-        <span class="align-center text-h5 my-4">versions and their share links</span>
+        <span class="align-center text-h5 my-4">
+          versions <span v-if="isFileModel(file)">and their share links</span>
+        </span>
       </td>
     </tr>
     <tr

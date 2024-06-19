@@ -8,7 +8,10 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
-import { tryToAuthenticate } from '../../hooks/handle-public-info-query.js';
+import {
+  authenticateJwtWhenPrivate,
+  handlePublicOnlyQuery,
+} from '../../hooks/handle-public-info-query.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -71,7 +74,10 @@ export const model = (app) => {
         schemaHooks.resolveResult(modelResolver)
       ],
       find: [authenticate('jwt')],
-      get: [tryToAuthenticate()],
+      get: [
+        handlePublicOnlyQuery(null),
+        authenticateJwtWhenPrivate(),
+      ],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],

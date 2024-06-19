@@ -177,3 +177,31 @@ export const checkForDeletedReadme = async context => {
   }
   return context;
 }
+
+export function removePrivateFileFields( fileDetail ) {
+  if (fileDetail.deleted) {
+    // remove all fields if deleted; but don't make a new object as the reference will be lost
+    for (const variableKey in fileDetail){
+      if (fileDetail.hasOwnProperty(variableKey)){
+        delete fileDetail[variableKey];
+      }
+    }
+    return
+  }
+  if (fileDetail.userId) { delete fileDetail.userId}
+  if (fileDetail.workspace) { delete fileDetail.workspace }
+  if (fileDetail.directory) { delete fileDetail.directory }
+  if (fileDetail.relatedUserDetails) { delete fileDetail.relatedUserDetails }
+  if (fileDetail.followingActiveSharedModels) { delete fileDetail.followingActiveSharedModels }
+  if (fileDetail.versions) {
+    fileDetail.versions.forEach(function(ver, _index) {
+      if (ver.userId) { delete ver.userId }
+      if (ver.message) { delete ver.message }
+      if (ver.createdAt) { delete ver.createdAt }
+      if (ver.fileUpdatedAt) { delete ver.fileUpdatedAt }
+      if (ver.lockedSharedModels) { delete ver.lockedSharedModels }
+      //  leave: uniqueFileName: Type.String(),
+      //  leave: thumbnailUrlCache: Type.Optional(Type.String()),
+    })
+  }
+}

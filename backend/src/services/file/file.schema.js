@@ -22,6 +22,16 @@ export const fileVersionSchema = Type.Object({
   additionalData: Type.Object({}),
 })
 
+// custFileName: data.custFileName,
+//       shouldCommitNewVersion: true,
+//       version: {
+//         uniqueFileName: data.uniqueFileName,
+//         message: 'Initial commit',
+//         ...(data.fileUpdatedAt && {fileUpdatedAt: data.fileUpdatedAt})
+//       },
+//       isSystemGenerated: _.get(data, 'isSharedModel', false),
+
+
 // Main data model schema
 export const fileSchema = Type.Object(
   {

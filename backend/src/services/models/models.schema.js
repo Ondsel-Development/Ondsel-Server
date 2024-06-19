@@ -6,6 +6,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { userSchema } from '../users/users.schema.js'
 import { fileSchema } from '../file/file.schema.js';
 import { NotFound } from '@feathersjs/errors'
+import {removePrivateFileFields} from "../file/helpers.js";
 
 export const logErrorIdType = Type.Optional(Type.Union([ObjectIdSchema(), Type.Null()]))
 
@@ -89,7 +90,11 @@ export const modelResolver = resolve({
     const fileService = app.service('file');
     if (message.fileId) {
       try {
-        return await fileService.get(message.fileId);
+        let fileResult = await fileService.get(message.fileId);
+        if (context.publicDataOnly) {
+          removePrivateFileFields(fileResult);
+        }
+        return fileResult;
       } catch (error) {
         if (error instanceof NotFound) {
           return null; // Return null if no record is found

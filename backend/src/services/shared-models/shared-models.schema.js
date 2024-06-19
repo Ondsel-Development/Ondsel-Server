@@ -90,7 +90,7 @@ export const sharedModelsResolver = resolve({
 
       // otherwise, everyone (logged-in or not) uses the default dummyModelId Model
       try {
-        const m = await modelService.get(message.dummyModelId);
+        const m = await modelService.get(message.dummyModelId, {publicInfo: 'true'});
         if (!(message.canUpdateModel || message.canViewModelAttributes)) {
           return _.omit(m, 'attributes')
         }
