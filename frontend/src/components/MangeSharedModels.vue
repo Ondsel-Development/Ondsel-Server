@@ -109,6 +109,15 @@
     </template>
     <template v-slot:item.protection="{ item }">
       {{ item.protection }}
+      <v-btn
+        v-if="item.protection === 'Direct'"
+        class="text-caption text-decoration-none"
+        density="compact"
+        color="secondary"
+        @click="openShareWithUserDialog(item)"
+      >
+        Manage Access
+      </v-btn>
     </template>
 
     <template v-slot:expanded-row="{ columns, item }">
@@ -254,6 +263,11 @@
     @save-tags="saveTags"
   />
 
+  <DirectShareToUsersDialog
+    ref="directShareToUsersDialog"
+    :shared-model="activeShareModel"
+  />
+
 </template>
 
 <script>
@@ -263,13 +277,14 @@ import { models } from '@feathersjs/vuex';
 import ShareModelDialog from '@/components/ShareModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
 import EditTagsDialog from "@/components/EditTagsDialog.vue";
+import DirectShareToUsersDialog from "@/components/DirectShareToUsersDialog.vue";
 import _ from "lodash";
 
 const { SharedModel } = models.api;
 
 export default {
   name: 'MangeSharedModels',
-  components: {EditTagsDialog, ShareModelDialog, ShareLinkDialog },
+  components: {EditTagsDialog, ShareModelDialog, ShareLinkDialog, DirectShareToUsersDialog },
   props: {
     model: Object,
   },
@@ -344,6 +359,11 @@ export default {
       this.activeShareModelId = sharedModel._id;
       this.$refs.shareLinkDialog.$data.dialog = true;
     },
+    openShareWithUserDialog(sharedModel) {
+      this.activeShareModel = sharedModel;
+      this.activeShareModelId = sharedModel._id;
+      this.$refs.directShareToUsersDialog.openDialog(sharedModel);
+    },
     openEditTagsDialog(sharedModelId, curation) {
       this.isEditTagsDialogActive = true;
       this.activeCuration = curation;
@@ -380,4 +400,5 @@ export default {
 
 </style>
 <script setup>
+import DirectShareToUsersDialog from "@/components/DirectShareToUsersDialog.vue";
 </script>

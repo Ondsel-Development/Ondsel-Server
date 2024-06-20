@@ -49,6 +49,7 @@ export const sharedModelsSchema = Type.Object(
     messagesParticipants: Type.Array(userSummarySchema),
     protection: ProtectionType,
     pin: Type.Optional(Type.String({ minLength: 6, maxLength: 6 })),
+    directSharedTo: Type.Optional(Type.Array(userSummarySchema)),
 
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
@@ -158,6 +159,7 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'protection',
   'pin',
   'versionFollowing',
+  'directSharedTo',
 ], {
   $id: 'SharedModelsData'
 })
@@ -271,6 +273,12 @@ export const sharedModelsDataResolver = resolve({
       versionId: versionId,
     }
   },
+  directSharedTo: async (value, _message, _context) => {
+    if (!value) {
+      return [];
+    }
+    return value;
+  },
 })
 
 // Schema for updating existing entries
@@ -299,7 +307,8 @@ export const sharedModelsQueryProperties = Type.Pick(
     'messages',
     'messagesParticipants',
     'protection',
-    'pin'
+    'pin',
+    'directSharedTo'
   ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(
