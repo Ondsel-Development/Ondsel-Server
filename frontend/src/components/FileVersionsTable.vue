@@ -136,7 +136,7 @@
   </v-table>
   <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile" />
   <share-model-dialog v-if="!publicView" ref="sharedModelDialogRef" :is-active='somethingTrue' :model-id="file.modelId"></share-model-dialog>
-  <shared-model-link-action-dialog v-if="!publicView" ref="sharedModelLinkActionDialogRef" :can-user-write="canUserWrite" @changed-file="changedFile"></shared-model-link-action-dialog>
+  <shared-model-link-action-dialog ref="sharedModelLinkActionDialogRef" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile"></shared-model-link-action-dialog>
 </template>
 
 <script>
@@ -176,7 +176,7 @@ export default {
             let linksFound = false;
             if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
               for (const sm of item.lockedSharedModels) {
-                if (sm.protection === "Listed" || !vm.publicView) {
+                if ((sm.protection === "Listed" && sm.isActive) || !vm.publicView) {
                   linksFound = true;
                   result.push({nature: 'link', ...sm});
                 }
@@ -193,7 +193,7 @@ export default {
         let linksFound = false;
         if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
           for (const sm of vm.file.followingActiveSharedModels) {
-            if (sm.protection === "Listed" || !vm.publicView) {
+            if ((sm.protection === "Listed" && sm.isActive ) || !vm.publicView) {
               linksFound = true;
               result.push({nature: 'link', ...sm});
             }

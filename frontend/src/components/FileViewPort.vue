@@ -136,13 +136,15 @@ export default {
     },
     async getProperUrl() {
       let url = null;
-      if (this.viewChosen === this.viewEnum.thumbnail) {
-        if (this.file?.versions) {
-          const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
-          if (viewedVersion) {
-            url = viewedVersion.thumbnailUrlCache || undefined;
-          } else {
-            console.log("FAIL cannot locate visible version in File");
+      if (this.versionId) {
+        if (this.viewChosen === this.viewEnum.thumbnail) {
+          if (this.file?.versions) {
+            const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
+            if (viewedVersion) {
+              url = viewedVersion.thumbnailUrlCache || undefined;
+            } else {
+              console.log("FAIL cannot locate visible version in File");
+            }
           }
         }
       }

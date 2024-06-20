@@ -12,7 +12,14 @@
         <v-table density="compact" class="justify-center align-center mt-2">
           <tbody>
             <tr
-              v-for="item in tableData"
+              v-for="item in publicTableData"
+              :key="item.name"
+            >
+              <td style="text-align: right">{{ item.name }}</td>
+              <td>{{ item.value }}</td>
+            </tr>
+            <tr
+              v-for="item in privateTableData"
               :key="item.name"
             >
               <td style="text-align: right">{{ item.name }}</td>
@@ -33,6 +40,7 @@
           variant="elevated"
           :disabled="!canUserWrite"
           :loading="isPatchPending"
+          @click="toggleEnableDisable()"
         >Enable/Disable</v-btn>
         <v-btn
           v-if="!publicView"
@@ -48,7 +56,10 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapActions, mapState} from 'vuex';
+import {models} from "@feathersjs/vuex";
+
+const { SharedModel } = models.api;
 
 export default {
   name: "SharedModelLinkActionDialog",
@@ -63,25 +74,80 @@ export default {
   data: () => ({
     dialog: false,
     sharedModelSummary: {},
+    protectionDesc: {
+      'Listed': 'Open to all; Listed in Search System',
+      'Unlisted': 'Open to all; But viewer needs to know the URL',
+      'Pin': 'Viewer needs to know PIN number',
+      'Direct': 'Only visible to specific Ondsel user(s)',
+    },
+    versionFollowingDesc: {
+      'Locked': 'Locked to a specific version of the file',
+      'Active': 'Shows the current (Active) version of the file',
+    },
+    privateTableData: [],
   }),
   computed: {
     ...mapState('auth', ['user']),
     ...mapState('shared-models', ['isPatchPending']),
-    tableData: (vm) => ([
+    publicTableData: (vm) => ([
       {
         name: 'Enabled',
-        value: vm.sharedModelSummary.isActive || "?",
+        value: vm.sharedModelSummary.isActive === undefined ? "?" : vm.sharedModelSummary.isActive,
       },
       {
         name: 'Description',
         value: vm.sharedModelSummary.description || '<no desc>',
       },
+      {
+        name: 'Link Creation',
+        value: vm.sharedModelSummary.createdAt ? (new Date(vm.sharedModelSummary.createdAt)).toLocaleString() : "?",
+      },
+      {
+        name: 'Distribution (Protection)',
+        value: `[${vm.sharedModelSummary.protection}] ` + (vm.sharedModelSummary.protection ? vm.protectionDesc[vm.sharedModelSummary.protection] : "?"),
+      },
+      {
+        name: 'Version Handling',
+        value: `[${vm.sharedModelSummary.versionFollowing}] ` + (vm.sharedModelSummary.versionFollowing ? vm.versionFollowingDesc[vm.sharedModelSummary.versionFollowing] : "?"),
+      },
     ])
   },
   methods: {
+    ...mapActions('app', ['getUserByIdOrNamePublic']),
+    async privateRefresh() {
+      let ptd = []
+      if (this.canUserWrite && !this.publicView) {
+        const sm = await SharedModel.get(this.sharedModelSummary._id);
+        if (sm) {
+          const user = await this.getUserByIdOrNamePublic(sm.userId);
+          ptd.push({
+            name: 'Creator',
+            value: `${user.name} [${user.username}]`,
+          });
+        }
+      }
+      this.privateTableData = ptd;
+    },
+    async toggleEnableDisable() {
+      if (this.canUserWrite && !this.publicView) {
+        await SharedModel.patch(
+          this.sharedModelSummary._id,
+          {
+            isActive: !this.sharedModelSummary.isActive,
+          }
+        )
+        await this.changedFile();
+        this.dialog = false;
+      }
+    },
     async changedFile() {
       this.$emit('changedFile');
     },
+  },
+  watch: {
+    async sharedModelSummary() {
+      await this.privateRefresh()
+    }
   }
 }
 </script>

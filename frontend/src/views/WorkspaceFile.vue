@@ -248,7 +248,7 @@ export default {
         this.publicView = true;
         this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
       }
-      this.viewPortVersionId = this.file.currentVersion._id.toString();
+      this.viewPortVersionId = this.file.currentVersionId.toString();
     },
     async gotoWorkspace() {
       const slug = this.$route.params.slug;

@@ -10,10 +10,12 @@ export const sharedModelsSummarySchema = Type.Object(
     description: Type.String(),
     versionFollowing: VersionFollowType,
     protection: ProtectionType,
+    createdAt: Type.Number(),
+    // Note: the following two fields are from Model an authoritative part of the SharedModel
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.Any(),
+    // Note: the following field is from File and is not and authoritative part of the SharedModel
     custFileName: Type.String(),
-    createdAt: Type.Number(),
   },
 )
 
