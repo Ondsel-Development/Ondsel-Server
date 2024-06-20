@@ -102,11 +102,12 @@
       <td v-if="item.nature==='link'">
       </td>
       <td v-if="item.nature==='link'">
-        <v-icon
+        <v-btn
           size="small"
-        >
-          mdi-dots-vertical
-        </v-icon>
+          color="decoration"
+          icon="mdi-dots-vertical"
+          @click="startSharedModelLinkActionDialog(item)"
+        ></v-btn>
         {{item.protection}}
         <span v-if="item.isActive">(enabled)</span>
         <span v-if="!item.isActive">(disabled)</span>
@@ -135,16 +136,18 @@
   </v-table>
   <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile" />
   <share-model-dialog v-if="!publicView" ref="sharedModelDialogRef" :is-active='somethingTrue' :model-id="file.modelId"></share-model-dialog>
+  <shared-model-link-action-dialog v-if="!publicView" ref="sharedModelLinkActionDialogRef" :can-user-write="canUserWrite" @changed-file="changedFile"></shared-model-link-action-dialog>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
 import ShareModelDialog from "@/components/ShareModelDialog.vue";
+import SharedModelLinkActionDialog from "@/components/SharedModelLinkActionDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: {ShareModelDialog, FileInfoDialog },
+  components: {SharedModelLinkActionDialog, ShareModelDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
@@ -239,6 +242,11 @@ export default {
       data.versionFollowing = 'Locked';
       data.versionFollowingPreset = true;
       data.versionDescription = `ver ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
+    },
+    async startSharedModelLinkActionDialog(item) {
+      let data = this.$refs.sharedModelLinkActionDialogRef.$data;
+      data.sharedModelSummary = item;
+      data.dialog = true;
     },
     async doChangeVisibleVersion(versionId) {
       this.$emit('changeVisibleVersion', versionId);
