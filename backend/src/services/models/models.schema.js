@@ -10,6 +10,12 @@ import { NotFound } from '@feathersjs/errors'
 
 export const logErrorIdType = Type.Optional(Type.Union([ObjectIdSchema(), Type.Null()]))
 
+const errorMsgType = Type.Object({
+  code: Type.Number(),
+  type: Type.String(),
+  detail: Type.Optional(Type.Object({})),
+});
+
 // Main data model schema
 export const modelSchema = Type.Object(
   {
@@ -26,7 +32,7 @@ export const modelSchema = Type.Object(
     isObjGenerated: Type.Optional(Type.Boolean({default: false})),
     shouldStartObjGeneration: Type.Optional(Type.Boolean()),
     attributes: Type.Optional(Type.Object({})),
-    errorMsg: Type.Optional(Type.String()),
+    errorMsg: Type.Optional(Type.Union([errorMsgType, Type.Null()])),
     objUrl: Type.String(),
     isSharedModel: Type.Optional(Type.Boolean({default: false})),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
@@ -187,7 +193,8 @@ export const modelQueryProperties = Type.Pick(
     'deleted',
     'attributes',
     'objUrl',
-    'isObjGenerated'
+    'isObjGenerated',
+    'errorMsg',
   ]
 )
 export const modelQuerySchema = Type.Intersect(
