@@ -200,7 +200,10 @@ export const sharedModels = (app) => {
         iff(
           isProvider('external'),
           iff(
-            context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
+            context => (
+              context.beforePatchCopy.isSystemGenerated && // a voluntary link can be deactivated
+              !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink
+            ),
             preventChanges(true, 'isActive')
           ),
         ),
@@ -208,7 +211,6 @@ export const sharedModels = (app) => {
           context => context.data.shouldCreateInstance,
           createUserInstance,
         ),
-
         iff(
           context => context.data.model,
           patchModel,
