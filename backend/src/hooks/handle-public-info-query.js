@@ -22,14 +22,6 @@ export const handlePublicOnlyQuery = (publicFields) => {
   }
 }
 
-export const isPublicOnly = async (context) => {
-  return (context.publicDataOnly === true)
-}
-
-export const isNotPublicOnly = async (context) => {
-  return (context.publicDataOnly !== false)
-}
-
 export const resolvePrivateResults = (resolver) => {
   // this is an "around" hook
   return async (context, next) => {

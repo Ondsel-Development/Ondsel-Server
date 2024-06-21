@@ -172,6 +172,8 @@ export const modelDataResolver = resolve({
   },
 })
 
+export const modelPublicFields = ['_id', 'isObjGenerated'];
+
 // Schema for updating existing entries
 export const modelPatchSchema = Type.Partial(modelSchema, {
   $id: 'ModelPatch'

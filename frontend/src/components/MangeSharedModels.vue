@@ -250,6 +250,7 @@
     v-if="model"
     :is-active="isShareModelDialogActive"
     :model-id="model._id"
+    @share-model="doNothing"
     ref="shareModelDialog"
   />
   <ShareLinkDialog
@@ -392,6 +393,9 @@ export default {
       });
       this.$refs.editTagsDialog.$data.isPatchPending = false;
     },
+    async doNothing() {
+      // the 'emit' of ShareModelDialog need not take action
+    }
   },
 }
 </script>

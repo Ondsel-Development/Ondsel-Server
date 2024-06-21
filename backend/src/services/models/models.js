@@ -24,7 +24,7 @@ import {
   modelSchema,
   modelDataSchema,
   modelPatchSchema,
-  modelQuerySchema,
+  modelQuerySchema, modelPublicFields,
 } from './models.schema.js'
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
@@ -71,11 +71,11 @@ export const model = (app) => {
     around: {
       all: [
         schemaHooks.resolveExternal(modelExternalResolver),
+        handlePublicOnlyQuery(modelPublicFields),
         schemaHooks.resolveResult(modelResolver)
       ],
       find: [authenticate('jwt')],
       get: [
-        handlePublicOnlyQuery(null),
         authenticateJwtWhenPrivate(),
       ],
       create: [authenticate('jwt')],

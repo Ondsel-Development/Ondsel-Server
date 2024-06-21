@@ -257,7 +257,12 @@ export default {
       sharedModel.cloneModelId = this.modelId;
       try {
         this.tmpSharedModel = await sharedModel.create();
-        this.tmpModel = await Model.get(this.tmpSharedModel.model._id); // TODO why?: , { query: { isSharedModel: true }});
+        if (sharedModel.versionFollowing === 'Active') {
+          this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { publicInfo: 'true' }});
+        } else {
+          this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
+        }
+        this.$emit('shareModel');
       } catch (e) {
         this.error = 'UpgradeTier';
         this.isGeneratingLink = false;

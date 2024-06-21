@@ -134,9 +134,27 @@
     </tr>
     </tbody>
   </v-table>
-  <file-info-dialog ref="fileInfoDialog" :file="file" :selectedFileVersion="selectedFileVersion" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile" />
-  <share-model-dialog v-if="!publicView" ref="sharedModelDialogRef" :is-active='somethingTrue' :model-id="file.modelId"></share-model-dialog>
-  <shared-model-link-action-dialog ref="sharedModelLinkActionDialogRef" :can-user-write="canUserWrite" :public-view="publicView" @changed-file="changedFile"></shared-model-link-action-dialog>
+  <file-info-dialog
+    ref="fileInfoDialog"
+    :file="file"
+    :selectedFileVersion="selectedFileVersion"
+    :can-user-write="canUserWrite"
+    :public-view="publicView"
+    @changed-file="changedFile"
+  ></file-info-dialog>
+  <share-model-dialog
+    v-if="!publicView"
+    ref="sharedModelDialogRef"
+    :is-active='somethingTrue'
+    :model-id="file.modelId"
+    @share-model="changedFile"
+  ></share-model-dialog>
+  <shared-model-link-action-dialog
+    ref="sharedModelLinkActionDialogRef"
+    :can-user-write="canUserWrite"
+    :public-view="publicView"
+    @changed-file="changedFile"
+  ></shared-model-link-action-dialog>
 </template>
 
 <script>
