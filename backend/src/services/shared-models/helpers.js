@@ -2,6 +2,7 @@ import { ProtectionTypeMap } from './shared-models.subdocs.schema.js';
 import {BadRequest} from "@feathersjs/errors";
 import _ from 'lodash';
 import {buildUserSummary} from "../users/users.distrib.js";
+import {removePrivateFileFields} from "../file/helpers.js";
 
 export const validateSharedModelCreatePayload = async context => {
   if (!context.data.protection) {
@@ -77,12 +78,13 @@ export async function buildFakeModelAndFileForActiveVersion(message, context) {
   // this function pulls from the DB to generate a psuedo Model and subtending File
   let finalModel = null;
 
-  const {refFile, refModel} = await getReferenceFileAndModel(message, context);
+  let {refFile, refModel} = await getReferenceFileAndModel(message, context);
 
-  let strippedFile = _.omit(refFile, ['workspace', 'directory']);
-  strippedFile.versions = refFile.versions.find(version => version._id.equals(refFile.currentVersionId));
+  const currentVersionId = refFile.currentVersionId;
+  removePrivateFileFields(refFile);
+  refFile.versions = refFile.versions.find(version => version._id.equals(currentVersionId));
   finalModel = _.omit(refModel, 'attributes');
-  finalModel.file = strippedFile;
+  finalModel.file = refFile;
 
   return finalModel;
 }

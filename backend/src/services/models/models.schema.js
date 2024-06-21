@@ -172,7 +172,7 @@ export const modelDataResolver = resolve({
   },
 })
 
-export const modelPublicFields = ['_id', 'isObjGenerated'];
+export const modelPublicFields = ['_id', 'isObjGenerated', 'objUrl'];
 
 // Schema for updating existing entries
 export const modelPatchSchema = Type.Partial(modelSchema, {
