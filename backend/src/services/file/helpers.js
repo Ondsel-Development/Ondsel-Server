@@ -189,7 +189,10 @@ export function removePrivateFileFields( fileDetail ) {
     return
   }
   if (fileDetail.userId) { delete fileDetail.userId}
-  if (fileDetail.workspace) { delete fileDetail.workspace }
+  if (fileDetail.workspace) {
+    if (fileDetail.workspace.name) { delete fileDetail.workspace.name }
+    if (fileDetail.refName) { delete fileDetail.refName }
+  }
   if (fileDetail.directory) { delete fileDetail.directory }
   if (fileDetail.relatedUserDetails) { delete fileDetail.relatedUserDetails }
   if (fileDetail.followingActiveSharedModels) { delete fileDetail.followingActiveSharedModels }

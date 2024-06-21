@@ -38,7 +38,7 @@
           v-if="!publicView"
           color="secondary"
           variant="elevated"
-          :disabled="!canUserWrite"
+          :disabled="!canUserWrite || (sharedModel.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink)"
           :loading="isPatchPending"
           @click="toggleEnableDisable()"
         >Enable/Disable</v-btn>
@@ -46,8 +46,9 @@
           v-if="!publicView"
           color="error"
           variant="elevated"
-          :disabled="!canUserWrite"
+          :disabled="!canUserWrite || (sharedModel.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink)"
           :loading="isPatchPending"
+          @click="deleteSharedModel()"
         >Delete</v-btn>
       </v-card-actions>
     </v-card>
@@ -74,6 +75,7 @@ export default {
   data: () => ({
     dialog: false,
     sharedModelSummary: {},
+    sharedModel: {},
     protectionDesc: {
       'Listed': 'Open to all; Listed in Search System',
       'Unlisted': 'Open to all; But viewer needs to know the URL',
@@ -117,9 +119,9 @@ export default {
     async privateRefresh() {
       let ptd = []
       if (this.canUserWrite && !this.publicView) {
-        const sm = await SharedModel.get(this.sharedModelSummary._id);
-        if (sm) {
-          const user = await this.getUserByIdOrNamePublic(sm.userId);
+        this.sharedModel = await SharedModel.get(this.sharedModelSummary._id);
+        if (this.sharedModel) {
+          const user = await this.getUserByIdOrNamePublic(this.sharedModel.userId);
           ptd.push({
             name: 'Creator',
             value: `${user.name} [${user.username}]`,
@@ -131,14 +133,19 @@ export default {
     async toggleEnableDisable() {
       if (this.canUserWrite && !this.publicView) {
         await SharedModel.patch(
-          this.sharedModelSummary._id,
+          this.sharedModel._id,
           {
-            isActive: !this.sharedModelSummary.isActive,
+            isActive: !this.sharedModel.isActive,
           }
         )
         await this.changedFile();
         this.dialog = false;
       }
+    },
+    async deleteSharedModel() {
+      await SharedModel.remove(this.sharedModel._id);
+      await this.changedFile();
+      this.dialog = false;
     },
     async changedFile() {
       this.$emit('changedFile');
