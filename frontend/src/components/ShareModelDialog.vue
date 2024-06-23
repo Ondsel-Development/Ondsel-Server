@@ -258,7 +258,7 @@ export default {
       try {
         this.tmpSharedModel = await sharedModel.create();
         if (sharedModel.versionFollowing === 'Active') {
-          this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { publicInfo: 'true' }});
+          this.tmpModel = await Model.get(this.tmpSharedModel.cloneModelId);
         } else {
           this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
         }
