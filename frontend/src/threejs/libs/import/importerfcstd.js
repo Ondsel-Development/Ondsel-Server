@@ -62,6 +62,7 @@ class FreeCadDocument
         this.properties = null;
         this.objectNames = [];
         this.objectData = new Map ();
+        this.documentXml = null;
     }
 
     Init (fileContent)
@@ -109,12 +110,55 @@ class FreeCadDocument
         return (fileName in this.files);
     }
 
+    LinkedFiles() {
+      if (this.documentXml === null) {
+        return false;
+      }
+
+      let linkedFiles = {};
+      let linkedObjectsName = [];
+
+      let objectsElements = this.documentXml.getElementsByTagName('Objects');
+      for (let objectsElement of objectsElements) {
+        let objectElements = objectsElement.getElementsByTagName('Object');
+        for (let objectElement of objectElements) {
+          let name = objectElement.getAttribute('name');
+          let type = objectElement.getAttribute('type');
+          if (type === 'App::Link') {
+            linkedObjectsName.push(name)
+          }
+        }
+      }
+
+      let objectDataElements = this.documentXml.getElementsByTagName('ObjectData');
+      for (let objectsElement of objectDataElements) {
+        let objectElements = objectsElement.getElementsByTagName('Object');
+        for (let objectElement of objectElements) {
+          let objectName = objectElement.getAttribute('name');
+          if (!linkedObjectsName.includes(objectName)) {
+            continue;
+          }
+          let properties = objectElement.getElementsByTagName('Property');
+          for (let propertyElement of properties) {
+            let name = propertyElement.getAttribute('name');
+            if (name === 'LinkedObject') {
+              let xLinkElement = propertyElement.getElementsByTagName('XLink')[0];
+              let fileName = xLinkElement.getAttribute('file');
+              linkedFiles[objectName] = fileName;
+            }
+          }
+        }
+      }
+      return linkedFiles;
+    }
+
     LoadDocumentXml ()
     {
         let documentXml = this.GetXMLContent ('Document.xml');
         if (documentXml === null) {
             return false;
         }
+        this.documentXml = documentXml;
 
         this.properties = new PropertyGroup ('Properties');
         let documentElements = documentXml.getElementsByTagName ('Document');
@@ -442,6 +486,10 @@ export class ImporterFcstd
         let object3d = new ModelObject3D ();
         if (object.shapeName !== null) {
             object3d.SetName (object.shapeName);
+        }
+
+        if (object.name !== null) {
+            object3d.SetRealName (object.name);
         }
 
         if (object.properties !== null && object.properties.PropertyCount () > 0) {
