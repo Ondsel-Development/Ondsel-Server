@@ -1,4 +1,8 @@
 import {VersionFollowTypeMap as versionFollowTypeMap} from "../services/shared-models/shared-models.subdocs.schema.js";
+import {buildSharedModelSummary} from "../services/shared-models/shared-models.distrib.js";
+import {virtual} from "@feathersjs/schema";
+import {buildFakeModelUrl} from "../services/shared-models/helpers.js";
+import _ from "lodash";
 
 export async function addFollowSupportToSharedModelsCommand(app) {
   const sharedModelsService = app.service('shared-models');
@@ -25,6 +29,14 @@ export async function addFollowSupportToSharedModelsCommand(app) {
         modelId: 1, // a legacy entry; should not be there
         fileDetail: 1,
         deleted: 1,
+        // the following are also needed for summaries:
+        isActive: 1,
+        description: 1,
+        protection: 1,
+        // custFileName is virtual
+        isThumbnailGenerated: 1,
+        // thumbnailUrl is virtual
+        createdAt: 1,
       }
     }
   ).toArray();
@@ -60,10 +72,18 @@ export async function addFollowSupportToSharedModelsCommand(app) {
         isSystemGenerated: 1,
         versions: 1,
         followingActiveSharedModels: 1,
+        custFileName: 1,
       }
     }
   ).toArray();
   for (let ref of refList) {
+    ref.$versionsChanged = false;
+    for (let version of ref.versions) {
+      if (version.lockedSharedModels === undefined) {
+        version.lockedSharedModels = [];
+        ref.$versionsChanged = true;
+      }
+    }
     fileCache[ref._id.toString()] = ref;
   }
   console.log(`>>>   cached ${refList.length}`);
@@ -79,7 +99,14 @@ export async function addFollowSupportToSharedModelsCommand(app) {
     if (sharedModelCache.hasOwnProperty(id)) {
       console.log(`>>>   sm ${id}`);
       let changes = {};
-      const sm = sharedModelCache[id];
+      let sm = sharedModelCache[id];
+      //
+      // versionFollowing
+      //
+      if (!sm.versionFollowing) {
+        changes.versionFollowing = versionFollowTypeMap.locked;
+      }
+
       //
       // fileDetail
       //
@@ -159,11 +186,14 @@ export async function addFollowSupportToSharedModelsCommand(app) {
               console.log(`>>>     PROBLEM!!! found MULTIPLE true files pointing to model ${keyModelId}`);
             } else {
               finalFileId = keyFileArray[0]._id;
-              const matchingVersion = keyFileArray[0].versions.find(
+              const matchingVersionIndex = keyFileArray[0].versions.findIndex(
                 version => version.uniqueFileName === targetVersionUniqueFileName
               );
-              if (matchingVersion) {
-                finalVersionId = matchingVersion._id;
+              if (matchingVersionIndex !== -1) {
+                // found it!
+                let keyFile = keyFileArray[0];
+                finalVersionId = keyFile.versions[matchingVersionIndex]._id;
+                await updateFileVersionEntryIfNeeded(keyFile, matchingVersionIndex, sm, app)
               } else {
                 console.log(`>>>     PROBLEM!!! cannot find matching version in file ${finalFileId}`);
               }
@@ -179,15 +209,81 @@ export async function addFollowSupportToSharedModelsCommand(app) {
       }
 
       //
-      // versionFollowing
+      // make the change
       //
-      if (!sm.versionFollowing) {
-        changes.versionFollowing = versionFollowTypeMap.locked;
+      if (!_.isEmpty(changes)) {
+        console.log(`>>>     changes: ${JSON.stringify(changes)}`);
+        const dbResult = await smDb.updateOne(
+          { _id: sm._id },
+          {
+            $set: changes,
+          }
+        )
+        console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
       }
-      console.log(`>>>     changes: ${JSON.stringify(changes)}`);
     }
   }
-  console.log(`>>> SharedModels serious problems: ${problemCount}`);
+  // /////////////////////////////////////////
+  //
+  //      FILES
+  //
+  // /////////////////////////////////////////
+  console.log('>>> changing each File');
+  for (const id in fileCache ) {
+    console.log(`>>>   file ${id}`);
+    let changes = {};
+    let file = fileCache[id];
+    if (file.$versionsChanged) {
+      changes.versions = file.versions; // this picks up the lockedSharedModels array in each version
+    }
+    if (file.followingActiveSharedModels === undefined) {
+      changes.followingActiveSharedModels = [];
+    }
+    //
+    // make the change
+    //
+    if (!_.isEmpty(changes)) {
+      console.log(`>>>     changes: ${JSON.stringify(changes)}`);
+      const dbResult = await fDb.updateOne(
+        { _id: file._id },
+        {
+          $set: changes,
+        }
+      )
+      console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
+    }
+  }
+  console.log('>>> done with Files')
+
+
+  console.log(`>>> SharedModels with serious problems: ${problemCount}`);
 
   console.log(`>>> command complete.`);
+}
+
+async function buildThumbnailUrlForLockedSharedModel(sm, app) {
+  if (sm.isThumbnailGenerated) {
+    const r = await app.service('upload').get(`public/${sm.dummyModelId.toString()}_thumbnail.PNG`);
+    return r.url
+  }
+  return '';
+}
+
+async function updateFileVersionEntryIfNeeded(file, versionIndex, sm, app) {
+  if (file.versions[versionIndex].lockedSharedModels.some(lsm => lsm._id.toString() === sm._id.toString() )) {
+    console.log(`>>>     file ${file._id} already has shared-model`);
+  } else {
+    sm.model = {
+      file: {
+        custFileName: file.custFileName
+      }
+    };
+    if (!sm.versionFollowing) {
+      sm.versionFollowing = versionFollowTypeMap.locked;
+    }
+    sm.thumbnailUrl = await buildThumbnailUrlForLockedSharedModel(sm, app);
+    const smSum = buildSharedModelSummary(sm);
+    file.versions[versionIndex].lockedSharedModels.push(smSum);
+    console.log(`>>>     also appended sm entry to file ${file._id} in version entry ${versionIndex}`);
+  }
 }
