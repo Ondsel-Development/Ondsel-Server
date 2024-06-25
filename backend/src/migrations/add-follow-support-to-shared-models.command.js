@@ -54,6 +54,7 @@ export async function addFollowSupportToSharedModelsCommand(app) {
         userId: 1,
         fileId: 1,
         sharedModelId: 1,
+        isThumbnailGenerated: 1,
       }
     }
   ).toArray();
@@ -73,6 +74,7 @@ export async function addFollowSupportToSharedModelsCommand(app) {
         versions: 1,
         followingActiveSharedModels: 1,
         custFileName: 1,
+        currentVersionId: 1,
       }
     }
   ).toArray();
@@ -193,7 +195,8 @@ export async function addFollowSupportToSharedModelsCommand(app) {
                 // found it!
                 let keyFile = keyFileArray[0];
                 finalVersionId = keyFile.versions[matchingVersionIndex]._id;
-                await updateFileVersionEntryIfNeeded(keyFile, matchingVersionIndex, sm, app)
+                let keyModel = _.get(modelCache, keyModelId, null);
+                await updateFileVersionEntryIfNeeded(keyFile, matchingVersionIndex, sm, keyModel, app)
               } else {
                 console.log(`>>>     PROBLEM!!! cannot find matching version in file ${finalFileId}`);
               }
@@ -269,7 +272,7 @@ async function buildThumbnailUrlForLockedSharedModel(sm, app) {
   return '';
 }
 
-async function updateFileVersionEntryIfNeeded(file, versionIndex, sm, app) {
+async function updateFileVersionEntryIfNeeded(file, versionIndex, sm, model, app) {
   if (file.versions[versionIndex].lockedSharedModels.some(lsm => lsm._id.toString() === sm._id.toString() )) {
     console.log(`>>>     file ${file._id} already has shared-model`);
   } else {
@@ -284,6 +287,29 @@ async function updateFileVersionEntryIfNeeded(file, versionIndex, sm, app) {
     sm.thumbnailUrl = await buildThumbnailUrlForLockedSharedModel(sm, app);
     const smSum = buildSharedModelSummary(sm);
     file.versions[versionIndex].lockedSharedModels.push(smSum);
+    // see if we can hydrate the thumbnailUrlCache
+    if (!file.versions[versionIndex].thumbnailUrlCache) {
+      if (model !== null && model.isThumbnailGenerated === true) {
+        let currentVersionIdStr = file.currentVersionId.toString();
+        if (file.versions[versionIndex]._id.toString() === currentVersionIdStr) {
+          file.versions[versionIndex].thumbnailUrlCache = await upsertExistingThumbnailToVersion(currentVersionIdStr, model, app);
+        }
+      }
+    }
+    //
     console.log(`>>>     also appended sm entry to file ${file._id} in version entry ${versionIndex}`);
+  }
+}
+
+async function upsertExistingThumbnailToVersion(currentVersionIdStr, model, app) {
+  const uploadService = app.service('upload');
+  const fromUrl = `public/${model._id.toString()}_thumbnail.PNG`;
+  const toUrl = `public/${model._id.toString()}_${currentVersionIdStr}_versionthumbnail.PNG`;
+  try {
+    await uploadService.upsert(fromUrl, toUrl);
+    const finalUrlObj = await uploadService.get(toUrl);
+    return finalUrlObj?.url;
+  } catch {
+    return undefined;
   }
 }
