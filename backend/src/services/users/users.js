@@ -3,7 +3,6 @@ import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
-import { sendCreateAccountNotificationToSlack } from '../../slack-notifications.js';
 import {
   userDataValidator,
   userPatchValidator,
@@ -205,7 +204,6 @@ export const user = (app) => {
         createDefaultOrganization,
         createNotificationsDoc,
         createSampleModels,
-        sendCreateAccountNotificationToSlack,
       ],
       patch: [
         distributeUserSummariesHook
