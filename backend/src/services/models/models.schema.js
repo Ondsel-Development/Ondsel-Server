@@ -23,7 +23,6 @@ export const modelSchema = Type.Object(
     user: Type.Ref(userSchema),
     uniqueFileName: Type.Optional(Type.String()),  // deprecated because we are using file object
     fileId: ObjectIdSchema(),
-    // fileVersionId: Type.Union([Type.Null(), ObjectIdSchema()]),
     file: Type.Ref(fileSchema),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),

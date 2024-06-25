@@ -90,33 +90,39 @@ export async function addFollowSupportToSharedModelsCommand(app) {
           problemCount += 1;
         } else {
           // else assume versionFollowing is 'locked'; which is the default
-          let modelId = sm.dummyModelId
-          if (!modelId) {
+          // The fileDetail points to the live file.
+          // BUT, to determine the version, you need the stub file.
+          let finalFileId = null;
+          let finalVersionId = null;
+          let targetVersionUniqueFileName = null;
+          let targetVersionUniqueDate = null;
+
+          let dummyModelId = sm.dummyModelId
+          if (!dummyModelId) {
             if (sm.modelId) {
-              modelId = sm.modelId;
-              console.log('>>>     dummyModelId missing but legacy modelId exists; so using that instead');
+              dummyModelId = sm.modelId;
               changes.dummyModelId = sm.modelId;
+              console.log('>>>     dummyModelId missing but legacy modelId exists; so using that instead');
             }
           }
-          if (modelId && modelCache.hasOwnProperty(modelId.toString())) {
-            let model = modelCache[modelId.toString()];
+          if (dummyModelId && modelCache.hasOwnProperty(dummyModelId.toString())) {
+            let model = modelCache[dummyModelId.toString()];
             if (!model.fileId) {
               if (sm.deleted) {
-                console.log(`>>>     model ${modelId} is missing FileId but that is okay for a deleted item`);
+                console.log(`>>>     model ${dummyModelId} is missing FileId but that is okay for a deleted item`);
               } else {
-                console.log(`>>>     PROBLEM!!! ${modelId} is missing the FileId field.`);
+                console.log(`>>>     PROBLEM!!! ${dummyModelId} is missing the FileId field.`);
                 problemCount += 1;
               }
             } else {
-              let fileId = model.fileId.toString();
-              if (fileCache.hasOwnProperty(fileId)) {
-                let file = fileCache[fileId];
+              let stubFileId = model.fileId.toString();
+              if (fileCache.hasOwnProperty(stubFileId)) {
+                let file = fileCache[stubFileId];
                 if (file.versions.length !== 1) {
-                  console.log(`>>>     PROBLEM!!! file ${fileId} has ${file.versions.length} versions rather than 1`)
+                  console.log(`>>>     PROBLEM!!! file ${stubFileId} has ${file.versions.length} versions rather than 1`)
                 } else {
-                  const fileVer = file.versions[0];
-                  const versionId = fileVer._id;
-                  changes.fileDetail = {fileId: fileId, versionId: versionId}
+                  targetVersionUniqueFileName = file.versions[0].uniqueFileName;
+                  targetVersionUniqueDate = file.versions[0].createdAt;
                 }
               } else {
                 console.log(`>>>     PROBLEM!!! failure to locate file ${fileId}`);
@@ -125,14 +131,53 @@ export async function addFollowSupportToSharedModelsCommand(app) {
             }
           } else {
             if (sm.deleted) {
-              console.log(`>>>     unable to locate dummyModelId/modelId ${modelId} but that is okay for a deleted item`);
+              console.log(`>>>     unable to locate dummyModelId/modelId ${dummyModelId} but that is okay for a deleted item`);
             } else {
-              console.log(`>>>     PROBLEM!!! failure to locate dummyModelId/modelId ${modelId}`);
+              console.log(`>>>     PROBLEM!!! failure to locate dummyModelId/modelId ${dummyModelId}`);
               problemCount += 1;
             }
           }
+          // now get the real file id
+          if (targetVersionUniqueFileName || targetVersionUniqueDate) {
+            const keyModelId = sm.cloneModelId;
+            let keyFileArray = [];
+            for (const fid in fileCache) {
+              const file = fileCache[fid];
+              if (file.modelId) {
+                if (file.modelId.toString() === keyModelId.toString()) {
+                  keyFileArray.push(file);
+                }
+              }
+            }
+            if (keyFileArray.length === 0) {
+              if (sm.deleted) {
+                console.log('>>>     No true file found, but this is a deleted shared-model so that is okay.');
+              } else {
+                console.log(`>>>     PROBLEM!!! failure to locate a true file pointing to model ${keyModelId}`);
+              }
+            } else if (keyFileArray.length > 1) {
+              console.log(`>>>     PROBLEM!!! found MULTIPLE true files pointing to model ${keyModelId}`);
+            } else {
+              finalFileId = keyFileArray[0]._id;
+              const matchingVersion = keyFileArray[0].versions.find(
+                version => version.uniqueFileName === targetVersionUniqueFileName
+              );
+              if (matchingVersion) {
+                finalVersionId = matchingVersion._id;
+              } else {
+                console.log(`>>>     PROBLEM!!! cannot find matching version in file ${finalFileId}`);
+              }
+            }
+          }
+          // put it together
+          if (finalVersionId !== null && finalFileId) {
+            changes.fileDetail = {fileId: finalFileId, versionId: finalVersionId}
+          } else {
+            console.log(`>>>     SKIPPING fileDetail`);
+          }
         }
       }
+
       //
       // versionFollowing
       //
