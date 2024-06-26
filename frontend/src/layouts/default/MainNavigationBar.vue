@@ -2,8 +2,12 @@
   <v-navigation-drawer
     :rail="rail"
     permanent
-    @click="rail = !rail"
   >
+    <v-list-item
+      :prepend-icon="railIcon"
+      title = " <<<<< "
+      @click="rail = !rail"
+    ></v-list-item>
     <v-list-item
       v-for="item in mainItems"
       :key="item.icon"
@@ -12,6 +16,21 @@
       :title="item.title"
       link
     ></v-list-item>
+    <template #append>
+      <v-list-item
+        v-for="item in secondaryItems"
+        :key="item.icon"
+        :prepend-icon="item.icon"
+        :to="item.route"
+        :title="item.title"
+        link
+      ></v-list-item>
+      <v-list-item
+        :prepend-icon="railIcon"
+        title = " <<<<< "
+        @click="rail = !rail"
+      ></v-list-item>
+    </template>
   </v-navigation-drawer>
 </template>
 
@@ -36,6 +55,9 @@ export default {
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization() {
       return this.userCurrentOrganization;
+    },
+    railIcon () {
+      return this.rail ? 'mdi-menu-right' : 'mdi-menu-left'
     },
     mainItems() {
       const items = [
