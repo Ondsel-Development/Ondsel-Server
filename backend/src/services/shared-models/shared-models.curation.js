@@ -25,7 +25,6 @@ export function buildNewCurationForSharedModel(sm) {
 export const afterCreateHandleSharedModelCuration = async (context) => {
   // first, set up the curation
   context.result.curation = buildNewCurationForSharedModel(context.result);
-  console.log("starting patch");
   const smService = context.service;
   const smDb = await smService.options.Model;
   await smDb.updateOne(
@@ -36,7 +35,5 @@ export const afterCreateHandleSharedModelCuration = async (context) => {
       },
     }
   )
-  console.log(context.result.curation);
-  console.log("done with patch");
   return context;
 }
