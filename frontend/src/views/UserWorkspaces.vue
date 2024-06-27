@@ -1,38 +1,45 @@
 <template>
-  <v-container v-if="organization">
-    <v-sheet class="d-flex flex-row justify-space-between">
-      <div class="text-h6">Personal Workspaces</div>
-      <div class="align-end">
-        <v-btn color="secondary" variant="elevated" @click="$refs.createWorkspace.$data.dialog = true;">Create Workspace</v-btn>
-      </div>
-    </v-sheet>
-    <v-sheet
-      class="d-flex flex-wrap flex-row"
-    >
-      <workspace-view-sheet
-        v-for="workspace in workspaces.data"
-        :key="workspace._id"
-        :workspace="workspace"
-        :is-org="false"
-        :username="username"
-      ></workspace-view-sheet>
-    </v-sheet>
-    <create-workspace-dialog ref="createWorkspace" :organization="organization" />
-  </v-container>
-  <v-row dense class="justify-center">
-    <template v-if="isFindPending">
-      <v-progress-circular indeterminate></v-progress-circular>
+  <Main>
+    <template #title>
+      <v-icon>mdi-folder-multiple-outline</v-icon>
+      Personal Workspaces
     </template>
-    <template v-else-if="workspaces.data?.length === 0">
-      <div class="text-grey-darken-1">There are no workspaces here!</div>
+    <template #content>
+      <v-container v-if="organization">
+        <v-sheet class="d-flex flex-row justify-end">
+          <div class="align-end">
+            <v-btn color="secondary" variant="elevated" @click="$refs.createWorkspace.$data.dialog = true;">Create Workspace</v-btn>
+          </div>
+        </v-sheet>
+        <v-sheet
+          class="d-flex flex-wrap flex-row"
+        >
+          <workspace-view-sheet
+            v-for="workspace in workspaces.data"
+            :key="workspace._id"
+            :workspace="workspace"
+            :is-org="false"
+            :username="username"
+          ></workspace-view-sheet>
+        </v-sheet>
+        <create-workspace-dialog ref="createWorkspace" :organization="organization" />
+      </v-container>
+      <v-row dense class="justify-center">
+        <template v-if="isFindPending">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </template>
+        <template v-else-if="workspaces.data?.length === 0">
+          <div class="text-grey-darken-1">There are no workspaces here!</div>
+        </template>
+        <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
+          <div class="text-grey-darken-1">You reached the end!</div>
+        </template>
+        <template v-else>
+          <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
+        </template>
+      </v-row>
     </template>
-    <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
-      <div class="text-grey-darken-1">You reached the end!</div>
-    </template>
-    <template v-else>
-      <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
-    </template>
-  </v-row>
+  </Main>
 </template>
 
 <script>
@@ -40,14 +47,14 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
-import ReprViewer from "@/components/ReprViewer.vue";
 import WorkspaceViewSheet from "@/components/WorkspaceViewSheet.vue";
+import Main from '@/layouts/default/Main.vue';
 
 const { Organization, Workspace } = models.api;
 
 export default {
   name: 'UserWorkspaces',
-  components: {WorkspaceViewSheet, ReprViewer, CreateWorkspaceDialog },
+  components: {WorkspaceViewSheet, CreateWorkspaceDialog, Main },
   mixins: [scrollListenerMixin],
   data: () => ({
     paginationData: {},

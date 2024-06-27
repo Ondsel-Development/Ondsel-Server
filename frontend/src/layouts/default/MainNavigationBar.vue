@@ -5,6 +5,7 @@
   >
     <v-list-item
       title = "Ondsel Lens"
+      :to="{name: 'LensHome'}"
     >
       <template v-slot:prepend>
         <v-img
@@ -21,13 +22,24 @@
     >
       <template v-slot:prepend>
         <v-sheet
+          v-if="loggedInUser"
           class="d-flex flex-column justify-center align-center text-uppercase mr-8"
           width="24"
           height="24"
           rounded="circle"
           color="grey-darken-2"
         >
-          {{ getInitials(currentOrganization?.name || '-') }}
+          {{ getInitials(currentOrganization?.name || '?') }}
+        </v-sheet>
+        <v-sheet
+          v-else
+          class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+          width="24"
+          height="24"
+          rounded="circle"
+          color="grey-darken-2"
+        >
+          -
         </v-sheet>
       </template>
     </v-list-item>
@@ -100,8 +112,11 @@
       </v-list-item>
       <v-list-item
         v-else
-        prepend-icon="mdi-account"
+        :to="{name: 'Login'}"
       >
+        <template #prepend>
+          <v-icon>mdi-login</v-icon>
+        </template>
         <template #title>
           <template v-if="currentRouteName !== 'Login'">
             <v-btn
@@ -229,9 +244,7 @@ export default {
     ...mapState('auth', ['user']),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
-    currentOrganization() {
-      return this.userCurrentOrganization;
-    },
+    currentOrganization: (vm) => vm.userCurrentOrganization,
     railIcon () {
       return this.rail ? 'mdi-menu-right' : 'mdi-menu-left'
     },
@@ -319,13 +332,6 @@ export default {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
       this.menu = false;
     },
-    gotoDownloadAndExplore() {
-      this.$router.push({name: 'DownloadAndExplore'});
-      this.menu = false;
-    },
-    gotoHome() {
-      this.$router.push({name: 'LensHome'});
-    },
     adjustRail() {
       this.rail = !!this.isMobile;
     },
@@ -342,7 +348,12 @@ export default {
   watch: {
     async 'isMobile'(to, from) {
       this.adjustRail();
-    }
+    },
+    async '$route'(to, from) {
+      if (this.isMobile) {
+        this.rail = true;
+      }
+    },
   }
 }
 </script>
