@@ -4,8 +4,8 @@
     permanent
   >
     <v-list-item
-      :title = "currentOrganization?.name || ''"
-      @click = "$refs.selectOrgDialog.$data.dialog = true"
+      :title = "currentOrganization?.name || 'public'"
+      id="navbar-org-action-activator"
     >
       <template v-slot:prepend>
         <v-sheet
@@ -15,7 +15,7 @@
           rounded="circle"
           color="grey-darken-2"
         >
-          {{ getInitials(currentOrganization?.name || '') }}
+          {{ getInitials(currentOrganization?.name || '-') }}
         </v-sheet>
       </template>
     </v-list-item>
@@ -60,6 +60,59 @@
         prepend-icon="mdi-copyright"
         title="2024 Ondsel Inc."
       ></v-list-item>
+      <v-divider></v-divider>
+      <v-list-item
+        id="navbar-user-action-activator"
+        v-if="loggedInUser"
+      >
+        <template #prepend>
+          <v-sheet
+            class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+            min-width="24"
+            min-height="24"
+            rounded="circle"
+            color="grey"
+          >
+            {{ getInitials(loggedInUser.user.name) }}
+          </v-sheet>
+        </template>
+        <template #title>
+          <v-sheet
+            class="d-flex flex-row justify-space-between"
+          >
+            <v-sheet>{{ loggedInUser.user.name }}</v-sheet>
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-sheet>
+        </template>
+      </v-list-item>
+      <v-list-item
+        v-else
+        prepend-icon="mdi-account"
+      >
+        <template #title>
+          <template v-if="currentRouteName !== 'Login'">
+            <v-btn
+              variant="outlined"
+              :to="{ name: 'Login' }"
+              density="compact"
+              class="navBarButtons"
+            >
+              Login
+            </v-btn>
+          </template>
+          <template v-if="currentRouteName !== 'SignUp'">
+            <v-btn
+              variant="tonal"
+              color="primary"
+              :to="{ name: 'SignUp' }"
+              density="compact"
+              class="navBarButtons"
+            >
+              SignUp
+            </v-btn>
+          </template>
+        </template>
+      </v-list-item>
       <v-list-item
         :prepend-icon="railIcon"
         title = " <<<<< "
@@ -67,18 +120,89 @@
       ></v-list-item>
     </template>
   </v-navigation-drawer>
-  <select-organization-dialog ref="selectOrgDialog"></select-organization-dialog>
+
+
+
+  <v-menu
+    activator="#navbar-org-action-activator"
+    v-if="loggedInUser"
+  >
+    <v-card>
+      <v-card-title>Select Organization</v-card-title>
+      <v-card-text>
+        <v-list>
+          <v-list-item
+            v-for="(organization, i) in user.organizations"
+            :key="i"
+            variant="text"
+            flat
+            :value="organization"
+            :active="currentOrganization ? organization._id === currentOrganization._id : false"
+          >
+            <template #title>
+              <v-sheet @click="goToOrganization(organization)">
+                {{ organization.name }}
+                <v-icon v-if="organization.type==='Open'" class="text-body-2" icon="mdi-earth" flag />
+              </v-sheet>
+            </template>
+            <template #append>
+              <v-btn
+                color="decorative"
+                flat
+                icon="mdi-cog"
+                @click="goToOrganizationEdit(organization)"
+              ></v-btn>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-menu>
+  <v-menu
+    v-if="loggedInUser"
+    activator="#navbar-user-action-activator"
+    v-model="menu"
+    :close-on-content-click="false"
+    transition="slide-y-transition"
+  >
+    <v-card min-width="200">
+      <v-list v-if="loggedInUser">
+        <v-list-item
+          :title="`${loggedInUser.user.name}`"
+        >
+        </v-list-item>
+        <v-list-item>
+          <v-btn
+            variant="text"
+            @click="gotoAccountSettings()"
+          >
+            account settings
+          </v-btn>
+        </v-list-item>
+      </v-list>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="logout"
+        >
+          Logout
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-menu>
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { getInitials } from '@/genericHelpers';
 import OrganizationMixin from '@/mixins/organizationMixin';
-import SelectOrganizationDialog from "@/layouts/default/SelectOrganizationDialog.vue";
 
 export default {
   name: "MainNavigationBar",
-  components: {SelectOrganizationDialog},
+  components: {},
   mixins: [ OrganizationMixin ],
   data: () => ({
     menu: false,
@@ -166,25 +290,10 @@ export default {
         },
       ].filter(item => item.condition);
     },
-    // orgItems() {
-    //   const orgs = this.user?.organizations || [];
-    //   return orgs.map((org) => {
-    //     return {
-    //       value: org._id.toString(),
-    //       title: org.name,
-    //       props: { subtitle: org.type},
-    //     }
-    //   });
-    // }
   },
   methods: {
     getInitials,
     ...mapActions('auth', {authLogout: 'logout'}),
-    // reassignSelect() {
-    //   const orgId = this.userCurrentOrganization?._id || '';
-    //   this.currentOrganizationId = orgId.toString();
-    //   console.log(`set to ${this.currentOrganizationId}`);
-    // },
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
       this.menu = false;
@@ -207,19 +316,14 @@ export default {
       }
     },
   },
-  // watch: {
-  //   async 'userCurrentOrganization'(to, from) {
-  //     this.reassignSelect();
-  //   }
-  // },
 }
 </script>
 
 
 <style scoped>
-.railButton {
-  position: absolute;
-  top: 49%;
-  right: -17px;
+.navBarButtons {
+  margin-right: 2px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 </style>
