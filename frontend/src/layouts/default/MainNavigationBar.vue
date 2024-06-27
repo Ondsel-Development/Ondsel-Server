@@ -221,6 +221,9 @@ export default {
     railIcon () {
       return this.rail ? 'mdi-menu-right' : 'mdi-menu-left'
     },
+    isMobile() {
+      return this.$vuetify.display.mobile;
+    },
     mainItems() {
       const items = [
         {
@@ -309,6 +312,9 @@ export default {
     gotoHome() {
       this.$router.push({name: 'LensHome'});
     },
+    adjustRail() {
+      this.rail = !!this.isMobile;
+    },
     doSearch() {
       this.rail = false;
       if (this.searchText) {
@@ -316,6 +322,14 @@ export default {
       }
     },
   },
+  async created() {
+    this.adjustRail();
+  },
+  watch: {
+    async 'isMobile'(to, from) {
+      this.adjustRail();
+    }
+  }
 }
 </script>
 
