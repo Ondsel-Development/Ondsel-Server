@@ -42,6 +42,7 @@ import XavierRemoveUser from "@/views/XavierRemoveUser.vue";
 import SharedWithMe from "@/views/SharedWithMe.vue";
 import MyNotifications from "@/views/MyNotifications.vue";
 import WorkspaceFile from "@/views/WorkspaceFile.vue";
+import WorkerErrorCodes from "@/views/WorkerErrorCodes.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -361,6 +362,11 @@ const routes = [
     component: WorkspaceFile,
     name: 'OrgWorkspaceFile',
     meta: { tryAuth: true },
+  },
+  {
+    path: '/error-codes',
+    component: WorkerErrorCodes,
+    name: 'WorkerErrorCodes',
   },
 ]
 

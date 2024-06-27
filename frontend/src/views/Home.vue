@@ -59,9 +59,23 @@
               type="error"
               border="top"
               class="text-left"
-              v-if="model && model.latestLogErrorIdForObjGenerationCommand"
+              v-if="showErrorMsg"
             >
-              <span>Internal server error occurred!</span>
+              <span class="text-body-1 font-weight-bold">{{ errorDetail.code }} - {{ errorDetail.label }}</span><br>
+              <span v-html="errorDetail.desc" /><br>
+              <span>
+                For more details, see
+                <v-btn
+                  class="ma-0 pa-0 text-capitalize"
+                  color="link"
+                  variant="plain"
+                  append-icon="mdi-open-in-new"
+                  style="text-decoration: none;"
+                  :to="{ name: 'WorkerErrorCodes' }"
+                >
+                  Error Codes
+                </v-btn>
+              </span>
             </v-alert>
             <v-alert
               variant="outlined"
@@ -111,10 +125,20 @@
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
                         {{ model.customerFileName }}
+                        <v-btn
+                          v-if="model.errorMsg"
+                          class="mx-2"
+                          append-icon="mdi-cached"
+                          size="small"
+                          color="secondary"
+                          @click="recomputeModel"
+                        >
+                          Recompute
+                        </v-btn>
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error"></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error || model.errorMsg"></v-progress-linear>
                     <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
@@ -242,7 +266,7 @@ export default {
       } catch (error) {
         this.error = 'NotFound';
       }
-      if (this.model && !this.model.objUrl && !this.model.isThumbnailGenerated) {
+      if (this.model && !this.model.errorMsg && !this.model.objUrl && !this.model.isThumbnailGenerated) {
         await this.model.patch({
           data: {
             shouldStartObjGeneration: true,
@@ -330,7 +354,37 @@ export default {
           this.generatePublicLinkValue = val;
         }
       }
-    }
+    },
+    showErrorMsg: vm => vm.model && vm.model.errorMsg,
+    errorDetail: vm => {
+      if (vm.showErrorMsg) {
+        if (vm.model.errorMsg.code === 101) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Missing Assemblies',
+            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}<span>`,
+          }
+        } else if (vm.model.errorMsg.code === 102) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Need tier Upgrade',
+            desc: 'Assembly feature detected, need at-least <span class="font-weight-medium font-italic">Peer</span>',
+          }
+        } else if (vm.model.errorMsg.code === 999) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Internal Server Error',
+            desc: 'Not able to process model, contact support',
+          }
+        } else {
+          return {
+            code: -1,
+            label: 'Undefined Error code',
+            desc: '',
+          }
+        }
+      }
+    },
   },
   methods: {
     fitModelToScreen() {
@@ -433,6 +487,18 @@ export default {
     objectSelected(object3d) {
       this.viewer.selectGivenObject(object3d);
     },
+    recomputeModel() {
+      if (this.model) {
+        this.model.patch({
+          data: {
+            latestLogErrorIdForObjGenerationCommand: null,
+            errorMsg: null,
+            shouldStartObjGeneration: true,
+            uniqueFileName: this.model.uniqueFileName,
+          }
+        })
+      }
+    }
   },
   watch: {
     'model.isObjGenerated'(v) {
