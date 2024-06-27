@@ -42,6 +42,10 @@ export default {
         desc: 'Missing assemblies, failed to find linked assemblies in parent directory.'
       },
       {
+        error: 102,
+        desc: 'Not allowed to recompute an assembly file in your current file.'
+      },
+      {
         error: 999,
         desc: 'Internal Server error occurred.'
       },

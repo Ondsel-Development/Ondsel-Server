@@ -364,6 +364,12 @@ export default {
             label: 'Missing Assemblies',
             desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}<span>`,
           }
+        } else if (vm.model.errorMsg.code === 102) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Need tier Upgrade',
+            desc: 'Assembly feature detected, need at-least <span class="font-weight-medium font-italic">Peer</span>',
+          }
         } else if (vm.model.errorMsg.code === 999) {
           return {
             code: vm.model.errorMsg.code,
