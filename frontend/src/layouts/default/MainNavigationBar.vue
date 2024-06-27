@@ -5,6 +5,7 @@
   >
     <v-list-item
       :title = "currentOrganization?.name || ''"
+      @click = "$refs.selectOrgDialog.$data.dialog = true"
     >
       <template v-slot:prepend>
         <v-sheet
@@ -66,15 +67,18 @@
       ></v-list-item>
     </template>
   </v-navigation-drawer>
+  <select-organization-dialog ref="selectOrgDialog"></select-organization-dialog>
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { getInitials } from '@/genericHelpers';
 import OrganizationMixin from '@/mixins/organizationMixin';
+import SelectOrganizationDialog from "@/layouts/default/SelectOrganizationDialog.vue";
 
 export default {
   name: "MainNavigationBar",
+  components: {SelectOrganizationDialog},
   mixins: [ OrganizationMixin ],
   data: () => ({
     menu: false,
