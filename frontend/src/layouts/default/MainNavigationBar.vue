@@ -4,6 +4,21 @@
     permanent
   >
     <v-list-item
+      :title = "currentOrganization?.name || ''"
+    >
+      <template v-slot:prepend>
+        <v-sheet
+          class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+          width="24"
+          height="24"
+          rounded="circle"
+          color="grey-darken-2"
+        >
+          {{ getInitials(currentOrganization?.name || '') }}
+        </v-sheet>
+      </template>
+    </v-list-item>
+    <v-list-item
       :prepend-icon="railIcon"
       title = " <<<<< "
       @click="rail = !rail"
@@ -126,12 +141,27 @@ export default {
           condition: true,
           route: {name: 'DownloadAndExplore'}
         },
-      ]
-    }
+      ].filter(item => item.condition);
+    },
+    // orgItems() {
+    //   const orgs = this.user?.organizations || [];
+    //   return orgs.map((org) => {
+    //     return {
+    //       value: org._id.toString(),
+    //       title: org.name,
+    //       props: { subtitle: org.type},
+    //     }
+    //   });
+    // }
   },
   methods: {
     getInitials,
     ...mapActions('auth', {authLogout: 'logout'}),
+    // reassignSelect() {
+    //   const orgId = this.userCurrentOrganization?._id || '';
+    //   this.currentOrganizationId = orgId.toString();
+    //   console.log(`set to ${this.currentOrganizationId}`);
+    // },
     logout() {
       this.authLogout().then(() => this.$router.push({ name: 'Logout' }));
       this.menu = false;
@@ -154,6 +184,11 @@ export default {
       }
     },
   },
+  // watch: {
+  //   async 'userCurrentOrganization'(to, from) {
+  //     this.reassignSelect();
+  //   }
+  // },
 }
 </script>
 
