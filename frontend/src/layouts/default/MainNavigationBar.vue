@@ -24,6 +24,20 @@
       @click="rail = !rail"
     ></v-list-item>
     <v-list-item
+      prepend-icon="mdi-magnify"
+    >
+      <v-text-field
+        v-model="searchText"
+        density="compact"
+        label="Search..."
+        :variant="rail ? 'plain' : 'outlined'"
+        hide-details
+        single-line
+        @click:append-inner="doSearch"
+        @keyup.enter="doSearch"
+      ></v-text-field>
+    </v-list-item>
+    <v-list-item
       v-for="item in mainItems"
       :key="item.icon"
       :prepend-icon="item.icon"
@@ -39,6 +53,11 @@
         :to="item.route"
         :title="item.title"
         link
+      ></v-list-item>
+      <v-divider></v-divider>
+      <v-list-item
+        prepend-icon="mdi-copyright"
+        title="2024 Ondsel Inc."
       ></v-list-item>
       <v-list-item
         :prepend-icon="railIcon"
