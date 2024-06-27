@@ -4,6 +4,18 @@
     permanent
   >
     <v-list-item
+      title = "Ondsel Lens"
+    >
+      <template v-slot:prepend>
+        <v-img
+          src="https://ondsel.com/img/Icon_Orange.svg"
+          width="24"
+          height="24"
+          class="mr-8"
+        ></v-img>
+      </template>
+    </v-list-item>
+    <v-list-item
       :title = "currentOrganization?.name || 'public'"
       id="navbar-org-action-activator"
     >
@@ -20,6 +32,7 @@
       </template>
     </v-list-item>
     <v-list-item
+      class="bg-light-green-lighten-4"
       :prepend-icon="railIcon"
       title = " <<<<< "
       @click="rail = !rail"
@@ -117,6 +130,7 @@
         :prepend-icon="railIcon"
         title = " <<<<< "
         @click="rail = !rail"
+        class="bg-light-green-lighten-4"
       ></v-list-item>
     </template>
   </v-navigation-drawer>
