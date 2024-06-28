@@ -336,7 +336,6 @@ export default {
       this.$refs.exportModelDialog.$data.dialog = true;
     },
     async updateModel() {
-      console.log("SPIN FROM SHARED MODEL");
       this.isReloadingOBJ = true;
       this.isModelLoaded = false;
       this.model.isObjGenerated = false;
@@ -361,7 +360,6 @@ export default {
           const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
           const fd = new FormData();
-          console.log("TN SAVE FROM SHARED MODEL");
           fd.append('file', image, `${modelId}_thumbnail.PNG`);
           const uploadUrl = `${import.meta.env.VITE_APP_API_URL}upload`;
 
