@@ -142,30 +142,28 @@
     :public-view="publicView"
     @changed-file="changedFile"
   ></file-info-dialog>
-  <share-model-dialog
-    v-if="!publicView"
-    ref="sharedModelDialogRef"
-    :is-active='somethingTrue'
-    :model-id="file.modelId"
-    @share-model="changedFile"
-  ></share-model-dialog>
   <shared-model-link-action-dialog
     ref="sharedModelLinkActionDialogRef"
     :can-user-write="canUserWrite"
     :public-view="publicView"
     @changed-file="changedFile"
   ></shared-model-link-action-dialog>
+  <share-link-crud-dialog
+    v-if="!publicView"
+    ref="sharedModelDialogRef"
+    @share-model="changedFile"
+  ></share-link-crud-dialog>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
-import ShareModelDialog from "@/components/ShareModelDialog.vue";
 import SharedModelLinkActionDialog from "@/components/SharedModelLinkActionDialog.vue";
+import ShareLinkCrudDialog from "@/components/ShareLinkCrudDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: {SharedModelLinkActionDialog, ShareModelDialog, FileInfoDialog },
+  components: {ShareLinkCrudDialog, SharedModelLinkActionDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
@@ -257,9 +255,11 @@ export default {
       const name = this.getUserLabel(version.userId, this.file.relatedUserDetails)
       let data = this.$refs.sharedModelDialogRef.$data;
       data.dialog = true;
+      data.modelId = this.file.fileId;
+      data.creatorRole = false;
       data.versionFollowing = 'Locked';
       data.versionFollowingPreset = true;
-      data.versionDescription = `ver ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
+      data.versionDescription = `file version ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
     },
     async startSharedModelLinkActionDialog(item) {
       let data = this.$refs.sharedModelLinkActionDialogRef.$data;
