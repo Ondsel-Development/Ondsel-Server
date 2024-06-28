@@ -230,6 +230,18 @@ export default {
     mainItems() {
       return [
         [
+          'mdi-folder-multiple-outline',
+          'Workspaces',
+          this.user && this.currentOrganization && this.currentOrganization?.type === 'Personal',
+          { name: 'UserWorkspaces', params: { id: this.user?.username }}
+        ],
+        [
+          'mdi-folder-multiple-outline',
+          'Workspaces',
+          this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',
+          { name: 'OrganizationWorkspaces', params: { id: this.currentOrganization?.refName }}
+        ],
+        [
           'mdi-cube-outline',
           'Models',
           this.user,
