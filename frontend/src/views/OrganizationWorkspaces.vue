@@ -80,7 +80,7 @@ export default {
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
     try {
-      await Organization.get(this.orgName);
+      await Organization.get(this.orgSrc._id);
     } catch (e) {
       if (e.data?.type === 'PermissionError') {
         this.$router.push({ name: 'PageNotFound' });
