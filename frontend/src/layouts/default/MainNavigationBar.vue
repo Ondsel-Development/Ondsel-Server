@@ -44,9 +44,8 @@
       </template>
     </v-list-item>
     <v-list-item
-      class="bg-light-green-lighten-4"
       :prepend-icon="railIcon"
-      title = " <<<<< "
+      title = " "
       @click="rail = !rail"
     ></v-list-item>
     <v-list-item
@@ -143,9 +142,8 @@
       </v-list-item>
       <v-list-item
         :prepend-icon="railIcon"
-        title = " <<<<< "
+        title = " "
         @click="rail = !rail"
-        class="bg-light-green-lighten-4"
       ></v-list-item>
     </template>
   </v-navigation-drawer>
@@ -246,7 +244,7 @@ export default {
     currentRouteName: (vm) => vm.$route.name,
     currentOrganization: (vm) => vm.userCurrentOrganization,
     railIcon () {
-      return this.rail ? 'mdi-menu-right' : 'mdi-menu-left'
+      return this.rail ? 'mdi-arrow-expand-right' : 'mdi-arrow-collapse-left'
     },
     isMobile() {
       return this.$vuetify.display.mobile;
