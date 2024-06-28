@@ -307,6 +307,7 @@ const triggerLambda = async context => {
       {
         shouldStartObjGeneration: true,
         fileId: file._id,
+        isThumbnailGenerated: false,
       },
       {
         $triggerObjGeneration: true,  // this will skip canUserUpdateModel check

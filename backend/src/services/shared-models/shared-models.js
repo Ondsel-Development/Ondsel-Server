@@ -252,7 +252,7 @@ const createClone = async (context) => {
   if (context.data.versionFollowing === VersionFollowTypeMap.active) {
     // if the versionFollowing always follows the active version, then simply point to the original model and
     // do not create a unique `isSharedModel` Model
-    context.data.dummyModelId = context.data.cloneModelId;
+    // context.data.dummyModelId = context.data.cloneModelId;
     return context;
   }
 

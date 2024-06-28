@@ -242,7 +242,7 @@ const startObjGeneration = async (context) => {
   }
 
   context.data.shouldStartObjGeneration = false;
-  context.data.isThumbnailGenerated = false;
+  // context.data.isThumbnailGenerated = false;
   context.data.isObjGenerationInProgress = true;
   context.data.isObjGenerated = false;
   context.data.latestLogErrorIdForObjGenerationCommand = null;
