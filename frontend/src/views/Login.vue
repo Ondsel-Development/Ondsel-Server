@@ -1,85 +1,96 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-sheet class="mx-auto position-relative d-flex flex-wrap">
-      <v-card title="Login to Ondsel" width="26em" class="pa-2 ma-2">
-        <template v-slot:loader="{ isActive }">
-          <v-progress-linear
-            :active="isAuthenticatePending"
-            height="4"
-            indeterminate
-          ></v-progress-linear>
-        </template>
-        <v-form v-model="isValid" @submit.prevent="login">
-          <v-text-field
-            v-model="user.email"
-            label="Email"
-            :rules="[rules.isRequired, rules.isEmail]"
-            :disabled="isAuthenticatePending"
-            autofocus
-          ></v-text-field>
+  <Main>
+    <template #title>
+    </template>
+    <template #content>
+      <v-sheet
+        class="d-flex flex-row flex-wrap justify-center align-center"
+      >
+        <v-card title="Login to Ondsel" width="26em" class="pa-2 mt-16">
+          <v-card-text>
+            <template v-slot:loader="{ isActive }">
+              <v-progress-linear
+                :active="isAuthenticatePending"
+                height="4"
+                indeterminate
+              ></v-progress-linear>
+            </template>
+            <v-form v-model="isValid" @submit.prevent="login">
+              <v-text-field
+                v-model="user.email"
+                label="Email"
+                :rules="[rules.isRequired, rules.isEmail]"
+                :disabled="isAuthenticatePending"
+                autofocus
+              ></v-text-field>
 
-          <v-text-field
-            v-model="user.password"
-            label="Password"
-            type="password"
-            :rules="[rules.isRequired]"
-            :disabled="isAuthenticatePending"
-          ></v-text-field>
+              <v-text-field
+                v-model="user.password"
+                label="Password"
+                type="password"
+                :rules="[rules.isRequired]"
+                :disabled="isAuthenticatePending"
+              ></v-text-field>
 
-          <v-card-actions>
-            <v-btn
-              type="submit"
-              v-bind:disabled="isAuthenticatePending"
-              color="primary"
-              variant="elevated"
-              class="mt-2"
-            >Submit</v-btn>
-          </v-card-actions>
+              <v-row>
+                <v-btn
+                  type="submit"
+                  v-bind:disabled="isAuthenticatePending"
+                  color="primary"
+                  variant="elevated"
+                  class="ml-4"
+                >Submit</v-btn>
+              </v-row>
 
-          <v-row justify="end">
-            <v-col class="text-right">
-              <v-btn
-                size="x-small"
-                color="secondary"
-                variant="elevated"
-                @click.stop="openForgotPasswordDialog()">
-                Forgot Password?
-              </v-btn>
-              <v-spacer></v-spacer>
-              <ForgotPasswordDialog
-                :is-active="isForgotPasswordDialogActive"
-                ref="forgotPasswordDialog"
-              />
-            </v-col>
-          </v-row>
-
-        </v-form>
-      </v-card>
-      <v-card width="26em" class="pa-2 mx-2" v-if="isRedirectedFromDownloadPage">
-        <v-card-title>...redirect from download page</v-card-title>
-        <v-card-text>
-          <p>&nbsp;</p>
-          <p>
-            You have been redirected from the Download & Explore page. To reach that page, you must be logged in.
-          </p>
-          <p>&nbsp;</p>
-          <p>
-            If you don’t have an account, visit <v-btn density="compact" class="mx-2" color="blue" variant="tonal" :to="{ name: 'SignUp' }">Signup</v-btn> to create a new account
-          </p>
-          <p>&nbsp;</p>
-          <p>
-            If you <b>do</b> have an account, just login using the form on the left. You will then be automatically sent to the page.
-          </p>
-        </v-card-text>
-      </v-card>
-    </v-sheet>
-    <v-snackbar
-      :timeout="2000"
-      v-model="showSnacker"
-    >
-      {{ snackerMsg }}
-    </v-snackbar>
-  </v-container>
+              <v-row justify="end">
+                <v-col class="text-right">
+                  <v-btn
+                    size="x-small"
+                    color="secondary"
+                    variant="elevated"
+                    @click.stop="openForgotPasswordDialog()">
+                    Forgot Password?
+                  </v-btn>
+                  <v-spacer></v-spacer>
+                  <ForgotPasswordDialog
+                    :is-active="isForgotPasswordDialogActive"
+                    ref="forgotPasswordDialog"
+                  />
+                </v-col>
+              </v-row>
+            </v-form>
+            <v-snackbar
+              :timeout="2000"
+              v-model="showSnacker"
+            >
+              {{ snackerMsg }}
+            </v-snackbar>
+          </v-card-text>
+        </v-card>
+        <v-card
+          width="26em"
+          class="pa-2 mx-2"
+          v-if="isRedirectedFromDownloadPage"
+        >
+          <v-card-title>...redirect from download page</v-card-title>
+          <v-card-text>
+            <p>&nbsp;</p>
+            <p>
+              You have been redirected from the Download & Explore page. To reach that page, you must be logged in.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              If you don’t have an account, visit <v-btn density="compact" class="mx-2" color="blue" variant="tonal" :to="{ name: 'SignUp' }">Signup</v-btn> to create a new account
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              If you <b>do</b> have an account, just login using the form on the left. You will then be automatically sent to the page.
+            </p>
+          </v-card-text>
+        </v-card>
+      </v-sheet>
+    </template>
+  </Main>
 </template>
 
 <script>
@@ -87,10 +98,12 @@ import {mapState, mapActions, mapGetters} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import { resetStores } from '@/store';
 import ForgotPasswordDialog from "@/components/ForgotPasswordDialog.vue";
+import Main from '@/layouts/default/Main.vue';
+
 
 export default {
   name: 'Login',
-  components: {ForgotPasswordDialog},
+  components: {ForgotPasswordDialog, Main},
   data() {
     return {
       result: {},

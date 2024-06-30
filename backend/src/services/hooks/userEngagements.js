@@ -67,7 +67,7 @@ const generateUserEngagementPayload = context => {
   const { path, method, params } = context;
 
   const getSource = () => {
-    const source = _.get(params.headers, 'X-Lens-Source');
+    const source = _.get(params.headers, 'x-lens-source');
     if (source) {
       if (_.some(SourceTypeMap, v => v === source)) {
         return source;
