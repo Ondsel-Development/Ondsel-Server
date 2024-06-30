@@ -3,7 +3,6 @@ import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
 import {iff, preventChanges} from 'feathers-hooks-common'
 import { hooks as schemaHooks } from '@feathersjs/schema'
-import { sendCreateAccountNotificationToSlack } from '../../slack-notifications.js';
 import {
   userDataValidator,
   userPatchValidator,
@@ -30,13 +29,12 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from "../../hooks/handle-public-info-query.js";
-import {copyUserBeforePatch, distributeUserSummaries, distributeUserSummariesHook} from "./users.distrib.js";
+import {copyUserBeforePatch, distributeUserSummariesHook} from "./users.distrib.js";
 import {buildNewCurationForUser, specialUserOrgCurationHandler} from "./users.curation.js";
 import {changeEmailNotification} from "./commands/changeEmailNotification.js";
-import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {notificationsEntrySchema} from "../notifications/notifications.subdocs.js";
 import {verifyOndselAdministrativePower} from "../hooks/administration.js";
 import {removeUser} from "./commands/removeUser.js";
+import { handleQueryArgs } from "./helpers.js";
 
 export * from './users.class.js'
 export * from './users.schema.js'
@@ -134,6 +132,7 @@ export const user = (app) => {
     around: {
       all: [
         schemaHooks.resolveExternal(userExternalResolver),
+        handleQueryArgs(),
         handlePublicOnlyQuery(userPublicFields),
         resolvePrivateResults(userResolver)
       ],
@@ -205,7 +204,6 @@ export const user = (app) => {
         createDefaultOrganization,
         createNotificationsDoc,
         createSampleModels,
-        sendCreateAccountNotificationToSlack,
       ],
       patch: [
         distributeUserSummariesHook
