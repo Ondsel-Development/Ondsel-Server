@@ -19,7 +19,7 @@
             <td>{{ dateFormat(file.createdAt) }}</td>
           </tr>
           <tr v-if="file">
-            <td class="font-weight-medium">Name</td>
+            <td class="font-weight-medium">File</td>
             <td>
               <v-btn
                   color="link"
@@ -30,7 +30,7 @@
                   :to="{ name: 'Home', params: { id: file.modelId } }"
                   target="_blank"
               >
-                {{ file.custFileName }}
+                {{ fileName }}
               </v-btn>
             </td>
           </tr>
@@ -123,20 +123,12 @@ export default {
     user: null,
     workspace: null,
     organization: null,
+    fileSummary: null,
   }),
   computed: {
     ...mapState('directories', ['isGetPending']),
     directory: vm => Directory.getFromStore(vm.directoryId),
     file: vm => File.getFromStore(vm.fileSummary?._id),
-    fileSummary: vm => {
-      if (vm.directory) {
-        for (let fileDoc of vm.directory.files) {
-          if (fileDoc.custFileName === vm.fileName) {
-            return fileDoc;
-          }
-        }
-      }
-    }
   },
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
@@ -172,14 +164,40 @@ export default {
       // Open the URL in a new tab
       window.open(href, '_blank');
     },
+    async getFile(fileName) {
+      let file;
+      let dirNames = fileName.split('/');
+      const custFileName = dirNames.pop();
+      let directory = Directory.getFromStore(this.directoryId) || await Directory.get(this.directoryId);
+      if (fileName.includes('/')) {
+        let directoryId;
+        for (let directoryName of dirNames) {
+          if (directoryName === '..') {
+            directoryId = directory.parentDirectory._id;
+          } else {
+            for (let directorySummary of directory.directories) {
+              if (directorySummary.name === directoryName) {
+                directoryId = directorySummary._id;
+                break;
+              }
+            }
+          }
+          directory = Directory.getFromStore(directoryId) || await Directory.get(directoryId);
+        }
+      }
+      for (let fileSummary of directory.files) {
+        if (fileSummary.custFileName === custFileName) {
+          file = fileSummary;
+        }
+      }
+      return file;
+    },
     async openDialog(directoryId, fileName) {
       if (directoryId && fileName) {
         this.directoryId = directoryId;
         this.fileName = fileName;
         this.dialog = true;
-        if (!this.directory) {
-          await Directory.get(this.directoryId);
-        }
+        this.fileSummary = await this.getFile(fileName);
         if (this.fileSummary && !this.file) {
           await File.get(this.fileSummary._id);
         }
