@@ -6,41 +6,44 @@
     <v-sheet
       v-for="(item, index) in versionRows"
       :key="item._id"
-      class="border-sm pa-1"
+      class="pa-1"
     >
+      <v-divider></v-divider>
       <v-sheet class="d-flex flex-row flex-wrap">
-        <v-sheet width="3em">
+        <v-sheet width="3em" class="pt-1">
           <span
             v-if="item._id.toString() === visibleVersionId || !isFileModel(file)"
             class="mx-1"
           >
-            <v-icon
+            <v-btn
               v-if="item._id.toString() === visibleVersionId"
               size="small"
-              class="ma-2"
-            >
-              mdi-eye-outline
-            </v-icon>
-            <v-icon
+              variant="text"
+              icon="mdi-eye-outline"
+            ></v-btn>
+            <v-btn
               v-else
               size="small"
-              class="ma-2"
-            >
-              mdi-space
-            </v-icon>
+              variant="text"
+              icon="midi-space"
+            ></v-btn>
           </span>
           <v-btn
             v-if="isFileModel(file) && item._id.toString() !== visibleVersionId"
             size="small"
             icon="mdi-eye-off-outline"
+            class="ml-1"
             @click="doChangeVisibleVersion(item._id.toString())"
           ></v-btn>
         </v-sheet>
-        <v-sheet width="20em" class="my-2">
+        <v-btn
+          width="20em"
+          class="my-2 mr-2"
+        >
           {{item.message}}
-          <span v-if="file.currentVersionId === item._id" class="ml-2"><b>Active</b></span>
-        </v-sheet>
-        <v-sheet width="20em" class="my-2">
+          <span v-if="file.currentVersionId === item._id" class="ml-2"><b>(Active)</b></span>
+        </v-btn>
+        <v-sheet width="20em" class="ma-2">
           from {{ getUserLabel(item.userId, file.relatedUserDetails) }}
           <br>
           on {{ dateFormat(item.createdAt) }}
@@ -49,12 +52,19 @@
           class="my-2"
           :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           @click="toggleLinkDisplay(index)"
+          width="6em"
         >
           Links
         </v-btn>
       </v-sheet>
-      <v-sheet v-if="item.displayLinks" class="d-flex flex-column flex-wrap border-lg">
-        <v-sheet v-if="item.lockedLinks.length === 0" class="ml-1 my-3">
+      <v-sheet
+        v-if="item.displayLinks"
+        class="d-flex flex-column flex-wrap border-lg ml-16"
+      >
+        <v-sheet
+          v-if="item.lockedLinks.length === 0"
+          class="ml-2 my-3"
+        >
           <i>No Links Locked to this version.</i>
         </v-sheet>
         <v-sheet
@@ -69,10 +79,9 @@
             <v-sheet width="4em" class="my-3 mr-4">
               {{link.isActive ? 'Enabled' : 'Disabled'}}
             </v-sheet>
-            <v-sheet width="20em" class="my-3">
+            <v-sheet width="16em" class="my-3">
               <b>{{link.publicDescription || 'no public description'}}</b>
-            </v-sheet>
-            <v-sheet width="20em" class="my-3">
+              <br>
               private: <i>{{link.description || 'no note'}}</i>
             </v-sheet>
             <v-sheet width="3em">

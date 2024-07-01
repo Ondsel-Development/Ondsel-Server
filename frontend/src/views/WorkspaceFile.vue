@@ -14,6 +14,7 @@
                   v-if="file.modelId"
                   :href="fileModelUrl"
                   target="_blank"
+                  class="mr-2 mt-2"
                   style="text-decoration: none; color: inherit;"
                 >
                   <v-btn
@@ -24,7 +25,7 @@
                 </a>
                 <v-btn
                   v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
-                  class="mx-2"
+                  class="mr-2 mb-n1"
                   color="decoration"
                   flat
                   :disabled="!canUserWrite"
@@ -33,7 +34,7 @@
                 ></v-btn>
                 <v-btn
                   v-if="!publicView && workspace.curation?.representativeFile?._id === file._id"
-                  class="mx-2"
+                  class="mr-2 mb-n1"
                   color="decoration"
                   flat
                   :disabled="!canUserWrite"
@@ -41,7 +42,7 @@
                   icon="mdi-camera"
                 ></v-btn>
                 <v-btn
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="isFileDownloadInProgress || !user"
@@ -52,7 +53,7 @@
                 </v-btn>
                 <v-btn
                   v-if="!publicView"
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="!canUserWrite"
@@ -62,14 +63,14 @@
                 </v-btn>
                 <v-btn
                   v-if="!publicView"
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="!canUserWrite"
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
               </v-sheet>
-              <file-view-port :file="file" :version-id="viewPortVersionId"></file-view-port>
+              <file-view-port :file="file" :version-id="viewPortVersionId" class="mt-2"></file-view-port>
               <v-sheet name="tables">
                 <file-versions-table
                   :file="file"
@@ -81,7 +82,10 @@
                 >
                 </file-versions-table>
               </v-sheet>
-              <v-sheet name="return buttons">
+              <v-sheet
+                name="return buttons"
+                class="mt-4"
+              >
                 <v-btn
                   color="secondary"
                   variant="elevated"
@@ -108,7 +112,7 @@
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
         </v-sheet>
-        <v-card min-width="32em" class="ma-1" border>
+        <v-card min-width="24em" class="ma-1" border>
           <v-card-title>{{ file.custFileName }}</v-card-title>
           <v-card-text>
             <v-data-table
@@ -199,7 +203,7 @@ export default {
         value: this.file.directory.name,
       },
       {
-        name: 'Revision Count',
+        name: 'Version Count',
         value: this.file.versions.length || 0,
       },
       {

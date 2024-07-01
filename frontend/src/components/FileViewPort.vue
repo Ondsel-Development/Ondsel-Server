@@ -14,27 +14,19 @@
       ></v-img>
       <v-sheet
         v-else
-        class="ma-16"
+        class="ma-16 d-flex flex-row justify-center align-center"
       >
-        <p class="text-center">
-          Image Not Generated Yet
-        </p>
-        <p v-if="file.currentVersion._id.toString() === versionId" class="text-center">
-          Click on "Explore" to create image
-        </p>
-        <p v-if="file.currentVersion._id.toString() !== versionId" class="text-center">
-          You can only create new Images on the active version.
-        </p>
-      </v-sheet>
-      <v-sheet
-        width="6em"
-      >
-        <v-icon
-          size="small"
-        >
-          mdi-eye-outline
-        </v-icon>
-        ..{{(versionId || "").substr(-6)}}
+        <v-sheet width="20em">
+          <p>
+            Image Not Generated Yet
+          </p>
+          <p v-if="file.currentVersion._id.toString() === versionId">
+            Click on "Explore" to create image
+          </p>
+          <p v-if="file.currentVersion._id.toString() !== versionId">
+            You can only create new Images on the active version.
+          </p>
+        </v-sheet>
       </v-sheet>
     </v-sheet>
     <v-sheet
