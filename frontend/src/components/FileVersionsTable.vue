@@ -39,7 +39,7 @@
         <v-sheet
           width="20em"
           class="my-2 mr-2 pa-2 text-blue-darken-4 cursor-pointer"
-          @click="doNothing()"
+          @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
         >
           {{item.message}}
           <span v-if="file.currentVersionId === item._id" class="ml-2"><b>(Active)</b></span>
@@ -58,10 +58,17 @@
         >
           Links
         </v-btn>
+<!--        <v-sheet width="3em">-->
+<!--          <v-btn-->
+<!--            color="secondary"-->
+<!--            icon="mdi-printer-3d"-->
+<!--            class="ma-1 ml-2"-->
+<!--          ></v-btn>-->
+<!--        </v-sheet>-->
       </v-sheet>
       <v-sheet
         v-if="item.displayLinks"
-        class="d-flex flex-column flex-wrap border-lg ml-16"
+        class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
         <v-sheet><span class="text-h6">Links For This Version</span></v-sheet>
         <v-sheet
@@ -95,13 +102,7 @@
                   color="secondary"
                   icon="mdi-cog"
                   class="ma-1"
-                ></v-btn>
-              </v-sheet>
-              <v-sheet width="3em">
-                <v-btn
-                  color="secondary"
-                  icon="mdi-printer-3d"
-                  class="ma-1 ml-2"
+                  @click="startEditLinkForFollowingActiveDialog(link)"
                 ></v-btn>
               </v-sheet>
             </v-sheet>
@@ -113,6 +114,7 @@
             <v-btn
               color="secondary"
               prepend-icon="mdi-plus"
+              @click="startCreateLinkForVersionDialog(item)"
             >
               Create Link For This Version
             </v-btn>
@@ -121,7 +123,7 @@
       </v-sheet>
       <v-sheet
         v-if="item.displayLinks && file.currentVersionId === item._id"
-        class="d-flex flex-column flex-wrap border-lg ml-16 mt-2"
+        class="d-flex flex-column flex-wrap border-lg ml-16 mt-2 pl-2"
       >
         <v-sheet><span class="text-h6">Links That Follow "Active"</span></v-sheet>
         <v-sheet
@@ -154,6 +156,7 @@
                 <v-btn
                   color="secondary"
                   icon="mdi-cog"
+                  @click="startEditLinkForFollowingActiveDialog(link)"
                 ></v-btn>
               </v-sheet>
             </v-sheet>
@@ -165,6 +168,7 @@
             <v-btn
               color="secondary"
               prepend-icon="mdi-plus"
+              @click="startCreateLinkForFollowingActiveDialog()"
             >
               Create Link Following Active
             </v-btn>
@@ -181,12 +185,6 @@
     :public-view="publicView"
     @changed-file="changedFile"
   ></file-info-dialog>
-  <shared-model-link-action-dialog
-    ref="sharedModelLinkActionDialogRef"
-    :can-user-write="canUserWrite"
-    :public-view="publicView"
-    @changed-file="changedFile"
-  ></shared-model-link-action-dialog>
   <share-link-crud-dialog
     v-if="!publicView"
     ref="sharedModelDialogRef"
@@ -197,12 +195,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
-import SharedModelLinkActionDialog from "@/components/SharedModelLinkActionDialog.vue";
 import ShareLinkCrudDialog from "@/components/ShareLinkCrudDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: {ShareLinkCrudDialog, SharedModelLinkActionDialog, FileInfoDialog },
+  components: {ShareLinkCrudDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
@@ -227,18 +224,12 @@ export default {
     activeFollowingLinkRows: (vm) => {
       let result = [];
       if (vm.isFileModel(vm.file)) {
-        let result = [];
-        let linksFound = false;
-        if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
+        if (vm.file.followingActiveSharedModels && vm.file.followingActiveSharedModels.length > 0) {
           for (const sm of vm.file.followingActiveSharedModels) {
             if ((sm.protection === "Listed" && sm.isActive ) || !vm.publicView) {
-              linksFound = true;
-              result.push({nature: 'link', ...sm});
+              result.push(sm);
             }
           }
-        }
-        if (!linksFound) {
-          result.push({nature: 'none'});
         }
       }
       return result;
@@ -269,22 +260,42 @@ export default {
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
-    async startSharedModelDialogFollowingActive() {
+    async startEditLinkForFollowingActiveDialog(link) {
       let data = this.$refs.sharedModelDialogRef.$data;
+      data.modelId = this.file.modelId;
+      data.creatorRole = false;
+      data.versionFollowingPreset = true;
+      data.versionDescription = `edit or delete link`;
+      await this.$refs.sharedModelDialogRef.assignFromExistingSharedModel(link);
+      if (data.versionFollowing === 'Locked') {
+        data.versionDescription = `Specific ${this.file.custFileName} Version`;
+      } else {
+        data.versionDescription = `Always Shows Active Version Of ${this.file.custFileName}`;
+      }
       data.dialog = true;
+    },
+    async startCreateLinkForFollowingActiveDialog() {
+      let data = this.$refs.sharedModelDialogRef.$data;
+      data.sharedModel = null;
+      data.modelId = this.file.modelId;
+      data.creatorRole = true;
       data.versionFollowing = 'Active';
       data.versionFollowingPreset = true;
-      data.versionDescription = "Always Shows Active Version Of File";
+      data.versionDescription = `Always Shows Active Version Of ${this.file.custFileName}`;
+      await this.$refs.sharedModelDialogRef.cleanCreatorStart();
+      data.dialog = true;
     },
-    async startSharedModelDialogForVersion(version) {
+    async startCreateLinkForVersionDialog(version) {
       const name = this.getUserLabel(version.userId, this.file.relatedUserDetails)
       let data = this.$refs.sharedModelDialogRef.$data;
-      data.dialog = true;
-      data.modelId = this.file.fileId;
-      data.creatorRole = false;
+      data.sharedModel = null;
+      data.modelId = this.file.modelId;
+      data.creatorRole = true;
       data.versionFollowing = 'Locked';
       data.versionFollowingPreset = true;
-      data.versionDescription = `file version ..${version._id.substr(-6)} : "${version.message}" posted by ${name}`;
+      data.versionDescription = `${this.file.custFileName} File Version "${version.message}" posted by ${name}`;
+      await this.$refs.sharedModelDialogRef.cleanCreatorStart();
+      data.dialog = true;
     },
     async startSharedModelLinkActionDialog(item) {
       let data = this.$refs.sharedModelLinkActionDialogRef.$data;
@@ -326,7 +337,7 @@ export default {
   },
   watch: {
     async 'file'(to, from) {
-      this.rebuild();
+      await this.rebuild();
     }
   }
 }

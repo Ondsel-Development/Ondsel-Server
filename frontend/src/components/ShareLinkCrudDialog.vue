@@ -6,7 +6,7 @@
   >
     <v-card>
       <v-card-title>
-        Link
+        {{creatorRole ? 'Create' : 'Update'}} Link
       </v-card-title>
       <v-card-subtitle v-if="versionDescription">{{versionDescription}}</v-card-subtitle>
       <v-progress-linear
@@ -36,7 +36,7 @@
         </v-alert>
       </v-card-item>
       <v-card-text>
-        <v-form ref="form" @submit.prevent="generateSharedModelUrl">
+        <v-form ref="form">
           <v-switch
             class="text-green-darken-3 mt-n4"
             v-model="isActive"
@@ -66,7 +66,7 @@
             v-model="protection"
             label="Protection"
             density="compact"
-            :items="['Listed', 'Unlisted', 'Pin', 'Direct']"
+            :items="protectionItems"
             hide-details
           ></v-combobox>
           <div
@@ -99,21 +99,43 @@
             readonly
             hide-details
             label = "Can view model"
-          ></v-checkbox>
+          >
+            <v-tooltip activator="parent">
+              Can the viewer see the model at all? You can't currently turn this off.
+            </v-tooltip>
+          </v-checkbox>
+          <v-checkbox
+            class="mt-n4"
+            :disabled="isGeneratingLink"
+            hide-details
+            label = "Can send to 3rd parties"
+          >
+            <v-tooltip activator="parent">
+              If you allow this, then viewers of the link can get 3rd party quotes and/or prototyping done with your model.
+            </v-tooltip>
+          </v-checkbox>
           <v-checkbox
             class="mt-n4"
             v-model="permissions.canViewModelAttributes"
             :disabled="isGeneratingLink"
             hide-details
-            label = "Can view model attributes"
-          ></v-checkbox>
+            label = "Can view attributes"
+          >
+            <v-tooltip activator="parent">
+              If you allow this, the viewer can see the parametric parameters of the CAD file.
+            </v-tooltip>
+          </v-checkbox>
           <v-checkbox
             class="mt-n4"
             v-model="permissions.canUpdateModel"
             :disabled="isGeneratingLink || permissionLocks.canUpdateModel"
             hide-details
-            label="Can update model attributes"
-          ></v-checkbox>
+            label="Can update attributes"
+          >
+            <v-tooltip activator="parent">
+              If you allow this, the viewer can update parametric parameters of the CAD file and see their own version of the model.
+            </v-tooltip>
+          </v-checkbox>
           <span class="my-2 text-subtitle-2">Viewer export/download permissions</span>
           <br>
           <v-sheet
@@ -179,33 +201,30 @@
           >
             <v-sheet
               class="d-flex flex-row flex-wrap justify-start"
-              width="14em"
+              width="16em"
             >
               <v-btn
-                type="submit"
                 color="secondary"
-                class="ml-n1 mr-1 my-1"
+                class="dialogButton ml-n1 mr-1 my-1"
                 :disabled="isGeneratingLink"
                 @click="dialog = false"
               >Cancel</v-btn>
               <v-btn
                 v-if="creatorRole"
-                type="submit"
                 color="primary"
-                class="my-1"
+                class="dialogButtons my-1"
                 :disabled="isGeneratingLink"
+                @click="generateSharedModelUrl()"
               >Generate Link</v-btn>
               <v-btn
                 v-if="!creatorRole"
-                type="submit"
                 color="primary"
-                class="my-1"
+                class="dialogButtons my-1"
                 :disabled="isGeneratingLink"
               >Update</v-btn>
             </v-sheet>
             <v-btn
               v-if="!creatorRole"
-              type="submit"
               color="error"
               class="dialogButtons align-self-end"
               :disabled="isGeneratingLink"
@@ -229,6 +248,7 @@ export default {
   data: () => ({
     dialog: false,
     sharedModel: null,
+    sharedModelId: null,
     modelId: null,
     creatorRole: false,
     valid: false,
@@ -272,19 +292,61 @@ export default {
     ],
     error: '',
     versionFollowingItems: [
-      {title: "Share this specific version of the file.", value: "Locked"},
-      {title: "Always show the file version that is active.", value: "Active"},
+      {title: "Share this specific version of the file", value: "Locked"},
+      {title: "Always show the file version that is active", value: "Active"},
     ],
+    protectionItems: [
+      {title: 'Listed: visible & searchable by the public', value: 'Listed'},
+      {title: 'Unlisted: visible to public but you need to know the URL', value: 'Unlisted'},
+      {title: 'Pin: only visible when the PIN is entered', value: 'Pin'},
+      {title: 'Direct: only visible to accounts you add', value: 'Direct'},
+    ]
   }),
   computed: {
-    sharedModelUrl: (vm) => {
-      if (vm.sharedModel) {
-        return window.location.origin + '/share/' + vm.sharedModel._id
-      }
-      return ''
-    }
   },
   methods: {
+    async cleanCreatorStart() {
+      this.sharedModel = null;
+      this.tmpSharedModel = null;
+      //
+      // this.versionFollowing  // set by caller
+      this.protection = 'Unlisted';
+      this.pin = null;
+      this.privateDescription = '';
+      this.publicDescription = '';
+      this.permissions.canViewModel = true;
+      this.permissions.canViewModelAttributes = false;
+      this.permissions.canUpdateModel = false;
+      this.permissions.canExportFCStd = false;
+      this.permissions.canExportSTEP = false;
+      this.permissions.canExportSTL = false;
+      this.permissions.canExportOBJ = false;
+      this.permissions.canDownloadDefaultModel = false;
+      // this.modelId  // set by caller
+      //
+      this.sharedModelId = null; // not an update
+    },
+    async assignFromExistingSharedModel(smSummary) {
+      this.sharedModelId = null; // paranoia; no updates will happen until this is set
+      const sharedModel = await SharedModel.get(smSummary._id);
+      this.sharedModel = sharedModel;
+      this.tmpSharedModel = sharedModel;
+      //
+      this.versionFollowing = sharedModel.versionFollowing;
+      this.protection = sharedModel.protection;
+      this.pin = sharedModel.pin;
+      this.privateDescription = sharedModel.description;
+      this.publicDescription = ''; // TODO
+      this.permissions.canViewModel = sharedModel.canViewModel;
+      this.permissions.canViewModelAttributes = sharedModel.canViewModelAttributes;
+      this.permissions.canUpdateModel = sharedModel.canUpdateModel;
+      this.permissions.canExportFCStd = sharedModel.canExportFCStd;
+      this.permissions.canExportSTEP = sharedModel.canExportSTEP;
+      this.permissions.canExportSTL = sharedModel.canExportSTL;
+      this.permissions.canExportOBJ = sharedModel.canExportOBJ;
+      this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
+      this.modelId = sharedModel.cloneModelId;
+    },
     async generateSharedModelUrl() {
       const { valid } = await this.$refs.form.validate();
       if (!valid) {
@@ -322,20 +384,6 @@ export default {
       } catch (e) {
         this.error = 'UpgradeTier';
         this.isGeneratingLink = false;
-      }
-    },
-
-    async copyToClipboard(textToCopy) {
-      this.$refs.sharedUrl.select();
-      // Navigator clipboard api needs a secure context (https)
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(textToCopy);
-      } else {
-        try {
-          document.execCommand('copy');
-        } catch (error) {
-          console.error(error);
-        }
       }
     },
   },
