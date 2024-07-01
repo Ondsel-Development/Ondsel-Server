@@ -7,8 +7,7 @@
     </template>
     <template #content>
       <v-sheet class="d-flex flex-row justify-space-between flex-wrap">
-        <v-card min-width="32em" class="flex-md-grow-1 ma-1" border>
-          <v-card-text>
+        <v-sheet class="flex-md-grow-1 ma-1 border-md pa-1">
             <v-sheet class="d-flex flex-column">
               <v-sheet name="buttons">
                 <a
@@ -108,8 +107,7 @@
               @changed-file="reloadFileAndWorkspace"
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
-          </v-card-text>
-        </v-card>
+        </v-sheet>
         <v-card min-width="32em" class="ma-1" border>
           <v-card-title>{{ file.custFileName }}</v-card-title>
           <v-card-text>

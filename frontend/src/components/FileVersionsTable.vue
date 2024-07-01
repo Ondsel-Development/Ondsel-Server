@@ -1,139 +1,91 @@
 <template>
-  <v-table
-    density="compact"
-  >
-    <thead>
-    <tr>
-      <th>Ref</th>
-      <th>Detail</th>
-      <th>Who/Why</th>
-      <th>Link(s)</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td colspan="4">
-        <br>
-        <span class="align-center text-h5 my-4">
-          versions <span v-if="isFileModel(file)">and their share links</span>
-        </span>
-      </td>
-    </tr>
-    <tr
-      v-for="item in blendedRows"
+  <v-sheet class="d-flex flex-column">
+    <v-sheet>
+      <span class="text-h5">versions</span>
+    </v-sheet>
+    <v-sheet
+      v-for="(item, index) in versionRows"
       :key="item._id"
+      class="border-sm pa-1"
     >
-      <td v-if="item.nature==='ver'">
-        <span
-          v-if="item._id.toString() === visibleVersionId || !isFileModel(file)"
-          class="mx-1"
-        >
-          <v-icon
-            v-if="item._id.toString() === visibleVersionId"
-            size="small"
-            class="ma-2"
+      <v-sheet class="d-flex flex-row flex-wrap">
+        <v-sheet width="3em">
+          <span
+            v-if="item._id.toString() === visibleVersionId || !isFileModel(file)"
+            class="mx-1"
           >
-            mdi-eye-outline
-          </v-icon>
-          <v-icon
-            v-else
-            size="small"
-            class="ma-2"
-          >
-            mdi-space
-          </v-icon>
-        </span>
-        <v-btn
-          v-if="isFileModel(file) && item._id.toString() !== visibleVersionId"
-          size="small"
-          icon="mdi-eye-off-outline"
-          @click="doChangeVisibleVersion(item._id.toString())"
-        ></v-btn>
-        <code class="mr-2">{{ refLabel(item._id) }}</code>
-        <v-btn
-          v-if="!publicView"
-          size="small"
-          color="decoration"
-          icon="mdi-pencil"
-          @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-        ></v-btn>
-        <v-btn
-          v-if="publicView"
-          size="small"
-          color="decoration"
-          icon="mdi-help"
-          @click="selectedFileVersion = item; $refs.fileInfoDialog.$data.dialog = true;"
-        ></v-btn>
-      </td>
-      <td v-if="item.nature==='ver'">
-        {{ dateFormat(item.createdAt) }}
-        <v-icon v-if="file.currentVersionId === item._id" icon="mdi-check"/><span v-if="file.currentVersionId === item._id"><b>Active</b></span>
-      </td>
-      <td v-if="item.nature==='ver'">
-        {{ getUserLabel(item.userId, file.relatedUserDetails) }}: {{item.message}}
-      </td>
-      <td v-if="item.nature==='ver'">
-        <v-btn
-          v-if="!publicView && isFileModel(file) && file.currentVersionId === item._id"
-          size="small"
-          color="decoration"
-          icon="mdi-plus"
-          @click="startSharedModelDialogForVersion(item)"
-        >
-        </v-btn>
-      </td>
-      <td v-if="item.nature==='link'">
-      </td>
-      <td v-if="item.nature==='link'">
-        <a
-          :href="'/share/' + item._id.toString()"
-          target="_blank"
-          style="text-decoration: none; color: inherit;"
-        >
-          <span class="text-blue-darken-4">
-            <v-icon>
-              mdi-open-in-new
+            <v-icon
+              v-if="item._id.toString() === visibleVersionId"
+              size="small"
+              class="ma-2"
+            >
+              mdi-eye-outline
             </v-icon>
-            /share/{{item._id}}
+            <v-icon
+              v-else
+              size="small"
+              class="ma-2"
+            >
+              mdi-space
+            </v-icon>
           </span>
-        </a>
-        <span class="ml-4">"{{item.description}}"</span>
-      </td>
-      <td v-if="item.nature==='link'">
-      </td>
-      <td v-if="item.nature==='link'">
+          <v-btn
+            v-if="isFileModel(file) && item._id.toString() !== visibleVersionId"
+            size="small"
+            icon="mdi-eye-off-outline"
+            @click="doChangeVisibleVersion(item._id.toString())"
+          ></v-btn>
+        </v-sheet>
+        <v-sheet width="20em" class="my-2">
+          {{item.message}}
+          <span v-if="file.currentVersionId === item._id" class="ml-2"><b>Active</b></span>
+        </v-sheet>
+        <v-sheet width="20em" class="my-2">
+          from {{ getUserLabel(item.userId, file.relatedUserDetails) }}
+          <br>
+          on {{ dateFormat(item.createdAt) }}
+        </v-sheet>
         <v-btn
-          size="small"
-          color="decoration"
-          icon="mdi-dots-vertical"
-          @click="startSharedModelLinkActionDialog(item)"
-        ></v-btn>
-        {{item.protection}}
-        <span v-if="item.isActive">(enabled)</span>
-        <span v-if="!item.isActive">(disabled)</span>
-      </td>
-      <td v-if="item.nature==='follow_title'" colspan="3">
-        <br>
-        <span class="align-center text-h5">shares following the active version</span>
-      </td>
-      <td v-if="item.nature==='follow_title'" colspan="1">
-        <v-btn
-          v-if="!publicView"
-          size="small"
-          color="decoration"
-          icon="mdi-plus"
-          @click="startSharedModelDialogFollowingActive()"
+          class="my-2"
+          :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
+          @click="toggleLinkDisplay(index)"
         >
+          Links
         </v-btn>
-      </td>
-      <td v-if="item.nature==='none'">
-      </td>
-      <td v-if="item.nature==='none'" colspan="3">
-        <span class="text-body-2"><i>no links</i></span>
-      </td>
-    </tr>
-    </tbody>
-  </v-table>
+      </v-sheet>
+      <v-sheet v-if="item.displayLinks" class="d-flex flex-column flex-wrap border-lg">
+        <v-sheet v-if="item.lockedLinks.length === 0" class="ml-1 my-3">
+          <i>No Links Locked to this version.</i>
+        </v-sheet>
+        <v-sheet
+          v-else
+          v-for="(link, index) in item.lockedLinks"
+          :key="link._id"
+          class="border-sm pa-1"
+        >
+          <v-sheet
+            class="d-flex flex-row flex-wrap"
+          >
+            <v-sheet width="4em" class="my-3 mr-4">
+              {{link.isActive ? 'Enabled' : 'Disabled'}}
+            </v-sheet>
+            <v-sheet width="20em" class="my-3">
+              <b>{{link.publicDescription || 'no public description'}}</b>
+            </v-sheet>
+            <v-sheet width="20em" class="my-3">
+              private: <i>{{link.description || 'no note'}}</i>
+            </v-sheet>
+            <v-sheet width="3em">
+              <v-btn
+                color="secondary"
+                icon="mdi-cog"
+              ></v-btn>
+            </v-sheet>
+          </v-sheet>
+        </v-sheet>
+      </v-sheet>
+    </v-sheet>
+  </v-sheet>
   <file-info-dialog
     ref="fileInfoDialog"
     :file="file"
@@ -178,34 +130,17 @@ export default {
     isFileInfoDialogActive: false,
     selectedFileVersion: null,
     somethingTrue: true,
+    versionRows: [],
   }),
   async created() {
+    await this.rebuild();
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    blendedRows: (vm) => {
+    activeFollowingLinkRows: (vm) => {
       let result = [];
-      if (vm.file?.versions) {
-        for (const item of vm.file.versions) {
-          result.push({nature: 'ver', ...item});
-          if (vm.isFileModel(vm.file)) {
-            let linksFound = false;
-            if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
-              for (const sm of item.lockedSharedModels) {
-                if ((sm.protection === "Listed" && sm.isActive) || !vm.publicView) {
-                  linksFound = true;
-                  result.push({nature: 'link', ...sm});
-                }
-              }
-            }
-            if (!linksFound) {
-              result.push({nature: 'none'});
-            }
-          }
-        }
-      }
       if (vm.isFileModel(vm.file)) {
-        result.push({nature: 'follow_title'});
+        let result = [];
         let linksFound = false;
         if (vm.file?.followingActiveSharedModels && vm.file?.followingActiveSharedModels.length > 0) {
           for (const sm of vm.file.followingActiveSharedModels) {
@@ -272,7 +207,38 @@ export default {
     async changedFile() {
       this.$emit('changedFile');
     },
+    async toggleLinkDisplay(index) {
+      this.versionRows[index].displayLinks = !this.versionRows[index].displayLinks;
+    },
+    async rebuild() {
+      let newRows = [];
+      if (this.file?.versions) {
+        for (const item of this.file.versions) {
+          let lockedLinks = [];
+          if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
+            for (const sm of item.lockedSharedModels) {
+              if ((sm.protection === "Listed" && sm.isActive) || !this.publicView) {
+                lockedLinks.push(sm);
+              }
+            }
+          }
+          newRows.push({
+            nature: 'ver',
+            linkDisplayRef: `link-display-${item._id.toString()}`,
+            displayLinks: false,
+            lockedLinks: lockedLinks,
+            ...item
+          });
+        }
+      }
+      this.versionRows = newRows;
+    }
   },
+  watch: {
+    async 'file'(to, from) {
+      this.rebuild();
+    }
+  }
 }
 </script>
 
