@@ -36,19 +36,21 @@
             @click="doChangeVisibleVersion(item._id.toString())"
           ></v-btn>
         </v-sheet>
-        <v-btn
+        <v-sheet
           width="20em"
-          class="my-2 mr-2"
+          class="my-2 mr-2 pa-2 text-blue-darken-4 cursor-pointer"
+          @click="doNothing()"
         >
           {{item.message}}
           <span v-if="file.currentVersionId === item._id" class="ml-2"><b>(Active)</b></span>
-        </v-btn>
+        </v-sheet>
         <v-sheet width="20em" class="ma-2">
           from {{ getUserLabel(item.userId, file.relatedUserDetails) }}
           <br>
           on {{ dateFormat(item.createdAt) }}
         </v-sheet>
         <v-btn
+          v-if="isFileModel(file)"
           class="my-2"
           :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           @click="toggleLinkDisplay(index)"
@@ -61,35 +63,103 @@
         v-if="item.displayLinks"
         class="d-flex flex-column flex-wrap border-lg ml-16"
       >
+        <v-sheet><span class="text-h6">Links For This Version</span></v-sheet>
         <v-sheet
-          v-if="item.lockedLinks.length === 0"
-          class="ml-2 my-3"
-        >
-          <i>No Links Locked to this version.</i>
-        </v-sheet>
-        <v-sheet
-          v-else
-          v-for="(link, index) in item.lockedLinks"
-          :key="link._id"
-          class="border-sm pa-1"
+          class="d-flex flex-column flex-wrap ml-8"
         >
           <v-sheet
-            class="d-flex flex-row flex-wrap"
+            v-if="item.lockedLinks.length === 0"
+            class="ml-2 my-3"
           >
-            <v-sheet width="4em" class="my-3 mr-4">
-              {{link.isActive ? 'Enabled' : 'Disabled'}}
+            <i>No Links Locked to this version.</i>
+          </v-sheet>
+          <v-sheet
+            v-else
+            v-for="(link, index) in item.lockedLinks"
+            :key="link._id"
+            class="border-sm pa-1"
+          >
+            <v-sheet
+              class="d-flex flex-row flex-wrap"
+            >
+              <v-sheet width="4em" class="my-3 mr-4">
+                {{link.isActive ? 'Enabled' : 'Disabled'}}
+              </v-sheet>
+              <v-sheet width="16em" class="my-3">
+                <b>{{link.publicDescription || 'no public description'}}</b>
+                <br>
+                private: <i>{{link.description || 'no note'}}</i>
+              </v-sheet>
+              <v-sheet width="3em">
+                <v-btn
+                  color="secondary"
+                  icon="mdi-cog"
+                ></v-btn>
+              </v-sheet>
             </v-sheet>
-            <v-sheet width="16em" class="my-3">
-              <b>{{link.publicDescription || 'no public description'}}</b>
-              <br>
-              private: <i>{{link.description || 'no note'}}</i>
+          </v-sheet>
+          <v-sheet
+            v-if="file.currentVersionId === item._id"
+            class="border-sm pa-1"
+          >
+            <v-btn
+              color="secondary"
+              prepend-icon="mdi-plus"
+            >
+              Create Link For This Version
+            </v-btn>
+          </v-sheet>
+        </v-sheet>
+      </v-sheet>
+      <v-sheet
+        v-if="item.displayLinks && file.currentVersionId === item._id"
+        class="d-flex flex-column flex-wrap border-lg ml-16 mt-2"
+      >
+        <v-sheet><span class="text-h6">Links That Follow "Active"</span></v-sheet>
+        <v-sheet
+          class="d-flex flex-column flex-wrap ml-8"
+        >
+          <v-sheet
+            v-if="activeFollowingLinkRows.length === 0"
+            class="ml-2 my-3"
+          >
+            <i>No Links Following Active.</i>
+          </v-sheet>
+          <v-sheet
+            v-else
+            v-for="(link, index) in activeFollowingLinkRows"
+            :key="link._id"
+            class="border-sm pa-1"
+          >
+            <v-sheet
+              class="d-flex flex-row flex-wrap"
+            >
+              <v-sheet width="4em" class="my-3 mr-4">
+                {{link.isActive ? 'Enabled' : 'Disabled'}}
+              </v-sheet>
+              <v-sheet width="16em" class="my-3">
+                <b>{{link.publicDescription || 'no public description'}}</b>
+                <br>
+                private: <i>{{link.description || 'no note'}}</i>
+              </v-sheet>
+              <v-sheet width="3em">
+                <v-btn
+                  color="secondary"
+                  icon="mdi-cog"
+                ></v-btn>
+              </v-sheet>
             </v-sheet>
-            <v-sheet width="3em">
-              <v-btn
-                color="secondary"
-                icon="mdi-cog"
-              ></v-btn>
-            </v-sheet>
+          </v-sheet>
+          <v-sheet
+            v-if="file.currentVersionId === item._id"
+            class="border-sm pa-1"
+          >
+            <v-btn
+              color="secondary"
+              prepend-icon="mdi-plus"
+            >
+              Create Link Following Active
+            </v-btn>
           </v-sheet>
         </v-sheet>
       </v-sheet>
@@ -167,6 +237,9 @@ export default {
     },
   },
   methods: {
+    doNothing() {
+      //
+    },
     dateFormat(number) {
       const date = new Date(number);
       return date.toLocaleString();

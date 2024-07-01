@@ -2,8 +2,8 @@
   <v-sheet name="view-port">
     <v-sheet
       v-if="viewChosen === viewEnum.thumbnail"
-      height="30em"
-      width="100%"
+      height="18em"
+      width="24em"
       class="d-flex justify-space-between"
     >
       <v-sheet></v-sheet>
