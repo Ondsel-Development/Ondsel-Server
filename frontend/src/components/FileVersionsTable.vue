@@ -94,6 +94,14 @@
                 <v-btn
                   color="secondary"
                   icon="mdi-cog"
+                  class="ma-1"
+                ></v-btn>
+              </v-sheet>
+              <v-sheet width="3em">
+                <v-btn
+                  color="secondary"
+                  icon="mdi-printer-3d"
+                  class="ma-1 ml-2"
                 ></v-btn>
               </v-sheet>
             </v-sheet>
