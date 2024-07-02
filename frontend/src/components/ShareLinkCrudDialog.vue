@@ -104,16 +104,16 @@
               Can the viewer see the model at all? You can't currently turn this off.
             </v-tooltip>
           </v-checkbox>
-          <v-checkbox
-            class="mt-n4"
-            :disabled="isGeneratingLink"
-            hide-details
-            label = "Can send to 3rd parties"
-          >
-            <v-tooltip activator="parent">
-              If you allow this, then viewers of the link can get 3rd party quotes and/or prototyping done with your model.
-            </v-tooltip>
-          </v-checkbox>
+<!--          <v-checkbox-->
+<!--            class="mt-n4"-->
+<!--            :disabled="isGeneratingLink"-->
+<!--            hide-details-->
+<!--            label = "Can send to 3rd parties"-->
+<!--          >-->
+<!--            <v-tooltip activator="parent">-->
+<!--              If you allow this, then viewers of the link can get 3rd party quotes and/or prototyping done with your model.-->
+<!--            </v-tooltip>-->
+<!--          </v-checkbox>-->
           <v-checkbox
             class="mt-n4"
             v-model="permissions.canViewModelAttributes"

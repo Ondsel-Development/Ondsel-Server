@@ -70,34 +70,46 @@
         v-if="item.displayLinks"
         class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
-        <v-sheet><span class="text-h6">Links For This Version</span></v-sheet>
+        <v-sheet><span class="text-h6">Links</span></v-sheet>
         <v-sheet
           class="d-flex flex-column flex-wrap ml-8"
         >
           <v-sheet
-            v-if="item.lockedLinks.length === 0"
+            v-if="item.links.length === 0"
             class="ml-2 my-3"
           >
-            <i>No Links Locked to this version.</i>
+            <i>No Links</i>
           </v-sheet>
           <v-sheet
             v-else
-            v-for="(link, index) in item.lockedLinks"
+            v-for="(link, index) in item.links"
             :key="link._id"
             class="border-sm pa-1"
           >
             <v-sheet
               class="d-flex flex-row flex-wrap"
             >
-              <v-sheet width="4em" class="my-3 mr-4">
+              <v-sheet width="4em" class="my-3 mr-2">
                 {{link.isActive ? 'Enabled' : 'Disabled'}}
               </v-sheet>
+              <v-btn
+                width="3em"
+                variant="plain"
+                class="mt-2"
+              >
+                <v-icon>
+                  {{link.versionFollowing === 'Locked' ? 'mdi-clock-end' : 'mdi-elevation-rise'}}
+                </v-icon>
+                <v-tooltip activator="parent">
+                  {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version/time' : 'Active: follows the file itself; uses the currently Active version'}}
+                </v-tooltip>
+              </v-btn>
               <v-sheet width="16em" class="my-3">
                 <b>{{link.publicDescription || 'no public description'}}</b>
                 <br>
                 private: <i>{{link.description || 'no note'}}</i>
               </v-sheet>
-              <v-sheet width="3em">
+              <v-sheet width="3em" class="mr-2">
                 <v-btn
                   color="secondary"
                   icon="mdi-cog"
@@ -105,59 +117,17 @@
                   @click="startEditLinkForFollowingActiveDialog(link)"
                 ></v-btn>
               </v-sheet>
-            </v-sheet>
-          </v-sheet>
-          <v-sheet
-            v-if="file.currentVersionId === item._id"
-            class="border-sm pa-1"
-          >
-            <v-btn
-              color="secondary"
-              prepend-icon="mdi-plus"
-              @click="startCreateLinkForVersionDialog(item)"
-            >
-              Create Link For This Version
-            </v-btn>
-          </v-sheet>
-        </v-sheet>
-      </v-sheet>
-      <v-sheet
-        v-if="item.displayLinks && file.currentVersionId === item._id"
-        class="d-flex flex-column flex-wrap border-lg ml-16 mt-2 pl-2"
-      >
-        <v-sheet><span class="text-h6">Links That Follow "Active"</span></v-sheet>
-        <v-sheet
-          class="d-flex flex-column flex-wrap ml-8"
-        >
-          <v-sheet
-            v-if="activeFollowingLinkRows.length === 0"
-            class="ml-2 my-3"
-          >
-            <i>No Links Following Active.</i>
-          </v-sheet>
-          <v-sheet
-            v-else
-            v-for="(link, index) in activeFollowingLinkRows"
-            :key="link._id"
-            class="border-sm pa-1"
-          >
-            <v-sheet
-              class="d-flex flex-row flex-wrap"
-            >
-              <v-sheet width="4em" class="my-3 mr-4">
-                {{link.isActive ? 'Enabled' : 'Disabled'}}
-              </v-sheet>
-              <v-sheet width="16em" class="my-3">
-                <b>{{link.publicDescription || 'no public description'}}</b>
-                <br>
-                private: <i>{{link.description || 'no note'}}</i>
-              </v-sheet>
-              <v-sheet width="3em">
+              <v-sheet
+                v-if="link.protection === 'Direct'"
+                width="4em"
+                class="d-flex flex-row justify-center"
+              >
                 <v-btn
                   color="secondary"
-                  icon="mdi-cog"
-                  @click="startEditLinkForFollowingActiveDialog(link)"
+                  icon="mdi-account-multiple-plus"
+                  class="mt-1"
                 ></v-btn>
+                <span class="mt-4 ml-2">{{link.directSharedTo ? link.directSharedTo.length : '0'}}</span>
               </v-sheet>
             </v-sheet>
           </v-sheet>
@@ -168,9 +138,9 @@
             <v-btn
               color="secondary"
               prepend-icon="mdi-plus"
-              @click="startCreateLinkForFollowingActiveDialog()"
+              @click="startCreateLinkDialog(item)"
             >
-              Create Link Following Active
+              Create Link
             </v-btn>
           </v-sheet>
         </v-sheet>
@@ -221,19 +191,6 @@ export default {
   },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
-    activeFollowingLinkRows: (vm) => {
-      let result = [];
-      if (vm.isFileModel(vm.file)) {
-        if (vm.file.followingActiveSharedModels && vm.file.followingActiveSharedModels.length > 0) {
-          for (const sm of vm.file.followingActiveSharedModels) {
-            if ((sm.protection === "Listed" && sm.isActive ) || !vm.publicView) {
-              result.push(sm);
-            }
-          }
-        }
-      }
-      return result;
-    },
   },
   methods: {
     doNothing() {
@@ -274,25 +231,14 @@ export default {
       }
       data.dialog = true;
     },
-    async startCreateLinkForFollowingActiveDialog() {
-      let data = this.$refs.sharedModelDialogRef.$data;
-      data.sharedModel = null;
-      data.modelId = this.file.modelId;
-      data.creatorRole = true;
-      data.versionFollowing = 'Active';
-      data.versionFollowingPreset = true;
-      data.versionDescription = `Always Shows Active Version Of ${this.file.custFileName}`;
-      await this.$refs.sharedModelDialogRef.cleanCreatorStart();
-      data.dialog = true;
-    },
-    async startCreateLinkForVersionDialog(version) {
+    async startCreateLinkDialog(version) {
       const name = this.getUserLabel(version.userId, this.file.relatedUserDetails)
       let data = this.$refs.sharedModelDialogRef.$data;
       data.sharedModel = null;
       data.modelId = this.file.modelId;
       data.creatorRole = true;
       data.versionFollowing = 'Locked';
-      data.versionFollowingPreset = true;
+      data.versionFollowingPreset = false;
       data.versionDescription = `${this.file.custFileName} File Version "${version.message}" posted by ${name}`;
       await this.$refs.sharedModelDialogRef.cleanCreatorStart();
       data.dialog = true;
@@ -315,11 +261,20 @@ export default {
       let newRows = [];
       if (this.file?.versions) {
         for (const item of this.file.versions) {
-          let lockedLinks = [];
+          let links = [];
           if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
             for (const sm of item.lockedSharedModels) {
               if ((sm.protection === "Listed" && sm.isActive) || !this.publicView) {
-                lockedLinks.push(sm);
+                links.push(sm);
+              }
+            }
+          }
+          if (item._id.toString() === this.file.currentVersionId.toString()) {
+            if (this.file.followingActiveSharedModels && this.file.followingActiveSharedModels.length > 0) {
+              for (const sm of this.file.followingActiveSharedModels) {
+                if ((sm.protection === "Listed" && sm.isActive ) || !this.publicView) {
+                  links.push(sm);
+                }
               }
             }
           }
@@ -327,7 +282,7 @@ export default {
             nature: 'ver',
             linkDisplayRef: `link-display-${item._id.toString()}`,
             displayLinks: false,
-            lockedLinks: lockedLinks,
+            links: links,
             ...item
           });
         }
@@ -344,5 +299,7 @@ export default {
 </script>
 
 <style scoped>
-
+.bw-icon {
+  color: #000000;
+}
 </style>
