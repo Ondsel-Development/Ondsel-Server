@@ -28,6 +28,7 @@ export const sharedModelsSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
+    title: Type.String(),
     description: Type.String({ maxLength: 20 }),
     canViewModel: Type.Boolean({default: true}),
     canViewModelAttributes: Type.Boolean({default: false}),
