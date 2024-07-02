@@ -3,6 +3,7 @@ import { getConstraint as getUserConstraint } from "../users/users.subdocs.schem
 
 
 const upgradeTierErrorMsg = 'Please upgrade your tier.'
+const upgradeTierForMoreSharedModels = "Please upgrade your tier to create more share links."
 
 
 export const getConstraint = async context => {
@@ -117,7 +118,7 @@ export const canUserCreateShareLink = async context => {
       }
     })
     if (sharedModels.total >= context.$organization.constraint.maxShareLinksPerModel) {
-      throw new BadRequest(upgradeTierErrorMsg);
+      throw new BadRequest(upgradeTierForMoreSharedModels);
     }
   }
 

@@ -22,14 +22,6 @@ export const handlePublicOnlyQuery = (publicFields) => {
   }
 }
 
-export const isPublicOnly = async (context) => {
-  return (context.publicDataOnly === true)
-}
-
-export const isNotPublicOnly = async (context) => {
-  return (context.publicDataOnly !== false)
-}
-
 export const resolvePrivateResults = (resolver) => {
   // this is an "around" hook
   return async (context, next) => {
@@ -62,16 +54,15 @@ export const ThrowBadRequestIfNotForPublicInfo = async (context) => {
   return context;
 }
 
-
-export const tryToAuthenticate = () => {
-  // this is an "around" hook
-  // Try To authenticate context but also allow anonymous calls
-  return async (context, next) => {
-    try {
-      await authenticate("jwt")(context, next);
-    } catch (error) {
-      await next();
-    }
-    return context;
-  }
-}
+//
+// export const tryToAuthenticate = () => {
+//   // this is an "around" hook
+//   // Try To authenticate context but also allow anonymous calls
+//   return async (context, next) => {
+//     if (context.params.user) {
+//       await authenticate("jwt")(context, next);
+//     }
+//     await next();
+//     return context;
+//   }
+// }

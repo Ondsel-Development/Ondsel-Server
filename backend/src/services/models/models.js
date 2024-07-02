@@ -8,7 +8,10 @@ import _ from 'lodash';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { canUserCreateModel, canUserUpdateModel, canUserExportModel } from '../hooks/permissions.js';
-import { tryToAuthenticate } from '../../hooks/handle-public-info-query.js';
+import {
+  authenticateJwtWhenPrivate,
+  handlePublicOnlyQuery,
+} from '../../hooks/handle-public-info-query.js';
 import {
   modelDataValidator,
   modelPatchValidator,
@@ -21,14 +24,17 @@ import {
   modelSchema,
   modelDataSchema,
   modelPatchSchema,
-  modelQuerySchema,
+  modelQuerySchema, modelPublicFields,
 } from './models.schema.js'
 import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
-import {distributeModelSummaries} from "./models.distrib.js";
+import {copyModelBeforePatch, distributeModelSummaries, distributeModelThumbnails} from "./models.distrib.js";
 import { canUserAccessModelGetMethod, userBelongingModels, canUserAccessModelPatchMethod } from './helpers.js';
-import {ProtectionTypeMap} from "../shared-models/shared-models.subdocs.schema.js";
+import {
+  ProtectionTypeMap,
+  VersionFollowTypeMap as versionFollowTypeMap
+} from "../shared-models/shared-models.subdocs.schema.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -65,10 +71,13 @@ export const model = (app) => {
     around: {
       all: [
         schemaHooks.resolveExternal(modelExternalResolver),
+        handlePublicOnlyQuery(modelPublicFields),
         schemaHooks.resolveResult(modelResolver)
       ],
       find: [authenticate('jwt')],
-      get: [tryToAuthenticate()],
+      get: [
+        authenticateJwtWhenPrivate(),
+      ],
       create: [authenticate('jwt')],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],
@@ -118,6 +127,7 @@ export const model = (app) => {
         schemaHooks.resolveData(modelDataResolver)
       ],
       patch: [
+        copyModelBeforePatch,
         iff(
           isProvider('external'),
           canUserAccessModelPatchMethod
@@ -183,6 +193,7 @@ export const model = (app) => {
           feedSystemGeneratedSharedModel,
         ),
         distributeModelSummaries,
+        distributeModelThumbnails,
       ]
     },
     error: {
@@ -231,6 +242,7 @@ const startObjGeneration = async (context) => {
   }
 
   context.data.shouldStartObjGeneration = false;
+  // context.data.isThumbnailGenerated = false;
   context.data.isObjGenerationInProgress = true;
   context.data.isObjGenerated = false;
   context.data.latestLogErrorIdForObjGenerationCommand = null;
@@ -408,6 +420,7 @@ const createSharedModelObject = async (context) => {
     dummyModelId: newModel._id.toString(),
     description: 'System Generated',
     isSystemGenerated: true,
+    versionFollowing: versionFollowTypeMap.locked,
     protection: ProtectionTypeMap.listed,
     canViewModel: true,
     canViewModelAttributes: true,

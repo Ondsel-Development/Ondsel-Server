@@ -57,6 +57,7 @@ import fileDownloadMixin from '@/mixins/fileDownloadMixin';
 
 export default {
   name: "FileInfoDialog",
+  emits: ['changedFile'],
   props: {
     file: Object,
     selectedFileVersion: Object,
@@ -100,6 +101,7 @@ export default {
           versionId: this.selectedFileVersion._id,
         }
       });
+      await this.changedFile();
       this.dialog = false;
     },
     getUserLabel(userId, userSummaryList) {
@@ -109,6 +111,9 @@ export default {
         return "ref:" + userId.substr(-6);
       }
       return userSum.name;
+    },
+    async changedFile() {
+      this.$emit('changedFile');
     },
   }
 }

@@ -10,6 +10,7 @@
 //
 
 import {forDirectoryRemoveFileSummary, forDirectoryUpdateFileSummary} from "../directories/helpers.js";
+import {VersionFollowType, VersionFollowTypeMap} from "../shared-models/shared-models.subdocs.schema.js";
 
 export function buildFileSummary(file) {
   let summary = {
@@ -90,6 +91,53 @@ export async function applyModelSummaryToFile(app, fileId, modelSummary) {
   );
 }
 
+export async function applyThumbnailToFile(app, modelId, fileId) {
+  const fileService = app.service('file');
+  const fDb = await fileService.options.Model;
+
+  try {
+    const currentFile = await fDb.findOne({ _id: fileId });
+    if (currentFile) {
+      const currentVersionId = currentFile.currentVersionId;
+      // first attempt to duplicate the file
+      const uploadService = app.service('upload');
+      const fromUrl = `public/${modelId.toString()}_thumbnail.PNG`;
+      const toUrl = `public/${modelId.toString()}_${currentVersionId.toString()}_versionthumbnail.PNG`;
+      await uploadService.upsert(fromUrl, toUrl);
+      const finalUrlObj = await uploadService.get(toUrl);
+      const finalUrl = finalUrlObj?.url;
+      // now save in the File document
+      if (finalUrl) {
+        const result = await fDb.updateOne(
+          { _id: fileId },
+          {
+            $set: {
+              "versions.$[ver].thumbnailUrlCache": finalUrl,
+            },
+          },
+          {
+            arrayFilters: [
+              {"ver._id": currentVersionId}
+            ]
+          }
+        )
+        if (result.matchedCount !== 1) {
+          console.log(`ERROR: failed to modify File ${fileId.toString()} version ${currentVersionId.toString()} with thumbnail`);
+        }
+      } else {
+        console.log(`Failed to get/generate url of thumbnail file ${toUrl}.`);
+      }
+      // console.log(finalUrl);
+      // console.log(currentVersionId);
+      // console.log("did it");
+    } else {
+      console.log(`THUMBNAIL DIST PROBLEM: unable to locate file ${fileId}`)
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export async function updateWorkspaceSummaryToMatchingFiles(context, wsSummary) {
   const fileService = context.app.service('file');
   const matchingFiles = await fileService.find({
@@ -110,4 +158,107 @@ export async function updateWorkspaceSummaryToFile(context, fileId, wsSummary) {
       workspace: wsSummary,
     }
   );
+}
+
+export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) {
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (sharedModelSummary.versionFollowing) {
+  case VersionFollowTypeMap.active:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $push: {followingActiveSharedModels: sharedModelSummary},
+      }
+    );
+    break;
+  case VersionFollowTypeMap.locked:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $push : {
+          "versions.$[ver].lockedSharedModels": sharedModelSummary,
+        },
+      },
+      {
+        arrayFilters: [
+          {"ver._id": fileDetail.versionId}
+        ]
+      }
+    );
+    break;
+  }
+}
+
+export async function updateSharedModelToFile(app, fileDetail, limitedSharedModelSummary){
+  // the summary is limited in that only the 'description' field is relevant
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (limitedSharedModelSummary.versionFollowing) {
+  case VersionFollowTypeMap.active:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $set: {
+          "followingActiveSharedModels.$[entry].description": limitedSharedModelSummary.description,
+          "followingActiveSharedModels.$[entry].isActive": limitedSharedModelSummary.isActive,
+        }
+      },
+      {
+        arrayFilters: [
+          {"entry._id": limitedSharedModelSummary._id},
+        ]
+      }
+    );
+    break;
+  case VersionFollowTypeMap.locked:
+    await fileDb.updateOne(
+      { _id: fileDetail.fileId },
+      {
+        $set: {
+          "versions.$[ver].lockedSharedModels.$[entry].description": limitedSharedModelSummary.description,
+          "versions.$[ver].lockedSharedModels.$[entry].isActive": limitedSharedModelSummary.isActive,
+        }
+      },
+      {
+        arrayFilters: [
+          {"ver._id": fileDetail.versionId},
+          {"entry._id": limitedSharedModelSummary._id},
+        ]
+      }
+    );
+    break;
+  }
+}
+
+export async function deleteSharedModelFromFile(app, sharedModel) {
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  switch (sharedModel.versionFollowing) {
+    case VersionFollowTypeMap.active:
+      await fileDb.updateOne(
+        { _id: sharedModel.fileDetail.fileId },
+        {
+          $pull: {
+            followingActiveSharedModels: { _id: sharedModel._id }
+          }
+        },
+      );
+      break;
+    case VersionFollowTypeMap.locked:
+      await fileDb.updateOne(
+        { _id: sharedModel.fileDetail.fileId },
+        {
+          $pull: {
+            "versions.$[ver].lockedSharedModels": { _id: sharedModel._id }
+          }
+        },
+        {
+          arrayFilters: [
+            {"ver._id": sharedModel.fileDetail.versionId},
+          ]
+        }
+      );
+      break;
+  }
 }

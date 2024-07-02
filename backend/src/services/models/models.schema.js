@@ -6,7 +6,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 import { userSchema } from '../users/users.schema.js'
 import { fileSchema } from '../file/file.schema.js';
 import { NotFound } from '@feathersjs/errors'
-
+import {removePrivateFileFields} from "../file/helpers.js";
 
 export const logErrorIdType = Type.Optional(Type.Union([ObjectIdSchema(), Type.Null()]))
 
@@ -17,6 +17,11 @@ const errorMsgType = Type.Object({
 });
 
 // Main data model schema
+//
+// A "Model" is a snapshot in time for a specific combination of:
+//   1. File Version
+//   2. SharedModel (Link)
+//   3. User Parameters for the File Revision's attributes (if any)
 export const modelSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
@@ -90,7 +95,11 @@ export const modelResolver = resolve({
     const fileService = app.service('file');
     if (message.fileId) {
       try {
-        return await fileService.get(message.fileId);
+        let fileResult = await fileService.get(message.fileId);
+        if (context.publicDataOnly) {
+          removePrivateFileFields(fileResult);
+        }
+        return fileResult;
       } catch (error) {
         if (error instanceof NotFound) {
           return null; // Return null if no record is found
@@ -167,6 +176,8 @@ export const modelDataResolver = resolve({
     return modelSchema.properties.isSharedModelAnonymousType.default;
   },
 })
+
+export const modelPublicFields = ['_id', 'isObjGenerated', 'objUrl'];
 
 // Schema for updating existing entries
 export const modelPatchSchema = Type.Partial(modelSchema, {

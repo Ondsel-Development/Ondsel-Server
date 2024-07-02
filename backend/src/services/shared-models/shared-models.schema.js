@@ -9,14 +9,22 @@ import {curationSchema} from "../../curation.schema.js";
 import { modelSchema } from '../models/models.schema.js';
 import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
-import { ProtectionType } from './shared-models.subdocs.schema.js';
+import {ProtectionType, VersionFollowTypeMap as versionFollowTypeMap} from './shared-models.subdocs.schema.js';
+import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl} from "./helpers.js";
+
 
 // Main data model schema
+//
+// A SharedModel is a "link", a reference, that points to a file and model/image of that file; where the meaning of
+// that can vary based on usage, user, and context. It is not a model by itself; and so is sometimes called a
+// ShareLink. But the legacy name is "SharedModel".
 export const sharedModelsSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
+    versionFollowing: VersionFollowType,
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
@@ -35,6 +43,7 @@ export const sharedModelsSchema = Type.Object(
     showInPublicGallery: Type.Optional(Type.Boolean({default: false})),  // deprecated
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    fileDetail: fileDetailSchema,
     curation: Type.Optional(curationSchema),
     messages: Type.Array(messageSchema),
     messagesParticipants: Type.Array(userSummarySchema),
@@ -51,13 +60,27 @@ export const sharedModelsSchema = Type.Object(
   },
   { $id: 'SharedModels', additionalProperties: false }
 )
+
 export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValidator)
 export const sharedModelsResolver = resolve({
   model: virtual(async (message, context) => {
     if (message.canViewModel && message.dummyModelId) {
+      // if the model is versionFollowing type "Active", then get virtual in-memory false Models and Files
+      if (message.versionFollowing === versionFollowTypeMap.active) {
+        return await buildFakeModelAndFileForActiveVersion(message, context);
+      }
+
+      // if a logged-in user has his/her own attribute/parameter variant, return that specific Model
+      // the first one is used rather than the most-recent; which might be the same thing on a single MongoDB server
       const modelService = context.app.service('models');
       if (context.params.user) {
-        const result = await modelService.find({ query: { sharedModelId: message._id, userId: context.params.user._id, isSharedModelAnonymousType: false }});
+        const result = await modelService.find({
+          query: {
+            sharedModelId: message._id,
+            userId: context.params.user._id,
+            isSharedModelAnonymousType: false
+          }
+        });
         if (result.data.length) {
           if (!(message.canUpdateModel || message.canViewModelAttributes)) {
             return _.omit(result.data[0], 'attributes')
@@ -66,7 +89,7 @@ export const sharedModelsResolver = resolve({
         }
       }
 
-      // When anonymous user access share model to view the model
+      // otherwise, everyone (logged-in or not) uses the default dummyModelId Model
       try {
         const m = await modelService.get(message.dummyModelId);
         if (!(message.canUpdateModel || message.canViewModelAttributes)) {
@@ -83,6 +106,9 @@ export const sharedModelsResolver = resolve({
   }),
   thumbnailUrl: virtual(async(message, context) => {
     const { app } = context;
+    if (message.versionFollowing === versionFollowTypeMap.active) {
+       return await buildFakeModelUrl(message, context);
+    }
     if (message.isThumbnailGenerated) {
       const r = await app.service('upload').get(`public/${message.dummyModelId.toString()}_thumbnail.PNG`);
       return r.url
@@ -132,12 +158,19 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'isThumbnailGenerated',
   'protection',
   'pin',
-  'directSharedTo'
+  'versionFollowing',
+  'directSharedTo',
 ], {
   $id: 'SharedModelsData'
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
+  versionFollowing: async (value, _message, _context) => {
+    if (value) {
+      return value;
+    }
+    return VersionFollowTypeMap.locked;  // default to locked
+  },
   userId: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
     return context.params.user._id
@@ -217,6 +250,28 @@ export const sharedModelsDataResolver = resolve({
   },
   messagesParticipants: async (_value, _message, _context) => {
     return [];
+  },
+  fileDetail: async (value, _message, context) => {
+    if (value) {
+      return value;
+    }
+    const fileService = context.app.service('file');
+    const modelService = context.app.service('models');
+    let modelId = context.data.cloneModelId;
+    if (!modelId) {
+      modelId = context.data.dummyModelId;
+    }
+    const model = await modelService.get(modelId);
+    const fileId = model.fileId;
+    let versionId = null;
+    if (context.data.versionFollowing !== VersionFollowTypeMap.active) {
+      const file = await fileService.get(model.fileId);
+      versionId = file.currentVersionId;
+    }
+    return {
+      fileId: fileId,
+      versionId: versionId,
+    }
   },
   directSharedTo: async (value, _message, _context) => {
     if (!value) {
