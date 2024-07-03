@@ -14,7 +14,7 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="workspaceNameDescDialogForm" @submit.prevent="isPatchPending">
+      <v-form ref="workspaceNameDescDialogForm">
         <v-card-text>
           <v-radio-group
             label="Should Workspace Be Seen By The General Public"
