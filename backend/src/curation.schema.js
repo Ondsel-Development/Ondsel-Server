@@ -442,9 +442,11 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       // description (pulled from parent, usually)
       //
       if (newCuration.collection === navTargetMap.sharedModels) {
-        if (context.data.title !== originalCuration.description) {
-          needPatch = true;
-          newCuration.description = context.data.title;
+        if (context.data.title) { // if changing the title
+          if (context.data.title !== originalCuration.description) {
+            needPatch = true;
+            newCuration.description = context.data.title;
+          }
         }
       } else {
         if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set

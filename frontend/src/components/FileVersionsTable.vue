@@ -89,7 +89,7 @@
             <v-sheet
               class="d-flex flex-row flex-wrap"
             >
-              <v-sheet width="4em" class="my-3 mr-2">
+              <v-sheet width="3em" class="my-3">
                 {{link.isActive ? 'Enabled' : 'Disabled'}}
               </v-sheet>
               <v-btn
@@ -104,8 +104,8 @@
                   {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
                 </v-tooltip>
               </v-btn>
-              <v-sheet width="16em" class="my-3">
-                <b>{{link.publicDescription || 'no public description'}}</b>
+              <v-sheet :width="$vuetify.display.mobile ? '16em' : '32em'" class="my-3">
+                <b>{{link.title || 'no public description'}}</b>
                 <br>
                 private: <i>{{link.description || 'no note'}}</i>
               </v-sheet>
