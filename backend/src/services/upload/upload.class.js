@@ -76,6 +76,7 @@ class UploadService {
   }
 
   async get(id, _params) {
+    id = decodeURIComponent(id);
     const bucketName = this.options.app.get('awsClientModelBucket');
     const isFileExist = await this.checkFileExists(bucketName, id);
 
