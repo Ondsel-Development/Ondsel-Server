@@ -101,7 +101,7 @@
                   {{link.versionFollowing === 'Locked' ? 'mdi-clock-end' : 'mdi-elevation-rise'}}
                 </v-icon>
                 <v-tooltip activator="parent">
-                  {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version/time' : 'Active: follows the file itself; uses the currently Active version'}}
+                  {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
                 </v-tooltip>
               </v-btn>
               <v-sheet width="16em" class="my-3">

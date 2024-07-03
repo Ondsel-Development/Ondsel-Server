@@ -6,7 +6,7 @@
   >
     <v-card>
       <v-card-title>
-        {{creatorRole ? 'Create' : 'Update'}} Link
+        {{creatorRole ? 'Create' : 'Update'}} Shared Link
       </v-card-title>
       <v-card-subtitle v-if="versionDescription">{{versionDescription}}</v-card-subtitle>
       <v-progress-linear
@@ -55,7 +55,7 @@
             class="mt-n2"
             v-model.trim="privateDescription"
             label="Private Note"
-            hint="Enter short private note for share link"
+            hint="Enter a short private note for the share link"
             density="compact"
             :disabled="isGeneratingLink"
             :counter="20"
@@ -81,6 +81,7 @@
             ></v-otp-input>
           </div>
           <v-combobox
+            id="SLCD-version-follow-combobox"
             v-model="versionFollowing"
             label="Version Change Handling"
             :items="versionFollowingItems"
@@ -89,6 +90,9 @@
             :readonly="versionFollowingPreset"
             class="mt-4 mb-6"
           ></v-combobox>
+          <v-tooltip v-if=versionFollowingPreset activator="#SLCD-version-follow-combobox">
+            Once a Share Link is created, this cannot be modified.
+          </v-tooltip>
 
           <span class="text-subtitle-2 my-2">Viewer general permissions</span>
           <br>
