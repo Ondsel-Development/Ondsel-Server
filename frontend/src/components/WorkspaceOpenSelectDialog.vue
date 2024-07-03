@@ -68,8 +68,8 @@ export default {
     rules: {
       isRequired: v => !!v || 'This field is required',
     },
-    snackerMsg: 'bling',
-    showSnacker: true,
+    snackerMsg: '',
+    showSnacker: false,
     newOpenSelect: "false",
   }),
   computed: {
