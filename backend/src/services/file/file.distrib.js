@@ -200,6 +200,7 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
       { _id: fileDetail.fileId },
       {
         $set: {
+          "followingActiveSharedModels.$[entry].title": limitedSharedModelSummary.title,
           "followingActiveSharedModels.$[entry].description": limitedSharedModelSummary.description,
           "followingActiveSharedModels.$[entry].isActive": limitedSharedModelSummary.isActive,
         }
@@ -216,6 +217,7 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
       { _id: fileDetail.fileId },
       {
         $set: {
+          "versions.$[ver].lockedSharedModels.$[entry].title": limitedSharedModelSummary.title,
           "versions.$[ver].lockedSharedModels.$[entry].description": limitedSharedModelSummary.description,
           "versions.$[ver].lockedSharedModels.$[entry].isActive": limitedSharedModelSummary.isActive,
         }

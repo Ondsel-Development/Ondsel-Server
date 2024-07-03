@@ -16,7 +16,7 @@ export async function updateSharedModelsWithTitleCommand (app) {
 
   console.log('>>> creating reference cache of all SharedModels');
   refList = await smDb.find(
-    {},
+    { deleted: {$ne: true}},
     {
       projection: {
         _id: 1,
@@ -36,32 +36,32 @@ export async function updateSharedModelsWithTitleCommand (app) {
   }
   console.log(`>>>   cached ${refList.length}`);
 
-  console.log('>>> creating reference cache of all Files');
-  refList = await fDb.find(
-    {},
-    {
-      projection: {
-        _id: 1,
-        modelId: 1,
-        isSystemGenerated: 1,
-        versions: 1,
-        followingActiveSharedModels: 1,
-        custFileName: 1,
-        currentVersionId: 1,
-      }
-    }
-  ).toArray();
-  for (let ref of refList) {
-    ref.$versionsChanged = false;
-    for (let version of ref.versions) {
-      if (version.lockedSharedModels === undefined) {
-        version.lockedSharedModels = [];
-        ref.$versionsChanged = true;
-      }
-    }
-    fileCache[ref._id.toString()] = ref;
-  }
-  console.log(`>>>   cached ${refList.length}`);
+  // console.log('>>> creating reference cache of all Files');
+  // refList = await fDb.find(
+  //   {},
+  //   {
+  //     projection: {
+  //       _id: 1,
+  //       modelId: 1,
+  //       isSystemGenerated: 1,
+  //       versions: 1,
+  //       followingActiveSharedModels: 1,
+  //       custFileName: 1,
+  //       currentVersionId: 1,
+  //     }
+  //   }
+  // ).toArray();
+  // for (let ref of refList) {
+  //   ref.$versionsChanged = false;
+  //   for (let version of ref.versions) {
+  //     if (version.lockedSharedModels === undefined) {
+  //       version.lockedSharedModels = [];
+  //       ref.$versionsChanged = true;
+  //     }
+  //   }
+  //   fileCache[ref._id.toString()] = ref;
+  // }
+  // console.log(`>>>   cached ${refList.length}`);
 
   // /////////////////////////////////////////
   //
@@ -79,25 +79,33 @@ export async function updateSharedModelsWithTitleCommand (app) {
       // title
       //
       if (!sm.title) {
-        const newTitle = `Shared Link from ${dateFormat(sm.createdAt)}`;
-        changes.title = newTitle;
-        sm.title = newTitle; // for later use by files
-        console.log(`>>>     updating title to \"${newTitle}\"`);
+        if (!sm.fileDetail) {
+          console.log(`>>>     SKIPPING as fileDetail missing (implying broken model)`);
+        } else {
+          const newTitle = (sm.createdAt && sm.createdAt > 0) ? `Shared Link from ${dateFormat(sm.createdAt)}` : 'Shared Link';
+          changes.title = newTitle;
+          sm.title = newTitle; // for later use by files
+          console.log(`>>>     updating title to \"${newTitle}\"`);
+        }
       }
 
       //
       // make the change
       //
-      // if (!_.isEmpty(changes)) {
-      //   console.log(`>>>     changes: ${JSON.stringify(changes)}`);
-      //   const dbResult = await smDb.updateOne(
-      //     { _id: sm._id },
-      //     {
-      //       $set: changes,
-      //     }
-      //   )
-      //   console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
-      // }
+      if (!_.isEmpty(changes)) {
+        console.log(`>>>     changes: ${JSON.stringify(changes)}`);
+        let dbResult = null;
+        try {
+          dbResult = await sharedModelsService.patch(
+            sm._id.toString(),
+            changes,
+          )
+        } catch (e) {
+          console.log(dbResult);
+          console.log(e);
+        }
+        // console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
+      }
     }
   }
   // /////////////////////////////////////////
@@ -105,32 +113,32 @@ export async function updateSharedModelsWithTitleCommand (app) {
   //      FILES
   //
   // /////////////////////////////////////////
-  console.log('>>> changing each File');
-  // for (const id in fileCache ) {
-  //   console.log(`>>>   file ${id}`);
-  //   let changes = {};
-  //   let file = fileCache[id];
-  //   if (file.$versionsChanged) {
-  //     changes.versions = file.versions; // this picks up the lockedSharedModels array in each version
-  //   }
-  //   if (file.followingActiveSharedModels === undefined) {
-  //     changes.followingActiveSharedModels = [];
-  //   }
-  //   //
-  //   // make the change
-  //   //
-  //   if (!_.isEmpty(changes)) {
-  //     console.log(`>>>     changes: ${JSON.stringify(changes)}`);
-  //     const dbResult = await fDb.updateOne(
-  //       { _id: file._id },
-  //       {
-  //         $set: changes,
-  //       }
-  //     )
-  //     console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
-  //   }
-  // }
-  console.log('>>> done with Files')
+  // console.log('>>> changing each File');
+  // // for (const id in fileCache ) {
+  // //   console.log(`>>>   file ${id}`);
+  // //   let changes = {};
+  // //   let file = fileCache[id];
+  // //   if (file.$versionsChanged) {
+  // //     changes.versions = file.versions; // this picks up the lockedSharedModels array in each version
+  // //   }
+  // //   if (file.followingActiveSharedModels === undefined) {
+  // //     changes.followingActiveSharedModels = [];
+  // //   }
+  // //   //
+  // //   // make the change
+  // //   //
+  // //   if (!_.isEmpty(changes)) {
+  // //     console.log(`>>>     changes: ${JSON.stringify(changes)}`);
+  // //     const dbResult = await fDb.updateOne(
+  // //       { _id: file._id },
+  // //       {
+  // //         $set: changes,
+  // //       }
+  // //     )
+  // //     console.log(`>>>     change result: ${JSON.stringify(dbResult)}`);
+  // //   }
+  // // }
+  // console.log('>>> done with Files')
 
   console.log(`>>> command complete.`);
 }

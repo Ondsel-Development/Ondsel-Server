@@ -12,7 +12,7 @@ export function buildNewCurationForSharedModel(sm) {
     },
     name: sm.model?.file?.custFileName || '',
     slug: '', // a shared model has no searchable slug
-    description: sm.description || '',
+    description: sm.title || '',
     longDescriptionMd: '',
     tags: [],
     representativeFile: null, // this is handled later by patches
@@ -23,6 +23,22 @@ export function buildNewCurationForSharedModel(sm) {
 }
 
 export const afterCreateHandleSharedModelCuration = async (context) => {
+  // first, set up the curation
+  context.result.curation = buildNewCurationForSharedModel(context.result);
+  const smService = context.service;
+  const smDb = await smService.options.Model;
+  await smDb.updateOne(
+    { _id: context.result._id },
+    {
+      $set: {
+        curation: context.result.curation
+      },
+    }
+  )
+  return context;
+}
+
+export const afterPatchHandleSharedModelCuration = async (context) => {
   // first, set up the curation
   context.result.curation = buildNewCurationForSharedModel(context.result);
   const smService = context.service;

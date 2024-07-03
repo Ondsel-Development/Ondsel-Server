@@ -154,7 +154,7 @@ export const curationSchema = Type.Object(
     description: Type.String(), // limited to 80 runes
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
-    representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
+    representativeFile: Type.Optional(Type.Union([Type.Null(), fileSummary])), // if applicable
     promoted: Type.Optional(Type.Array(Type.Any())), // an array of promotionSchema
     keywordRefs: Type.Optional(Type.Array(Type.String())), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
@@ -432,7 +432,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       }
       if (newCuration.collection === 'shared-models') {
         if (!newCuration.name) {
-          if (newCuration.representativeFile) {
+          if (newCuration.representativeFile?.custFileName) {
             newCuration.name = newCuration.representativeFile.custFileName;
             needPatch = true;
           }
@@ -441,13 +441,20 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // description (pulled from parent, usually)
       //
-      if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
-        needPatch = true;
-        newCuration.description = context.data.description;
-      }
-      if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
-        needPatch = true;
-        newCuration.description = context.data.curation?.description || '';
+      if (newCuration.collection === navTargetMap.sharedModels) {
+        if (context.data.title !== originalCuration.description) {
+          needPatch = true;
+          newCuration.description = context.data.title;
+        }
+      } else {
+        if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
+          needPatch = true;
+          newCuration.description = context.data.curation?.description || '';
+        }
+        if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
+          needPatch = true;
+          newCuration.description = context.data.description;
+        }
       }
       //
       // long description
@@ -472,7 +479,7 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           break;
         case navTargetMap.sharedModels:
           if (!newCuration.representativeFile) {
-            if (context.beforePatchCopy.model?.file) {
+            if (context.beforePatchCopy.model?.file?.custFileName) {
               newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
               needPatch = true;
             }

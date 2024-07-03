@@ -7,6 +7,7 @@ export const sharedModelsSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
     isActive: Type.Boolean({default: true}),
+    title: Type.String(),
     description: Type.String(),
     versionFollowing: VersionFollowType,
     protection: ProtectionType,
@@ -33,6 +34,7 @@ export function buildSharedModelSummary(sharedModel) {
       summary = {
         _id: sharedModel._id,
         isActive: sharedModel.isActive,
+        title: sharedModel.title,
         description: sharedModel.description,
         versionFollowing: sharedModel.versionFollowing,
         protection: sharedModel.protection,
@@ -69,6 +71,9 @@ export async function distributeSharedModelChanges(context){
     let changeDetected = false;
     let sharedModel = context.result;
     if (sharedModel.description !== context.beforePatchCopy.description) {
+      changeDetected = true;
+    }
+    if (sharedModel.title !== context.beforePatchCopy.title) {
       changeDetected = true;
     }
     if (sharedModel.isActive !== context.beforePatchCopy.isActive) {
