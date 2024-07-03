@@ -2,9 +2,9 @@
   <v-dialog
     v-if="dialog"
     v-model="dialog"
-    width="auto"
+    width="36em"
   >
-    <v-card width="600" max-height="800">
+    <v-card>
       <v-card-title>
         <v-progress-linear
           :active="isPatchPending"
@@ -16,8 +16,8 @@
       </v-card-title>
       <v-card-text>
         <v-form>
+          <v-span>Should Workspace Be Seen By The General Public</v-span>
           <v-radio-group
-            label="Should Workspace Be Seen By The General Public"
             v-model="newOpenSelect"
             :disabled="isPatchPending"
           >
