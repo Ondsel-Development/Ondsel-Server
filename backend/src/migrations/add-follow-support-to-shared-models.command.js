@@ -236,6 +236,7 @@ export async function addFollowSupportToSharedModelsCommand(app) {
     console.log(`>>>   file ${id}`);
     let changes = {};
     let file = fileCache[id];
+    await checkIfActiveVersionMissingThumbnail(file, modelCache, app);
     if (file.$versionsChanged) {
       changes.versions = file.versions; // this picks up the lockedSharedModels array in each version
     }
@@ -287,17 +288,42 @@ async function updateFileVersionEntryIfNeeded(file, versionIndex, sm, model, app
     sm.thumbnailUrl = await buildThumbnailUrlForLockedSharedModel(sm, app);
     const smSum = buildSharedModelSummary(sm);
     file.versions[versionIndex].lockedSharedModels.push(smSum);
-    // see if we can hydrate the thumbnailUrlCache
-    if (!file.versions[versionIndex].thumbnailUrlCache) {
-      if (model !== null && model.isThumbnailGenerated === true) {
-        let currentVersionIdStr = file.currentVersionId.toString();
-        if (file.versions[versionIndex]._id.toString() === currentVersionIdStr) {
-          file.versions[versionIndex].thumbnailUrlCache = await upsertExistingThumbnailToVersion(currentVersionIdStr, model, app);
+    file.$versionsChanged = true;
+    console.log(`>>>     also appended sm entry to file ${file._id} in version entry ${versionIndex}`);
+  }
+  // see if we can hydrate the thumbnailUrlCache
+  if (!file.versions[versionIndex].thumbnailUrlCache) {
+    if (model !== null && model.isThumbnailGenerated === true) {
+      let currentVersionIdStr = file.currentVersionId.toString();
+      if (file.versions[versionIndex]._id.toString() === currentVersionIdStr) {
+        let newUrl = await upsertExistingThumbnailToVersion(currentVersionIdStr, model, app);
+        file.versions[versionIndex].thumbnailUrlCache = newUrl;
+        file.$versionsChanged = true;
+        console.log(`>>>     also updated file ${file._id} version entry ${versionIndex} with thumbnailUrlCache ${newUrl}`)
+      }
+    }
+  }
+}
+
+async function checkIfActiveVersionMissingThumbnail(file, modelCache, app){
+  let versionIdStr = file.currentVersionId.toString();
+  const verIndex = file.versions.findIndex(v => v._id.toString() === versionIdStr);
+  if (file.modelId && file.deleted !== true) {
+    if (verIndex > -1 && !file.versions[verIndex].thumbnailUrlCache) {
+      const model = _.get(modelCache, file.modelId.toString(), null);
+      if (model && !model.sharedModelId) {
+        if (model.isThumbnailGenerated === true) {
+          let newUrl = await upsertExistingThumbnailToVersion(versionIdStr, model, app);
+          if (newUrl) {
+            file.versions[verIndex].thumbnailUrlCache = newUrl;
+            file.$versionsChanged = true;
+            console.log(`>>>      duplicated model thumbnail to current active version via S3 to ${newUrl}`)
+          } else {
+            console.log(`>>>      UNABLE to duplicate model thumbnail to current active version via S3`)
+          }
         }
       }
     }
-    //
-    console.log(`>>>     also appended sm entry to file ${file._id} in version entry ${versionIndex}`);
   }
 }
 

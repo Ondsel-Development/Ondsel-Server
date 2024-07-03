@@ -22,6 +22,12 @@
       >
         <template #append>
           <v-btn
+              v-if="linkedObjects.hasOwnProperty(object3d.realName)"
+              icon="mdi-open-in-new"
+              variant="text"
+              @click.stop="openAssemblyObjectInfoDialog(object3d.realName)"
+          />
+          <v-btn
             :icon="object3d.object3d.visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
             variant="text"
             flat
@@ -31,14 +37,25 @@
       </v-list-item>
     </v-list-group>
   </v-list>
+  <AssemblyObjectInfoDialog ref="assemblyObjectInfoDialog" />
 </template>
 
 <script>
+import AssemblyObjectInfoDialog from '@/components/AssemblyObjectInfoDialog.vue';
+
 export default {
   name: "ObjectsListView",
   emits: ['selectGivenObject'],
+  components: {AssemblyObjectInfoDialog},
+  props: {
+    model: {
+      type: Object,
+      required: false,
+    }
+  },
   data: () => ({
     objects3d: [],
+    linkedObjects: {},
     open: ['Objects'],
     active: [],
   }),
@@ -52,6 +69,11 @@ export default {
         this.active.splice(index, 1);
       } else {
         this.active.push(object3d);
+      }
+    },
+    openAssemblyObjectInfoDialog(objectName) {
+      if (this.model && this.linkedObjects.hasOwnProperty(objectName)) {
+        this.$refs.assemblyObjectInfoDialog.openDialog(this.model.file.directory._id, this.linkedObjects[objectName]);
       }
     }
   }

@@ -83,17 +83,12 @@ export async function distributeFileDeletion(context){
 //
 
 export async function applyModelSummaryToFile(app, fileId, modelSummary) {
-  const fileService = app.service('file');
-  const fDb = await fileService.options.Model;
-
-  await fDb.updateOne(
-    { _id: fileId },
+  await app.service('file').patch(
+    fileId,
     {
-      $set: {
-        model: modelSummary,
-      },
-    },
-  )
+      model: modelSummary,
+    }
+  );
 }
 
 export async function applyThumbnailToFile(app, modelId, fileId) {
