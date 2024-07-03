@@ -5,17 +5,17 @@
     width="auto"
   >
     <v-card width="600" max-height="800">
-      <template v-slot:title>
+      <v-card-title>
+        <v-progress-linear
+          :active="isPatchPending"
+          indeterminate
+          absolute
+          bottom
+        ></v-progress-linear>
         <div class="text-center">Change Visibility</div>
-      </template>
-      <v-progress-linear
-        :active="isPatchPending"
-        indeterminate
-        absolute
-        bottom
-      ></v-progress-linear>
-      <v-form ref="workspaceNameDescDialogForm">
-        <v-card-text>
+      </v-card-title>
+      <v-card-text>
+        <v-form>
           <v-radio-group
             label="Should Workspace Be Seen By The General Public"
             v-model="newOpenSelect"
@@ -24,14 +24,14 @@
             <v-radio label="Visible to Public (public = true)" value="true"></v-radio>
             <v-radio label="Not Visible (public = false)" value="false"></v-radio>
           </v-radio-group>
-        </v-card-text>
-      </v-form>
-      <v-snackbar
-        :timeout="2000"
-        v-model="showSnacker"
-      >
-        {{ snackerMsg }}
-      </v-snackbar>
+        </v-form>
+        <v-snackbar
+          :timeout="2000"
+          v-model="showSnacker"
+        >
+          {{ snackerMsg }}
+        </v-snackbar>
+      </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn
           color="cancel"
@@ -68,8 +68,8 @@ export default {
     rules: {
       isRequired: v => !!v || 'This field is required',
     },
-    snackerMsg: '',
-    showSnacker: false,
+    snackerMsg: 'bling',
+    showSnacker: true,
     newOpenSelect: "false",
   }),
   computed: {
