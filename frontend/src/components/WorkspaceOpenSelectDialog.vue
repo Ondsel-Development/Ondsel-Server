@@ -16,7 +16,7 @@
       </v-card-title>
       <v-card-text>
         <v-form>
-          <v-span>Should Workspace Be Seen By The General Public</v-span>
+          <span>Should Workspace Be Seen By The General Public</span>
           <v-radio-group
             v-model="newOpenSelect"
             :disabled="isPatchPending"
