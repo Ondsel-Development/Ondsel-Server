@@ -2,7 +2,7 @@
   <Main>
     <template #title>
       <v-btn icon="mdi-arrow-left" @click="$router.go(-1)"></v-btn>
-      Error Codes
+      Code Details
     </template>
     <template #content>
       <v-table>

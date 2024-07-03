@@ -283,7 +283,7 @@ export default {
         },
         {
           icon: 'mdi-dots-square',
-          title: 'Public Models',
+          title: 'Public Share Links',
           condition: true,
           route: {name: 'PublicModels'}
         },

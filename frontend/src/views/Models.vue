@@ -59,7 +59,10 @@
                 height="200px"
                 class="d-flex justify-center align-center"
               >
-                <span style="color: #8D8D8D">?</span>
+                <div class="d-flex align-center flex-column">
+                  <v-icon icon="mdi-drawing" size="x-large" color="#8D8D8D" />
+                  <span class="mt-2" style="color: #8D8D8D">Click to generate thumbnail</span>
+                </div>
               </v-sheet>
             </template>
 
