@@ -64,12 +64,12 @@ export const sharedModelsSchema = Type.Object(
 export const sharedModelsValidator = getValidator(sharedModelsSchema, dataValidator)
 export const sharedModelsResolver = resolve({
   model: virtual(async (message, context) => {
-    if (message.canViewModel && message.dummyModelId) {
-      // if the model is versionFollowing type "Active", then get virtual in-memory false Models and Files
-      if (message.versionFollowing === versionFollowTypeMap.active) {
-        return await buildFakeModelAndFileForActiveVersion(message, context);
-      }
+    // if the model is versionFollowing type "Active", then get virtual in-memory false Models and Files
+    if (message.canViewModel && message.versionFollowing === versionFollowTypeMap.active) {
+      return await buildFakeModelAndFileForActiveVersion(message, context);
+    }
 
+    if (message.canViewModel && message.dummyModelId) {
       // if a logged-in user has his/her own attribute/parameter variant, return that specific Model
       // the first one is used rather than the most-recent; which might be the same thing on a single MongoDB server
       const modelService = context.app.service('models');
