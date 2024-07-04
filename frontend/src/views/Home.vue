@@ -56,7 +56,7 @@
           <v-card-item>
             <v-alert
               variant="outlined"
-              type="error"
+              type="info"
               border="top"
               class="text-left"
               v-if="showErrorMsg"
@@ -64,7 +64,6 @@
               <span class="text-body-1 font-weight-bold">{{ errorDetail.code }} - {{ errorDetail.label }}</span><br>
               <span v-html="errorDetail.desc" /><br>
               <span>
-                For more details, see
                 <v-btn
                   class="ma-0 pa-0 text-capitalize"
                   color="link"
@@ -73,7 +72,7 @@
                   style="text-decoration: none;"
                   :to="{ name: 'WorkerErrorCodes' }"
                 >
-                  Error Codes
+                  Click to see for more detail
                 </v-btn>
               </span>
             </v-alert>
@@ -173,7 +172,7 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-            <v-btn v-if="model && !error" icon flat @click="dialog = false">
+            <v-btn v-if="model && !error && !showErrorMsg" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
             <v-btn v-else icon flat :to="{ name: 'LensHome' }">
@@ -361,14 +360,14 @@ export default {
         if (vm.model.errorMsg.code === 101) {
           return {
             code: vm.model.errorMsg.code,
-            label: 'Missing Assemblies',
-            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}<span>`,
+            label: 'Missing Linked models',
+            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}</span>`,
           }
         } else if (vm.model.errorMsg.code === 102) {
           return {
             code: vm.model.errorMsg.code,
             label: 'Need tier Upgrade',
-            desc: 'Assembly feature detected, need at-least <span class="font-weight-medium font-italic">Peer</span>',
+            desc: 'The rendering of linked documents requires a <span class="font-weight-medium font-italic">Peer</span> tier subscription.',
           }
         } else if (vm.model.errorMsg.code === 999) {
           return {
