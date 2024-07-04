@@ -44,7 +44,7 @@
     </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
-  <ObjectsListView ref="objectListView" @select-given-object="objectSelected" />
+  <ObjectsListView ref="objectListView" :model="model" @select-given-object="objectSelected" />
   <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -56,12 +56,25 @@
           <v-card-item>
             <v-alert
               variant="outlined"
-              type="error"
+              type="info"
               border="top"
               class="text-left"
-              v-if="model && model.latestLogErrorIdForObjGenerationCommand"
+              v-if="showErrorMsg"
             >
-              <span>Internal server error occurred!</span>
+              <span class="text-body-1 font-weight-bold">{{ errorDetail.code }} - {{ errorDetail.label }}</span><br>
+              <span v-html="errorDetail.desc" /><br>
+              <span>
+                <v-btn
+                  class="ma-0 pa-0 text-capitalize"
+                  color="link"
+                  variant="plain"
+                  append-icon="mdi-open-in-new"
+                  style="text-decoration: none;"
+                  :to="{ name: 'WorkerErrorCodes' }"
+                >
+                  Click to see for more detail
+                </v-btn>
+              </span>
             </v-alert>
             <v-alert
               variant="outlined"
@@ -111,10 +124,20 @@
                     <v-icon icon="mdi-file" size="x-large"></v-icon>
                       <div class="text-subtitle-2">
                         {{ model.customerFileName }}
+                        <v-btn
+                          v-if="model.errorMsg"
+                          class="mx-2"
+                          append-icon="mdi-cached"
+                          size="small"
+                          color="secondary"
+                          @click="recomputeModel"
+                        >
+                          Recompute
+                        </v-btn>
                       </div>
                   </v-row>
                   <v-row>
-                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error"></v-progress-linear>
+                    <v-progress-linear model-value="100" v-if="isModelLoaded || model.latestLogErrorIdForObjGenerationCommand || error || model.errorMsg"></v-progress-linear>
                     <v-progress-linear indeterminate v-else></v-progress-linear>
                   </v-row>
                   <v-row>
@@ -149,7 +172,7 @@
             </v-card-item>
           </div>
           <v-card-actions class="justify-center">
-            <v-btn v-if="model && !error" icon flat @click="dialog = false">
+            <v-btn v-if="model && !error && !showErrorMsg" icon flat @click="dialog = false">
               <v-icon icon="mdi-close-circle-outline" size="x-large"></v-icon>
             </v-btn>
             <v-btn v-else icon flat :to="{ name: 'LensHome' }">
@@ -181,7 +204,7 @@
     <v-navigation-drawer
       v-model="isDrawerOpen"
       location="right"
-      width="1100"
+      width="48em"
       temporary
     >
       <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>
@@ -242,7 +265,7 @@ export default {
       } catch (error) {
         this.error = 'NotFound';
       }
-      if (this.model && !this.model.objUrl && !this.model.isThumbnailGenerated) {
+      if (this.model && !this.model.errorMsg && !this.model.objUrl && !this.model.isThumbnailGenerated) {
         await this.model.patch({
           data: {
             shouldStartObjGeneration: true,
@@ -330,7 +353,37 @@ export default {
           this.generatePublicLinkValue = val;
         }
       }
-    }
+    },
+    showErrorMsg: vm => vm.model && vm.model.errorMsg,
+    errorDetail: vm => {
+      if (vm.showErrorMsg) {
+        if (vm.model.errorMsg.code === 101) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Missing Linked models',
+            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}</span>`,
+          }
+        } else if (vm.model.errorMsg.code === 102) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Need tier Upgrade',
+            desc: 'The rendering of linked documents requires a <span class="font-weight-medium font-italic">Peer</span> tier subscription.',
+          }
+        } else if (vm.model.errorMsg.code === 999) {
+          return {
+            code: vm.model.errorMsg.code,
+            label: 'Internal Server Error',
+            desc: 'Not able to process model, contact support',
+          }
+        } else {
+          return {
+            code: -1,
+            label: 'Undefined Error code',
+            desc: '',
+          }
+        }
+      }
+    },
   },
   methods: {
     fitModelToScreen() {
@@ -424,8 +477,9 @@ export default {
       }
       this.isModelLoaded = true;
       this.viewer = viewer;
-      this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
       setTimeout(() => this.uploadThumbnail(), 500);
+      this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
+      this.$refs.objectListView.$data.linkedObjects = this.viewer.importer.activeImporter?.document?.LinkedFiles() || {};
     },
     objectClicked(object3d) {
       this.$refs.objectListView.selectListItem(object3d);
@@ -433,6 +487,18 @@ export default {
     objectSelected(object3d) {
       this.viewer.selectGivenObject(object3d);
     },
+    recomputeModel() {
+      if (this.model) {
+        this.model.patch({
+          data: {
+            latestLogErrorIdForObjGenerationCommand: null,
+            errorMsg: null,
+            shouldStartObjGeneration: true,
+            uniqueFileName: this.model.uniqueFileName,
+          }
+        })
+      }
+    }
   },
   watch: {
     'model.isObjGenerated'(v) {

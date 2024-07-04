@@ -6,7 +6,7 @@
 // the reference collection is updated.
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
-import {applyModelSummaryToFile} from "../file/file.distrib.js";
+import {applyModelSummaryToFile, applyThumbnailToFile} from "../file/file.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection
@@ -58,6 +58,15 @@ export async function getModelSummary(app, modelId) {
 // DISTRIBUTE AFTER (HOOK)
 //
 
+export const copyModelBeforePatch = async (context) => {
+  // store a copy of the Model in `context.beforePatchCopy` to help detect true changes later
+  const modelsService = context.app.service('models');
+  const modelId = context.id;
+  context.beforePatchCopy = await modelsService.get(modelId);
+  return context;
+}
+
+
 export const distributeModelSummaries = async (context) => {
   const modelId = context.id;
   if (modelId !== undefined) {
@@ -69,6 +78,27 @@ export const distributeModelSummaries = async (context) => {
       }
     }
   }
+  return context;
+}
+
+export const distributeModelThumbnails = async (context) => {
+  // used for distributing file-version-specific copies of thumbnails to File when appropriate
+  if (context.result.isSharedModel) { // this is only for the main model
+    return context;
+  }
+  if (context.result.deleted) {
+    return context;
+  }
+  // if (context.result.isObjGenerated === context.beforePatchCopy.isObjGenerated) {
+  //   // only after thumbnail generation on new versions
+  //   return context;
+  // }
+  if (context.result.isThumbnailGenerated === true) {
+    await applyThumbnailToFile(context.app, context.id, context.result.fileId);
+  }
+  // if (context.result.isObjGenerated === false) { // only when file generation finished
+  //   return context;
+  // }
   return context;
 }
 

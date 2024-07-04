@@ -1,9 +1,7 @@
 import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';
-import {addUsernameCommand} from "./add-username.command.js";
 import { migrateObjectsForSharedWorkspaceCommand } from './shared-workspace.command.js';
-import { mergeFirstLastNameCommand } from "./merge-first-last-name.command.js";
 import {updateModelsForFilesCommand} from "./update-models-for-files.command.js";
 import { migrateWorkspaceGroupsOrUsersCommand } from "./update-workspace-groupsOrUsers.js";
 import {updateDirectoryFileSummariesCommand} from "./update-directory-file-summaries.command.js";
@@ -40,6 +38,7 @@ import { addMessagesFieldsToSharedModelsCommand } from './add-messages-fields-to
 import { createOndselOrganizationCommand } from './create-ondsel-organization.command.js';
 import {addNotificationsIdToUsersCommand} from "./add-notificationsId-to-users.command.js";
 import { addProtectionFieldToSharedModelCommand } from "./addProtectionFieldToSharedModel.js";
+import { addFollowSupportToSharedModelsCommand } from "./add-follow-support-to-shared-models.command.js";
 
 
 async function runMigration() {
@@ -159,6 +158,9 @@ async function runMigration() {
       break;
     case 'addProtectionFieldToSharedModel':
       await addProtectionFieldToSharedModelCommand(app);
+      break;
+    case 'addFollowSupportToSharedModels':
+      await addFollowSupportToSharedModelsCommand(app)
       break;
     default:
       console.error('Please specify the migration command.')

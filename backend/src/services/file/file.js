@@ -210,6 +210,7 @@ const commitNewVersion = async (context) => {
     uniqueFileName: context.data.version.uniqueFileName,
     message: context.data.version.message || '',
     userId: context.params.user._id,
+    lockedSharedModels: [],
     additionalData: _.omit(context.data.version, ['uniqueFileName', 'message'])
   }
 
@@ -306,6 +307,7 @@ const triggerLambda = async context => {
       {
         shouldStartObjGeneration: true,
         fileId: file._id,
+        isThumbnailGenerated: false,
       },
       {
         $triggerObjGeneration: true,  // this will skip canUserUpdateModel check

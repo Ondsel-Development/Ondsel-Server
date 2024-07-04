@@ -1,62 +1,48 @@
 <template>
-  <v-container v-if="organization">
-    <v-row class="align-center">
-      <div class="text-h6">{{organization.name}} Workspaces</div>
-      <v-spacer />
-      <div class="align-end">
-        <v-btn
-          color="secondary"
-          variant="elevated"
-          @click="$refs.createWorkspace.$data.dialog = true;"
-        >Create new Workspace</v-btn>
-      </div>
-    </v-row>
-    <v-row class="mt-6">
-      <v-col
-        cols="6"
-        v-for="workspace in workspaces.data"
-        :key="workspace._id"
-      >
-        <v-card
-          class="mx-auto"
-          link
-          @click.stop="goToWorkspaceHome(workspace)"
+  <Main>
+    <template #title>
+      <v-icon>mdi-folder-multiple-outline</v-icon>
+      {{organization?.name}} Workspaces
+    </template>
+    <template #content>
+      <v-container v-if="organization">
+        <v-sheet class="d-flex flex-row justify-end">
+          <div class="align-end">
+            <v-btn
+              color="secondary"
+              variant="elevated"
+              @click="$refs.createWorkspace.$data.dialog = true;"
+            >Create Workspace</v-btn>
+          </div>
+        </v-sheet>
+        <v-sheet
+          class="d-flex flex-wrap flex-row"
         >
-          <template #title>
-            <div class="text-h6">
-              {{ workspace.name }}
-              <span class="text-body-2">({{ workspace.description }})</span>
-              <v-icon v-if="workspace.open" class="text-body-2" icon="mdi-earth" flag />
-            </div>
-          </template>
-          <template #subtitle>
-            <div class="text-body-2">{{ (new Date(workspace.createdAt)).toDateString() }}</div>
-          </template>
-          <template v-slot:prepend>
-            <repr-viewer :curation="workspace.curation"/>
-          </template>
-          <template v-slot:append>
-            <v-btn icon="mdi-cog" flat @click.stop="goToWorkspaceEdit(workspace)"/>
-          </template>
-        </v-card>
-      </v-col>
-    </v-row>
-    <create-workspace-dialog ref="createWorkspace" :organization="organization" />
-  </v-container>
-  <v-row dense class="justify-center">
-    <template v-if="isFindPending">
-      <v-progress-circular indeterminate></v-progress-circular>
+          <workspace-view-sheet
+            v-for="workspace in workspaces.data"
+            :key="workspace._id"
+            :workspace="workspace"
+            :is-org="true"
+          ></workspace-view-sheet>
+        </v-sheet>
+        <create-workspace-dialog ref="createWorkspace" :organization="organization" />
+      </v-container>
+      <v-row dense class="justify-center">
+        <template v-if="isFindPending">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </template>
+        <template v-else-if="workspaces.data?.length === 0">
+          <div class="text-grey-darken-1">There are no workspaces here!</div>
+        </template>
+        <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
+          <div class="text-grey-darken-1">You reached the end!</div>
+        </template>
+        <template v-else>
+          <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
+        </template>
+      </v-row>
     </template>
-    <template v-else-if="workspaces.data?.length === 0">
-      <div class="text-grey-darken-1">There are no workspaces here!</div>
-    </template>
-    <template v-else-if="workspaces.data?.length === paginationData[orgName]?.total">
-      <div class="text-grey-darken-1">You reached the end!</div>
-    </template>
-    <template v-else>
-      <v-btn flat variant="text" @click.stop="fetchDataOnScroll">Load more</v-btn>
-    </template>
-  </v-row>
+  </Main>
 </template>
 
 <script>
@@ -64,13 +50,14 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue';
 import scrollListenerMixin from '@/mixins/scrollListenerMixin';
-import ReprViewer from "@/components/ReprViewer.vue";
+import WorkspaceViewSheet from "@/components/WorkspaceViewSheet.vue";
+import Main from '@/layouts/default/Main.vue';
 
 const { Organization, Workspace } = models.api;
 
 export default {
   name: 'OrganizationWorkspaces',
-  components: {ReprViewer, CreateWorkspaceDialog },
+  components: {WorkspaceViewSheet, CreateWorkspaceDialog, Main },
   mixins: [scrollListenerMixin],
   data: () => ({
     paginationData: {},
@@ -80,7 +67,7 @@ export default {
     this.orgSrc = await this.getOrgByIdOrNamePublic(this.orgName);
     this.initPagination(this.orgName);
     try {
-      await Organization.get(this.orgName);
+      await Organization.get(this.orgSrc._id);
     } catch (e) {
       if (e.data?.type === 'PermissionError') {
         this.$router.push({ name: 'PageNotFound' });
@@ -146,12 +133,6 @@ export default {
         this.paginationData[this.orgName].total = workspaces.total;
       }
     },
-    async goToWorkspaceHome(workspace) {
-      this.$router.push({ name: 'OrgWorkspaceHome', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
-    },
-    async goToWorkspaceEdit(workspace) {
-      this.$router.push({ name: 'OrgEditWorkspace', params: { slug: workspace.organization.refName, wsname: workspace.refName } });
-    }
   },
   watch: {
     async '$route'(to, from) {

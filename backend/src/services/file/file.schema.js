@@ -8,6 +8,7 @@ import { directorySummary } from '../directories/directories.subdocs.js';
 import { workspaceSummary } from '../workspaces/workspaces.subdocs.schema.js';
 import { modelSummarySchema } from "../models/models.distrib.js";
 import {userSummarySchema} from "../users/users.subdocs.schema.js";
+import {sharedModelsSummarySchema} from "../shared-models/shared-models.distrib.js";
 
 export const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
@@ -15,9 +16,21 @@ export const fileVersionSchema = Type.Object({
   userId: ObjectIdSchema(),
   message: Type.Optional(Type.String()),
   createdAt: Type.Number(),
+  thumbnailUrlCache: Type.Optional(Type.String()),
   fileUpdatedAt: Type.Optional(Type.Number()),
+  lockedSharedModels: Type.Optional(Type.Array(sharedModelsSummarySchema)),
   additionalData: Type.Object({}),
 })
+
+// custFileName: data.custFileName,
+//       shouldCommitNewVersion: true,
+//       version: {
+//         uniqueFileName: data.uniqueFileName,
+//         message: 'Initial commit',
+//         ...(data.fileUpdatedAt && {fileUpdatedAt: data.fileUpdatedAt})
+//       },
+//       isSystemGenerated: _.get(data, 'isSharedModel', false),
+
 
 // Main data model schema
 export const fileSchema = Type.Object(
@@ -35,6 +48,7 @@ export const fileSchema = Type.Object(
     directory: Type.Optional(Type.Union([Type.Null(), directorySummary])),
     workspace: Type.Optional(workspaceSummary),
     relatedUserDetails: Type.Array(userSummarySchema),
+    followingActiveSharedModels: Type.Array(sharedModelsSummarySchema),
     // Soft delete
     deleted: Type.Optional(Type.Boolean()),
   },
@@ -76,7 +90,13 @@ export const fileDataResolver = resolve({
       return _value;
     }
     return fileSchema.properties.isSystemGenerated.default
-  }
+  },
+  followingActiveSharedModels: async (value, _message, _context) => {
+    if (value) {
+      return value;
+    }
+    return [];
+  },
 })
 
 // Schema for updating existing entries

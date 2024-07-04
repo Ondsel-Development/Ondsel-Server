@@ -75,6 +75,7 @@ import Dropzone from 'dropzone';
 export default {
   name: "UploadNewVersionFileDialog",
   mixins: [rules],
+  emits: ['changedFile'],
   props: {
     file: Object,
   },
@@ -169,6 +170,7 @@ export default {
           }
         }
       });
+      this.$emit('changedFile');
       this.dialog = false;
       this.newFile = null;
       this.error = null;

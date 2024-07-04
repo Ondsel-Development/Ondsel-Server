@@ -1,6 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
-import {discard, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
+import { discard, iff, isProvider, preventChanges, softDelete} from 'feathers-hooks-common'
 import { BadRequest } from '@feathersjs/errors';
 import swagger from 'feathers-swagger';
 
@@ -27,13 +27,20 @@ import {getConstraint} from "../users/users.subdocs.schema.js";
 import {afterCreateHandleSharedModelCuration, buildNewCurationForSharedModel} from "./shared-models.curation.js";
 import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
-import {copySharedModelBeforePatch} from "./shared-models.distrib.js";
+import {
+  copySharedModelBeforePatch,
+  distributeSharedModelChanges,
+  distributeSharedModelCreation, distributeSharedModelDeletion
+} from "./shared-models.distrib.js";
 import { commitMessage } from './message.hooks.js';
 import {
   canUserAccessSharedModelGetMethod,
   handleDirectSharedToUsers,
   validateSharedModelCreatePayload
 } from './helpers.js';
+import {app} from "../../app.js";
+import {VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {applyThumbnailToFile} from "../file/file.distrib.js";
 
 export * from './shared-models.class.js'
 export * from './shared-models.schema.js'
@@ -193,7 +200,10 @@ export const sharedModels = (app) => {
         iff(
           isProvider('external'),
           iff(
-            context => !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink,
+            context => (
+              context.beforePatchCopy.isSystemGenerated && // a voluntary link can be deactivated
+              !getConstraint(context.params.user).canDisableAutomaticGenerationOfPublicLink
+            ),
             preventChanges(true, 'isActive')
           ),
         ),
@@ -201,7 +211,6 @@ export const sharedModels = (app) => {
           context => context.data.shouldCreateInstance,
           createUserInstance,
         ),
-
         iff(
           context => context.data.model,
           patchModel,
@@ -223,8 +232,15 @@ export const sharedModels = (app) => {
           context => context.data.cloneModelId,
           createClone,
         ),
+        distributeSharedModelCreation,
         afterCreateHandleSharedModelCuration,
       ],
+      patch: [
+        distributeSharedModelChanges
+      ],
+      remove: [
+        distributeSharedModelDeletion
+      ]
     },
     error: {
       all: []
@@ -233,6 +249,13 @@ export const sharedModels = (app) => {
 }
 
 const createClone = async (context) => {
+  if (context.data.versionFollowing === VersionFollowTypeMap.active) {
+    // if the versionFollowing always follows the active version, then simply point to the original model and
+    // do not create a unique `isSharedModel` Model
+    // context.data.dummyModelId = context.data.cloneModelId;
+    return context;
+  }
+
   const { data } = context;
   const modelService = context.app.service('models');
   const uploadService = context.app.service('upload');

@@ -168,6 +168,7 @@ export const userQuerySchema = Type.Intersect(
     // Add additional query properties here
     Type.Object({
       'publicInfo': Type.Optional(Type.String()),
+      'getOnlyAccessTokenUser': Type.Optional(Type.String()),
     }, { additionalProperties: false })
   ],
   { additionalProperties: false }
@@ -177,7 +178,7 @@ export const userQueryResolver = resolve({
   // If there is a user (e.g. with authentication) but not admin, they are only allowed to see their own data
   _id: async (value, user, context) => {
     if (context.params.user) {
-      if (!isAdminUser(context.params.user)) {
+      if (!isAdminUser(context.params.user) || context.$getOnlyAccessTokenUser) {
         return context.params.user._id
       }
     }

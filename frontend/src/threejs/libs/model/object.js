@@ -4,6 +4,7 @@ import { OBJ_COLOR } from '@/threejs/libs/constants';
 export class ModelObject3D
 {
     constructor() {
+        this.realName = '';
         this.name = '';
         this.propertyGroups = [];
         this.meshes = [];
@@ -18,6 +19,16 @@ export class ModelObject3D
     SetName (name)
     {
         this.name = name;
+    }
+
+    GetRealName ()
+    {
+        return this.realName;
+    }
+
+    SetRealName (name)
+    {
+        this.realName = name;
     }
 
     GetObject3d ()

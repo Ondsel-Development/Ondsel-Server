@@ -2,6 +2,7 @@ import { ProtectionTypeMap } from './shared-models.subdocs.schema.js';
 import {BadRequest} from "@feathersjs/errors";
 import _ from 'lodash';
 import {buildUserSummary} from "../users/users.distrib.js";
+import {removePrivateFileFields} from "../file/helpers.js";
 
 export const validateSharedModelCreatePayload = async context => {
   if (!context.data.protection) {
@@ -71,4 +72,45 @@ export const handleDirectSharedToUsers = async context => {
   }
   context.data = _.omit(context.data, 'directSharedToUserIds');
   return context;
+}
+
+export async function buildFakeModelAndFileForActiveVersion(message, context) {
+  // this function pulls from the DB to generate a psuedo Model and subtending File
+  let finalModel = null;
+
+  let {refFile, refModel} = await getReferenceFileAndModel(message, context);
+
+  const currentVersionId = refFile.currentVersionId;
+  removePrivateFileFields(refFile);
+  refFile.versions = refFile.versions.find(version => version._id.equals(currentVersionId));
+  finalModel = _.omit(refModel, 'attributes');
+  finalModel.file = refFile;
+
+  return finalModel;
+}
+
+export async function buildFakeModelUrl(message, context) {
+  const {refFile, refModel} = await getReferenceFileAndModel(message, context);
+
+  return refModel.objUrl;
+}
+
+async function getReferenceFileAndModel(message, context) {
+  const modelService = context.app.service('models');
+  const fileService = context.app.service('file');
+  let model = null;
+  let file = null;
+
+  // get file data
+  const fileId = message.fileDetail.fileId;
+  file = await fileService.get(fileId);
+
+  // get model data
+  if (file) {
+    model = await modelService.get(file.modelId);
+  }
+  return {
+    refFile: file,
+    refModel: model
+  };
 }

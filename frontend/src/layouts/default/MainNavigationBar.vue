@@ -1,23 +1,162 @@
 <template>
-  <v-navigation-drawer v-model="drawer" :rail="rail" permanent style="background: #fafafa; border: none;">
-    <v-list class="my-2" nav>
-      <v-menu>
-        <template v-slot:activator="{ props }">
-          <v-list-item height="80px" min-width="60px" class="mb-0" style="background: white;" :disabled="!user" v-bind="props">
-            <template #prepend>
-              <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ml-n2" min-width="40" min-height="40" rounded="circle" color="grey-darken-2">
-                {{ getInitials(currentOrganization?.name || '') }}
-              </v-sheet>
-            </template>
-            <v-sheet class="d-flex align-start flex-column ml-2" style="background: inherit;" width="160">
-              <span class="text-caption">Organization</span>
-              <v-sheet class="d-flex align-start text-body-1 overflow-hidden" width="160" height="20px">{{ (currentOrganization && currentOrganization.name) || 'Select Organization' }}</v-sheet>
-            </v-sheet>
-            <template v-slot:append>
-              <v-icon icon="mdi-arrow-up-down" size="x-small" color="black" />
-            </template>
-          </v-list-item>
+  <v-navigation-drawer
+    :rail="rail"
+    permanent
+  >
+    <v-list-item
+      title = "Ondsel Lens"
+      :to="{name: 'LensHome'}"
+    >
+      <template v-slot:prepend>
+        <v-img
+          src="https://ondsel.com/img/Icon_Orange.svg"
+          width="24"
+          height="24"
+          class="mr-8"
+        ></v-img>
+      </template>
+    </v-list-item>
+    <v-list-item
+      :title = "currentOrganization?.name || 'public'"
+      id="navbar-org-action-activator"
+    >
+      <template v-slot:prepend>
+        <v-sheet
+          v-if="loggedInUser"
+          class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+          width="24"
+          height="24"
+          rounded="circle"
+          color="grey-darken-2"
+        >
+          {{ getInitials(currentOrganization?.name || '?') }}
+        </v-sheet>
+        <v-sheet
+          v-else
+          class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+          width="24"
+          height="24"
+          rounded="circle"
+          color="grey-darken-2"
+        >
+          -
+        </v-sheet>
+      </template>
+    </v-list-item>
+    <v-list-item
+      :prepend-icon="railIcon"
+      title = " "
+      @click="rail = !rail"
+    ></v-list-item>
+    <v-list-item
+      prepend-icon="mdi-magnify"
+    >
+      <v-text-field
+        v-model="searchText"
+        density="compact"
+        label="Search..."
+        :variant="rail ? 'plain' : 'outlined'"
+        hide-details
+        single-line
+        @click:append-inner="doSearch"
+        @keyup.enter="doSearch"
+      ></v-text-field>
+    </v-list-item>
+    <v-list-item
+      v-for="item in mainItems"
+      :key="item.icon"
+      :prepend-icon="item.icon"
+      :to="item.route"
+      :title="item.title"
+      link
+    ></v-list-item>
+    <template #append>
+      <v-list-item
+        v-for="item in secondaryItems"
+        :key="item.icon"
+        :prepend-icon="item.icon"
+        :to="item.route"
+        :title="item.title"
+        link
+      ></v-list-item>
+      <v-divider></v-divider>
+      <v-list-item
+        prepend-icon="mdi-copyright"
+        title="2024 Ondsel Inc."
+      ></v-list-item>
+      <v-divider></v-divider>
+      <v-list-item
+        id="navbar-user-action-activator"
+        v-if="loggedInUser"
+      >
+        <template #prepend>
+          <v-sheet
+            class="d-flex flex-column justify-center align-center text-uppercase mr-8"
+            min-width="24"
+            min-height="24"
+            rounded="circle"
+            color="grey"
+          >
+            {{ getInitials(loggedInUser.user.name) }}
+          </v-sheet>
         </template>
+        <template #title>
+          <v-sheet
+            class="d-flex flex-row justify-space-between"
+          >
+            <v-sheet>{{ loggedInUser.user.name }}</v-sheet>
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-sheet>
+        </template>
+      </v-list-item>
+      <v-list-item
+        v-else
+        :to="{name: 'Login'}"
+      >
+        <template #prepend>
+          <v-icon>mdi-login</v-icon>
+        </template>
+        <template #title>
+          <template v-if="currentRouteName !== 'Login'">
+            <v-btn
+              variant="outlined"
+              :to="{ name: 'Login' }"
+              density="compact"
+              class="navBarButtons"
+            >
+              Login
+            </v-btn>
+          </template>
+          <template v-if="currentRouteName !== 'SignUp'">
+            <v-btn
+              variant="tonal"
+              color="primary"
+              :to="{ name: 'SignUp' }"
+              density="compact"
+              class="navBarButtons"
+            >
+              SignUp
+            </v-btn>
+          </template>
+        </template>
+      </v-list-item>
+      <v-list-item
+        :prepend-icon="railIcon"
+        title = " "
+        @click="rail = !rail"
+      ></v-list-item>
+    </template>
+  </v-navigation-drawer>
+
+
+
+  <v-menu
+    activator="#navbar-org-action-activator"
+    v-if="loggedInUser"
+  >
+    <v-card>
+      <v-card-title>Select Organization</v-card-title>
+      <v-card-text>
         <v-list>
           <v-list-item
             v-for="(organization, i) in user.organizations"
@@ -43,166 +182,44 @@
             </template>
           </v-list-item>
         </v-list>
-      </v-menu>
-    </v-list>
-    <v-text-field
-      v-model="searchText"
-      class="ma-4"
-      append-inner-icon="mdi-magnify"
-      density="compact"
-      label="Search..."
-      :variant="rail ? 'plain' : 'outlined'"
-      hide-details
-      single-line
-      @click:append-inner="doSearch"
-      @keyup.enter="doSearch"
-    ></v-text-field>
-    <v-list density="compact" nav>
-      <template
-        v-for="[icon, text, condition, path] in mainItems"
-        :key="icon"
-      >
+      </v-card-text>
+    </v-card>
+  </v-menu>
+  <v-menu
+    v-if="loggedInUser"
+    activator="#navbar-user-action-activator"
+    v-model="menu"
+    :close-on-content-click="false"
+    transition="slide-y-transition"
+  >
+    <v-card min-width="200">
+      <v-list v-if="loggedInUser">
         <v-list-item
-          v-if="condition"
-          :prepend-icon="icon"
-          :to="path"
-          link
+          :title="`${loggedInUser.user.name}`"
         >
-          <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
         </v-list-item>
-      </template>
-    </v-list>
-    <template #append>
-      <v-list density="compact" nav>
-        <template
-          v-for="[icon, text, condition, path] in secondaryItems"
-          :key="icon"
-        >
-          <v-list-item
-            v-if="condition"
-            :prepend-icon="icon"
-            :to="path"
-            link
+        <v-list-item>
+          <v-btn
+            variant="text"
+            @click="gotoAccountSettings()"
           >
-            <span v-if="!rail" class="text-body-2" style="color: black;">{{ text }}</span>
-          </v-list-item>
-        </template>
+            account settings
+          </v-btn>
+        </v-list-item>
       </v-list>
-      <span v-if="!rail" class="d-flex justify-center text-caption mb-4">@ 2024 Ondsel, inc.</span>
-      <v-divider />
-      <v-list>
-        <v-list-item
-          v-if="loggedInUser"
-          nav
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="logout"
         >
-          <template #prepend>
-            <v-sheet class="d-flex flex-column justify-center align-center text-uppercase ma-1" min-width="40" min-height="40" rounded="circle" color="grey" @click="rail = false">
-              {{ getInitials(loggedInUser.user.name) }}
-            </v-sheet>
-          </template>
-          <template #title>
-            {{ loggedInUser.user.name }}
-          </template>
-          <template v-slot:append>
-            <v-menu
-              v-if="loggedInUser"
-              v-model="menu"
-              :close-on-content-click="false"
-              transition="slide-y-transition"
-            >
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon
-                  variant="text"
-                  v-bind="props"
-                >
-                  <v-icon>mdi-dots-vertical</v-icon>
-                </v-btn>
-              </template>
-
-              <v-card min-width="200">
-                <v-list v-if="loggedInUser">
-                  <v-list-item
-                    :title="`${loggedInUser.user.name}`"
-                  >
-                  </v-list-item>
-                  <v-list-item>
-                    <v-btn
-                      variant="text"
-                      @click="gotoAccountSettings()"
-                    >
-                      account settings
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-
-                <v-divider></v-divider>
-
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="primary"
-                    variant="text"
-                    @click="logout"
-                  >
-                    Logout
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-menu>
-          </template>
-        </v-list-item>
-        <v-list-item v-else>
-          <span class="d-flex flex-row justify-center">
-            <v-btn
-              v-if="rail && currentRouteName !== 'Login' && currentRouteName !== 'SignUp'"
-              variant="plain"
-              icon="mdi-account"
-              @click="rail = false;"
-            />
-            <template v-else>
-              <template v-if="currentRouteName !== 'Login'">
-                <v-btn
-                  v-if="!rail"
-                  variant="outlined"
-                  class="ma-1"
-                  :to="{ name: 'Login' }"
-                >
-                  Login
-                </v-btn>
-                <v-btn
-                  v-else
-                  variant="plain"
-                  icon="mdi-login"
-                  :to="{ name: 'Login' }"
-                />
-              </template>
-              <template v-if="currentRouteName !== 'SignUp'">
-                <v-btn
-                  v-if="!rail"
-                  variant="tonal"
-                  color="primary"
-                  class="ma-1"
-                  :to="{ name: 'SignUp' }"
-                >
-                  SignUp
-                </v-btn>
-                <v-btn
-                  v-else
-                  variant="plain"
-                  color="primary"
-                  icon="mdi-account-plus-outline"
-                  :to="{ name: 'SignUp' }"
-                />
-              </template>
-            </template>
-          </span>
-        </v-list-item>
-      </v-list>
-    </template>
-    <v-btn :icon="rail ? 'mdi-menu-right' : 'mdi-menu-left'" variant="plain" class="railButton" @click.stop="rail = !rail"></v-btn>
-  </v-navigation-drawer>
-  <!-- Wired: this comment is important to make navigation bar toggle working. Not sure why? -->
+          Logout
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-menu>
 </template>
 
 <script>
@@ -212,6 +229,7 @@ import OrganizationMixin from '@/mixins/organizationMixin';
 
 export default {
   name: "MainNavigationBar",
+  components: {},
   mixins: [ OrganizationMixin ],
   data: () => ({
     menu: false,
@@ -224,67 +242,82 @@ export default {
     ...mapState('auth', ['user']),
     ...mapGetters('app', { userCurrentOrganization: 'currentOrganization' }),
     currentRouteName: (vm) => vm.$route.name,
-    currentOrganization() {
-      return this.userCurrentOrganization;
+    currentOrganization: (vm) => vm.userCurrentOrganization,
+    railIcon () {
+      return this.rail ? 'mdi-arrow-expand-right' : 'mdi-arrow-collapse-left'
+    },
+    isMobile() {
+      return this.$vuetify.display.mobile;
     },
     mainItems() {
-      return [
-        [
-          'mdi-cube-outline',
-          'Models',
-          this.user,
-          { name: 'Models', params: { slug: this.user?.username }}
-        ],
-        [
-          'mdi-view-dashboard-outline',  // icon
-          `Public view of ${this.currentOrganization?.name}`,  // label
-          this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',  // condition
-          { name: 'OrganizationHome', params: { slug: this.currentOrganization?.refName }}  // route
-        ],
-        [
-          'mdi-earth',
-          'Public View of Me',
-          this.user && this.currentOrganization && this.currentOrganization?.type === 'Personal',
-          { name: 'UserHome', params: { slug: this.user?.username }}
-        ],
-        [
-          'mdi-dots-square',
-          'Public Models',
-          true,
-          { name: 'PublicModels' }
-        ],
-      ]
+      const items = [
+        {
+          icon: 'mdi-folder-multiple-outline',
+          title: 'Workspaces',
+          condition: this.user && this.currentOrganization && this.currentOrganization?.type === 'Personal',
+          route: {name: 'UserWorkspaces', params: {id: this.user?.username}}
+        },
+        {
+          icon: 'mdi-folder-multiple-outline',
+          title: 'Workspaces',
+          condition: this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',
+          route: { name: 'OrganizationWorkspaces', params: { id: this.currentOrganization?.refName }}
+        },
+        {
+          icon: 'mdi-cube-outline',
+          title: 'Models',
+          condition: this.user,
+          route: {name: 'Models', params: {slug: this.user?.username}}
+        },
+        {
+          icon: 'mdi-view-dashboard-outline',  // icon
+          title:   `Public view of ${this.currentOrganization?.name}`,  // label
+          condition: this.user && this.currentOrganization && this.currentOrganization?.type !== 'Personal',  // condition
+          route: {name: 'OrganizationHome', params: {slug: this.currentOrganization?.refName}}  // route
+        },
+        {
+          icon: 'mdi-earth',
+          title:    'Public View of Me',
+          condition: this.user && this.currentOrganization && this.currentOrganization?.type === 'Personal',
+          route: {name: 'UserHome', params: {slug: this.user?.username}}
+        },
+        {
+          icon: 'mdi-dots-square',
+          title: 'Public Share Links',
+          condition: true,
+          route: {name: 'PublicModels'}
+        },
+      ];
+      return items.filter(item => item.condition);
     },
     secondaryItems() {
       return [
-        [
-          'mdi-bell-outline',
-          'Notifications',
-          this.user,
-          { name: 'MyNotifications' }
-        ],
-        [
-          'mdi-inbox',
-          'Shared With Me',
-          this.user,
-          { name: 'SharedWithMe' }
-        ],
-        [
-          'mdi-bookmark-outline',
-          'Bookmarks',
-          this.user,
-          { name: 'Bookmarks' }
-        ],
-        [
-          'mdi-download-outline',
-          'Download Ondsel ES',
-          true,
-          { name: 'DownloadAndExplore' }
-        ],
-        // ['mdi-emoticon-happy-outline', 'Community'],
-        // ['mdi-help-circle-outline', 'Help'],
-      ]
-    }
+        {
+          icon: 'mdi-bell-outline',
+          title: 'Notifications',
+          condition: this.user,
+          route: {name: 'MyNotifications'}
+        },
+        {
+          icon: 'mdi-inbox',
+          title: 'Shared With Me',
+          condition: this.user,
+          route: {name: 'SharedWithMe'}
+        },
+        {
+          icon: 'mdi-bookmark-outline',
+          title: 'Bookmarks',
+          condition: this.user,
+          route: {name: 'Bookmarks'}
+        },
+        {
+          icon: 'mdi-download-outline',
+          title: 'Download Ondsel ES',
+          condition: true,
+          route: {name: 'DownloadAndExplore'}
+        },
+      ].filter(item => item.condition);
+    },
   },
   methods: {
     getInitials,
@@ -297,12 +330,8 @@ export default {
       this.$router.push({name: 'AccountSettings', params: {slug: this.user.username}});
       this.menu = false;
     },
-    gotoDownloadAndExplore() {
-      this.$router.push({name: 'DownloadAndExplore'});
-      this.menu = false;
-    },
-    gotoHome() {
-      this.$router.push({name: 'LensHome'});
+    adjustRail() {
+      this.rail = !!this.isMobile;
     },
     doSearch() {
       this.rail = false;
@@ -311,14 +340,27 @@ export default {
       }
     },
   },
+  async created() {
+    this.adjustRail();
+  },
+  watch: {
+    async 'isMobile'(to, from) {
+      this.adjustRail();
+    },
+    async '$route'(to, from) {
+      if (this.isMobile) {
+        this.rail = true;
+      }
+    },
+  }
 }
 </script>
 
 
 <style scoped>
-.railButton {
-  position: absolute;
-  top: 49%;
-  right: -17px;
+.navBarButtons {
+  margin-right: 2px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 </style>
