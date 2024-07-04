@@ -12,9 +12,9 @@
             <td class="font-weight-medium">Name</td>
             <td>{{ fileObject.custFileName }}</td>
           </tr>
-          <tr v-if="sharedModel && sharedModel.description">
-            <td class="font-weight-medium">Description</td>
-            <td><b>{{ sharedModel.description }}</b></td>
+          <tr v-if="sharedModel && sharedModel.title">
+            <td class="font-weight-medium">Title</td>
+            <td><b>{{ sharedModel.title }}</b></td>
           </tr>
           <tr v-if="sharedModel && sharedModel.curation?.tags">
             <td class="font-weight-medium">Tags</td>

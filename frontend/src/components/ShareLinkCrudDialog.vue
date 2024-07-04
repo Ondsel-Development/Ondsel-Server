@@ -45,7 +45,7 @@
             label = "Enabled"
           ></v-switch>
           <v-text-field
-            v-model.trim="publicDescription"
+            v-model.trim="title"
             label="Description (seen by Viewer)"
             hint="Enter a description share link to guide the viewer"
             density="compact"
@@ -257,7 +257,7 @@ export default {
     creatorRole: false,
     valid: false,
     privateDescription: '',
-    publicDescription: '',
+    title: '',
     protection: 'Unlisted',
     versionFollowing: 'Locked',
     versionFollowingPreset: false,
@@ -317,7 +317,7 @@ export default {
       this.protection = 'Unlisted';
       this.pin = null;
       this.privateDescription = '';
-      this.publicDescription = '';
+      this.title = '';
       this.permissions.canViewModel = true;
       this.permissions.canViewModelAttributes = false;
       this.permissions.canUpdateModel = false;
@@ -340,7 +340,7 @@ export default {
       this.protection = sharedModel.protection;
       this.pin = sharedModel.pin;
       this.privateDescription = sharedModel.description;
-      this.publicDescription = ''; // TODO
+      this.title = sharedModel.title;
       this.permissions.canViewModel = sharedModel.canViewModel;
       this.permissions.canViewModelAttributes = sharedModel.canViewModelAttributes;
       this.permissions.canUpdateModel = sharedModel.canUpdateModel;
@@ -368,6 +368,7 @@ export default {
       sharedModel.protection = this.protection;
       sharedModel.pin = this.pin;
       sharedModel.description = this.privateDescription;
+      sharedModel.title = this.title;
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;

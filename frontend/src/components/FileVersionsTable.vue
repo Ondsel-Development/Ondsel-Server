@@ -109,6 +109,20 @@
                 <br>
                 private: <i>{{link.description || 'no note'}}</i>
               </v-sheet>
+              <v-sheet width="3em" class="mt-3 mr-2">
+                <v-btn
+                  color="link"
+                  variant="plain"
+                  append-icon="mdi-open-in-new"
+                  style="text-decoration: none;"
+                  :to="{ name: 'Share', params: { id: link._id }}"
+                  target="_blank"
+                >
+                  <v-tooltip activator="parent">
+                    open link in new window
+                  </v-tooltip>
+                </v-btn>
+              </v-sheet>
               <v-sheet width="3em" class="mr-2">
                 <v-btn
                   color="secondary"
