@@ -360,14 +360,14 @@ export default {
         if (vm.model.errorMsg.code === 101) {
           return {
             code: vm.model.errorMsg.code,
-            label: 'Missing Assemblies',
-            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}<span>`,
+            label: 'Missing Linked models',
+            desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}</span>`,
           }
         } else if (vm.model.errorMsg.code === 102) {
           return {
             code: vm.model.errorMsg.code,
             label: 'Need tier Upgrade',
-            desc: 'Assembly feature detected, need at-least <span class="font-weight-medium font-italic">Peer</span>',
+            desc: 'The rendering of linked documents requires a <span class="font-weight-medium font-italic">Peer</span> tier subscription.',
           }
         } else if (vm.model.errorMsg.code === 999) {
           return {

@@ -22,7 +22,9 @@
           :key="errorCode.error"
         >
           <td class="text-center">{{ errorCode.error }}</td>
-          <td class="text-left">{{ errorCode.desc }}</td>
+          <td class="text-left">
+            <span v-html="errorCode.desc" />
+          </td>
         </tr>
         </tbody>
       </v-table>
@@ -39,15 +41,15 @@ export default {
     errorCodes: () => [
       {
         error: 101,
-        desc: 'Missing assemblies, failed to find linked assemblies in parent directory.'
+        desc: 'Linked models weren\'t found in the parent directory, cannot render the assembly.'
       },
       {
         error: 102,
-        desc: 'Not allowed to recompute an assembly file in your current file.'
+        desc: 'The rendering of linked documents requires a Peer tier subscription. Please consider <a href="/choose-tier">upgrading</a>',
       },
       {
         error: 999,
-        desc: 'Internal Server error occurred.'
+        desc: 'Internal Server error.'
       },
     ]
   }
