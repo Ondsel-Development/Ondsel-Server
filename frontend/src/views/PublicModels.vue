@@ -2,7 +2,7 @@
   <Main>
     <template #title>
       <v-icon icon="mdi-dots-square" />
-      Public Models
+      Public Share Links
     </template>
     <template #subtitle>Browse popular models ready to be integrated with FreeCAD</template>
     <template #actions>
