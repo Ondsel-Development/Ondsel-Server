@@ -14,7 +14,7 @@ class Model extends BaseModel {
       shouldStartObjGeneration: false,
       isObjGenerationInProgress: false,
       isObjGenerated: false,
-      errorMsg: '',
+      errorMsg: null,
     }
   }
 
