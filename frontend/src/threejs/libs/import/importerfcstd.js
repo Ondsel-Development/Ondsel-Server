@@ -154,6 +154,7 @@ class FreeCadDocument
 
     LoadDocumentXml ()
     {
+        const excludedObjects = ['App::Plane', 'App::Origin'];
         let documentXml = this.GetXMLContent ('Document.xml');
         if (documentXml === null) {
             return false;
@@ -177,6 +178,11 @@ class FreeCadDocument
                 let name = objectElement.getAttribute ('name');
                 let type = objectElement.getAttribute ('type');
                 let fileName = `ondsel_${name}.brp`
+                // Hack for ObjectList view to avoid showing Origin and Plane object. For new files we already fixed on
+                // FC_Worker side, this is for already generated files.
+                if (excludedObjects.includes(type)) {
+                  continue
+                }
                 if (!(this.IsSupportedType (type, name) || this.HasFile(fileName))) {
                     continue;
                 }
