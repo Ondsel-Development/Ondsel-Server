@@ -15,24 +15,15 @@
         absolute
         bottom
       ></v-progress-linear>
-      <v-card-item v-if="error">
+      <v-card-item v-if="genericError">
         <v-alert
           variant="outlined"
           type="error"
           border="top"
           class="text-left"
-          v-if="error === 'UpgradeTier'"
+          v-if="genericError"
         >
-          <span>Please upgrade your tier.</span>
-        </v-alert>
-        <v-alert
-          variant="outlined"
-          type="error"
-          border="top"
-          class="text-left"
-          v-if="error === 'PinValidationError'"
-        >
-          <span>PIN must be 6 characters</span>
+          <span>{{genericError}}</span>
         </v-alert>
       </v-card-item>
       <v-card-text>
@@ -46,15 +37,17 @@
           ></v-switch>
           <v-text-field
             v-model.trim="title"
-            label="Description (seen by Viewer)"
-            hint="Enter a description share link to guide the viewer"
+            label="Title"
+            hint="Enter a title to guide the viewer"
             density="compact"
             :disabled="isGeneratingLink"
+            :counter="120"
+            :rules="titleRules"
           ></v-text-field>
           <v-text-field
             class="mt-n2"
             v-model.trim="privateDescription"
-            label="Private Note"
+            label="Private Note (seen by public)"
             hint="Enter a short private note for the share link"
             density="compact"
             :disabled="isGeneratingLink"
@@ -225,6 +218,7 @@
                 color="primary"
                 class="dialogButtons my-1"
                 :disabled="isGeneratingLink"
+                @click="updateSharedModel()"
               >Update</v-btn>
             </v-sheet>
             <v-btn
@@ -242,6 +236,7 @@
 
 <script>
 import { models } from '@feathersjs/vuex';
+import {cleanupString} from "@/genericHelpers";
 
 const { Model, SharedModel } = models.api;
 
@@ -286,6 +281,10 @@ export default {
     tmpModel: null,
     isGeneratingLink: false,
     toolTipMsg: 'Copy to clipboard',
+    titleRules: [
+      v => !!v || 'Content required',
+      v => (v && v.length <= 120) || 'Must be less than 120 characters'
+    ],
     descriptionRules: [
       v => !!v || 'Content required',
       v => (v && v.length <= 20) || 'Must be less than 20 characters'
@@ -295,6 +294,7 @@ export default {
       v => (v && v.length === 6) || 'PIN must be 6 characters'
     ],
     error: '',
+    genericError: '',
     versionFollowingItems: [
       {title: "Share this specific version of the file", value: "Locked"},
       {title: "Always show the file version that is active", value: "Active"},
@@ -312,6 +312,7 @@ export default {
     async cleanCreatorStart() {
       this.sharedModel = null;
       this.tmpSharedModel = null;
+      this.genericError = '';
       //
       // this.versionFollowing  // set by caller
       this.protection = 'Unlisted';
@@ -335,6 +336,7 @@ export default {
       const sharedModel = await SharedModel.get(smSummary._id);
       this.sharedModel = sharedModel;
       this.tmpSharedModel = sharedModel;
+      this.genericError = '';
       //
       this.versionFollowing = sharedModel.versionFollowing;
       this.protection = sharedModel.protection;
@@ -350,6 +352,95 @@ export default {
       this.permissions.canExportOBJ = sharedModel.canExportOBJ;
       this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
       this.modelId = sharedModel.cloneModelId;
+      this.sharedModelId = sharedModel._id;
+    },
+    generateAndValidateChanges() {
+      let changes = {};
+      // protection
+      let desiredProtection = this.protection.value ? this.protection.value : this.protection;
+      if (desiredProtection !== this.sharedModel.protection) {
+        if (['Listed', 'Unlisted', 'Pin', 'Direct'].includes(desiredProtection)) {
+          changes.protection = desiredProtection;
+        } else {
+          this.genericError = `A protection of ${desiredProtection} is not known.`;
+          return false;
+        }
+      }
+      // pin
+      if (this.pin !== this.sharedModel.pin) {
+        if (desiredProtection === 'Pin') {
+          if (this.pin?.length !== 6) {
+            this.genericError = 'PIN must be 6 digits';
+            return false;
+          }
+          changes.pin = this.pin;
+        } else {
+          changes.pin = '';
+        }
+      }
+      // title
+      if (this.title !== this.sharedModel.title) {
+        let desiredTitle = cleanupString(this.title, 120);
+        if (desiredTitle.length === 0) {
+          this.genericError = 'Must have a title';
+          return false;
+        }
+        changes.title = desiredTitle;
+      }
+      // description
+      if (this.privateDescription !== this.sharedModel.description) {
+        let desiredDescription = cleanupString(this.privateDescription, 20);
+        if (desiredDescription.length === 0) {
+          this.genericError = 'Must have a private note';
+          return false;
+        }
+        changes.description = desiredDescription;
+      }
+      // // canViewModel
+      // if (this.permissions.canViewModel !== this.sharedModel.canViewModel) {
+      //   changes.canViewModel = this.permissions.canViewModel;
+      // }
+      // canViewModelAttributes
+      if (this.permissions.canViewModelAttributes !== this.sharedModel.canViewModelAttributes) {
+        changes.canViewModelAttributes = this.permissions.canViewModelAttributes;
+      }
+      // canUpdateModel
+      if (this.permissions.canUpdateModel !== this.sharedModel.canUpdateModel) {
+        changes.canUpdateModel = this.permissions.canUpdateModel;
+      }
+      // canExportFCStd
+      if (this.permissions.canExportFCStd !== this.sharedModel.canExportFCStd) {
+        changes.canExportFCStd = this.permissions.canExportFCStd;
+      }
+      // canExportSTEP
+      if (this.permissions.canExportSTEP !== this.sharedModel.canExportSTEP) {
+        changes.canExportSTEP = this.permissions.canExportSTEP;
+      }
+      // canExportSTL
+      if (this.permissions.canExportSTL !== this.sharedModel.canExportSTL) {
+        changes.canExportSTL = this.permissions.canExportSTL;
+      }
+      // canExportOBJ
+      if (this.permissions.canExportOBJ !== this.sharedModel.canExportOBJ) {
+        changes.canExportOBJ = this.permissions.canExportOBJ;
+      }
+      // canDownloadDefaultModel
+      if (this.permissions.canDownloadDefaultModel !== this.sharedModel.canDownloadDefaultModel) {
+        changes.canDownloadDefaultModel = this.permissions.canDownloadDefaultModel;
+      }
+      return changes;
+    },
+    async updateSharedModel() {
+      if (this.sharedModelId) {
+        const changes = this.generateAndValidateChanges();
+        if (changes) {
+          await SharedModel.patch(
+            this.sharedModelId,
+            changes
+          );
+          this.dialog = false;
+        }
+      }
     },
     async generateSharedModelUrl() {
       const { valid } = await this.$refs.form.validate();
@@ -357,10 +448,10 @@ export default {
         return;
       }
       if (this.protection === 'Pin' && this.pin?.length !== 6) {
-        this.error = 'PinValidationError';
+        this.genericError = 'PIN must be 6 digits';
         return;
       }
-      this.error = null;
+      this.genericError = null;
       this.isGeneratingLink = true;
       this.sharedModel = null;
       const sharedModel = new SharedModel();
@@ -387,7 +478,7 @@ export default {
         }
         this.$emit('shareModel');
       } catch (e) {
-        this.error = 'UpgradeTier';
+        this.genericError = 'Please upgrade your tier';
         this.isGeneratingLink = false;
       }
     },

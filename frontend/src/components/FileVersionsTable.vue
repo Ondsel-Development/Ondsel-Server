@@ -104,7 +104,7 @@
                   {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
                 </v-tooltip>
               </v-btn>
-              <v-sheet :width="$vuetify.display.mobile ? '16em' : '32em'" class="my-3">
+              <v-sheet :width="$vuetify.display.mobile ? '16em' : '32em'" class="text-wrap my-3" style="word-break: break-word">
                 <b>{{link.title || 'no public description'}}</b>
                 <br>
                 private: <i>{{link.description || 'no note'}}</i>
@@ -128,7 +128,7 @@
                   color="secondary"
                   icon="mdi-cog"
                   class="ma-1"
-                  @click="startEditLinkForFollowingActiveDialog(link)"
+                  @click="startEditLinkDialog(link)"
                 ></v-btn>
               </v-sheet>
               <v-sheet
@@ -231,18 +231,14 @@ export default {
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
-    async startEditLinkForFollowingActiveDialog(link) {
+    async startEditLinkDialog(link) {
       let data = this.$refs.sharedModelDialogRef.$data;
       data.modelId = this.file.modelId;
       data.creatorRole = false;
       data.versionFollowingPreset = true;
       data.versionDescription = `edit or delete link`;
       await this.$refs.sharedModelDialogRef.assignFromExistingSharedModel(link);
-      if (data.versionFollowing === 'Locked') {
-        data.versionDescription = `Specific ${this.file.custFileName} Version`;
-      } else {
-        data.versionDescription = `Always Shows Active Version Of ${this.file.custFileName}`;
-      }
+      data.versionDescription = ``;
       data.dialog = true;
     },
     async startCreateLinkDialog(version) {

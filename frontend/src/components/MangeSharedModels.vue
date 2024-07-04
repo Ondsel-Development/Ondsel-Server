@@ -363,7 +363,6 @@ export default {
       await SharedModel.remove(id);
     },
     async updateDescription(id, val) {
-      console.log(val);
       const { ['description_' + id]:form } = this.$refs;
       const { valid } = await form.validate();
       if (valid) {
