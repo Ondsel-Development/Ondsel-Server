@@ -28,13 +28,15 @@
       </v-card-item>
       <v-card-text>
         <v-form ref="form">
-          <v-switch
-            class="text-green-darken-3 mt-n4"
-            v-model="isActive"
-            :disabled="isGeneratingLink"
-            hide-details
-            label = "Enabled"
-          ></v-switch>
+          <v-sheet class="mt-nr">
+            <v-switch
+              :class="isActive ? 'text-green-darken-3' : 'text-red-darken-3'"
+              v-model="isActive"
+              :disabled="isGeneratingLink"
+              hide-details
+              :label = "isActive ? 'Enabled' : 'Disabled'"
+            ></v-switch>
+          </v-sheet>
           <v-text-field
             v-model.trim="title"
             label="Title"
@@ -74,7 +76,7 @@
             ></v-otp-input>
           </div>
           <v-combobox
-            id="SLCD-version-follow-combobox"
+            v-if="!versionFollowingPreset"
             v-model="versionFollowing"
             label="Version Change Handling"
             :items="versionFollowingItems"
@@ -83,7 +85,16 @@
             :readonly="versionFollowingPreset"
             class="mt-4 mb-6"
           ></v-combobox>
-          <v-tooltip v-if=versionFollowingPreset activator="#SLCD-version-follow-combobox">
+          <v-sheet
+            v-if="versionFollowingPreset"
+            class="mt-4 mb-6 pl-4 border-sm"
+            id="SLCD-version-follow-text"
+          >
+            <span class="text-sm-caption">Version Change Handling</span>
+            <br>
+            {{versionFollowing}} : {{ versionFollowing==='Locked' ? 'only show this version of file' : 'show the active version of file'}}
+          </v-sheet>
+          <v-tooltip v-if=versionFollowingPreset activator="#SLCD-version-follow-text">
             Once a Share Link is created, this cannot be modified.
           </v-tooltip>
 
@@ -180,6 +191,7 @@
             ></v-checkbox>
           </v-sheet>
           <v-combobox
+            v-if="!creatorRole"
             v-model="tags"
             chips
             multiple
@@ -237,12 +249,13 @@
 <script>
 import { models } from '@feathersjs/vuex';
 import {cleanupString} from "@/genericHelpers";
+import _ from "lodash";
 
 const { Model, SharedModel } = models.api;
 
 export default {
   name: 'ShareLinkCrudDialog',
-  emits: ['shareModel'],
+  emits: ['sharedModelChanged'],
   props: {},
   data: () => ({
     dialog: false,
@@ -315,6 +328,7 @@ export default {
       this.genericError = '';
       //
       // this.versionFollowing  // set by caller
+      this.isActive = true;
       this.protection = 'Unlisted';
       this.pin = null;
       this.privateDescription = '';
@@ -327,6 +341,7 @@ export default {
       this.permissions.canExportSTL = false;
       this.permissions.canExportOBJ = false;
       this.permissions.canDownloadDefaultModel = false;
+      this.tags = [];
       // this.modelId  // set by caller
       //
       this.sharedModelId = null; // not an update
@@ -334,10 +349,10 @@ export default {
     async assignFromExistingSharedModel(smSummary) {
       this.sharedModelId = null; // paranoia; no updates will happen until this is set
       const sharedModel = await SharedModel.get(smSummary._id);
-      this.sharedModel = sharedModel;
       this.tmpSharedModel = sharedModel;
       this.genericError = '';
       //
+      this.isActive = sharedModel.isActive;
       this.versionFollowing = sharedModel.versionFollowing;
       this.protection = sharedModel.protection;
       this.pin = sharedModel.pin;
@@ -351,11 +366,18 @@ export default {
       this.permissions.canExportSTL = sharedModel.canExportSTL;
       this.permissions.canExportOBJ = sharedModel.canExportOBJ;
       this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
+      this.tags = sharedModel.curation.tags;
+      //
+      this.sharedModel = sharedModel;
       this.modelId = sharedModel.cloneModelId;
       this.sharedModelId = sharedModel._id;
     },
     generateAndValidateChanges() {
       let changes = {};
+      // isActive
+      if (this.isActive !== this.sharedModel.isActive) {
+        changes.isActive = this.isActive;
+      }
       // protection
       let desiredProtection = this.protection.value ? this.protection.value : this.protection;
       if (desiredProtection !== this.sharedModel.protection) {
@@ -428,6 +450,11 @@ export default {
       if (this.permissions.canDownloadDefaultModel !== this.sharedModel.canDownloadDefaultModel) {
         changes.canDownloadDefaultModel = this.permissions.canDownloadDefaultModel;
       }
+      // tags
+      if (!_.isEqual(this.tags, this.sharedModel.curation.tags)) {
+        this.sharedModel.curation.tags = _.cloneDeep(this.tags);
+        changes.curation = this.sharedModel.curation;
+      }
       return changes;
     },
     async updateSharedModel() {
@@ -438,6 +465,7 @@ export default {
             this.sharedModelId,
             changes
           );
+          this.$emit('sharedModelChanged');
           this.dialog = false;
         }
       }

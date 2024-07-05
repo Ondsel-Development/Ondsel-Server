@@ -111,6 +111,7 @@
               </v-sheet>
               <v-sheet width="3em" class="mt-3 mr-2">
                 <v-btn
+                  v-if="link.isActive"
                   color="link"
                   variant="plain"
                   append-icon="mdi-open-in-new"
@@ -122,13 +123,24 @@
                     open link in new window
                   </v-tooltip>
                 </v-btn>
+                <v-btn
+                  v-else
+                  color="disabled"
+                  variant="plain"
+                  append-icon="mdi-open-in-new"
+                  style="text-decoration: none;"
+                >
+                  <v-tooltip activator="parent">
+                    link is disabled
+                  </v-tooltip>
+                </v-btn>
               </v-sheet>
               <v-sheet width="3em" class="mr-2">
                 <v-btn
                   color="secondary"
                   icon="mdi-cog"
                   class="ma-1"
-                  @click="startEditLinkDialog(link)"
+                  @click="startEditLinkDialog(link, item)"
                 ></v-btn>
               </v-sheet>
               <v-sheet
@@ -172,7 +184,7 @@
   <share-link-crud-dialog
     v-if="!publicView"
     ref="sharedModelDialogRef"
-    @share-model="changedFile"
+    @shared-model-changed="changedFile"
   ></share-link-crud-dialog>
 </template>
 
@@ -207,9 +219,6 @@ export default {
     ...mapGetters('app', ['currentOrganization']),
   },
   methods: {
-    doNothing() {
-      //
-    },
     dateFormat(number) {
       const date = new Date(number);
       return date.toLocaleString();
@@ -231,14 +240,19 @@ export default {
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
-    async startEditLinkDialog(link) {
+    async startEditLinkDialog(link, version) {
+      const name = this.getUserLabel(version.userId, this.file.relatedUserDetails)
       let data = this.$refs.sharedModelDialogRef.$data;
       data.modelId = this.file.modelId;
       data.creatorRole = false;
       data.versionFollowingPreset = true;
       data.versionDescription = `edit or delete link`;
       await this.$refs.sharedModelDialogRef.assignFromExistingSharedModel(link);
-      data.versionDescription = ``;
+      if (data.versionFollowing === 'Locked') {
+        data.versionDescription = `"${this.file.custFileName}" version "${version.message}" by ${name}`;
+      } else {
+        data.versionDescription = `Follows ${this.file.custFileName}`;
+      }
       data.dialog = true;
     },
     async startCreateLinkDialog(version) {
@@ -249,7 +263,7 @@ export default {
       data.creatorRole = true;
       data.versionFollowing = 'Locked';
       data.versionFollowingPreset = false;
-      data.versionDescription = `${this.file.custFileName} File Version "${version.message}" posted by ${name}`;
+      data.versionDescription = `"${this.file.custFileName}" version "${version.message}" by ${name}`;
       await this.$refs.sharedModelDialogRef.cleanCreatorStart();
       data.dialog = true;
     },
@@ -262,7 +276,14 @@ export default {
       this.$emit('changeVisibleVersion', versionId);
     },
     async changedFile() {
-      this.$emit('changedFile');
+      // while a bit extreme; this solves the "too many layers" reactive problem
+      window.location.reload();
+      // this.$emit('changedFile');
+      // await this.$nextTick( // the "distribution" is post-update, so wait a moment for file to update
+      //   async () => {
+      //     await this.rebuild();
+      //   }
+      // )
     },
     async toggleLinkDisplay(index) {
       this.versionRows[index].displayLinks = !this.versionRows[index].displayLinks;
