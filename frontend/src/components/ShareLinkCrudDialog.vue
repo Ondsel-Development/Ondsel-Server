@@ -49,7 +49,7 @@
           <v-text-field
             class="mt-n2"
             v-model.trim="privateDescription"
-            label="Private Note (seen by public)"
+            label="Private Note (not seen by public)"
             hint="Enter a short private note for the share link"
             density="compact"
             :disabled="isGeneratingLink"

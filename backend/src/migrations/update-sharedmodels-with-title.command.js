@@ -1,7 +1,7 @@
 import {VersionFollowTypeMap as versionFollowTypeMap} from "../services/shared-models/shared-models.subdocs.schema.js";
 import {buildSharedModelSummary} from "../services/shared-models/shared-models.distrib.js";
 import {virtual} from "@feathersjs/schema";
-import {buildFakeModelUrl} from "../services/shared-models/helpers.js";
+import {buildFakeModelUrl, generateDefaultTitle} from "../services/shared-models/helpers.js";
 import _ from "lodash";
 
 export async function updateSharedModelsWithTitleCommand (app) {
@@ -36,32 +36,32 @@ export async function updateSharedModelsWithTitleCommand (app) {
   }
   console.log(`>>>   cached ${refList.length}`);
 
-  // console.log('>>> creating reference cache of all Files');
-  // refList = await fDb.find(
-  //   {},
-  //   {
-  //     projection: {
-  //       _id: 1,
-  //       modelId: 1,
-  //       isSystemGenerated: 1,
-  //       versions: 1,
-  //       followingActiveSharedModels: 1,
-  //       custFileName: 1,
-  //       currentVersionId: 1,
-  //     }
-  //   }
-  // ).toArray();
-  // for (let ref of refList) {
-  //   ref.$versionsChanged = false;
-  //   for (let version of ref.versions) {
-  //     if (version.lockedSharedModels === undefined) {
-  //       version.lockedSharedModels = [];
-  //       ref.$versionsChanged = true;
-  //     }
-  //   }
-  //   fileCache[ref._id.toString()] = ref;
-  // }
-  // console.log(`>>>   cached ${refList.length}`);
+  console.log('>>> creating reference cache of all Files');
+  refList = await fDb.find(
+    {},
+    {
+      projection: {
+        _id: 1,
+        modelId: 1,
+        isSystemGenerated: 1,
+        versions: 1,
+        followingActiveSharedModels: 1,
+        custFileName: 1,
+        currentVersionId: 1,
+      }
+    }
+  ).toArray();
+  for (let ref of refList) {
+    ref.$versionsChanged = false;
+    for (let version of ref.versions) {
+      if (version.lockedSharedModels === undefined) {
+        version.lockedSharedModels = [];
+        ref.$versionsChanged = true;
+      }
+    }
+    fileCache[ref._id.toString()] = ref;
+  }
+  console.log(`>>>   cached ${refList.length}`);
 
   // /////////////////////////////////////////
   //
@@ -82,10 +82,13 @@ export async function updateSharedModelsWithTitleCommand (app) {
         if (!sm.fileDetail) {
           console.log(`>>>     SKIPPING as fileDetail missing (implying broken model)`);
         } else {
-          const newTitle = (sm.createdAt && sm.createdAt > 0) ? `Shared Link from ${dateFormat(sm.createdAt)}` : 'Shared Link';
-          changes.title = newTitle;
-          sm.title = newTitle; // for later use by files
-          console.log(`>>>     updating title to \"${newTitle}\"`);
+          if (fileCache.hasOwnProperty(sm.fileDetail.id.toString())) {
+            const file = fileCache[sm.fileDetail.id.toString()];
+            const newTitle = generateDefaultTitle(sm, file);
+            changes.title = newTitle;
+            sm.title = newTitle; // for later use by files
+            console.log(`>>>     updating title to \"${newTitle}\"`);
+          }
         }
       }
 

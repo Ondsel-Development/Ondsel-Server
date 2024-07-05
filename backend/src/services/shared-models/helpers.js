@@ -144,3 +144,20 @@ export async function findThumbnailIfThereIsOne(context, sharedModel) {
   }
   return result;
 }
+
+export function generateDefaultTitle(sharedModel, file) {
+  if (!file) {
+    return "A ShareLink";
+  }
+  let version = null;
+  if (sharedModel.versionFollowing === VersionFollowTypeMap.active) {
+    version = file.versions.find(version => version._id.equals(file.currentVersionId));
+  } else {
+    version = file.versions.find(version => version._id.equals(sharedModel.fileDetail.versionId));
+  }
+  const msg = version?.message;
+  if (msg) {
+    return `${file.custFileName} - ${msg}`
+  }
+  return `${file.custFileName}`;
+}
