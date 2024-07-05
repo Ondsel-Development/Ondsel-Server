@@ -4,6 +4,7 @@ import { ModelObject3D } from '../model/object.js';
 import { GetFileExtension } from '../utils/fileutils.js';
 import { ArrayBufferToUtf8String } from '../utils/bufferutils.js';
 import { Property, PropertyGroup, PropertyType } from '../model/property.js';
+import { readShapeAppearance, intToRgba } from './utils.js';
 
 import * as fflate from 'fflate';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
@@ -285,11 +286,35 @@ class FreeCadDocument
                     let isVisibleString = this.GetFirstChildValue (propertyElement, 'Bool', 'value');
                     object.isVisible = (isVisibleString === 'true');
                 } else if (propertyName === 'ShapeColor') {
+                    /*
+                    <Property name="ShapeColor" type="App::PropertyColor" status="1">
+                        <PropertyColor value="1073807104"/>
+                    </Property>
+                     */
                     let colorString = this.GetFirstChildValue (propertyElement, 'PropertyColor', 'value');
-                    let rgba = parseInt (colorString, 10);
-                    object.color = new THREE.Color(
-                      (rgba >> 24 & 0xff) / 255, (rgba >> 16 & 0xff) / 255, (rgba >> 8 & 0xff) / 255, 1
-                    )
+                    let colorInt = parseInt (colorString, 10);
+                    object.color = new THREE.Color(...intToRgba(colorInt))
+                } else if (propertyName === 'ShapeAppearance') {
+                    /*
+                    <Property name="ShapeAppearance" type="App::PropertyMaterialList" status="9">
+                        <MaterialList file="ShapeAppearance" version="3"/>
+                    </Property>
+                     */
+                    let file = this.GetFirstChildValue (propertyElement, 'MaterialList', 'file');
+                    const shapeAppearanceBuffer = this.files[file];
+                    const materialList = readShapeAppearance(shapeAppearanceBuffer);
+                    if (materialList.length) {
+                        object.color = new THREE.Color(...intToRgba(materialList[0].specularColor))
+                    }
+                } else if (propertyName === 'ShapeMaterial') {
+                    /*
+                    <Property name="ShapeMaterial" type="App::PropertyMaterial" status="1">
+                        <PropertyMaterial ambientColor="858993408" diffuseColor="1073807104" specularColor="0" emissiveColor="0" shininess="0.2000000029802322" transparency="0.0000000000000000"/>
+                    </Property>
+                     */
+                    let colorString = this.GetFirstChildValue (propertyElement, 'PropertyMaterial', 'diffuseColor');
+                    const colorInt = parseInt (colorString, 10);
+                    object.color = new THREE.Color(colorInt);
                 }
             }
         }
