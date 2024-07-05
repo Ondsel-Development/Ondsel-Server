@@ -70,13 +70,19 @@
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
               </v-sheet>
-              <file-view-port :file="file" :version-id="viewPortVersionId" class="mt-2"></file-view-port>
+              <file-view-port
+                :file="file"
+                :version-id="viewPortVersionId"
+                class="mt-2"
+                @active-version-model-seen="seeActiveVersionModel"
+              ></file-view-port>
               <v-sheet name="tables">
                 <file-versions-table
                   :file="file"
                   :can-user-write="canUserWrite"
                   :public-view="publicView"
                   :visible-version-id="viewPortVersionId"
+                  :active-version-thumbnail-available="activeVersionThumbnailAvailable"
                   @change-visible-version="changeViewPort"
                   @changed-file="reloadFileAndWorkspace"
                 >
@@ -108,7 +114,7 @@
               v-if="!publicView"
               ref="uploadNewVersionFile"
               :file="file"
-              @changed-file="reloadFileAndWorkspace"
+              @changed-file="reloadPage"
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
         </v-sheet>
@@ -157,6 +163,7 @@ export default {
   mixins: [fileDownloadMixin],
   data() {
     return {
+      activeVersionThumbnailAvailable: false,
       file: {},
       workspace: {},
       publicView: false,
@@ -229,6 +236,9 @@ export default {
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
+    async reloadPage() {
+      window.location.reload();
+    },
     async reloadFileAndWorkspace() {
       const fileId = this.$route.params.fileid;
       try {
@@ -274,6 +284,9 @@ export default {
     async changeViewPort(versionId) {
       this.viewPortVersionId = versionId;
     },
+    seeActiveVersionModel() {
+      this.activeVersionThumbnailAvailable = true;
+    }
   },
 };
 </script>

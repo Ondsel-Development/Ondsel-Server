@@ -208,3 +208,12 @@ export function removePrivateFileFields( fileDetail ) {
     })
   }
 }
+
+export function GetUrlFromFileLatestVersion(fileDetail) {
+  let url = null;
+  const currentVersion = fileDetail.versions.find((v) => v._id.equals(fileDetail.currentVersionId));
+  if (currentVersion) {
+    url = currentVersion.thumbnailUrlCache;
+  }
+  return url;
+}

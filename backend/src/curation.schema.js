@@ -13,7 +13,8 @@ import {modelPath} from "./services/models/models.shared.js";
 import {BadRequest} from "@feathersjs/errors";
 import err from "mocha/lib/pending.js";
 import {getProperty} from "./helpers.js";
-import { ProtectionTypeMap } from './services/shared-models/shared-models.subdocs.schema.js';
+import {ProtectionTypeMap, VersionFollowTypeMap} from './services/shared-models/shared-models.subdocs.schema.js';
+import {findThumbnailIfThereIsOne} from "./services/shared-models/helpers.js";
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -487,12 +488,9 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
             }
           }
           if (newCuration.representativeFile && newCuration.representativeFile.thumbnailUrlCache === null) {
-            try {
-              const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
-              newCuration.representativeFile.thumbnailUrlCache = r.url || null;
+            newCuration.representativeFile.thumbnailUrlCache = await findThumbnailIfThereIsOne(context, context.beforePatchCopy);
+            if (newCuration.representativeFile.thumbnailUrlCache !== null) {
               needPatch = true;
-            } catch (e) {
-              console.log(`Error while getting url for shared-models curation with id ${context.beforePatchCopy._id} : ` + e.message);
             }
           }
           break;

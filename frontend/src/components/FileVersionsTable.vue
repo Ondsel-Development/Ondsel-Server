@@ -104,7 +104,7 @@
                   {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
                 </v-tooltip>
               </v-btn>
-              <v-sheet :width="$vuetify.display.mobile ? '16em' : '32em'" class="text-wrap my-3" style="word-break: break-word">
+              <v-sheet :width="$vuetify.display.mobile ? '16em' : '28em'" class="text-wrap my-3" style="word-break: break-word">
                 <b>{{link.title || 'no public description'}}</b>
                 <br>
                 private: <i>{{link.description || 'no note'}}</i>
@@ -164,6 +164,7 @@
             <v-btn
               color="secondary"
               prepend-icon="mdi-plus"
+              :disabled = "!activeVersionThumbnailAvailable"
               @click="startCreateLinkDialog(item)"
             >
               Create Link
@@ -192,11 +193,10 @@
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
 import ShareLinkCrudDialog from "@/components/ShareLinkCrudDialog.vue";
-import VerifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: {VerifyDeleteDialog, ShareLinkCrudDialog, FileInfoDialog },
+  components: {ShareLinkCrudDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
@@ -206,6 +206,7 @@ export default {
     },
     publicView: Boolean,
     visibleVersionId: String,
+    activeVersionThumbnailAvailable: Boolean,
   },
   data: () => ({
     isFileInfoDialogActive: false,
@@ -266,11 +267,6 @@ export default {
       data.versionFollowingPreset = false;
       data.versionDescription = `"${this.file.custFileName}" version "${version.message}" by ${name}`;
       await this.$refs.sharedModelDialogRef.cleanCreatorStart();
-      data.dialog = true;
-    },
-    async startSharedModelLinkActionDialog(item) {
-      let data = this.$refs.sharedModelLinkActionDialogRef.$data;
-      data.sharedModelSummary = item;
       data.dialog = true;
     },
     async doChangeVisibleVersion(versionId) {

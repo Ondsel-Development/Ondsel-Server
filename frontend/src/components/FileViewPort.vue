@@ -18,7 +18,7 @@
       >
         <v-sheet width="20em">
           <p>
-            Image Not Generated Yet
+            Thumbnail Not Generated Yet
           </p>
           <p v-if="file.currentVersion._id.toString() === versionId">
             Click on "Explore" to create image
@@ -63,6 +63,7 @@ const { Upload } = models.api;
 export default {
   name: 'FileViewPort',
   components: {MarkdownViewer},
+  emits: ['activeVersionModelSeen'],
   props: {
     file: {
       type: Object,
@@ -134,6 +135,11 @@ export default {
             const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
             if (viewedVersion) {
               url = viewedVersion.thumbnailUrlCache || undefined;
+              if (url) {
+                if (viewedVersion._id.toString() === this.file.currentVersion._id.toString()) {
+                  this.$emit('activeVersionModelSeen');
+                }
+              }
             } else {
               console.log("FAIL cannot locate visible version in File");
             }

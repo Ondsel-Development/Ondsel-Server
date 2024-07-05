@@ -1,12 +1,18 @@
-import { ProtectionTypeMap } from './shared-models.subdocs.schema.js';
+import {ProtectionTypeMap, VersionFollowTypeMap} from './shared-models.subdocs.schema.js';
 import {BadRequest} from "@feathersjs/errors";
 import _ from 'lodash';
 import {buildUserSummary} from "../users/users.distrib.js";
-import {removePrivateFileFields} from "../file/helpers.js";
+import {GetUrlFromFileLatestVersion, removePrivateFileFields} from "../file/helpers.js";
 
 export const validateSharedModelCreatePayload = async context => {
   if (!context.data.protection) {
     context.data.protection = ProtectionTypeMap.unlisted;
+  }
+  if (context.data.protection === ProtectionTypeMap.listed) {
+    let thumbnailUrl = await findThumbnailIfThereIsOne(context, context.data);
+    if (thumbnailUrl) {
+      context.data.isThumbnailGenerated = true;
+    }
   }
   if (context.data.pin) {
     context.data.protection = ProtectionTypeMap.pin;
@@ -91,8 +97,11 @@ export async function buildFakeModelAndFileForActiveVersion(message, context) {
 
 export async function buildFakeModelUrl(message, context) {
   const {refFile, refModel} = await getReferenceFileAndModel(message, context);
-
-  return refModel.objUrl;
+  let url = null;
+  if (refFile) {
+    url = GetUrlFromFileLatestVersion(refFile);
+  }
+  return url
 }
 
 async function getReferenceFileAndModel(message, context) {
@@ -113,4 +122,25 @@ async function getReferenceFileAndModel(message, context) {
     refFile: file,
     refModel: model
   };
+}
+
+export async function findThumbnailIfThereIsOne(context, sharedModel) {
+  let result = null;
+  let modelId = null;
+  if (sharedModel.versionFollowing === VersionFollowTypeMap.active) {
+    modelId = sharedModel.cloneModelId.toString();
+  } else {
+    if (sharedModel.dummyModelId) {
+      modelId = sharedModel.dummyModelId.toString();
+    }
+  }
+  if (modelId) {
+    try {
+      const r = await context.app.service('upload').get(`public/${modelId}_thumbnail.PNG`);
+      result = r.url || null;
+    } catch (e) {
+      //
+    }
+  }
+  return result;
 }
