@@ -28,7 +28,7 @@
       </v-card-item>
       <v-card-text>
         <v-form ref="form">
-          <v-sheet class="mt-nr">
+          <v-sheet v-if="!creatorRole" class="mt-nr">
             <v-switch
               :class="isActive ? 'text-green-darken-3' : 'text-red-darken-3'"
               v-model="isActive"
@@ -238,23 +238,28 @@
               color="error"
               class="dialogButtons align-self-end"
               :disabled="isGeneratingLink"
+              @click="startVerifyDeleteDialog()"
             >Delete</v-btn>
           </v-sheet>
         </v-form>
       </v-card-text>
     </v-card>
   </v-dialog>
+  <verify-delete-dialog @delete-approved="deleteSharedLink" ref="verifyDeleteRef"></verify-delete-dialog>
 </template>
 
 <script>
 import { models } from '@feathersjs/vuex';
 import {cleanupString} from "@/genericHelpers";
 import _ from "lodash";
+import VerifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
+import verifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
 
 const { Model, SharedModel } = models.api;
 
 export default {
   name: 'ShareLinkCrudDialog',
+  components: {VerifyDeleteDialog},
   emits: ['sharedModelChanged'],
   props: {},
   data: () => ({
@@ -320,6 +325,9 @@ export default {
     ]
   }),
   computed: {
+    verifyDeleteDialog() {
+      return verifyDeleteDialog
+    }
   },
   methods: {
     async cleanCreatorStart() {
@@ -344,6 +352,7 @@ export default {
       this.tags = [];
       // this.modelId  // set by caller
       //
+      this.assertPermissionConditions();
       this.sharedModelId = null; // not an update
     },
     async assignFromExistingSharedModel(smSummary) {
@@ -368,6 +377,7 @@ export default {
       this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
       this.tags = sharedModel.curation.tags;
       //
+      this.assertPermissionConditions();
       this.sharedModel = sharedModel;
       this.modelId = sharedModel.cloneModelId;
       this.sharedModelId = sharedModel._id;
@@ -483,19 +493,37 @@ export default {
       this.isGeneratingLink = true;
       this.sharedModel = null;
       const sharedModel = new SharedModel();
-      sharedModel.versionFollowing = this.versionFollowing;
-      sharedModel.protection = this.protection;
+
+      // isActive is not set on creation
+      // versionFollowing
+      let desiredVF = this.versionFollowing.value ? this.versionFollowing.value : this.versionFollowing;
+      sharedModel.versionFollowing = desiredVF;
+      // protection
+      let desiredProtection = this.protection.value ? this.protection.value : this.protection;
+      sharedModel.protection = desiredProtection;
+      // pin
       sharedModel.pin = this.pin;
-      sharedModel.description = this.privateDescription;
-      sharedModel.title = this.title;
+      // title
+      sharedModel.title = cleanupString(this.title, 120);
+      // description
+      sharedModel.description = cleanupString(this.privateDescription, 20);
+      // canViewModel -- should be hard-code to `true` for now
       sharedModel.canViewModel = this.permissions.canViewModel;
+      // canViewModelAttributes
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;
+      // canUpdateModel
       sharedModel.canUpdateModel = this.permissions.canUpdateModel;
+      // canExportFCStd
       sharedModel.canExportFCStd = this.permissions.canExportFCStd;
+      // canExportSTEP
       sharedModel.canExportSTEP = this.permissions.canExportSTEP;
+      // canExportSTL
       sharedModel.canExportSTL = this.permissions.canExportSTL;
+      // canExportOBJ
       sharedModel.canExportOBJ = this.permissions.canExportOBJ;
+      // canDownloadDefaultModel
       sharedModel.canDownloadDefaultModel = this.permissions.canDownloadDefaultModel;
+      // tags are not created at first
       sharedModel.cloneModelId = this.modelId;
       try {
         this.tmpSharedModel = await sharedModel.create();
@@ -504,25 +532,31 @@ export default {
         } else {
           this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
         }
-        this.$emit('shareModel');
       } catch (e) {
         this.genericError = 'Please upgrade your tier';
         this.isGeneratingLink = false;
       }
     },
-  },
-  watch: {
-    'tmpModel.isObjGenerated'(v) {
-      if (v) {
-        this.sharedModel = this.tmpSharedModel;
-        this.tmpSharedModel = null;
-        this.tmpModel = null;
-        this.isGeneratingLink = false;
-      }
+    async startVerifyDeleteDialog() {
+      this.isGeneratingLink = true;
+      this.$refs.verifyDeleteRef.$data.targetName = `Shared Link "${this.sharedModel.title}"`;
+      this.$refs.verifyDeleteRef.$data.warnings = [
+        'The link cannot be "undeleted"',
+        'Anyone who knows the link will get a "404 not found" if they visit the old link',
+      ];
+      this.$refs.verifyDeleteRef.$data.dialog = true;
     },
-    'versionFollowing'(v) {
-      if (v) {
-        if (v === 'Locked') {
+    async deleteSharedLink() {
+      this.isGeneratingLink = true;
+      await SharedModel.remove(this.sharedModelId);
+      this.isGeneratingLink = false;
+      this.$emit('sharedModelChanged');
+      this.dialog = false;
+    },
+    assertPermissionConditions() {
+      let desiredVF = this.versionFollowing.value ? this.versionFollowing.value : this.versionFollowing;
+      if (desiredVF) {
+        if (desiredVF === 'Locked') {
           this.permissionLocks.canExportFCStd = false;
           this.permissionLocks.canExportSTEP = false;
           this.permissionLocks.canExportSTL = false;
@@ -541,6 +575,21 @@ export default {
           this.permissions.canUpdateModel = false;
         }
       }
+    },
+  },
+  watch: {
+    'tmpModel.isObjGenerated'(v) {
+      if (v) {
+        this.sharedModel = this.tmpSharedModel;
+        this.tmpSharedModel = null;
+        this.tmpModel = null;
+        this.isGeneratingLink = false;
+        this.$emit('sharedModelChanged');
+        this.dialog=false;
+      }
+    },
+    'versionFollowing'() {
+      this.assertPermissionConditions()
     }
   }
 }

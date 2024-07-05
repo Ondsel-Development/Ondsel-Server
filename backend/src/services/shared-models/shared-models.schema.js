@@ -145,6 +145,7 @@ export const sharedModelsExternalResolver = resolve({
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'cloneModelId',
+  'title',
   'description',
   'canViewModel',
   'canViewModelAttributes',

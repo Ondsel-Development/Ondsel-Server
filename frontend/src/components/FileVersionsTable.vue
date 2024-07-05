@@ -192,10 +192,11 @@
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
 import ShareLinkCrudDialog from "@/components/ShareLinkCrudDialog.vue";
+import VerifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
 
 export default {
   name: "FileVersionsTable",
-  components: {ShareLinkCrudDialog, FileInfoDialog },
+  components: {VerifyDeleteDialog, ShareLinkCrudDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
