@@ -65,7 +65,7 @@
             hide-details
           ></v-combobox>
           <div
-            v-if="protection === 'Pin'"
+            v-if="protection === 'Pin' || protection.value === 'Pin'"
             class="d-flex flex-row align-center mb-n4"
           >
             <span class="text-body-1">Set PIN</span>
@@ -271,6 +271,7 @@ export default {
     valid: false,
     privateDescription: '',
     title: '',
+    defaultTitle: 'SharedModel',
     protection: 'Unlisted',
     versionFollowing: 'Locked',
     versionFollowingPreset: false,
@@ -340,7 +341,7 @@ export default {
       this.protection = 'Unlisted';
       this.pin = null;
       this.privateDescription = '';
-      this.title = '';
+      this.title = this.defaultTitle;
       this.permissions.canViewModel = true;
       this.permissions.canViewModelAttributes = false;
       this.permissions.canUpdateModel = false;
@@ -485,7 +486,8 @@ export default {
       if (!valid) {
         return;
       }
-      if (this.protection === 'Pin' && this.pin?.length !== 6) {
+      let desiredProtection = this.protection.value ? this.protection.value : this.protection;
+      if (desiredProtection === 'Pin' && this.pin?.length !== 6) {
         this.genericError = 'PIN must be 6 digits';
         return;
       }
@@ -499,7 +501,6 @@ export default {
       let desiredVF = this.versionFollowing.value ? this.versionFollowing.value : this.versionFollowing;
       sharedModel.versionFollowing = desiredVF;
       // protection
-      let desiredProtection = this.protection.value ? this.protection.value : this.protection;
       sharedModel.protection = desiredProtection;
       // pin
       sharedModel.pin = this.pin;
@@ -533,6 +534,7 @@ export default {
           this.tmpModel = await Model.get(this.tmpSharedModel.model._id, { query: { isSharedModel: true }});
         }
       } catch (e) {
+        console.log(e);
         this.genericError = 'Please upgrade your tier';
         this.isGeneratingLink = false;
       }

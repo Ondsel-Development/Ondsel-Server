@@ -82,8 +82,8 @@ export async function updateSharedModelsWithTitleCommand (app) {
         if (!sm.fileDetail) {
           console.log(`>>>     SKIPPING as fileDetail missing (implying broken model)`);
         } else {
-          if (fileCache.hasOwnProperty(sm.fileDetail.id.toString())) {
-            const file = fileCache[sm.fileDetail.id.toString()];
+          if (fileCache.hasOwnProperty(sm.fileDetail.fileId.toString())) {
+            const file = fileCache[sm.fileDetail.fileId.toString()];
             const newTitle = generateDefaultTitle(sm, file);
             changes.title = newTitle;
             sm.title = newTitle; // for later use by files

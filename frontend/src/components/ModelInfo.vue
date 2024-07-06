@@ -4,17 +4,13 @@
     <v-card-item style="justify-content: center;">
       <v-table density="comfortable" style="width: 600px; text-align: left;">
         <tbody>
-          <tr v-if="fileObject">
-            <td class="font-weight-medium">Date</td>
-            <td>{{ dateFormat(fileObject.createdAt) }}</td>
-          </tr>
-          <tr v-if="fileObject">
-            <td class="font-weight-medium">Name</td>
-            <td>{{ fileObject.custFileName }}</td>
-          </tr>
           <tr v-if="sharedModel && sharedModel.title">
             <td class="font-weight-medium">Title</td>
             <td><b>{{ sharedModel.title }}</b></td>
+          </tr>
+          <tr v-if="fileObject">
+            <td class="font-weight-medium">Date</td>
+            <td>{{ dateFormat(fileObject.createdAt) }}</td>
           </tr>
           <tr v-if="sharedModel && sharedModel.curation?.tags">
             <td class="font-weight-medium">Tags</td>
@@ -22,6 +18,18 @@
               <v-chip-group>
                 <v-chip v-for="(tag) in sharedModel.curation.tags" :key="tag">{{tag}}</v-chip>
               </v-chip-group>
+              <v-sheet v-if="sharedModel.curation.tags.length===0"><i>no tags</i></v-sheet>
+            </td>
+          </tr>
+          <tr>
+            <td class="font-weight-medium">Version</td>
+            <td>
+              <v-sheet v-if="sharedModel.versionFollowing === 'Locked'">
+                Showing a <i>specific</i> version of the original file
+              </v-sheet>
+              <v-sheet v-else>
+                Showing <i>the active</i> version of the original file
+              </v-sheet>
             </td>
           </tr>
           <tr v-if="user">
@@ -61,25 +69,37 @@
               </v-btn>
             </td>
           </tr>
-          <tr v-if="organization && fileObject && fileObject.workspace?.open === true">
+          <tr v-if="organization && fileObject && open">
             <td class="font-weight-medium">Workspace</td>
             <td>
               <v-btn
                 color="link"
                 variant="plain"
-                append-icon="mdi-open-in-new"
                 class="text-body-1 font-weight-medium pa-0"
                 style="text-decoration: none;"
                 @click.stop="gotoWorkspace()"
-                target="_blank"
               >
-                {{ fileObject.workspace.name }}&nbsp;
+                "{{ fileObject.workspace.name }}"&nbsp;
                 <span v-if="organization.type === 'Personal' && user">
                    of user {{ user.name }}
                 </span>
                 <span v-else>
                   of org {{ organization.name }}
                 </span>
+              </v-btn>
+            </td>
+          </tr>
+          <tr v-if="organization && fileObject && open">
+            <td class="font-weight-medium">File</td>
+            <td>
+              <v-btn
+                color="link"
+                variant="plain"
+                class="text-body-1 font-weight-medium pa-0"
+                style="text-decoration: none;"
+                @click.stop="gotoFile()"
+              >
+                "{{ fileObject.custFileName }}"&nbsp;
               </v-btn>
             </td>
           </tr>
@@ -108,6 +128,7 @@ export default {
     user: null,
     workspace: null,
     organization: null,
+    open: false,
     isDataFetchingInProgress: false,
   }),
   computed: {
@@ -134,7 +155,7 @@ export default {
         this.workspace = await this.getWorkspaceByIdPublic(this.fileObject.workspace._id);
         this.organization = await this.getOrgByIdOrNamePublic(this.workspace.organizationId);
       }
-      this.isDataFetchingInProgress = false;
+      this.open = this.fileObject?.workspace?.open === true;
     },
     async gotoWorkspace() {
       if (this.organization.type === 'Personal') {
@@ -146,6 +167,19 @@ export default {
         this.$router.push({
           name: 'OrgWorkspaceHome',
           params: {slug: this.organization.refName, wsname: this.fileObject.workspace.refName}
+        });
+      }
+    },
+    async gotoFile() {
+      if (this.organization.type === 'Personal') {
+        this.$router.push({
+          name: 'UserWorkspaceFile',
+          params: {slug: this.user.username, wsname: this.fileObject.workspace.refName, fileid: this.fileObject._id.toString()}
+        });
+      } else {
+        this.$router.push({
+          name: 'OrgWorkspaceFile',
+          params: {slug: this.organization.refName, wsname: this.fileObject.workspace.refName, fileid: this.fileObject._id.toString()}
         });
       }
     },

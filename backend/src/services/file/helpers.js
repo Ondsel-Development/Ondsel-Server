@@ -188,10 +188,18 @@ export function removePrivateFileFields( fileDetail ) {
     }
     return
   }
+  const isOpen = fileDetail.workspace?.open || false;
+  const isClosed = !isOpen;
   if (fileDetail.userId) { delete fileDetail.userId}
+  if (isClosed) {
+    fileDetail.custFileName = "REDACTED";
+  }
   if (fileDetail.workspace) {
-    if (fileDetail.workspace.name) { delete fileDetail.workspace.name }
-    if (fileDetail.refName) { delete fileDetail.refName }
+    // leave fileDetail.workspace.open of course
+    if (fileDetail.workspace.name && isClosed) {
+      fileDetail.workspace.name = "REDACTED"
+    }
+    if (fileDetail.refName && isClosed) { delete fileDetail.refName }
   }
   if (fileDetail.directory) { delete fileDetail.directory }
   if (fileDetail.relatedUserDetails) { delete fileDetail.relatedUserDetails }
@@ -203,7 +211,9 @@ export function removePrivateFileFields( fileDetail ) {
       if (ver.createdAt) { delete ver.createdAt }
       if (ver.fileUpdatedAt) { delete ver.fileUpdatedAt }
       if (ver.lockedSharedModels) { delete ver.lockedSharedModels }
-      //  leave: uniqueFileName: Type.String(),
+      if (isClosed) {
+        ver.uniqueFileName = "REDACTED";
+      }
       //  leave: thumbnailUrlCache: Type.Optional(Type.String()),
     })
   }

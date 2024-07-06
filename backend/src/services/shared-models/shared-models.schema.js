@@ -11,7 +11,7 @@ import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
 import {ProtectionType, VersionFollowTypeMap as versionFollowTypeMap} from './shared-models.subdocs.schema.js';
 import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
-import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl} from "./helpers.js";
+import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl, generateDefaultTitle} from "./helpers.js";
 
 
 // Main data model schema
@@ -145,7 +145,6 @@ export const sharedModelsExternalResolver = resolve({
 // Schema for creating new entries
 export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'cloneModelId',
-  'title',
   'description',
   'canViewModel',
   'canViewModelAttributes',
@@ -163,10 +162,17 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'versionFollowing',
   'directSharedTo',
 ], {
-  $id: 'SharedModelsData'
+  $id: 'SharedModelsData',
+  additionalProperties: true,
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
+  title: async (value, message, context) => {
+    if (value) {
+      return value;
+    }
+    return "Sharelink";
+  },
   versionFollowing: async (value, _message, _context) => {
     if (value) {
       return value;

@@ -50,11 +50,12 @@
           on {{ dateFormat(item.createdAt) }}
         </v-sheet>
         <v-btn
-          v-if="isFileModel(file)"
+          v-if="canUserWrite && isFileModel(file)"
           class="my-2"
           :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
+          :prepend-icon="arrayCountIcon(item.links)"
           @click="toggleLinkDisplay(index)"
-          width="6em"
+          width="8em"
         >
           Links
         </v-btn>
@@ -67,7 +68,7 @@
 <!--        </v-sheet>-->
       </v-sheet>
       <v-sheet
-        v-if="item.displayLinks"
+        v-if="canUserWrite && item.displayLinks"
         class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
         <v-sheet><span class="text-h6">Links</span></v-sheet>
@@ -89,21 +90,34 @@
             <v-sheet
               class="d-flex flex-row flex-wrap"
             >
-              <v-sheet width="3em" class="my-3">
+              <v-sheet width="4em" class="my-1 mt-3">
                 {{link.isActive ? 'Enabled' : 'Disabled'}}
               </v-sheet>
-              <v-btn
+              <v-sheet
                 width="3em"
-                variant="plain"
-                class="mt-2"
+                class="d-flex flex-column"
               >
-                <v-icon>
-                  {{link.versionFollowing === 'Locked' ? 'mdi-clock-end' : 'mdi-elevation-rise'}}
-                </v-icon>
-                <v-tooltip activator="parent">
-                  {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
-                </v-tooltip>
-              </v-btn>
+                <v-btn
+                  variant="plain"
+                >
+                  <v-icon>
+                    {{link.versionFollowing === 'Locked' ? 'mdi-clock-end' : 'mdi-elevation-rise'}}
+                  </v-icon>
+                  <v-tooltip activator="parent">
+                    {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
+                  </v-tooltip>
+                </v-btn>
+                <v-btn
+                  variant="plain"
+                >
+                  <v-icon>
+                    {{protectionDetail(link.protection).icon}}
+                  </v-icon>
+                  <v-tooltip activator="parent">
+                    {{protectionDetail(link.protection).title}}
+                  </v-tooltip>
+                </v-btn>
+              </v-sheet>
               <v-sheet :width="$vuetify.display.mobile ? '16em' : '28em'" class="text-wrap my-3" style="word-break: break-word">
                 <b>{{link.title || 'no public description'}}</b>
                 <br>
@@ -143,17 +157,14 @@
                   @click="startEditLinkDialog(link, item)"
                 ></v-btn>
               </v-sheet>
-              <v-sheet
-                v-if="link.protection === 'Direct'"
-                width="4em"
-                class="d-flex flex-row justify-center"
-              >
+              <v-sheet width="3em" class="mr-2">
                 <v-btn
+                  v-if="link.protection === 'Direct'"
+                  class="ma-1"
                   color="secondary"
                   icon="mdi-account-multiple-plus"
-                  class="mt-1"
+                  @click="startDirectShareToUserDialog(link)"
                 ></v-btn>
-                <span class="mt-4 ml-2">{{link.directSharedTo ? link.directSharedTo.length : '0'}}</span>
               </v-sheet>
             </v-sheet>
           </v-sheet>
@@ -187,16 +198,25 @@
     ref="sharedModelDialogRef"
     @shared-model-changed="changedFile"
   ></share-link-crud-dialog>
+  <direct-share-to-users-dialog
+    ref="directShareToUsersDialogRef"
+    :shared-model="activeSharedModel"
+  />
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import FileInfoDialog from '@/components/FileInfoDialog.vue';
 import ShareLinkCrudDialog from "@/components/ShareLinkCrudDialog.vue";
+import DirectShareToUsersDialog from "@/components/DirectShareToUsersDialog.vue";
+import {models} from "@feathersjs/vuex";
+
+const { SharedModel } = models.api;
+
 
 export default {
   name: "FileVersionsTable",
-  components: {ShareLinkCrudDialog, FileInfoDialog },
+  components: {DirectShareToUsersDialog, ShareLinkCrudDialog, FileInfoDialog },
   emits: ['changeVisibleVersion', 'changedFile'],
   props: {
     file: Object,
@@ -213,6 +233,7 @@ export default {
     selectedFileVersion: null,
     somethingTrue: true,
     versionRows: [],
+    activeSharedModel: {},
   }),
   async created() {
     await this.rebuild();
@@ -266,8 +287,13 @@ export default {
       data.versionFollowing = 'Locked';
       data.versionFollowingPreset = false;
       data.versionDescription = `"${this.file.custFileName}" version "${version.message}" by ${name}`;
+      data.defaultTitle = `${this.file.custFileName} - ${version.message}`;
       await this.$refs.sharedModelDialogRef.cleanCreatorStart();
       data.dialog = true;
+    },
+    async startDirectShareToUserDialog(sharedModelSummary) {
+      this.activeSharedModel = await SharedModel.get(sharedModelSummary._id); // get full model for this dialog
+      this.$refs.directShareToUsersDialogRef.$data.dialog = true;
     },
     async doChangeVisibleVersion(versionId) {
       this.$emit('changeVisibleVersion', versionId);
@@ -316,7 +342,28 @@ export default {
         }
       }
       this.versionRows = newRows;
-    }
+    },
+    protectionDetail(protection) {
+      switch (protection) {
+        case 'Listed':
+          return {icon: 'mdi-earth', title: 'Listed: visible & searchable by the public'};
+        case 'Unlisted':
+          return {icon: 'mdi-playlist-remove', title: 'Unlisted: visible to public but you need to know the URL'};
+        case 'Pin':
+          return {icon: 'mdi-apps', title: 'Pin: only visible when the PIN is entered'};
+        case 'Direct':
+          return {icon: 'mdi-account-key', title: 'Direct: only visible to accounts you add'};
+      }
+      return {icon: '', title: ''}
+    },
+    arrayCountIcon(arr) {
+      const number = arr?.length ?? 0;
+      if (number <= 9) {
+        return `mdi-numeric-${number}-box-outline`;
+      } else {
+        return 'mdi-numeric-9-plus-box-outline';
+      }
+    },
   },
   watch: {
     async 'file'(to, from) {
