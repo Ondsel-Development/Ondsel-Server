@@ -543,3 +543,19 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
     return context;
   }
 }
+
+export const removeCurationFromSearch = async (context) => {
+  // to be called 'after' the 'remove'
+  const keywordService = context.app.service('keywords');
+  const curation = context.result.curation;
+  const keywordsList = curation.keywordRefs || [];
+  for (const keyword of keywordsList) {
+    await keywordService.create(
+      {
+        _id: keyword,
+        shouldRemoveScore: true,
+        curation: curation,
+      }
+    )
+  }
+}

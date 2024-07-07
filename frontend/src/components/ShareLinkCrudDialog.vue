@@ -376,7 +376,7 @@ export default {
       this.permissions.canExportSTL = sharedModel.canExportSTL;
       this.permissions.canExportOBJ = sharedModel.canExportOBJ;
       this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
-      this.tags = sharedModel.curation.tags;
+      this.tags = sharedModel.curation?.tags || [];
       //
       this.assertPermissionConditions();
       this.sharedModel = sharedModel;

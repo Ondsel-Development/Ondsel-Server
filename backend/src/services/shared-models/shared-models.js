@@ -25,7 +25,7 @@ import { SharedModelsService, getOptions } from './shared-models.class.js'
 import { sharedModelsPath, sharedModelsMethods } from './shared-models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {afterCreateHandleSharedModelCuration, buildNewCurationForSharedModel} from "./shared-models.curation.js";
-import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {beforePatchHandleGenericCuration, removeCurationFromSearch} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {
   copySharedModelBeforePatch,
@@ -239,7 +239,8 @@ export const sharedModels = (app) => {
         distributeSharedModelChanges
       ],
       remove: [
-        distributeSharedModelDeletion
+        distributeSharedModelDeletion,
+        removeCurationFromSearch,
       ]
     },
     error: {
