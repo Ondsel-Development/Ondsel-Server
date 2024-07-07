@@ -150,6 +150,7 @@ import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue"
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
 import FileViewPort from "@/components/FileViewPort.vue";
+import {deriveOwnerDescAndRoute} from "@/genericHelpers";
 
 const { File } = models.api;
 
@@ -185,8 +186,9 @@ export default {
     this.wsName = this.$route.params.wsname;
     const fileId = this.$route.params.fileid;
     this.orgRefName = '';
+    let userDetail = {};
     if (this.userRouteFlag) {
-      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
+      userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
         console.log(`No such user for ${this.slug}`);
         this.$router.push({ name: 'PageNotFound' });
@@ -205,6 +207,10 @@ export default {
       {
         name: 'Workspace',
         value: `${this.file.workspace.name} [${this.file.workspace.refName}]`,
+      },
+      {
+        name: 'Owner',
+        value: deriveOwnerDescAndRoute(userDetail, this.workspace?.organization).desc
       },
       {
         name: 'Directory',

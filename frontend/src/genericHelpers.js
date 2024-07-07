@@ -17,3 +17,24 @@ export function cleanupString(src, len) {
   const shortTrimmed = shortDirty.trim();
   return shortTrimmed;
 }
+
+export function deriveOwnerDescAndRoute(user, org) {
+  // if org isn't set, don't worry about assigning user
+  if (!org) {
+    return {
+      desc: 'tbd',
+      route: { name: 'LensHome' }
+    }
+  }
+  if (org.type === 'Personal') {
+    return {
+      desc: `user ${user.name}`,
+      route: { name: 'UserHome', params: { slug: user.username } },
+    }
+  } else {
+    return {
+      desc: `org ${org.name}`,
+      route: { name: 'OrganizationHome', params: { slug: org.refName } },
+    }
+  }
+}
