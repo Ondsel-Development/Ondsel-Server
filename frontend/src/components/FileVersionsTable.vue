@@ -194,7 +194,7 @@
     @changed-file="changedFile"
   ></file-info-dialog>
   <share-link-crud-dialog
-    v-if="!publicView"
+    v-if="canUserWrite"
     ref="sharedModelDialogRef"
     @shared-model-changed="changedFile"
   ></share-link-crud-dialog>

@@ -558,4 +558,21 @@ export const removeCurationFromSearch = async (context) => {
       }
     )
   }
+  // for the time being, we are going to be paranoid and do a full sweep of the DB. In the future this should not be
+  // needed if everything is up-to-date.
+  const kwDb = await keywordService.options.Model;
+  const refList = await kwDb.find(
+    {
+      sortedMatches: {$elemMatch: {"curation._id": curation._id}}
+    },
+  ).toArray();
+  for (const doc of refList) {
+    await keywordService.create(
+      {
+        _id: doc._id,
+        shouldRemoveScore: true,
+        curation: curation,
+      }
+    )
+  }
 }

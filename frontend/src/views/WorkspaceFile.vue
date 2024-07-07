@@ -177,6 +177,7 @@ export default {
       wsName: '',
       orgRefName: '',
       slug: '',
+      representingWorkspaceOrg: false,
     };
   },
   async created() {
@@ -224,7 +225,7 @@ export default {
     ...mapState('auth', ['user']),
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
-    canUserWrite: vm => vm.workspace?.haveWriteAccess || false,
+    canUserWrite: vm => (vm.workspace?.haveWriteAccess && vm.representingWorkspaceOrg) || false,
   },
   methods: {
     ...mapActions('app', [
@@ -261,6 +262,7 @@ export default {
         this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
       }
       this.viewPortVersionId = this.file.currentVersionId.toString();
+      this.representingWorkspaceOrg = this.workspace.organizationId.toString() === this.currentOrganization._id.toString();
     },
     async gotoWorkspace() {
       const slug = this.$route.params.slug;
