@@ -4,6 +4,7 @@ import {buildFileSummary} from "../file/file.distrib.js";
 import {ProtectionTypeMap, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {fileVersionSchema} from "../file/file.schema.js";
+import {removePrivateFileSummaryFields} from "../file/helpers.js";
 
 export function buildNewCurationForSharedModel(sm) {
   let curation =   {
@@ -67,3 +68,18 @@ export const afterCreateHandleSharedModelCuration = async (context) => {
   return context;
 }
 
+export async function narrowlyUpdateSharedModelCurationRepresentativeFileUrl(app, sharedModel, newUrl, versionSummary) {
+  const smService = app.service('shared-models');
+  if (sharedModel.curation?.representativeFile) {
+    let curation = sharedModel.curation;
+    curation.representativeFile.thumbnailUrlCache = newUrl;
+    removePrivateFileSummaryFields(versionSummary);
+    curation.representativeFile.versionSummary = versionSummary;
+    await smService.patch(
+      sharedModel._id,
+      {
+        curation: curation
+      },
+    )
+  }
+}

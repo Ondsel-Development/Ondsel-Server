@@ -4,6 +4,8 @@ import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
 import * as http from "http";
 import * as https from "https";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {sharedModelsSummarySchema} from "../shared-models/shared-models.distrib.js";
 
 export const feedWorkspaceAndDirectory = async context => {
   const { data, params } = context;
@@ -206,18 +208,25 @@ export function removePrivateFileFields( fileDetail ) {
   if (fileDetail.followingActiveSharedModels) { delete fileDetail.followingActiveSharedModels }
   if (fileDetail.versions) {
     fileDetail.versions.forEach(function(ver, _index) {
-      if (ver.userId) { delete ver.userId }
-      if (ver.message) { delete ver.message }
-      if (ver.createdAt) { delete ver.createdAt }
-      if (ver.fileUpdatedAt) { delete ver.fileUpdatedAt }
-      if (ver.lockedSharedModels) { delete ver.lockedSharedModels }
-      if (isClosed) {
-        ver.uniqueFileName = "REDACTED";
-      }
-      //  leave: thumbnailUrlCache: Type.Optional(Type.String()),
+      removePrivateFileSummaryFields(ver);
     })
   }
 }
+
+export function removePrivateFileSummaryFields( fileDetailSum ) {
+  // used by curation representative file model handling mostly
+  // _id left
+  if (fileDetailSum.uniqueFileName) {
+    fileDetailSum.uniqueFileName = "REDACTED"
+  }
+  if (fileDetailSum.userId) { delete fileDetailSum.userId }
+  if (fileDetailSum.message) { delete fileDetailSum.message }
+  if (fileDetailSum.createdAt) { delete fileDetailSum.createdAt }
+  // thumbnailUrlCache left
+  if (fileDetailSum.fileUpdatedAt) { delete fileDetailSum.fileUpdatedAt }
+  if (fileDetailSum.lockedSharedModels) { delete fileDetailSum.lockedSharedModels }
+}
+
 
 export function GetUrlFromFileLatestVersion(fileDetail) {
   let url = null;

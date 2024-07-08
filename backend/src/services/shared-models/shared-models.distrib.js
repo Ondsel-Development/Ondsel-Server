@@ -1,7 +1,8 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import _ from 'lodash';
 import {addSharedModelToFile, deleteSharedModelFromFile, updateSharedModelToFile} from "../file/file.distrib.js";
-import {ProtectionType, VersionFollowType} from "./shared-models.subdocs.schema.js";
+import {ProtectionType, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
+import {narrowlyUpdateSharedModelCurationRepresentativeFileUrl} from "./shared-models.curation.js";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
@@ -46,6 +47,10 @@ export function buildSharedModelSummary(sharedModel) {
     }
     return summary;
 }
+
+//
+// sending changes
+//
 
 export async function distributeSharedModelCreation(context){
   // for now, only file is updated
@@ -97,4 +102,40 @@ export async function distributeSharedModelDeletion(context){
     console.log(error);
   }
   return context;
+}
+
+//
+// UPDATE  --  Update secondary fields in this collection; suppresses further patches to prevent loops
+//
+
+export async function applyThumbnailsToActiveFollowingSharedModels(app, model) {
+  // used by the model UPDATE for sending new thumbnails to SharedModels that are versionFollowingActive
+  // while the `model.file` virtual field needs no update, since it is dynamically built, the 'representativeFile' part
+  // of curation needs to see changes.
+  const fileService = app.service('file');
+  const fileDb = await fileService.options.Model;
+  const smService = app.service('shared-models');
+  const smDb = await smService.options.Model;
+
+  try {
+    const file = await fileDb.findOne({ modelId: model._id })
+    if (file) {
+      const ver = file.versions.find(version => version._id.equals(file.currentVersionId));
+      const url = ver?.thumbnailUrlCache;
+      if (url) {
+        const smList = await smDb.find(
+          {
+            deleted: {$ne: true},
+            versionFollowing: VersionFollowTypeMap.active,
+            cloneModelId: model._id,
+          },
+        ).toArray();
+        for (const sharedModel of smList) {
+          await narrowlyUpdateSharedModelCurationRepresentativeFileUrl(app, sharedModel, url, ver);
+        }
+      }
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }

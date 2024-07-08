@@ -395,8 +395,11 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // setup
       //
+      // If you set `needPatch`, then you are changing _additional_ information about the curation so both a keyword db change and a patch change needed
+      // If you set `changeFound`, then you have simply detected a change already queued up. Merely update the keyword db.
+      // So, if you set `needPatch`, you don't need to bother with setting `changeFound`
       let changeFound = false;
-      let needPatch = false; // if true, then ALSO needing changes applied to keywords
+      let needPatch = false;
       if (context.data.curation?.resetKeywords) {
         delete context.data.curation.resetKeywords;
         changeFound = true;
@@ -424,30 +427,29 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // name (pulled from parent except for personal orgs)
       //
-      if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
-        needPatch = true;
-        newCuration.name = context.data.name;
-      }
-      if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
-        needPatch = true;
-      }
-      if (newCuration.collection === 'shared-models') {
-        if (!newCuration.name) {
-          if (newCuration.representativeFile?.custFileName) {
-            newCuration.name = newCuration.representativeFile.custFileName;
+      if (newCuration.collection === navTargetMap.sharedModels) {
+        if (context.data.title) { // if changing the title
+          if (context.data.title !== originalCuration.name) {
             needPatch = true;
+            newCuration.name = context.data.title;
           }
+        }
+      } else {
+        if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
+          needPatch = true;
+          newCuration.name = context.data.name;
+        }
+        if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
+          needPatch = true;
         }
       }
       //
       // description (pulled from parent, usually)
       //
       if (newCuration.collection === navTargetMap.sharedModels) {
-        if (context.data.title) { // if changing the title
-          if (context.data.title !== originalCuration.description) {
-            needPatch = true;
-            newCuration.description = context.data.title;
-          }
+        if (newCuration.description) {
+          newCuration.description = ''
+          needPatch = true;
         }
       } else {
         if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
@@ -487,10 +489,16 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
               needPatch = true;
             }
           }
-          if (newCuration.representativeFile && newCuration.representativeFile.thumbnailUrlCache === null) {
-            newCuration.representativeFile.thumbnailUrlCache = await findThumbnailIfThereIsOne(context, context.beforePatchCopy);
-            if (newCuration.representativeFile.thumbnailUrlCache !== null) {
-              needPatch = true;
+          if (newCuration.representativeFile) {
+            if (newCuration.representativeFile.thumbnailUrlCache === null) {
+              newCuration.representativeFile.thumbnailUrlCache = await findThumbnailIfThereIsOne(context, context.beforePatchCopy);
+              if (newCuration.representativeFile.thumbnailUrlCache !== null) {
+                needPatch = true;
+              }
+            } else {
+              if (newCuration.representativeFile.thumbnailUrlCache !== originalCuration.representativeFile.thumbnailUrlCache) {
+                changeFound = true;
+              }
             }
           }
           break;
