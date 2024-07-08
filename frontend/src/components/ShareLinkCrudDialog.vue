@@ -6,7 +6,7 @@
   >
     <v-card>
       <v-card-title>
-        {{creatorRole ? 'Create' : 'Update'}} Shared Link
+        {{creatorRole ? 'Create' : 'Update'}} ShareLink
       </v-card-title>
       <v-card-subtitle v-if="versionDescription">{{versionDescription}}</v-card-subtitle>
       <v-progress-linear
@@ -32,7 +32,7 @@
             <v-switch
               :class="isActive ? 'text-green-darken-3' : 'text-red-darken-3'"
               v-model="isActive"
-              :disabled="isGeneratingLink"
+              :disabled="isGeneratingLink || shareLinkLocked"
               hide-details
               :label = "isActive ? 'Enabled' : 'Disabled'"
             ></v-switch>
@@ -52,7 +52,7 @@
             label="Private Note (not seen by public)"
             hint="Enter a short private note for the share link"
             density="compact"
-            :disabled="isGeneratingLink"
+            :disabled="isGeneratingLink || shareLinkLocked"
             :counter="20"
             :rules="descriptionRules"
           ></v-text-field>
@@ -61,6 +61,7 @@
             v-model="protection"
             label="Protection"
             density="compact"
+            :disabled="isGeneratingLink || shareLinkLocked"
             :items="protectionItems"
             hide-details
           ></v-combobox>
@@ -239,7 +240,9 @@
               class="dialogButtons align-self-end"
               :disabled="isGeneratingLink"
               @click="startVerifyDeleteDialog()"
-            >Delete</v-btn>
+            >
+              Delete
+            </v-btn>
           </v-sheet>
         </v-form>
       </v-card-text>
@@ -254,6 +257,7 @@ import {cleanupString} from "@/genericHelpers";
 import _ from "lodash";
 import VerifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
 import verifyDeleteDialog from "@/components/VerifyDeleteDialog.vue";
+import {mapState} from "vuex";
 
 const { Model, SharedModel } = models.api;
 
@@ -268,6 +272,7 @@ export default {
     sharedModelId: null,
     modelId: null,
     creatorRole: false,
+    shareLinkLocked: false,
     valid: false,
     privateDescription: '',
     title: '',
@@ -328,7 +333,8 @@ export default {
   computed: {
     verifyDeleteDialog() {
       return verifyDeleteDialog
-    }
+    },
+    ...mapState('auth', ['user']),
   },
   methods: {
     async cleanCreatorStart() {
@@ -354,6 +360,7 @@ export default {
       // this.modelId  // set by caller
       //
       this.assertPermissionConditions();
+      this.shareLinkLocked = false;
       this.sharedModelId = null; // not an update
     },
     async assignFromExistingSharedModel(smSummary) {
@@ -377,6 +384,8 @@ export default {
       this.permissions.canExportOBJ = sharedModel.canExportOBJ;
       this.permissions.canDownloadDefaultModel = sharedModel.canDownloadDefaultModel;
       this.tags = sharedModel.curation?.tags || [];
+      //
+      this.shareLinkLocked = sharedModel.isSystemGenerated === true && !(this.user.tier === 'Peer' || this.user.tier === 'Enterprise');
       //
       this.assertPermissionConditions();
       this.sharedModel = sharedModel;
@@ -540,8 +549,12 @@ export default {
       }
     },
     async startVerifyDeleteDialog() {
+      if (this.shareLinkLocked) {
+        this.genericError = 'Only users of Peer or Enterprise tier can remove the original "system generated" ShareLink without deleting the file'
+        return;
+      }
       this.isGeneratingLink = true;
-      this.$refs.verifyDeleteRef.$data.targetName = `Shared Link "${this.sharedModel.title}"`;
+      this.$refs.verifyDeleteRef.$data.targetName = `ShareLink "${this.sharedModel.title}"`;
       this.$refs.verifyDeleteRef.$data.warnings = [
         'The link cannot be "undeleted"',
         'Anyone who knows the link will get a "404 not found" if they visit the old link',

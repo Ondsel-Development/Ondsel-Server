@@ -55,9 +55,9 @@
           :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           :prepend-icon="arrayCountIcon(item.links)"
           @click="toggleLinkDisplay(index)"
-          width="8em"
+          width="12em"
         >
-          Links
+          ShareLinks
         </v-btn>
 <!--        <v-sheet width="3em">-->
 <!--          <v-btn-->
@@ -71,7 +71,7 @@
         v-if="canUserWrite && item.displayLinks"
         class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
-        <v-sheet><span class="text-h6">Links</span></v-sheet>
+        <v-sheet><span class="text-h6">ShareLinks</span></v-sheet>
         <v-sheet
           class="d-flex flex-column flex-wrap ml-8"
         >
@@ -79,7 +79,7 @@
             v-if="item.links.length === 0"
             class="ml-2 my-3"
           >
-            <i>No Links</i>
+            <i>No ShareLinks</i>
           </v-sheet>
           <v-sheet
             v-else
