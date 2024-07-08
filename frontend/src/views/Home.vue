@@ -462,11 +462,9 @@ export default {
       if (this.drawerActiveWindow === 'modelInfo') {
         this.isDrawerOpen = !this.isDrawerOpen;
       } else {
+        this.drawerActiveWindow = 'modelInfo'; // this will cause a fresh mount which invokes a data reload
         this.isDrawerOpen = true;
       }
-      this.drawerActiveWindow = 'modelInfo';
-      await nextTick();
-      await this.$refs.modelInfoDrawer.fetchData();
     },
     modelLoaded(viewer) {
       if (this.isReloadingOBJ) {

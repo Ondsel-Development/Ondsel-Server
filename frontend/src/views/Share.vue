@@ -42,12 +42,19 @@
         location="start"
       >Share model</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openShareWithUserDialog">
+    <v-btn v-if="hasBasicRights" icon flat @click="openShareWithUserDialog">
       <v-icon>mdi-account-network</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Share With User</v-tooltip>
+    </v-btn>
+    <v-btn v-if="!hasBasicRights" icon color="decoration" flat>
+      <v-icon>mdi-account-network</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Share With User (must be logged in and verified to use)</v-tooltip>
     </v-btn>
     <v-btn v-if="isAuthenticated" icon flat @click="openManageBookmarkDialog">
       <v-icon>mdi-bookmark</v-icon>
@@ -56,12 +63,19 @@
         location="start"
       >Manage Bookmarks</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openEditPromotionDialog()">
+    <v-btn v-if="hasBasicRights" icon flat @click="openEditPromotionDialog()">
       <v-icon>mdi-bullhorn</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Should {{selfPronoun}} promote this shared link</v-tooltip>
+    </v-btn>
+    <v-btn v-if="!hasBasicRights" icon flat color="decoration">
+      <v-icon>mdi-bullhorn</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >promote this shared link (must be logged in and verified to user)</v-tooltip>
     </v-btn>
     <v-btn v-if="sharedModel && !sharedModel.showInPublicGallery" icon flat @click="openMessages">
       <v-icon v-if="sharedModel.messages.length">mdi-chat</v-icon>
@@ -273,6 +287,7 @@ export default {
     ...mapGetters('auth', ['isAuthenticated']),
     ...mapGetters('app', ['selfPronoun', 'selfName', 'currentOrganization']),
     isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
+    hasBasicRights: (vm) => vm.isAuthenticated && vm.user?.tier !== undefined && vm.user?.tier !== 'Unverified',
   },
   methods: {
     async fetchShareLink() {
@@ -406,9 +421,8 @@ export default {
       this.viewer.selectGivenObject(object3d);
     },
     async modelInfoDrawerClicked() {
-      this.drawerActiveWindow = 'modelInfo';
+      this.drawerActiveWindow = 'modelInfo'; // this causes a fresh mount which causes a data reload
       this.isDrawerOpen = !this.isDrawerOpen;
-      await this.$refs.modelInfoDrawer.fetchData();
     },
     async openMessages() {
       this.drawerActiveWindow = 'openMessages';

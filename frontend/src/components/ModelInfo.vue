@@ -121,13 +121,16 @@ export default {
       return null;
     }
   },
+  async mounted() {
+    await this.fetchModelInfoData();
+  },
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
     dateFormat(number) {
       const date = new Date(number);
       return date.toDateString();
     },
-    async fetchData() {
+    async fetchModelInfoData() {
       this.isDataFetchingInProgress = true;
       this.user = await this.getUserByIdOrNamePublic(this.fileObject.userId);
       if (this.fileObject.workspace) {
