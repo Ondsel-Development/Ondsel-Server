@@ -397,6 +397,7 @@ const createSharedModelObject = async (context) => {
     shouldCommitNewVersion: true,
     version: {
       uniqueFileName: originalFile.currentVersion.uniqueFileName,
+      message: originalFile.currentVersion.message, // this is exposed ONLY on the initial commit when isSystemGenerated
     },
     isSystemGenerated: true,
   }, {
