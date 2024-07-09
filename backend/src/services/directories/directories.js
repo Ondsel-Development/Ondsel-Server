@@ -31,7 +31,7 @@ import {
   handleAddRelatedUserDetailsQuery,
   ifNeededAddRelatedUserDetails,
   removeFromParent,
-  doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent
+  doesUserHaveWorkspaceWriteRights, verifyDirectoryUniqueness, attachNewDirectoryToParent, verifyDirectoryName
 } from './helpers.js';
 import {authenticateJwtWhenPrivate, handlePublicOnlyQuery} from "../../hooks/handle-public-info-query.js";
 
@@ -131,6 +131,11 @@ export const directory = (app) => {
           isProvider('external'),
           doesUserHaveWorkspaceWriteRights
         ),
+        iff(
+          isProvider('external'),
+          // External because workspace make internal call to create directory with name '/'
+          verifyDirectoryName,
+        ),
         verifyDirectoryUniqueness,
         schemaHooks.validateData(directoryDataValidator),
         schemaHooks.resolveData(directoryDataResolver)
@@ -143,6 +148,10 @@ export const directory = (app) => {
         iff(
           isProvider('external'),
           preventChanges(false, 'workspace', 'files', 'directories'),
+        ),
+        iff(
+          isProvider('external'),
+          verifyDirectoryName,
         ),
         iff(
           context => context.data.shouldAddFilesToDirectory,
