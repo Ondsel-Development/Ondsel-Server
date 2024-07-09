@@ -81,6 +81,8 @@ const generateUserEngagementPayload = context => {
     return SourceTypeMap.unknown;
   }
 
+  const version = _.get(params.headers, 'x-lens-version');
+
   const payload = {
     source: getSource(),
     path: path,
@@ -89,6 +91,7 @@ const generateUserEngagementPayload = context => {
     ...(eventNameMapping.hasOwnProperty(`${path}.${method}`) && {event: eventNameMapping[`${path}.${method}`]}),
     ...(context.id && {contextId: context.id}),
     ...(!_.isEmpty(context.$userQuery) && {query: context.$userQuery}),
+    ...(version && {version: version}),
   };
   return payload;
 }

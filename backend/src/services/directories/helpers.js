@@ -76,6 +76,18 @@ export const verifyDirectoryUniqueness = async context => {
   return context;
 }
 
+
+export const verifyDirectoryName = async context => {
+  if (context.data.name) {
+    const pattern = /[\/\\:]/;
+    if (pattern.test(context.data.name)) {
+      throw new BadRequest(`Directory name must not include /, \\ and : characters`);
+    }
+  }
+  return context;
+}
+
+
 export const attachNewDirectoryToParent = async context => {
   // used 'after' a 'create'
   // by the time this is called, the correctness of insertion (rights, uniqueness, etc.) has been verified
