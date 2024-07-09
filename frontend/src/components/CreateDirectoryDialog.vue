@@ -72,6 +72,7 @@ export default {
     directoryName: '',
     rules: [
       v => !!v || 'Directory name is required',
+      v => !/[\/\\:]/.test(v) || 'Directory name must not include /, \\ and : characters'
     ],
     snackerMsg: '',
     showSnacker: false,
