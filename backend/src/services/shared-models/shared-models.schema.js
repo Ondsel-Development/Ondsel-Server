@@ -24,7 +24,7 @@ export const sharedModelsSchema = Type.Object(
     _id: ObjectIdSchema(),
     createdAt: Type.Number(),
     updatedAt: Type.Number(),
-    versionFollowing: VersionFollowType,
+    versionFollowing: Type.Optional(VersionFollowType),
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),

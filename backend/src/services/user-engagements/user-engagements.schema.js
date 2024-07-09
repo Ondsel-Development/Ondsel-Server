@@ -13,6 +13,7 @@ export const userEngagementsSchema = Type.Object(
     _id: ObjectIdSchema(),
     event: Type.Optional(Type.String()),
     source: SourceType,
+    version: Type.Optional(Type.String()),
     createdAt: Type.Number(),
     createdBy: userSummarySchema,
     path: Type.String(),
@@ -37,6 +38,7 @@ export const userEngagementsDataSchema = Type.Pick(userEngagementsSchema, [
   'contextId',
   'query',
   'connection',
+  'version',
 ], {
   $id: 'UserEngagementsData'
 })
@@ -67,7 +69,8 @@ export const userEngagementsQueryProperties = Type.Pick(userEngagementsSchema, [
   'createdAt',
   'createdBy',
   'source',
-  'contextId'
+  'contextId',
+  'version',
 ])
 export const userEngagementsQuerySchema = Type.Intersect(
   [
