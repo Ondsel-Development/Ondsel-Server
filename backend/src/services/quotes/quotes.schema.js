@@ -16,14 +16,16 @@ import {ThirdPartyVendorType} from "./quotes.subdocs.schema.js";
 export const quotesSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    completed: Type.Boolean(),           // if a true response seen from 3rd party, then this is set true; otherwise false
     originatingUserId: ObjectIdSchema(), // kept for historical reference; only a logged-in user can request a quote
     requestedAt: Type.Number(),          // the date the quote was requested
-    isCacheable: Type.Boolean(),         // if false, this quote CANNOT be cached because pricing is based on context;
+    cacheable: Type.Boolean(),           // if false, this quote CANNOT be cached because pricing is based on context;
                                          // such as the delivery address, a per-customer-discount, or an odd promotion
                                          // those details should be stored in `otherParams` or `promotion`
     passiveDetail: Type.Any(),           // an object (empty is okay) containing details not affecting price
+    vendorResult: Type.Optional(Type.String()), // a user readable string describing the result of the 3rd party vendor request
     // the following fields determine the "uniqueness" of the quote
-    createdAt: Type.Optional(Type.Number()),    // the date the quote was RECEIVED; used for "aging" the quote
+    createdAt: Type.Optional(Type.Number()),    // the date the quote was RECEIVED (by 3rd pty); used for "aging" the quote
     fileId: ObjectIdSchema(),
     fileVersionId: ObjectIdSchema(),
     source: ThirdPartyVendorType,

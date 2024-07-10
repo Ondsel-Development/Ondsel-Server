@@ -15,6 +15,7 @@ import {
 import { QuotesService, getOptions } from './quotes.class.js'
 import { quotesPath, quotesMethods } from './quotes.shared.js'
 import {disallow, iff, iffElse, isProvider} from "feathers-hooks-common";
+import {generateImmediateQuote} from "./commands/generateImmediateQuote.js";
 
 export * from './quotes.class.js'
 export * from './quotes.schema.js'
@@ -43,17 +44,16 @@ export const quotes = (app) => {
       get: [],
       create: [
         disallow('external'),
+        generateImmediateQuote, // for now, this is the only option
         schemaHooks.validateData(quotesDataValidator),
         schemaHooks.resolveData(quotesDataResolver)
       ],
       patch: [
-        iff(
-          isProvider('external'),
-          iffElse(context => context.data.shouldGenerateQuote,
-            [], // TODO
-            [disallow()]
-          ),
-        ),
+        // iffElse(context => context.data.shouldGenerateImmediateQuote,
+        //   [generateImmediateQuote],
+        //   [disallow()]
+        // ),
+        disallow(), // TODO: this will change later as two-step (non-immediate) quotations are supported
         schemaHooks.validateData(quotesPatchValidator),
         schemaHooks.resolveData(quotesPatchResolver)
       ],

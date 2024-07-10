@@ -1,5 +1,3 @@
-import { quotes } from './quotes/quotes.js'
-
 import { keywords } from './keywords/keywords.js'
 
 import { orgInvites } from './org-invites/org-invites.js'
@@ -42,9 +40,11 @@ import { notifications } from './notifications/notifications.js'
 
 import { userEngagements } from './user-engagements/user-engagements.js'
 
-export const services = (app) => {
-  app.configure(quotes)
+import { orgOrders } from './org-orders/org-orders.js'
 
+import { quotes } from './quotes/quotes.js'
+
+export const services = (app) => {
   app.configure(orgSecondaryReferences)
 
   app.configure(preferences)
@@ -86,6 +86,10 @@ export const services = (app) => {
   app.configure(notifications)
 
   app.configure(userEngagements)
+
+  app.configure(orgOrders)
+
+  app.configure(quotes)
 
   // All services will be registered here
 }
