@@ -167,11 +167,11 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
-  title: async (value, message, context) => {
+  title: async (value, _message, _context) => {
     if (value) {
       return value;
     }
-    return "Sharelink";
+    return 'Sharelink';
   },
   versionFollowing: async (value, _message, _context) => {
     if (value) {
