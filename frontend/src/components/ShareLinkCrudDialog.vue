@@ -83,6 +83,7 @@
             :items="versionFollowingItems"
             hide-details
             density="compact"
+            :disabled="isGeneratingLink"
             :readonly="versionFollowingPreset"
             class="mt-4 mb-6"
           ></v-combobox>
