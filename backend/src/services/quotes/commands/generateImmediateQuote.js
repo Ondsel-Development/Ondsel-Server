@@ -11,8 +11,13 @@ export const generateImmediateQuote = async (context) => {
   data.requestedAt = new Date();
   data.createdAt = undefined;
 
-  if (!data.quantity || data.quantity <= 0) {
-    throw new BadRequest(`unable to process a quantity of ${data.quantity}`);
+  if (data.quantity) {
+    data.quantity = Math.floor(Number(data.quantity) || 0); // anything is made an int
+  } else {
+    throw new BadRequest(`missing quantity`);
+  }
+  if (data.quantity <= 0) {
+    throw new BadRequest(`unable to process a negative quantity: ${data.quantity}`);
   }
   if (data.priceCurrency !== currencyTypeMap.USD) {
     throw new BadRequest(`only supporting priceCurrency of ${currencyTypeMap.USD}`);
