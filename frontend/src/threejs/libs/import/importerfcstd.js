@@ -483,6 +483,7 @@ export class ImporterFcstd
             }
             convertedObjectCount += 1;
             if (convertedObjectCount === objects.length) {
+                this.worker.terminate();
                 onFinish (this.model);
             } else {
                 let currentObject = objects[convertedObjectCount];
@@ -498,6 +499,7 @@ export class ImporterFcstd
         });
 
         this.worker.addEventListener ('error', (ev) => {
+            this.worker.terminate()
             onFileConverted (null);
         });
 
