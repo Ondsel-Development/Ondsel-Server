@@ -13,24 +13,14 @@ import {sharedModelsSummarySchema} from "../shared-models/shared-models.distrib.
 export const fileVersionSchema = Type.Object({
   _id: ObjectIdSchema(),
   uniqueFileName: Type.String(),
-  userId: ObjectIdSchema(),
+  userId: Type.Optional(ObjectIdSchema()), // this is now optional because of some privacy issues
   message: Type.Optional(Type.String()),
-  createdAt: Type.Number(),
+  createdAt: Type.Optional(Type.Number()), // this is now optional because of some privacy issues
   thumbnailUrlCache: Type.Optional(Type.String()),
   fileUpdatedAt: Type.Optional(Type.Number()),
   lockedSharedModels: Type.Optional(Type.Array(sharedModelsSummarySchema)),
   additionalData: Type.Object({}),
 })
-
-// custFileName: data.custFileName,
-//       shouldCommitNewVersion: true,
-//       version: {
-//         uniqueFileName: data.uniqueFileName,
-//         message: 'Initial commit',
-//         ...(data.fileUpdatedAt && {fileUpdatedAt: data.fileUpdatedAt})
-//       },
-//       isSystemGenerated: _.get(data, 'isSharedModel', false),
-
 
 // Main data model schema
 export const fileSchema = Type.Object(

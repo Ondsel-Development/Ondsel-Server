@@ -19,7 +19,7 @@
     "feathers-hooks-common": "^7.0.1",
     "fflate": "^0.8.1",
     "marked": "^7.0.5",
-    "occt-import-js": "^0.0.21",
+    "occt-import-js": "^0.0.22",
     "roboto-fontface": "*",
     "rss-parser": "^3.13.0",
     "socket.io-client": "^4.6.1",

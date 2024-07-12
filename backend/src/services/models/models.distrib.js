@@ -7,6 +7,7 @@
 
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {applyModelSummaryToFile, applyThumbnailToFile} from "../file/file.distrib.js";
+import {applyThumbnailsToActiveFollowingSharedModels} from "../shared-models/shared-models.distrib.js";
 
 //
 // SUMMARY  --  Summary of the Source-Of-Truth fields in this collection
@@ -82,23 +83,18 @@ export const distributeModelSummaries = async (context) => {
 }
 
 export const distributeModelThumbnails = async (context) => {
-  // used for distributing file-version-specific copies of thumbnails to File when appropriate
+  // this is to be called after a patch
+  // used for distributing file-version-specific copies of thumbnails
   if (context.result.isSharedModel) { // this is only for the main model
     return context;
   }
   if (context.result.deleted) {
     return context;
   }
-  // if (context.result.isObjGenerated === context.beforePatchCopy.isObjGenerated) {
-  //   // only after thumbnail generation on new versions
-  //   return context;
-  // }
   if (context.result.isThumbnailGenerated === true) {
     await applyThumbnailToFile(context.app, context.id, context.result.fileId);
+    await applyThumbnailsToActiveFollowingSharedModels(context.app, context.result);
   }
-  // if (context.result.isObjGenerated === false) { // only when file generation finished
-  //   return context;
-  // }
   return context;
 }
 

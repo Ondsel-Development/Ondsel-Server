@@ -1,178 +1,171 @@
 <template>
-  <v-card min-width="32em" class="border-md">
-    <v-card-title>
-      <v-sheet class="d-flex flex-wrap justify-space-between">
-        <v-sheet class="d-flex flex-wrap flex-row">
-          <v-sheet
-            v-for="(dir, i) in fullPath"
-            :key="dir._id"
-          >
-            <v-btn
-              @click="gotoDirectory(dir)"
-            >{{dir.name}}</v-btn>
-          </v-sheet>
-        </v-sheet>
-        <v-sheet>
+  <v-sheet class="border-md flex-grow-1">
+    <v-sheet class="d-flex flex-row flex-wrap justify-space-between" name="flv-top-row">
+      <v-sheet class="d-flex flex-wrap flex-row">
+        <v-sheet
+          v-for="dir in fullPath"
+          :key="dir._id"
+        >
           <v-btn
-            :color="iconViewMode ? '#757575' : '#F5F5F5'"
-            @click="iconViewMode = true"
-          >
-            <v-icon>mdi-view-grid</v-icon>
-          </v-btn>
-          <v-btn
-            :color="!iconViewMode ? '#757575' : '#F5F5F5'"
-            @click="iconViewMode = false"
-          >
-            <v-icon>mdi-view-list</v-icon>
-          </v-btn>
+            @click="gotoDirectory(dir)"
+          >{{dir.name}}</v-btn>
         </v-sheet>
-
-        <v-menu v-if="canUserWrite">
-          <template v-slot:activator="{ props }">
-            <v-btn
-              color="decoration"
-              flat
-              icon="mdi-plus"
-              v-bind="props"
-            ></v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="openCreateDirectoryDialog()">
-              <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="$refs.uploadFileDialog.openFileUploadDialog();">
-              <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New File</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+      </v-sheet>
+      <v-sheet>
         <v-btn
-          v-else
-          color="decoration"
-          flat
-          icon="mdi-plus"
-          disabled
-        ></v-btn>
+          :color="iconViewMode ? '#757575' : '#F5F5F5'"
+          @click="iconViewMode = true"
+        >
+          <v-icon>mdi-view-grid</v-icon>
+        </v-btn>
+        <v-btn
+          :color="!iconViewMode ? '#757575' : '#F5F5F5'"
+          @click="iconViewMode = false"
+        >
+          <v-icon>mdi-view-list</v-icon>
+        </v-btn>
       </v-sheet>
-    </v-card-title>
-    <v-card-text>
+      <v-menu v-if="canUserWrite">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            color="decoration"
+            flat
+            icon="mdi-plus"
+            v-bind="props"
+          ></v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="openCreateDirectoryDialog()">
+            <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New Subdirectory</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="$refs.uploadFileDialog.openFileUploadDialog();">
+            <v-list-item-title><v-icon icon="mdi-plus" class="mx-2"></v-icon> Add New File</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-btn
+        v-else
+        color="decoration"
+        flat
+        icon="mdi-plus"
+        disabled
+      ></v-btn>
+    </v-sheet>
 
-      <v-sheet class="d-flex flex-wrap" name="icon-view-version" v-if="iconViewMode">
-        <v-card
-          v-for="dir in dirList"
-          :key="dir._id"
-          class="ma-1"
-          @click="gotoDirectory(dir)"
+    <v-sheet class="d-flex flex-wrap flex-row" v-if="iconViewMode" name="icon-view-middle">
+      <v-sheet
+        v-for="dir in dirList"
+        :key="dir._id"
+        class="ma-1 border-sm"
+        width="8em"
+        @click="gotoDirectory(dir)"
+      >
+        <v-sheet
+          color="BDBDBD"
+          height="8em"
+          class="d-flex justify-center align-center"
         >
-          <v-sheet
-            color="BDBDBD"
-            height="8em"
-            class="d-flex justify-center align-center"
-          >
-            <v-icon
-              icon="mdi-folder"
-              style="color: #8D8D8D"
-              cover
-            />
-          </v-sheet>
-          <v-card-text>
-            <v-sheet width="8em" class="d-flex justify-center">
-              <span class="text-body-2 text-center">{{ dir.name }}</span>
-              <v-menu v-if="canUserWrite">
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    color="decoration"
-                    flat
-                    icon="mdi-dots-vertical"
-                    v-bind="props"
-                    size="x-small"
-                    class="ml-1"
-                  ></v-btn>
-                </template>
-                <v-list>
-                  <v-list-item @click="openDeleteDirectoryDialog(dir)">
-                    <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-sheet>
-          </v-card-text>
-        </v-card>
-        <v-card
-          v-for="file in fileList"
-          :key="file._id"
-          class="ma-1"
-          @click="gotoFile(file)"
-        >
-          <v-img
-            v-if="file.thumbnailUrlCache"
-            height="8em"
-            :src="file.thumbnailUrlCache"
+          <v-icon
+            icon="mdi-folder"
+            style="color: #8D8D8D"
             cover
-          ></v-img>
-          <v-sheet
-            v-else
-            color="#F4F4F4"
-            height="8em"
-            class="d-flex justify-center align-center"
-          >
-            <v-icon icon="mdi-file" style="color: #8D8D8D" cover />
-          </v-sheet>
-          <v-card-text>
-            <v-sheet width="8em" class="d-flex justify-center">
-              <div class="text-body-2 text-center">{{ file.custFileName }}</div>
-            </v-sheet>
-          </v-card-text>
-        </v-card>
+          />
+        </v-sheet>
+        <v-sheet width="8em" class="d-flex justify-center text-body-2 text-center">
+          {{ dir.name }}
+          <v-menu v-if="canUserWrite">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                color="decoration"
+                flat
+                icon="mdi-dots-vertical"
+                v-bind="props"
+                size="x-small"
+                class="ml-1"
+              ></v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-sheet>
       </v-sheet>
-
-      <v-sheet class="d-flex flex-column" name="icon-view-version" v-if="!iconViewMode">
-        <v-card
-          v-for="dir in dirList"
-          :key="dir._id"
-          class="ma-1"
-          @click="gotoDirectory(dir)"
+      <v-sheet
+        v-for="file in fileList"
+        :key="file._id"
+        class="ma-1 border-sm"
+        width="8em"
+        @click="gotoFile(file)"
+      >
+        <v-img
+          v-if="file.thumbnailUrlCache"
+          height="8em"
+          :src="file.thumbnailUrlCache"
+          cover
+        ></v-img>
+        <v-sheet
+          v-else
+          color="#F4F4F4"
+          height="8em"
+          class="d-flex justify-center align-center"
         >
-          <v-card-text>
-            <v-icon icon="mdi-folder"></v-icon> <code>{{ dir.name }}</code>
-            <v-menu v-if="canUserWrite">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  color="decoration"
-                  flat
-                  icon="mdi-dots-vertical"
-                  v-bind="props"
-                  size="x-small"
-                  class="ml-1"
-                ></v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="openDeleteDirectoryDialog(dir)">
-                  <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-card-text>
-        </v-card>
-        <v-card
-          v-for="file in fileList"
-          :key="file._id"
-          class="ma-1"
-          @click="gotoFile(file)"
-        >
-          <v-card-text>
-            <v-icon icon="mdi-file"></v-icon> <code>{{ file.custFileName }}</code>
-          </v-card-text>
-        </v-card>
+          <v-icon icon="mdi-file" style="color: #8D8D8D" cover />
+        </v-sheet>
+        <v-sheet width="8em" class="d-flex justify-center text-body-2 text-center">
+          {{ wrapify(file.custFileName) }}
+        </v-sheet>
       </v-sheet>
+    </v-sheet>
 
-      <div v-if="fileList.length===0 && dirList.length===0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
-        This directory is empty
-      </div>
-      <div v-if="fileList.length===0 && dirList.length>0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
-        There are no files in this directory
-      </div>
-    </v-card-text>
-  </v-card>
+    <v-sheet class="d-flex flex-column" v-if="!iconViewMode" name="list-view-middle" >
+      <v-card
+        v-for="dir in dirList"
+        :key="dir._id"
+        class="ma-1"
+        @click="gotoDirectory(dir)"
+      >
+        <v-card-text>
+          <v-icon icon="mdi-folder"></v-icon> <code>{{ dir.name }}</code>
+          <v-menu v-if="canUserWrite">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                color="decoration"
+                flat
+                icon="mdi-dots-vertical"
+                v-bind="props"
+                size="x-small"
+                class="ml-1"
+              ></v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="openDeleteDirectoryDialog(dir)">
+                <v-list-item-title><v-icon icon="mdi-delete" class="mx-2"></v-icon> Delete This Directory</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-card-text>
+      </v-card>
+      <v-card
+        v-for="file in fileList"
+        :key="file._id"
+        class="ma-1"
+        @click="gotoFile(file)"
+      >
+        <v-card-text>
+          <v-icon icon="mdi-file"></v-icon> <code>{{ file.custFileName }}</code>
+        </v-card-text>
+      </v-card>
+    </v-sheet>
+
+    <div v-if="fileList.length===0 && dirList.length===0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
+      This directory is empty
+    </div>
+    <div v-if="fileList.length===0 && dirList.length>0" class="text-body-2 text-center" style="text-align: center; justify-content: center">
+      There are no files in this directory
+    </div>
+  </v-sheet>
   <upload-file-dialog v-if="!publicView" ref="uploadFileDialog" :directory="directory" />
   <create-directory-dialog ref="createDirectoryDialog" @create-directory="emitCreateDirectory" :parent-dir="directory"></create-directory-dialog>
   <delete-directory-dialog ref="deleteDirectoryDialog" @delete-directory="deleteDirectory" :directory-name="targetDirectory.name"></delete-directory-dialog>
@@ -243,6 +236,30 @@ export default {
       } else {
         this.$router.push({ name: 'OrgWorkspaceFile', params: { slug: slug, wsname: wsName, fileid: fileId } });
       }
+    },
+    wrapify(text) {
+      // insert generic text-wrap (ZERO-WIDTH-SPACE) 200B unicode to help with wrapping long filenames
+      let newText = "";
+      let prevRune = null;
+      let prevLowerCaseLetter = false;
+      for (const rune of Array.from(text)) {
+        if (rune === "_") {
+          newText += rune;
+          newText += '\u{200B}';
+        } else if (prevLowerCaseLetter && /^[A-Z]*$/.test(rune)) {
+          // lowercase to uppercase transition just as aA
+          newText += '\u{200B}';
+          newText += rune;
+        } else if (['.', ','].includes(rune)) { // html already wraps on dashes and hyphens
+          newText += '\u{200B}';
+          newText += rune;
+        } else {
+          newText += rune;
+        }
+        prevRune = rune;
+        prevLowerCaseLetter = /^[a-z]*$/.test(prevRune);
+      }
+      return newText;
     },
     async gotoDirectory(dirSummary) {
       const slug = this.$route.params.slug;
