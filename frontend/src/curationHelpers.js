@@ -18,10 +18,10 @@ export function translateCollection(collection) {
       tr = 'organization';
       break;
     case 'users':
-      tr = 'individual user';
+      tr = 'user';
       break;
     case 'shared-models':
-      tr = 'shared CAD model';
+      tr = 'share-link';
       break;
   }
   return tr;

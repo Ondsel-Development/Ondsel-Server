@@ -2,8 +2,8 @@
   <v-sheet name="view-port">
     <v-sheet
       v-if="viewChosen === viewEnum.thumbnail"
-      height="30em"
-      width="100%"
+      height="18em"
+      width="24em"
       class="d-flex justify-space-between"
     >
       <v-sheet></v-sheet>
@@ -14,27 +14,19 @@
       ></v-img>
       <v-sheet
         v-else
-        class="ma-16"
+        class="ma-16 d-flex flex-row justify-center align-center"
       >
-        <p class="text-center">
-          Image Not Generated Yet
-        </p>
-        <p v-if="file.currentVersion._id.toString() === versionId" class="text-center">
-          Click on "Explore" to create image
-        </p>
-        <p v-if="file.currentVersion._id.toString() !== versionId" class="text-center">
-          You can only create new Images on the active version.
-        </p>
-      </v-sheet>
-      <v-sheet
-        width="6em"
-      >
-        <v-icon
-          size="small"
-        >
-          mdi-eye-outline
-        </v-icon>
-        ..{{(versionId || "").substr(-6)}}
+        <v-sheet width="20em">
+          <p>
+            Thumbnail Not Generated Yet
+          </p>
+          <p v-if="file.currentVersion._id.toString() === versionId">
+            Click on "Explore" to create image
+          </p>
+          <p v-if="file.currentVersion._id.toString() !== versionId">
+            You can only create new Images on the active version.
+          </p>
+        </v-sheet>
       </v-sheet>
     </v-sheet>
     <v-sheet
@@ -71,6 +63,7 @@ const { Upload } = models.api;
 export default {
   name: 'FileViewPort',
   components: {MarkdownViewer},
+  emits: ['activeVersionModelSeen'],
   props: {
     file: {
       type: Object,
@@ -142,6 +135,11 @@ export default {
             const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
             if (viewedVersion) {
               url = viewedVersion.thumbnailUrlCache || undefined;
+              if (url) {
+                if (viewedVersion._id.toString() === this.file.currentVersion._id.toString()) {
+                  this.$emit('activeVersionModelSeen');
+                }
+              }
             } else {
               console.log("FAIL cannot locate visible version in File");
             }

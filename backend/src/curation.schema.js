@@ -13,7 +13,8 @@ import {modelPath} from "./services/models/models.shared.js";
 import {BadRequest} from "@feathersjs/errors";
 import err from "mocha/lib/pending.js";
 import {getProperty} from "./helpers.js";
-import { ProtectionTypeMap } from './services/shared-models/shared-models.subdocs.schema.js';
+import {ProtectionTypeMap, VersionFollowTypeMap} from './services/shared-models/shared-models.subdocs.schema.js';
+import {findThumbnailIfThereIsOne} from "./services/shared-models/helpers.js";
 
 // these schemas are shared by users, organizations, and workspaces (and possibly others)
 // But, this is NOT a collection, so it is placed here as a shared item with a suite
@@ -154,7 +155,7 @@ export const curationSchema = Type.Object(
     description: Type.String(), // limited to 80 runes
     longDescriptionMd: Type.String(), // markdown expected
     tags: Type.Array(Type.String()), // list of zero or more lower-case strings
-    representativeFile: Type.Union([Type.Null(), fileSummary]), // if applicable
+    representativeFile: Type.Optional(Type.Union([Type.Null(), fileSummary])), // if applicable
     promoted: Type.Optional(Type.Array(Type.Any())), // an array of promotionSchema
     keywordRefs: Type.Optional(Type.Array(Type.String())), // used for pre-emptive "cleanup" prior to recalculating keywords
   }
@@ -394,8 +395,11 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // setup
       //
+      // If you set `needPatch`, then you are changing _additional_ information about the curation so both a keyword db change and a patch change needed
+      // If you set `changeFound`, then you have simply detected a change already queued up. Merely update the keyword db.
+      // So, if you set `needPatch`, you don't need to bother with setting `changeFound`
       let changeFound = false;
-      let needPatch = false; // if true, then ALSO needing changes applied to keywords
+      let needPatch = false;
       if (context.data.curation?.resetKeywords) {
         delete context.data.curation.resetKeywords;
         changeFound = true;
@@ -423,31 +427,39 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       //
       // name (pulled from parent except for personal orgs)
       //
-      if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
-        needPatch = true;
-        newCuration.name = context.data.name;
-      }
-      if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
-        needPatch = true;
-      }
-      if (newCuration.collection === 'shared-models') {
-        if (!newCuration.name) {
-          if (newCuration.representativeFile) {
-            newCuration.name = newCuration.representativeFile.custFileName;
+      if (newCuration.collection === navTargetMap.sharedModels) {
+        if (context.data.title) { // if changing the title
+          if (context.data.title !== originalCuration.name) {
             needPatch = true;
+            newCuration.name = context.data.title;
           }
+        }
+      } else {
+        if (context.data.name && context.beforePatchCopy.name !== context.data.name) { // indirect patch
+          needPatch = true;
+          newCuration.name = context.data.name;
+        }
+        if (patchCuration.name !== undefined && patchCuration.name !== originalCuration.name) { // direct patch
+          needPatch = true;
         }
       }
       //
       // description (pulled from parent, usually)
       //
-      if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
-        needPatch = true;
-        newCuration.description = context.data.description;
-      }
-      if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
-        needPatch = true;
-        newCuration.description = context.data.curation?.description || '';
+      if (newCuration.collection === navTargetMap.sharedModels) {
+        if (newCuration.description) {
+          newCuration.description = ''
+          needPatch = true;
+        }
+      } else {
+        if (context.data.curation?.description && context.beforePatchCopy.curation?.description !== newCuration.description) { // direct set
+          needPatch = true;
+          newCuration.description = context.data.curation?.description || '';
+        }
+        if (context.data.description && context.beforePatchCopy.description !== context.data.description) { // indirect set
+          needPatch = true;
+          newCuration.description = context.data.description;
+        }
       }
       //
       // long description
@@ -472,18 +484,21 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
           break;
         case navTargetMap.sharedModels:
           if (!newCuration.representativeFile) {
-            if (context.beforePatchCopy.model?.file) {
+            if (context.beforePatchCopy.model?.file?.custFileName) {
               newCuration.representativeFile = buildFileSummary(context.beforePatchCopy.model.file);
               needPatch = true;
             }
           }
-          if (newCuration.representativeFile && newCuration.representativeFile.thumbnailUrlCache === null) {
-            try {
-              const r = await context.app.service('upload').get(`public/${context.beforePatchCopy.dummyModelId.toString()}_thumbnail.PNG`);
-              newCuration.representativeFile.thumbnailUrlCache = r.url || null;
-              needPatch = true;
-            } catch (e) {
-              console.log(`Error while getting url for shared-models curation with id ${context.beforePatchCopy._id} : ` + e.message);
+          if (newCuration.representativeFile) {
+            if (newCuration.representativeFile.thumbnailUrlCache === null) {
+              newCuration.representativeFile.thumbnailUrlCache = await findThumbnailIfThereIsOne(context, context.beforePatchCopy);
+              if (newCuration.representativeFile.thumbnailUrlCache !== null) {
+                needPatch = true;
+              }
+            } else {
+              if (newCuration.representativeFile.thumbnailUrlCache !== originalCuration.representativeFile.thumbnailUrlCache) {
+                changeFound = true;
+              }
             }
           }
           break;
@@ -534,5 +549,38 @@ export const beforePatchHandleGenericCuration = (buildFunction) => {
       console.log(e);
     }
     return context;
+  }
+}
+
+export const removeCurationFromSearch = async (context) => {
+  // to be called 'after' the 'remove'
+  const keywordService = context.app.service('keywords');
+  const curation = context.result.curation;
+  const keywordsList = curation.keywordRefs || [];
+  for (const keyword of keywordsList) {
+    await keywordService.create(
+      {
+        _id: keyword,
+        shouldRemoveScore: true,
+        curation: curation,
+      }
+    )
+  }
+  // for the time being, we are going to be paranoid and do a full sweep of the DB. In the future this should not be
+  // needed if everything is up-to-date.
+  const kwDb = await keywordService.options.Model;
+  const refList = await kwDb.find(
+    {
+      sortedMatches: {$elemMatch: {"curation._id": curation._id}}
+    },
+  ).toArray();
+  for (const doc of refList) {
+    await keywordService.create(
+      {
+        _id: doc._id,
+        shouldRemoveScore: true,
+        curation: curation,
+      }
+    )
   }
 }

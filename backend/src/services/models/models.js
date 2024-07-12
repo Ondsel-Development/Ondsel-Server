@@ -35,6 +35,7 @@ import {
   ProtectionTypeMap,
   VersionFollowTypeMap as versionFollowTypeMap
 } from "../shared-models/shared-models.subdocs.schema.js";
+import {generateDefaultTitle} from "../shared-models/helpers.js";
 
 export * from './models.class.js'
 export * from './models.schema.js'
@@ -396,6 +397,7 @@ const createSharedModelObject = async (context) => {
     shouldCommitNewVersion: true,
     version: {
       uniqueFileName: originalFile.currentVersion.uniqueFileName,
+      message: originalFile.currentVersion.message, // this is exposed ONLY on the initial commit when isSystemGenerated
     },
     isSystemGenerated: true,
   }, {
@@ -415,9 +417,17 @@ const createSharedModelObject = async (context) => {
     authentication: context.params.authentication,
   });
 
+  const prepSharedModel = {
+    versionFollowing: versionFollowTypeMap.locked,
+    fileDetail: {
+      fileId: file.id,
+      versionId: file.versions[0]._id,
+    }
+  };
   const sharedModel = await sharedModelService.create({
     cloneModelId: context.result._id.toString(),
     dummyModelId: newModel._id.toString(),
+    title: generateDefaultTitle(prepSharedModel, file),
     description: 'System Generated',
     isSystemGenerated: true,
     versionFollowing: versionFollowTypeMap.locked,

@@ -64,7 +64,7 @@
             label="Version Change Handling"
             :items="versionFollowingItems"
             hide-details
-            :disabled="versionFollowingPreset"
+            :disabled="versionFollowingPreset || isGeneratingLink"
             class="mt-2 mb-6"
           ></v-select>
 
