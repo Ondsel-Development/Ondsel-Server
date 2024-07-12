@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import occtimportjs from 'occt-import-js';
 import { Model } from '../model/model.js';
 import { ModelObject3D } from '../model/object.js';
 import { GetFileExtension } from '../utils/fileutils.js';
@@ -472,40 +473,52 @@ export class ImporterFcstd
 
     ConvertObjects (objects, onFinish)
     {
-        this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
-
-        let convertedObjectCount = 0;
-        let colorToMaterial = null;
-        let onFileConverted = (resultContent) => {
-            if (resultContent !== null) {
-                let currentObject = objects[convertedObjectCount];
-                this.OnFileConverted (currentObject, resultContent, colorToMaterial);
+        occtimportjs().then(occt => {
+            for (let obj of objects) {
+                const result = occt.ReadBrepFile(obj.fileContent, null);
+                if (result !== null) {
+                    this.OnFileConverted(obj, result, null);
+                }
             }
-            convertedObjectCount += 1;
-            if (convertedObjectCount === objects.length) {
-                onFinish (this.model);
-            } else {
-                let currentObject = objects[convertedObjectCount];
-                this.worker.postMessage ({
-                    format : 'brep',
-                    buffer : currentObject.fileContent
-                });
-            }
-        };
+            onFinish(this.model);
+        })
 
-        this.worker.addEventListener ('message', (ev) => {
-            onFileConverted (ev.data);
-        });
-
-        this.worker.addEventListener ('error', (ev) => {
-            onFileConverted (null);
-        });
-
-        let currentObject = objects[convertedObjectCount];
-        this.worker.postMessage ({
-            format : 'brep',
-            buffer : currentObject.fileContent
-        });
+        // this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
+        //
+        // let convertedObjectCount = 0;
+        // let colorToMaterial = null;
+        // let onFileConverted = (resultContent) => {
+        //     if (resultContent !== null) {
+        //         let currentObject = objects[convertedObjectCount];
+        //         this.OnFileConverted (currentObject, resultContent, colorToMaterial);
+        //     }
+        //     convertedObjectCount += 1;
+        //     if (convertedObjectCount === objects.length) {
+        //         this.worker.terminate();
+        //         onFinish (this.model);
+        //     } else {
+        //         let currentObject = objects[convertedObjectCount];
+        //         this.worker.postMessage ({
+        //             format : 'brep',
+        //             buffer : currentObject.fileContent
+        //         });
+        //     }
+        // };
+        //
+        // this.worker.addEventListener ('message', (ev) => {
+        //     onFileConverted (ev.data);
+        // });
+        //
+        // this.worker.addEventListener ('error', (ev) => {
+        //     this.worker.terminate()
+        //     onFileConverted (null);
+        // });
+        //
+        // let currentObject = objects[convertedObjectCount];
+        // this.worker.postMessage ({
+        //     format : 'brep',
+        //     buffer : currentObject.fileContent
+        // });
     }
 
     OnFileConverted (object, resultContent, colorToMaterial)
