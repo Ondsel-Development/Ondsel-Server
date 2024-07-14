@@ -52,7 +52,7 @@
         <v-btn
           v-if="canUserWrite && isFileModel(file)"
           class="my-2"
-          :append-icon="item.displayLinks ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
+          :append-icon="displayLinks[item._id] ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           :prepend-icon="arrayCountIcon(item.links)"
           @click="toggleLinkDisplay(index)"
           width="12em"
@@ -68,7 +68,7 @@
 <!--        </v-sheet>-->
       </v-sheet>
       <v-sheet
-        v-if="canUserWrite && item.displayLinks"
+        v-if="canUserWrite && displayLinks[item._id]"
         class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
         <v-sheet><span class="text-h6">ShareLinks</span></v-sheet>
@@ -232,14 +232,42 @@ export default {
     isFileInfoDialogActive: false,
     selectedFileVersion: null,
     somethingTrue: true,
-    versionRows: [],
     activeSharedModel: {},
+    displayLinks: {},
   }),
-  async created() {
-    await this.rebuild();
-  },
   computed: {
     ...mapGetters('app', ['currentOrganization']),
+    versionRows() {
+      let newRows = [];
+      if (this.file && this.file?.versions) {
+        for (const item of this.file.versions) {
+          let links = [];
+          if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
+            for (const sm of item.lockedSharedModels) {
+              if ((sm.protection === "Listed" && sm.isActive) || !this.publicView) {
+                links.push(sm);
+              }
+            }
+          }
+          if (item._id.toString() === this.file.currentVersionId.toString()) {
+            if (this.file.followingActiveSharedModels && this.file.followingActiveSharedModels.length > 0) {
+              for (const sm of this.file.followingActiveSharedModels) {
+                if ((sm.protection === "Listed" && sm.isActive ) || !this.publicView) {
+                  links.push(sm);
+                }
+              }
+            }
+          }
+          newRows.push({
+            nature: 'ver',
+            linkDisplayRef: `link-display-${item._id.toString()}`,
+            links: links,
+            ...item
+          });
+        }
+      }
+      return newRows;
+    },
   },
   methods: {
     dateFormat(number) {
@@ -255,10 +283,7 @@ export default {
       return userSum.name;
     },
     isFileModel(file) {
-      if (file.modelId) {
-        return true;
-      }
-      return false;
+      return !!file.modelId;
     },
     refLabel(refId) {
       return ".." + refId.substr(-6);
@@ -300,7 +325,7 @@ export default {
     },
     async changedFile() {
       // while a bit extreme; this solves the "too many layers" reactive problem
-      window.location.reload();
+      // window.location.reload();
       // this.$emit('changedFile');
       // await this.$nextTick( // the "distribution" is post-update, so wait a moment for file to update
       //   async () => {
@@ -309,39 +334,7 @@ export default {
       // )
     },
     async toggleLinkDisplay(index) {
-      this.versionRows[index].displayLinks = !this.versionRows[index].displayLinks;
-    },
-    async rebuild() {
-      let newRows = [];
-      if (this.file?.versions) {
-        for (const item of this.file.versions) {
-          let links = [];
-          if (item.lockedSharedModels && item.lockedSharedModels.length > 0) {
-            for (const sm of item.lockedSharedModels) {
-              if ((sm.protection === "Listed" && sm.isActive) || !this.publicView) {
-                links.push(sm);
-              }
-            }
-          }
-          if (item._id.toString() === this.file.currentVersionId.toString()) {
-            if (this.file.followingActiveSharedModels && this.file.followingActiveSharedModels.length > 0) {
-              for (const sm of this.file.followingActiveSharedModels) {
-                if ((sm.protection === "Listed" && sm.isActive ) || !this.publicView) {
-                  links.push(sm);
-                }
-              }
-            }
-          }
-          newRows.push({
-            nature: 'ver',
-            linkDisplayRef: `link-display-${item._id.toString()}`,
-            displayLinks: false,
-            links: links,
-            ...item
-          });
-        }
-      }
-      this.versionRows = newRows;
+      this.displayLinks[this.versionRows[index]._id] = !this.displayLinks[this.versionRows[index]._id]
     },
     protectionDetail(protection) {
       switch (protection) {
@@ -365,11 +358,6 @@ export default {
       }
     },
   },
-  watch: {
-    async 'file'(to, from) {
-      await this.rebuild();
-    }
-  }
 }
 </script>
 

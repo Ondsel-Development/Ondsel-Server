@@ -161,6 +161,7 @@ export async function updateWorkspaceSummaryToFile(context, fileId, wsSummary) {
 }
 
 export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) {
+  let sendUpdateSignalInWebSocketChannel = false;
   const fileService = app.service('file');
   const fileDb = await fileService.options.Model;
   switch (sharedModelSummary.versionFollowing) {
@@ -171,6 +172,7 @@ export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) 
         $push: {followingActiveSharedModels: sharedModelSummary},
       }
     );
+    sendUpdateSignalInWebSocketChannel = true;
     break;
   case VersionFollowTypeMap.locked:
     await fileDb.updateOne(
@@ -186,12 +188,17 @@ export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) 
         ]
       }
     );
+    sendUpdateSignalInWebSocketChannel = true;
     break;
+  }
+  if (sendUpdateSignalInWebSocketChannel) {
+    await fileService.patch(fileDetail.fileId, {});
   }
 }
 
 export async function updateSharedModelToFile(app, fileDetail, limitedSharedModelSummary){
   // the summary is limited in that only the 'description' field is relevant
+  let sendUpdateSignalInWebSocketChannel = false;
   const fileService = app.service('file');
   const fileDb = await fileService.options.Model;
   switch (limitedSharedModelSummary.versionFollowing) {
@@ -211,6 +218,7 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
         ]
       }
     );
+    sendUpdateSignalInWebSocketChannel = true;
     break;
   case VersionFollowTypeMap.locked:
     await fileDb.updateOne(
@@ -229,7 +237,11 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
         ]
       }
     );
+    sendUpdateSignalInWebSocketChannel = true;
     break;
+  }
+  if (sendUpdateSignalInWebSocketChannel) {
+    await fileService.patch(fileDetail.fileId, {});
   }
 }
 
