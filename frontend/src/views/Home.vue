@@ -360,20 +360,20 @@ export default {
         if (vm.model.errorMsg.code === 101) {
           return {
             code: vm.model.errorMsg.code,
-            label: 'Missing Linked models',
+            label: 'Missing linked models',
             desc: `Not able to find <span class="font-weight-medium font-italic">${vm.model.errorMsg.detail.filesNotAvailable.join(', ')}</span>`,
           }
         } else if (vm.model.errorMsg.code === 102) {
           return {
             code: vm.model.errorMsg.code,
-            label: 'Need tier Upgrade',
+            label: 'Tier upgrade required',
             desc: 'The rendering of linked documents requires a <span class="font-weight-medium font-italic">Peer</span> tier subscription.',
           }
         } else if (vm.model.errorMsg.code === 999) {
           return {
             code: vm.model.errorMsg.code,
-            label: 'Internal Server Error',
-            desc: 'Not able to process model, contact support',
+            label: 'Internal server error',
+            desc: 'Not able to process model, please contact the <a href="https://ondsel.com/support/">support team</a>',
           }
         } else {
           return {
