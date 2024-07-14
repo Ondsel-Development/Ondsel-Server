@@ -1,6 +1,10 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { orgOrdersClient } from './services/org-orders/org-orders.shared.js'
+
+import { quotesClient } from './services/quotes/quotes.shared.js'
+
 import { userEngagementsClient } from './services/user-engagements/user-engagements.shared.js'
 
 import { notificationsClient } from './services/notifications/notifications.shared.js'
@@ -99,6 +103,10 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(notificationsClient)
 
   client.configure(userEngagementsClient)
+
+  client.configure(quotesClient)
+
+  client.configure(orgOrdersClient)
 
   return client
 }

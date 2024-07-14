@@ -40,6 +40,9 @@ import { notifications } from './notifications/notifications.js'
 
 import { userEngagements } from './user-engagements/user-engagements.js'
 
+import { orgOrders } from './org-orders/org-orders.js'
+
+import { quotes } from './quotes/quotes.js'
 
 export const services = (app) => {
   app.configure(orgSecondaryReferences)
@@ -83,6 +86,10 @@ export const services = (app) => {
   app.configure(notifications)
 
   app.configure(userEngagements)
+
+  app.configure(orgOrders)
+
+  app.configure(quotes)
 
   // All services will be registered here
 }
