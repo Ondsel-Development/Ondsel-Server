@@ -121,6 +121,8 @@ export async function applyThumbnailToFile(app, modelId, fileId) {
             ]
           }
         )
+        // Manually send update to frontend in websocket channel to avoid hot reloading
+        await fileService.patch(fileId, {});
         if (result.matchedCount !== 1) {
           console.log(`ERROR: failed to modify File ${fileId.toString()} version ${currentVersionId.toString()} with thumbnail`);
         }
@@ -192,6 +194,7 @@ export async function addSharedModelToFile(app, fileDetail, sharedModelSummary) 
     break;
   }
   if (sendUpdateSignalInWebSocketChannel) {
+    // Manually send update to frontend in websocket channel to avoid hot reloading
     await fileService.patch(fileDetail.fileId, {});
   }
 }
@@ -241,6 +244,7 @@ export async function updateSharedModelToFile(app, fileDetail, limitedSharedMode
     break;
   }
   if (sendUpdateSignalInWebSocketChannel) {
+    // Manually send update to frontend in websocket channel to avoid hot reloading
     await fileService.patch(fileDetail.fileId, {});
   }
 }

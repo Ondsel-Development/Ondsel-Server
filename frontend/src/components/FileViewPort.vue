@@ -81,16 +81,35 @@ export default {
       markdown: 3,
     },
     htmlContent: 'tbd',
-    properUrl: null,
     viewChosen: 1,
   }),
   computed: {
     ...mapState('auth', ['accessToken']),
+    properUrl() {
+      let url = null;
+      if (this.versionId) {
+        if (this.viewChosen === this.viewEnum.thumbnail) {
+          if (this.file?.versions) {
+            const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
+            if (viewedVersion) {
+              url = viewedVersion.thumbnailUrlCache || undefined;
+              if (url) {
+                if (viewedVersion._id.toString() === this.file.currentVersion._id.toString()) {
+                  this.$emit('activeVersionModelSeen');
+                }
+              }
+            } else {
+              console.log("FAIL cannot locate visible version in File");
+            }
+          }
+        }
+      }
+      return url;
+    }
   },
   async created() {
     await this.chooseViewer(this.file);
     await this.getMarkdownHtml();
-    await this.getProperUrl();
   },
   methods: {
     ...mapActions('app', [
@@ -127,38 +146,15 @@ export default {
       }
       this.htmlContent = marked(content);
     },
-    async getProperUrl() {
-      let url = null;
-      if (this.versionId) {
-        if (this.viewChosen === this.viewEnum.thumbnail) {
-          if (this.file?.versions) {
-            const viewedVersion = this.file.versions.find(v => v._id.toString() === this.versionId.toString());
-            if (viewedVersion) {
-              url = viewedVersion.thumbnailUrlCache || undefined;
-              if (url) {
-                if (viewedVersion._id.toString() === this.file.currentVersion._id.toString()) {
-                  this.$emit('activeVersionModelSeen');
-                }
-              }
-            } else {
-              console.log("FAIL cannot locate visible version in File");
-            }
-          }
-        }
-      }
-      this.properUrl = url;
-    }
   },
   watch: {
     async 'file'(to, from) {
       await this.chooseViewer(this.file)
       await this.getMarkdownHtml();
-      await this.getProperUrl();
     },
     async 'versionId'(to, from) {
       await this.chooseViewer(this.file)
       await this.getMarkdownHtml();
-      await this.getProperUrl();
     }
   },
 
