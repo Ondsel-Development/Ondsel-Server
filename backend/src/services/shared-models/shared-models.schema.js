@@ -316,7 +316,8 @@ export const sharedModelsQueryProperties = Type.Pick(
     'messagesParticipants',
     'protection',
     'pin',
-    'directSharedTo'
+    'directSharedTo',
+    'fileDetail',
   ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(
