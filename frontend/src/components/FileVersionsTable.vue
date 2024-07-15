@@ -199,6 +199,7 @@
     @shared-model-changed="changedFile"
   ></share-link-crud-dialog>
   <direct-share-to-users-dialog
+    v-if="currentOrganization"
     ref="directShareToUsersDialogRef"
     :shared-model="activeSharedModel"
   />
