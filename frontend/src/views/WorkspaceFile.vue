@@ -114,7 +114,6 @@
               v-if="!publicView"
               ref="uploadNewVersionFile"
               :file="file"
-              @changed-file="reloadPage"
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
         </v-sheet>
