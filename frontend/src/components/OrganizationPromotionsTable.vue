@@ -94,9 +94,9 @@ export default {
       return result;
     },
     async openEditPromotionDialog(item) {
-      this.rowCollection = item.columns.collection;
-      this.rowItemId = item.columns.id;
-      this.rowItemName = item.columns.name;
+      this.rowCollection = item.collection;
+      this.rowItemId = item.id;
+      this.rowItemName = item.name;
       this.$refs.editPromotionDialog.$data.dialog = true;
     },
   },

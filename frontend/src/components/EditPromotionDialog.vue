@@ -122,30 +122,38 @@ export default {
     async editPromotion(decision) {
       this.isPatchPending = true;
       let obj;
-      let curation;
+      let curation = {_id: this.itemId}; // this is enough if decision is false
       switch (this.collection) {
         case 'workspaces':
-          obj = await this.getWorkspaceByIdPublic(this.itemId);
-          curation = obj.curation;
-          removeNonPublicItems(curation);
+          if (decision) {
+            obj = await this.getWorkspaceByIdPublic(this.itemId);
+            curation = obj.curation;
+            removeNonPublicItems(curation);
+          }
           await this.applyChange(decision, curation);
           break;
         case 'organizations':
-          obj = await this.getOrgByIdOrNamePublic(this.itemId);
-          curation = obj.curation;
-          removeNonPublicItems(curation);
+          if (decision) {
+            obj = await this.getOrgByIdOrNamePublic(this.itemId);
+            curation = obj.curation;
+            removeNonPublicItems(curation);
+          }
           await this.applyChange(decision, curation);
           break;
         case 'users':
-          obj = await this.getOrgByIdOrNamePublic(this.itemId); // picks up Personal Org by refName
-          curation = obj.curation;
-          removeNonPublicItems(curation);
+          if (decision) {
+            obj = await this.getOrgByIdOrNamePublic(this.itemId); // picks up Personal Org by refName
+            curation = obj.curation;
+            removeNonPublicItems(curation);
+          }
           await this.applyChange(decision, curation);
           break;
         case 'shared-models':
-          obj = await SharedModel.get(this.itemId);
-          curation = obj.curation;
-          removeNonPublicItems(curation);
+          if (decision) {
+            obj = await SharedModel.get(this.itemId);
+            curation = obj.curation;
+            removeNonPublicItems(curation);
+          }
           await this.applyChange(decision, curation);
           break;
         default:
