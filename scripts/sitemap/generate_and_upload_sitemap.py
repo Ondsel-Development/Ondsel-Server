@@ -37,10 +37,10 @@ def get_mongo_client(mongo_uri):
     return pymongo.MongoClient(mongo_uri)
 
 
-def fetch_data_from_db(db, collection, fields):
+def fetch_data_from_db(db, collection, query, fields):
     """Fetch users from the MongoDB database."""
-    users_collection = db[collection]
-    return users_collection.find({}, fields)
+    collection = db[collection]
+    return collection.find(query, fields)
 
 
 def create_sitemap(urls):
@@ -79,9 +79,9 @@ def upload_to_s3(file_name, bucket, object_name=None):
 
 def generate_sitemap_for_users(db, base_url, collection_name):
     """Generate the sitemap for user profiles."""
-    users = fetch_data_from_db(db, collection_name, {"username": 1, "updatedAt": 1})
+    users = fetch_data_from_db(db, collection_name, {}, {"username": 1, "updatedAt": 1})
     urls = [
-        (f"{base_url}/user/{user['username']}", datetime.fromtimestamp(user["updatedAt"] / 1000))
+        (f"{base_url}user/{user['username']}", datetime.fromtimestamp(user["updatedAt"] / 1000))
         for user in users
     ]
     sitemap = create_sitemap(urls)
@@ -90,9 +90,9 @@ def generate_sitemap_for_users(db, base_url, collection_name):
 
 def generate_sitemap_for_shared_models(db, base_url, collection_name):
     """Generate the sitemap for shared models."""
-    shared_models = fetch_data_from_db(db, collection_name, {"_id": 1, "updatedAt": 1})
+    shared_models = fetch_data_from_db(db, collection_name, {"protection": "Listed"}, {"_id": 1, "updatedAt": 1})
     urls = [
-        (f"{base_url}/share/{model['_id']}", datetime.fromtimestamp(model["updatedAt"] / 1000))
+        (f"{base_url}share/{model['_id']}", datetime.fromtimestamp(model["updatedAt"] / 1000))
         for model in shared_models
     ]
     sitemap = create_sitemap(urls)
@@ -137,7 +137,7 @@ def main():
     upload_to_s3("sharelinks-sitemap.xml", aws_s3_bucket, aws_shared_models_sitemap_path)
 
     sitemaps = [
-        f"{base_url}/{aws_file_path}" for aws_file_path in (aws_users_sitemap_path, aws_shared_models_sitemap_path)
+        f"{base_url}{aws_file_path}" for aws_file_path in (aws_users_sitemap_path, aws_shared_models_sitemap_path)
     ]
     create_main_sitemap(sitemaps)
     upload_to_s3("sitemap.xml", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/sitemap.xml")
