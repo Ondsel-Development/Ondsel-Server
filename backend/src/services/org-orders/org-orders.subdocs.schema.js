@@ -1,6 +1,7 @@
 import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {userSummarySchema} from "../users/users.subdocs.schema.js";
-import {quotesSummarySchema} from "../quotes/quotes.distrib.js";
+import {buildQuotesSummary, quotesSummarySchema} from "../quotes/quotes.distrib.js";
+import {buildUserSummary} from "../users/users.distrib.js";
 
 export const QuoteTargetMap = {
     fileVersion: 'file-version',
@@ -14,10 +15,22 @@ export const fileVersionProductionQuoteSchema = Type.Object(
     requestedAt: Type.Number(),
     daysGoodFor: Type.Number(),
     quote: quotesSummarySchema,
-    quoteFromCache: Type.Boolean(),
     notes: Type.String(),
   },
 )
+
+export function buildFileVersionProductionQuote(quote, user) {
+  const userSummary = buildUserSummary(user);
+  const quoteSummary = buildQuotesSummary(quote);
+  return {
+    quoteTarget: QuoteTargetMap.fileVersion,
+    requestedBy: userSummary,
+    requestedAt: quote.requestedAt,
+    daysGoodFor: 99, // TODO
+    quote: quoteSummary,
+    notes: '',
+  }
+}
 
 export const sharedModelProductionQuoteSchema = Type.Object(
   {
@@ -27,7 +40,19 @@ export const sharedModelProductionQuoteSchema = Type.Object(
     requestedAt: Type.Number(),
     daysGoodFor: Type.Number(),
     quote: quotesSummarySchema,
-    quoteFromCache: Type.Boolean(),
     notes: Type.String(),
   },
 )
+
+export function buildSharedModelProductionQuote(quote, user) {
+  const userSummary = buildUserSummary(user);
+  const quoteSummary = buildQuotesSummary(quote);
+  return {
+    quoteTarget: QuoteTargetMap.sharedModel,
+    requestedBy: userSummary,
+    requestedAt: quote.requestedAt,
+    daysGoodFor: 99, // TODO
+    quote: quoteSummary,
+    notes: '',
+  }
+}

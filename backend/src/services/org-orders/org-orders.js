@@ -14,6 +14,9 @@ import {
 } from './org-orders.schema.js'
 import { OrgOrdersService, getOptions } from './org-orders.class.js'
 import { orgOrdersPath, orgOrdersMethods } from './org-orders.shared.js'
+import {copyOrInsertOrgOrdersBeforePatch} from "./org-orders.distrib.js";
+import {iff, preventChanges} from "feathers-hooks-common";
+import {getNewQuote} from "./commands/getNewQuote.js";
 
 export * from './org-orders.class.js'
 export * from './org-orders.schema.js'
@@ -48,6 +51,12 @@ export const orgOrders = (app) => {
         schemaHooks.resolveData(orgOrdersDataResolver)
       ],
       patch: [
+        copyOrInsertOrgOrdersBeforePatch,
+        preventChanges(false, 'productionQuotes'),
+        iff(
+          context => context.data.shouldGetNewQuote,
+          getNewQuote
+        ),
         schemaHooks.validateData(orgOrdersPatchValidator),
         schemaHooks.resolveData(orgOrdersPatchResolver)
       ],

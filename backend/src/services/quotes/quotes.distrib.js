@@ -5,6 +5,8 @@ import {CurrencyType} from "../../currencies.js";
 export const quotesSummarySchema = Type.Object(
   {
     _id: ObjectIdSchema(),
+    orderId: ObjectIdSchema(),
+    isFromCache: Type.Boolean(),
     createdAt: Type.Optional(Type.Number()),    // the date the quote was RECEIVED from 3rd party; used for "aging" the quote
     fileId: ObjectIdSchema(),
     fileVersionId: ObjectIdSchema(),
@@ -20,6 +22,8 @@ export function buildQuotesSummary(quote) {
   if (quote) {
     summary = {
       _id: quote._id,
+      orderId: quote.orderId,
+      isFromCache: quote.isFromCache,
       createdAt: quote.createdAt || undefined,
       fileId: quote.fileId,
       fileVersionId: quote.fileVersionId,

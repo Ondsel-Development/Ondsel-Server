@@ -8,8 +8,7 @@ import {fileVersionProductionQuoteSchema, sharedModelProductionQuoteSchema} from
 // Main data model schema
 export const orgOrdersSchema = Type.Object(
   {
-    _id: ObjectIdSchema(),
-    organizationId: ObjectIdSchema(),
+    _id: ObjectIdSchema(),  // this is the Organization's _id
     productionQuotes: Type.Array(Type.Union([
       fileVersionProductionQuoteSchema,
       sharedModelProductionQuoteSchema,
@@ -23,11 +22,20 @@ export const orgOrdersResolver = resolve({})
 export const orgOrdersExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const orgOrdersDataSchema = Type.Pick(orgOrdersSchema, ['text'], {
-  $id: 'OrgOrdersData'
-})
+export const orgOrdersDataSchema = Type.Pick(
+  orgOrdersSchema,
+  ['_id'],  // this endpoint REQUIRES that the organization's _id be supplied as the _id for CREATE
+  {$id: 'OrgOrdersData'}
+)
 export const orgOrdersDataValidator = getValidator(orgOrdersDataSchema, dataValidator)
-export const orgOrdersDataResolver = resolve({})
+export const orgOrdersDataResolver = resolve({
+  productionQuotes: async (value, _message, _context) => {
+    if (value) {
+      return value;
+    }
+    return [];
+  }
+})
 
 // Schema for updating existing entries
 export const orgOrdersPatchSchema = Type.Partial(orgOrdersSchema, {
