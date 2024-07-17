@@ -113,6 +113,23 @@ def create_main_sitemap(sitemaps):
     save_sitemap(sitemapindex, "sitemap.xml")
 
 
+def generate_robots_txt(base_url):
+    """Generate a robots.txt file content."""
+    lines = [
+        "User-agent: *",
+        "Disallow:",
+        "",
+        f"Sitemap: {base_url}sitemap.xml"
+    ]
+    return "\n".join(lines)
+
+
+def save_robots_txt(content, filename):
+    """Save the robots.txt content to a file."""
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+
 def main():
     (
         mongo_uri,
@@ -143,6 +160,11 @@ def main():
     ]
     create_main_sitemap(sitemaps)
     upload_to_s3("sitemap.xml", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/sitemap.xml")
+
+    robots_txt_content = generate_robots_txt(base_url)
+    save_robots_txt(robots_txt_content, "robots.txt")
+    upload_to_s3("robots.txt", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/robots.txt")
+
 
 
 if __name__ == "__main__":
