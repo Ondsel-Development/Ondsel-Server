@@ -129,15 +129,17 @@ def main():
     db = mongo_client[db_name]
 
     generate_sitemap_for_users(db, base_url, users_collection_name)
-    aws_users_sitemap_path = f"{aws_s3_bucket_dir_name}/users-sitemap.xml"
+    user_sitemap_filename = "users-sitemap.xml"
+    aws_users_sitemap_path = f"{aws_s3_bucket_dir_name}/{user_sitemap_filename}"
     upload_to_s3("users-sitemap.xml", aws_s3_bucket, aws_users_sitemap_path)
 
     generate_sitemap_for_shared_models(db, base_url, shared_models_collection_name)
-    aws_shared_models_sitemap_path = f"{aws_s3_bucket_dir_name}/sharelinks-sitemap.xml"
+    shared_model_sitemap_filename = "sharelinks-sitemap.xml"
+    aws_shared_models_sitemap_path = f"{aws_s3_bucket_dir_name}/{shared_model_sitemap_filename}"
     upload_to_s3("sharelinks-sitemap.xml", aws_s3_bucket, aws_shared_models_sitemap_path)
 
     sitemaps = [
-        f"{base_url}{aws_file_path}" for aws_file_path in (aws_users_sitemap_path, aws_shared_models_sitemap_path)
+        f"{base_url}{aws_file_path}" for aws_file_path in (user_sitemap_filename, shared_model_sitemap_filename)
     ]
     create_main_sitemap(sitemaps)
     upload_to_s3("sitemap.xml", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/sitemap.xml")
