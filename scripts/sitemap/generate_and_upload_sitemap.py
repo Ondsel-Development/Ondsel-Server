@@ -133,7 +133,7 @@ def save_robots_txt(content, filename):
         f.write(content)
 
 
-def main():
+def main(event, context):
     (
         mongo_uri,
         base_url,
@@ -169,6 +169,5 @@ def main():
     upload_to_s3(f"{DIR}/robots.txt", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/robots.txt")
 
 
-
 if __name__ == "__main__":
-    main()
+    main({}, {})
