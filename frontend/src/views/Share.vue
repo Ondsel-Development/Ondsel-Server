@@ -288,6 +288,7 @@ export default {
     ...mapGetters('app', ['selfPronoun', 'selfName', 'currentOrganization']),
     isWindowLoadedInIframe: (vm) => vm.$route.meta.isWindowLoadedInIframe,
     hasBasicRights: (vm) => vm.isAuthenticated && vm.user?.tier !== undefined && vm.user?.tier !== 'Unverified',
+    title: (vm) => `${vm.sharedModel?.title || ''} - Ondsel`,
   },
   methods: {
     async fetchShareLink() {
@@ -340,6 +341,7 @@ export default {
         this.model = this.sharedModel.model;
       }
       this.name = this.model.file?.custFileName || '';
+      document.title = this.title;
     },
     fitModelToScreen() {
       this.$refs.modelViewer.fitModelToScreen();
