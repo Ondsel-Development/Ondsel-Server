@@ -7,6 +7,9 @@ import pymongo
 from dotenv import load_dotenv
 
 
+DIR = "/tmp"
+
+
 def load_environment_variables():
     """Load environment variables from .env file if it exists."""
     load_dotenv()
@@ -85,7 +88,7 @@ def generate_sitemap_for_users(db, base_url, collection_name):
         for user in users
     ]
     sitemap = create_sitemap(urls)
-    save_sitemap(sitemap, "users-sitemap.xml")
+    save_sitemap(sitemap, f"{DIR}/users-sitemap.xml")
 
 
 def generate_sitemap_for_shared_models(db, base_url, collection_name):
@@ -96,7 +99,7 @@ def generate_sitemap_for_shared_models(db, base_url, collection_name):
         for model in shared_models
     ]
     sitemap = create_sitemap(urls)
-    save_sitemap(sitemap, "sharelinks-sitemap.xml")
+    save_sitemap(sitemap, f"{DIR}/sharelinks-sitemap.xml")
 
 
 def create_main_sitemap(sitemaps):
@@ -110,7 +113,7 @@ def create_main_sitemap(sitemaps):
         lastmod = SubElement(sitemap_element, "lastmod")
         lastmod.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
 
-    save_sitemap(sitemapindex, "sitemap.xml")
+    save_sitemap(sitemapindex, f"{DIR}/sitemap.xml")
 
 
 def generate_robots_txt(base_url):
@@ -148,22 +151,22 @@ def main():
     generate_sitemap_for_users(db, base_url, users_collection_name)
     user_sitemap_filename = "users-sitemap.xml"
     aws_users_sitemap_path = f"{aws_s3_bucket_dir_name}/{user_sitemap_filename}"
-    upload_to_s3("users-sitemap.xml", aws_s3_bucket, aws_users_sitemap_path)
+    upload_to_s3(f"{DIR}/users-sitemap.xml", aws_s3_bucket, aws_users_sitemap_path)
 
     generate_sitemap_for_shared_models(db, base_url, shared_models_collection_name)
     shared_model_sitemap_filename = "sharelinks-sitemap.xml"
     aws_shared_models_sitemap_path = f"{aws_s3_bucket_dir_name}/{shared_model_sitemap_filename}"
-    upload_to_s3("sharelinks-sitemap.xml", aws_s3_bucket, aws_shared_models_sitemap_path)
+    upload_to_s3(f"{DIR}/sharelinks-sitemap.xml", aws_s3_bucket, aws_shared_models_sitemap_path)
 
     sitemaps = [
         f"{base_url}{aws_file_path}" for aws_file_path in (user_sitemap_filename, shared_model_sitemap_filename)
     ]
     create_main_sitemap(sitemaps)
-    upload_to_s3("sitemap.xml", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/sitemap.xml")
+    upload_to_s3(f"{DIR}/sitemap.xml", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/sitemap.xml")
 
     robots_txt_content = generate_robots_txt(base_url)
-    save_robots_txt(robots_txt_content, "robots.txt")
-    upload_to_s3("robots.txt", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/robots.txt")
+    save_robots_txt(robots_txt_content, f"{DIR}/robots.txt")
+    upload_to_s3(f"{DIR}/robots.txt", aws_s3_bucket, f"{aws_s3_bucket_dir_name}/robots.txt")
 
 
 
