@@ -323,25 +323,23 @@ const softDeleteFile = async (context) => {
   // gather data before starting
   //
   const modelService = context.app.service('models');
-  const sharedLinkService = context.app.service('shared-models');
+  const sharedModelsService = context.app.service('shared-models');
   const file = await context.service.get(context.id);
   const fileId = file._id.toString();
-  const models = await modelService.find({
+  const modelsToDelete = await modelService.find({
     query: {
+      deleted: {$ne: true},
       fileId: fileId,
     }
   });
-  let sharedLinks = [];
-  for (const model of models.data) {
-    const newLinks = await sharedLinkService.find({
-      query: {
-        cloneModelId: model._id.toString(),
+  const sharedLinks = await sharedModelsService.find({
+    paginate: false,
+    pipeline: [{
+      $match: {
+        'fileDetail.fileId': file._id,
       }
-    })
-    if (newLinks.total > 0) {
-      sharedLinks.push(...newLinks.data)
-    }
-  }
+    }]
+  }) || [];
   //
   // mark the file as deleted
   //
@@ -354,7 +352,8 @@ const softDeleteFile = async (context) => {
   //
   // mark all the models for all the revisions as deleted
   //
-  for (const model of models.data) {
+  for (const model of modelsToDelete.data) {
+    // most of the time the following will silently fail and that is okay; this is mostly a "fail-safe"
     await modelService.patch(
       model._id,
       {
@@ -366,13 +365,7 @@ const softDeleteFile = async (context) => {
   // mark all the shared links for all the models as deleted
   //
   for (const link of sharedLinks) {
-    await sharedLinkService.patch(
-      link._id,
-      {
-        isActive: false,
-        deleted: true,
-      }
-    )
+    await sharedModelsService.remove(link._id)
   }
   context.result = fileAfterDelete;
   return context;

@@ -144,7 +144,8 @@ export default {
         // console.log(e);
       }
       if (wsResult?.total === 1) {
-        result = wsResult.data[0];
+        let wsMissingVirtualFields = wsResult.data[0];
+        result = await models.api.Workspace.get(wsMissingVirtualFields._id);
       }
       return result;
     },
@@ -167,6 +168,7 @@ export default {
       }
       if (wsResult?.total === 1) {
         result = wsResult.data[0];
+        result.haveWriteAccess = false; // this is not set on a 'find' so we are explicitly setting it here
       }
       return result;
     },

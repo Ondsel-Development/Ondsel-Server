@@ -50,10 +50,10 @@
       </v-snackbar>
       <v-card-actions class="justify-center">
         <v-btn
-          color="cancel"
+          color="secondary"
           variant="elevated"
           @click="dialog = false"
-        >Cancel</v-btn>
+        >Done</v-btn>
         <v-btn
           color="primary"
           variant="elevated"

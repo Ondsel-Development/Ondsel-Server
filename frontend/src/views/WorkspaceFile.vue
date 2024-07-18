@@ -114,7 +114,6 @@
               v-if="!publicView"
               ref="uploadNewVersionFile"
               :file="file"
-              @changed-file="reloadPage"
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
         </v-sheet>
@@ -268,7 +267,8 @@ export default {
         this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
       }
       this.viewPortVersionId = this.file.currentVersionId.toString();
-      this.representingWorkspaceOrg = this.workspace.organizationId.toString() === this.currentOrganization._id.toString();
+      let currentOrgId = this.currentOrganization?._id ? this.currentOrganization._id.toString() : '';
+      this.representingWorkspaceOrg = this.workspace.organizationId.toString() === currentOrgId;
     },
     async gotoWorkspace() {
       const slug = this.$route.params.slug;
