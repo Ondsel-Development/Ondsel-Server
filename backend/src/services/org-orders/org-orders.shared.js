@@ -1,6 +1,6 @@
 export const orgOrdersPath = 'org-orders'
 
-export const orgOrdersMethods = ['find', 'get', 'create', 'patch', 'remove']
+export const orgOrdersMethods = ['get', 'create', 'patch']
 
 export const orgOrdersClient = (client) => {
   const connection = client.get('connection')

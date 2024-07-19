@@ -8,7 +8,7 @@ export const generateImmediateQuote = async (context) => {
 
   data.completed = false;
   data.isFromCache = false;
-  data.requestedAt = new Date();
+  data.requestedAt = Date.now();
   data.createdAt = undefined;
 
   if (data.quantity) {

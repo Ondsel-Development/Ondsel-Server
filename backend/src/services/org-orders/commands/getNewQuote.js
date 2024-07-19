@@ -12,7 +12,7 @@ import {ObjectId} from "mongodb";
 export const getNewQuote = async (context) => {
   const { data } = context;
   const user = context.params.user;
-  const quotesService = context.app.services('quotes');
+  const quotesService = context.app.service('quotes');
 
   let fileId = data.fileId;
   let versionId = data.versionId;
@@ -47,7 +47,7 @@ export const getNewQuote = async (context) => {
     default:
       throw new BadRequest(`Unknown quote type: ${quoteType}`);
   }
-  updatedProductionQuotes.push(newQuote);
+  updatedProductionQuotes.push(newQuoteSummary);
 
   context.data.productionQuotes = updatedProductionQuotes;
   delete context.data.shouldGetNewQuote;

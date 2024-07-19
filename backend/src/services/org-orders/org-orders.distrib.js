@@ -1,14 +1,32 @@
 import {ObjectId} from "mongodb";
 
 export const copyOrInsertOrgOrdersBeforePatch = async (context) => {
-  // store a copy of the File in `context.beforePatchCopy` to help detect true changes
+  // basically, support "upsert"
   const orgOrderService = context.app.service('org-orders');
+  const orgOrdersDb = await orgOrderService.options.Model;
   const orgId = new ObjectId(context.id);
-  context.beforePatchCopy = await orgOrderService.get(orgId);
-  if (!context.beforePatchCopy) {
-    context.beforePatchCopy = await orgOrderService.create({
-      _id: orgId,
-    });
+
+  let ooCopy = await orgOrdersDb.findOne({ _id: orgId });
+  if (!ooCopy) {
+    const orgService = context.app.service('organizations');
+    const refOrg = await orgService.get(orgId);
+    if (!refOrg) {
+      console.log(`Somebody tried to get a org-order for an organization that does not exist (${orgId})`);
+    } else {
+      ooCopy = await orgOrderService.create({
+        _id: orgId,
+      });
+    }
+  }
+  if (ooCopy) {
+    switch (context.method) {
+      case 'patch':
+        context.beforePatchCopy = ooCopy;
+        break;
+      case 'get':
+        context.result = ooCopy; // we are done.
+        break;
+    }
   }
   return context;
 }

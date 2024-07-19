@@ -10,13 +10,20 @@ import {
   orgOrdersExternalResolver,
   orgOrdersDataResolver,
   orgOrdersPatchResolver,
-  orgOrdersQueryResolver
+  orgOrdersQueryResolver, orgOrdersSchema, orgOrdersDataSchema, orgOrdersPatchSchema, orgOrdersQuerySchema
 } from './org-orders.schema.js'
 import { OrgOrdersService, getOptions } from './org-orders.class.js'
 import { orgOrdersPath, orgOrdersMethods } from './org-orders.shared.js'
 import {copyOrInsertOrgOrdersBeforePatch} from "./org-orders.distrib.js";
-import {iff, preventChanges} from "feathers-hooks-common";
+import {disallow, iff, preventChanges} from "feathers-hooks-common";
 import {getNewQuote} from "./commands/getNewQuote.js";
+import swagger from "feathers-swagger";
+import {
+  workspaceDataSchema,
+  workspacePatchSchema,
+  workspaceQuerySchema,
+  workspaceSchema
+} from "../workspaces/workspaces.schema.js";
 
 export * from './org-orders.class.js'
 export * from './org-orders.schema.js'
@@ -28,7 +35,43 @@ export const orgOrders = (app) => {
     // A list of all methods this service exposes externally
     methods: orgOrdersMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { orgOrdersSchema, orgOrdersDataSchema, orgOrdersPatchSchema , orgOrdersQuerySchema, },
+      docs: {
+        description: 'Organization orders for quotes and production from 3rd parties',
+        idType: 'string',
+        securities: ['all'],
+        operations: {
+          get: {
+            'parameters': [
+              {
+                'description': 'Organization OID',
+                'in': 'path',
+                'name': '_id',
+                'schema': {
+                  'type': 'string'
+                },
+                'required': true,
+              },
+            ]
+          },
+          patch: {
+            'parameters': [
+              {
+                'description': 'Organization OID',
+                'in': 'path',
+                'name': '_id',
+                'schema': {
+                  'type': 'string'
+                },
+                'required': true,
+              },
+            ]
+          },
+        }
+      }
+    })
   })
   // Initialize hooks
   app.service(orgOrdersPath).hooks({
@@ -45,8 +88,11 @@ export const orgOrders = (app) => {
         schemaHooks.resolveQuery(orgOrdersQueryResolver)
       ],
       find: [],
-      get: [],
+      get: [
+        copyOrInsertOrgOrdersBeforePatch,
+      ],
       create: [
+        disallow('external'),
         schemaHooks.validateData(orgOrdersDataValidator),
         schemaHooks.resolveData(orgOrdersDataResolver)
       ],

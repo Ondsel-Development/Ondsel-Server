@@ -45,8 +45,8 @@ export const quotes = (app) => {
       create: [
         disallow('external'),
         generateImmediateQuote, // for now, this is the only option
-        schemaHooks.validateData(quotesDataValidator),
-        schemaHooks.resolveData(quotesDataResolver)
+        // schemaHooks.validateData(quotesDataValidator),
+        // schemaHooks.resolveData(quotesDataResolver)
       ],
       patch: [
         // iffElse(context => context.data.shouldGenerateImmediateQuote,

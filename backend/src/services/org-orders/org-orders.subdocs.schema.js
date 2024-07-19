@@ -22,7 +22,7 @@ export const fileVersionProductionQuoteSchema = Type.Object(
 export function buildFileVersionProductionQuote(quote, user) {
   const userSummary = buildUserSummary(user);
   const quoteSummary = buildQuotesSummary(quote);
-  return {
+  const result = {
     quoteTarget: QuoteTargetMap.fileVersion,
     requestedBy: userSummary,
     requestedAt: quote.requestedAt,
@@ -30,6 +30,7 @@ export function buildFileVersionProductionQuote(quote, user) {
     quote: quoteSummary,
     notes: '',
   }
+  return result;
 }
 
 export const sharedModelProductionQuoteSchema = Type.Object(
