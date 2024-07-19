@@ -2,6 +2,7 @@ import {ObjectIdSchema, Type} from "@feathersjs/typebox";
 import {userSummarySchema} from "../users/users.subdocs.schema.js";
 import {buildQuotesSummary, quotesSummarySchema} from "../quotes/quotes.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
+import {calculateRemainingAge} from "../quotes/quotes.helpers.js";
 
 export const QuoteTargetMap = {
     fileVersion: 'file-version',
@@ -26,7 +27,7 @@ export function buildFileVersionProductionQuote(quote, user) {
     quoteTarget: QuoteTargetMap.fileVersion,
     requestedBy: userSummary,
     requestedAt: quote.requestedAt,
-    daysGoodFor: 99, // TODO
+    daysGoodFor: calculateRemainingAge(quote),
     quote: quoteSummary,
     notes: '',
   }
@@ -52,7 +53,7 @@ export function buildSharedModelProductionQuote(quote, user) {
     quoteTarget: QuoteTargetMap.sharedModel,
     requestedBy: userSummary,
     requestedAt: quote.requestedAt,
-    daysGoodFor: 99, // TODO
+    daysGoodFor: calculateRemainingAge(quote),
     quote: quoteSummary,
     notes: '',
   }
