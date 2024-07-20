@@ -61,12 +61,12 @@ export const quotesDataSchema = Type.Pick(quotesSchema, [
   `source`,
   `priceCurrency`,
   `quantity`,
+  'otherParams',
 ], {
   $id: 'QuotesData'
 })
 export const quotesDataValidator = getValidator(quotesDataSchema, dataValidator)
 export const quotesDataResolver = resolve({
-  cacheable: async () => true, // TODO: make this smarter in the future
   requestedAt: async () => Date.now(),
   otherParams: async (value, _message, _context) => {
     if (value) {
@@ -93,10 +93,12 @@ export const quotesPatchResolver = resolve({})
 export const quotesQueryProperties = Type.Pick(quotesSchema, [
   '_id',
   'createdAt',
+  'isFromCache',
   'fileId',
   'fileVersionId',
   'source',
   'quantity',
+  'priceCurrency',
   'otherParams',
 ])
 export const quotesQuerySchema = Type.Intersect(
