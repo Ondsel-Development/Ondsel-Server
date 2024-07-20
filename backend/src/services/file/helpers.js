@@ -4,6 +4,8 @@ import {buildWorkspaceSummary} from "../workspaces/workspaces.distrib.js";
 import {buildUserSummary} from "../users/users.distrib.js";
 import * as http from "http";
 import * as https from "https";
+import {ObjectIdSchema, Type} from "@feathersjs/typebox";
+import {sharedModelsSummarySchema} from "../shared-models/shared-models.distrib.js";
 
 export const feedWorkspaceAndDirectory = async context => {
   const { data, params } = context;
@@ -188,23 +190,49 @@ export function removePrivateFileFields( fileDetail ) {
     }
     return
   }
+  const isOpen = fileDetail.workspace?.open || false;
+  const isClosed = !isOpen;
   if (fileDetail.userId) { delete fileDetail.userId}
+  if (isClosed) {
+    fileDetail.custFileName = "REDACTED";
+  }
   if (fileDetail.workspace) {
-    if (fileDetail.workspace.name) { delete fileDetail.workspace.name }
-    if (fileDetail.refName) { delete fileDetail.refName }
+    // leave fileDetail.workspace.open of course
+    if (fileDetail.workspace.name && isClosed) {
+      fileDetail.workspace.name = "REDACTED"
+    }
+    if (fileDetail.refName && isClosed) { delete fileDetail.refName }
   }
   if (fileDetail.directory) { delete fileDetail.directory }
   if (fileDetail.relatedUserDetails) { delete fileDetail.relatedUserDetails }
   if (fileDetail.followingActiveSharedModels) { delete fileDetail.followingActiveSharedModels }
   if (fileDetail.versions) {
     fileDetail.versions.forEach(function(ver, _index) {
-      if (ver.userId) { delete ver.userId }
-      if (ver.message) { delete ver.message }
-      if (ver.createdAt) { delete ver.createdAt }
-      if (ver.fileUpdatedAt) { delete ver.fileUpdatedAt }
-      if (ver.lockedSharedModels) { delete ver.lockedSharedModels }
-      //  leave: uniqueFileName: Type.String(),
-      //  leave: thumbnailUrlCache: Type.Optional(Type.String()),
+      removePrivateFileSummaryFields(ver);
     })
   }
+}
+
+export function removePrivateFileSummaryFields( fileDetailSum ) {
+  // used by curation representative file model handling mostly
+  // _id left
+  if (fileDetailSum.uniqueFileName) {
+    fileDetailSum.uniqueFileName = "REDACTED"
+  }
+  if (fileDetailSum.userId) { delete fileDetailSum.userId }
+  if (fileDetailSum.message) { delete fileDetailSum.message }
+  if (fileDetailSum.createdAt) { delete fileDetailSum.createdAt }
+  // thumbnailUrlCache left
+  if (fileDetailSum.fileUpdatedAt) { delete fileDetailSum.fileUpdatedAt }
+  if (fileDetailSum.lockedSharedModels) { delete fileDetailSum.lockedSharedModels }
+}
+
+
+export function GetUrlFromFileLatestVersion(fileDetail) {
+  let url = null;
+  const currentVersion = fileDetail.versions.find((v) => v._id.equals(fileDetail.currentVersionId));
+  if (currentVersion) {
+    url = currentVersion.thumbnailUrlCache;
+  }
+  return url;
 }

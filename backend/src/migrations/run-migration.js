@@ -39,6 +39,7 @@ import { createOndselOrganizationCommand } from './create-ondsel-organization.co
 import {addNotificationsIdToUsersCommand} from "./add-notificationsId-to-users.command.js";
 import { addProtectionFieldToSharedModelCommand } from "./addProtectionFieldToSharedModel.js";
 import { addFollowSupportToSharedModelsCommand } from "./add-follow-support-to-shared-models.command.js";
+import {updateSharedModelsWithTitleCommand} from "./update-sharedmodels-with-title.command.js";
 
 
 async function runMigration() {
@@ -161,6 +162,9 @@ async function runMigration() {
       break;
     case 'addFollowSupportToSharedModels':
       await addFollowSupportToSharedModelsCommand(app)
+      break;
+    case 'updateSharedModelsWithTitle':
+      await updateSharedModelsWithTitleCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')

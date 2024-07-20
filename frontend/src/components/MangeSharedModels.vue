@@ -66,10 +66,35 @@
       </v-row>
     </template>
 
+    <template v-slot:item.title="{ item }">
+      <v-form :ref="'title_' + item._id" class="mt-4">
+        <v-sheet class="d-flex">
+          <v-text-field
+            width="20em"
+            density="compact"
+            variant="outlined"
+            v-model="item.title"
+            :rules="[
+              v => !!v || 'Description is required',
+            ]"
+            @click="item.titleFieldClicked=true"
+          ></v-text-field>
+          <v-btn
+            v-if="item.titleFieldClicked"
+            color="primary"
+            icon="mdi-check"
+            @click.stop="updateTitle(item._id, item.title); item.titleFieldClicked=false"
+          ></v-btn>
+        </v-sheet>
+      </v-form>
+    </template>
+
+
     <template v-slot:item.description="{ item }">
       <v-form :ref="'description_' + item._id" class="mt-4">
         <v-sheet class="d-flex">
           <v-text-field
+            width="12em"
             density="compact"
             counter="20"
             variant="outlined"
@@ -80,21 +105,17 @@
               v => (v && v.length <= 20) || 'Description must be less than 20 characters'
             ]"
             @click="item.descriptionFieldClicked=true"
-            @click:append-inner="updateDescription(item._id, item.description)"></v-text-field>
+          ></v-text-field>
           <v-btn
             v-if="item.descriptionFieldClicked"
             color="primary"
             icon="mdi-check"
-            @click.stop="item.descriptionFieldClicked=false"
+            @click.stop="updateDescription(item._id, item.description); item.descriptionFieldClicked=false"
           ></v-btn>
         </v-sheet>
       </v-form>
     </template>
 
-    <template v-slot:item.versionFollowing="{ item }">
-      <span v-if="item.versionFollowing === 'Locked'">Locked to {{ (item.fileDetail?.versionId || '??').substr(-6) }}</span>
-      <span v-if="item.versionFollowing === 'Active'">Show Active Version</span>
-    </template>
 
     <template v-slot:item.createdAt="{ item }">
       <span>{{ dateFormat(item.createdAt) }}</span>
@@ -118,8 +139,10 @@
       >
         Manage Access
       </v-btn>
+      <br>
+      <span v-if="item.versionFollowing === 'Locked'">Locked to {{ (item.fileDetail?.versionId || '??').substr(-6) }}</span>
+      <span v-if="item.versionFollowing === 'Active'">Show Active Version</span>
     </template>
-
     <template v-slot:expanded-row="{ columns, item }">
     <td :colspan="columns.length">
       <v-container>
@@ -301,10 +324,10 @@ export default {
           sortable: false,
           key: 'link',
         },
-        { title: 'Description', key: 'description', sortable: false, width: '20em'},
-        { title: 'Version', key: 'versionFollowing', sortable: true},
+        { title: 'Title', key: 'title', sortable: false, width: '20em'},
+        { title: 'Private Note', key: 'description', sortable: false, width: '20em'},
         { title: 'Created At', key: 'createdAt', sortable: true},
-        { title: 'Protection', key: 'protection', sortable: true, width: '10em'},
+        { title: 'Protection/Version', key: 'protection', sortable: true, width: '10em'},
         { title: 'Active', key: 'isActive', sortable: true},
       ],
       isShareModelDialogActive: false,
@@ -347,6 +370,18 @@ export default {
           id,
           {
             description: val
+          }
+        );
+      }
+    },
+    async updateTitle(id, val) {
+      const { ['title_' + id]:form } = this.$refs;
+      const { valid } = await form.validate();
+      if (valid) {
+        await this.updateSharedModel(
+          id,
+          {
+            title: val
           }
         );
       }

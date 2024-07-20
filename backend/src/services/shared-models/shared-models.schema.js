@@ -11,7 +11,7 @@ import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
 import {ProtectionType, VersionFollowTypeMap as versionFollowTypeMap} from './shared-models.subdocs.schema.js';
 import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
-import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl} from "./helpers.js";
+import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl, generateDefaultTitle} from "./helpers.js";
 
 
 // Main data model schema
@@ -28,6 +28,7 @@ export const sharedModelsSchema = Type.Object(
     userId: Type.String({ objectid: true }),
     cloneModelId: Type.String({ objectid: true }),
     model: Type.Ref(modelSchema),
+    title: Type.String(),
     description: Type.String({ maxLength: 20 }),
     canViewModel: Type.Boolean({default: true}),
     canViewModelAttributes: Type.Boolean({default: false}),
@@ -161,10 +162,17 @@ export const sharedModelsDataSchema = Type.Pick(sharedModelsSchema, [
   'versionFollowing',
   'directSharedTo',
 ], {
-  $id: 'SharedModelsData'
+  $id: 'SharedModelsData',
+  additionalProperties: true,
 })
 export const sharedModelsDataValidator = getValidator(sharedModelsDataSchema, dataValidator)
 export const sharedModelsDataResolver = resolve({
+  title: async (value, _message, _context) => {
+    if (value) {
+      return value;
+    }
+    return 'Sharelink';
+  },
   versionFollowing: async (value, _message, _context) => {
     if (value) {
       return value;
@@ -308,7 +316,8 @@ export const sharedModelsQueryProperties = Type.Pick(
     'messagesParticipants',
     'protection',
     'pin',
-    'directSharedTo'
+    'directSharedTo',
+    'fileDetail',
   ]
 )
 export const sharedModelsQuerySchema = Type.Intersect(

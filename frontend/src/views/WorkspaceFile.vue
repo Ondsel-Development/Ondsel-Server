@@ -7,14 +7,14 @@
     </template>
     <template #content>
       <v-sheet class="d-flex flex-row justify-space-between flex-wrap">
-        <v-card min-width="32em" class="flex-md-grow-1 ma-1" border>
-          <v-card-text>
+        <v-sheet class="flex-md-grow-1 ma-1 border-md pa-1">
             <v-sheet class="d-flex flex-column">
               <v-sheet name="buttons">
                 <a
                   v-if="file.modelId"
                   :href="fileModelUrl"
                   target="_blank"
+                  class="mr-2 mt-2"
                   style="text-decoration: none; color: inherit;"
                 >
                   <v-btn
@@ -25,7 +25,7 @@
                 </a>
                 <v-btn
                   v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
-                  class="mx-2"
+                  class="mr-2 mb-n1"
                   color="decoration"
                   flat
                   :disabled="!canUserWrite"
@@ -34,7 +34,7 @@
                 ></v-btn>
                 <v-btn
                   v-if="!publicView && workspace.curation?.representativeFile?._id === file._id"
-                  class="mx-2"
+                  class="mr-2 mb-n1"
                   color="decoration"
                   flat
                   :disabled="!canUserWrite"
@@ -42,7 +42,7 @@
                   icon="mdi-camera"
                 ></v-btn>
                 <v-btn
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="isFileDownloadInProgress || !user"
@@ -53,7 +53,7 @@
                 </v-btn>
                 <v-btn
                   v-if="!publicView"
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="!canUserWrite"
@@ -63,26 +63,35 @@
                 </v-btn>
                 <v-btn
                   v-if="!publicView"
-                  class="mx-2"
+                  class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   :disabled="!canUserWrite"
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
               </v-sheet>
-              <file-view-port :file="file" :version-id="viewPortVersionId"></file-view-port>
+              <file-view-port
+                :file="file"
+                :version-id="viewPortVersionId"
+                class="mt-2"
+                @active-version-model-seen="seeActiveVersionModel"
+              ></file-view-port>
               <v-sheet name="tables">
                 <file-versions-table
                   :file="file"
                   :can-user-write="canUserWrite"
                   :public-view="publicView"
                   :visible-version-id="viewPortVersionId"
+                  :active-version-thumbnail-available="activeVersionThumbnailAvailable"
                   @change-visible-version="changeViewPort"
                   @changed-file="reloadFileAndWorkspace"
                 >
                 </file-versions-table>
               </v-sheet>
-              <v-sheet name="return buttons">
+              <v-sheet
+                name="return buttons"
+                class="mt-4"
+              >
                 <v-btn
                   color="secondary"
                   variant="elevated"
@@ -105,12 +114,10 @@
               v-if="!publicView"
               ref="uploadNewVersionFile"
               :file="file"
-              @changed-file="reloadFileAndWorkspace"
             ></upload-new-version-file-dialog>
             <delete-file-dialog v-if="!publicView" ref="deleteFile" :file="file" @done-with-file="gotoWorkspace" />
-          </v-card-text>
-        </v-card>
-        <v-card min-width="32em" class="ma-1" border>
+        </v-sheet>
+        <v-card min-width="24em" class="ma-1" border>
           <v-card-title>{{ file.custFileName }}</v-card-title>
           <v-card-text>
             <v-data-table
@@ -142,6 +149,7 @@ import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue"
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
 import FileViewPort from "@/components/FileViewPort.vue";
+import {deriveOwnerDescAndRoute} from "@/genericHelpers";
 
 const { File } = models.api;
 
@@ -155,6 +163,7 @@ export default {
   mixins: [fileDownloadMixin],
   data() {
     return {
+      activeVersionThumbnailAvailable: false,
       file: {},
       workspace: {},
       publicView: false,
@@ -168,6 +177,7 @@ export default {
       wsName: '',
       orgRefName: '',
       slug: '',
+      representingWorkspaceOrg: false,
     };
   },
   async created() {
@@ -175,8 +185,9 @@ export default {
     this.wsName = this.$route.params.wsname;
     const fileId = this.$route.params.fileid;
     this.orgRefName = '';
+    let userDetail = {};
     if (this.userRouteFlag) {
-      const userDetail = await this.getUserByIdOrNamePublic(this.slug);
+      userDetail = await this.getUserByIdOrNamePublic(this.slug);
       if (!userDetail) {
         console.log(`No such user for ${this.slug}`);
         this.$router.push({ name: 'PageNotFound' });
@@ -197,11 +208,15 @@ export default {
         value: `${this.file.workspace.name} [${this.file.workspace.refName}]`,
       },
       {
+        name: 'Owner',
+        value: deriveOwnerDescAndRoute(userDetail, this.workspace?.organization).desc
+      },
+      {
         name: 'Directory',
         value: this.file.directory.name,
       },
       {
-        name: 'Revision Count',
+        name: 'Version Count',
         value: this.file.versions.length || 0,
       },
       {
@@ -215,7 +230,7 @@ export default {
     ...mapState('auth', ['user']),
     userRouteFlag: vm => vm.$route.path.startsWith("/user"),
     fileModelUrl: vm => `${window.location.origin}/model/${vm.file.modelId}`,
-    canUserWrite: vm => vm.workspace?.haveWriteAccess || false,
+    canUserWrite: vm => (vm.workspace?.haveWriteAccess && vm.representingWorkspaceOrg) || false,
   },
   methods: {
     ...mapActions('app', [
@@ -226,6 +241,9 @@ export default {
     ]),
     refLabel(refId) {
       return ".." + refId.substr(-6);
+    },
+    async reloadPage() {
+      window.location.reload();
     },
     async reloadFileAndWorkspace() {
       const fileId = this.$route.params.fileid;
@@ -249,6 +267,8 @@ export default {
         this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
       }
       this.viewPortVersionId = this.file.currentVersionId.toString();
+      let currentOrgId = this.currentOrganization?._id ? this.currentOrganization._id.toString() : '';
+      this.representingWorkspaceOrg = this.workspace.organizationId.toString() === currentOrgId;
     },
     async gotoWorkspace() {
       const slug = this.$route.params.slug;
@@ -272,6 +292,9 @@ export default {
     async changeViewPort(versionId) {
       this.viewPortVersionId = versionId;
     },
+    seeActiveVersionModel() {
+      this.activeVersionThumbnailAvailable = true;
+    }
   },
 };
 </script>
