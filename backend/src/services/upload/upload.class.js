@@ -87,6 +87,8 @@ class UploadService {
       }
       if (id.includes('public/')) {
         url = this.getPublicUrl(id, bucketName);
+      } else if (id.includes('thirdpartyshare')) {
+        return this.getThirdPartyShare(id, bucketName); // TODO
       } else {
         url = await this.getSignedFileUrl(id, bucketName, 3600);
       }
