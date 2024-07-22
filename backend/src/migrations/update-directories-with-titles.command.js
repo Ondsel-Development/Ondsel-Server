@@ -7,13 +7,10 @@ import _ from "lodash";
 export async function updateDirectoriesWithTitleCommand (app) {
   const sharedModelsService = app.service('shared-models');
   const smDb = await sharedModelsService.options.Model;
-  const fileService = app.service('file');
-  const fileDb = await fileService.options.Model;
   const dirService = app.service('directories');
   const dirDb = await dirService.options.Model;
 
   const sharedModelCache = {};
-  const fileCache = {};
   const dirCache = {};
   let refList = null;
 
@@ -42,21 +39,6 @@ export async function updateDirectoriesWithTitleCommand (app) {
   ).toArray();
   for (let ref of refList) {
     sharedModelCache[ref._id.toString()] = ref;
-  }
-  console.log(`>>>   cached ${refList.length}`);
-
-  console.log('>>> creating reference cache of all Files (source of truth)');
-  refList = await fileDb.find(
-    {},
-    {
-      projection: {
-        _id: 1,
-        versions: 1,
-      }
-    }
-  ).toArray();
-  for (let ref of refList) {
-    fileCache[ref._id.toString()] = ref;
   }
   console.log(`>>>   cached ${refList.length}`);
 
@@ -108,10 +90,10 @@ export async function updateDirectoriesWithTitleCommand (app) {
       // now explore in the other direction and find any missing titles
       for (const lockedSmIndex in file.currentVersion.lockedSharedModels || []) {
         const lockedSm = file.currentVersion.lockedSharedModels[lockedSmIndex];
-        if (!lockedSm.title) {
-          changeFound = true;
+        if (!lockedSm.title || !lockedSm.thumbnailUrl) {
           const sourceSm = sharedModelCache[lockedSm._id.toString()];
           if (!sourceSm) {
+            changeFound = true;
             console.log('        DELETED or NON-LOCKED sharedModel found; removing it.');
             dir.files[fileIndex].currentVersion.lockedSharedModels = dir.files[fileIndex].currentVersion.lockedSharedModels.filter(
               t => t._id.toString() !== lockedSm._id.toString()
@@ -123,7 +105,16 @@ export async function updateDirectoriesWithTitleCommand (app) {
               console.log(`        SEVERE ERROR: Shared model ${smSum._id} does not have a title!!!!!.`);
               process.exit(1);
             }
-            dir.files[fileIndex].currentVersion.lockedSharedModels[lockedSmIndex] = smSum;
+            if (!lockedSm.title) {
+              changeFound = true;
+              dir.files[fileIndex].currentVersion.lockedSharedModels[lockedSmIndex] = smSum;
+            }
+            if (!lockedSm.thumbnailUrl) {
+              if (smSum.thumbnailUrl) {
+                changeFound = true;
+                dir.files[fileIndex].currentVersion.lockedSharedModels[lockedSmIndex] = smSum;
+              }
+            }
           }
         }
       }
