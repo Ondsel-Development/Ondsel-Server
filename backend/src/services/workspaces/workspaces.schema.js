@@ -69,7 +69,7 @@ export const workspaceResolver = resolve({
 
 export const workspaceExternalResolver = resolve({})
 
-export const workspacePublicFields = ['_id', 'name', 'organizationId', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory', 'curation'];
+export const workspacePublicFields = ['_id', 'name', 'organizationId', 'organization', 'refName', 'open', 'license', 'description', 'createdAt', 'rootDirectory', 'curation'];
 
 // Schema for creating new entries
 export const workspaceDataSchema = Type.Pick(workspaceSchema, ['name', 'refName', 'description', 'organizationId'], {
@@ -131,7 +131,7 @@ export const workspacePatchResolver = resolve({
 
 // Schema for allowed query properties
 export const workspaceQueryProperties = Type.Pick(workspaceSchema, [
-  '_id', 'name', 'refName', 'open', 'license', 'description', 'refNameHash', 'organizationId',
+  '_id', 'name', 'refName', 'open', 'license', 'description', 'refNameHash', 'organizationId', 'organization',
   'createdAt', 'rootDirectory', 'curation',
 ])
 export const workspaceQuerySchema = Type.Intersect(
@@ -139,6 +139,7 @@ export const workspaceQuerySchema = Type.Intersect(
     querySyntax(workspaceQueryProperties),
     // Add additional query properties here
     Type.Object({
+      "organization": Type.Optional(organizationSummarySchema),
       "organization._id": Type.Optional(ObjectIdSchema()),
       "organization.refName": Type.Optional(Type.String()),
       'publicInfo': Type.Optional(Type.String()),
