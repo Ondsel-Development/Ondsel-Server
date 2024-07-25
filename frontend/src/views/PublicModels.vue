@@ -136,7 +136,7 @@
       </v-row>
       <ShareLinkDialog
         :is-active="isShareLinkDialogActive"
-        :shared-model-id="activeShareModel._id"
+        :shared-model="activeShareModel"
         ref="shareLinkDialog"
       />
       <ManageBookmarkDialog

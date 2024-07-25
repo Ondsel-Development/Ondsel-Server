@@ -264,7 +264,7 @@ export default {
         }
       } else {
         this.publicView = true;
-        this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.slug} );
+        this.workspace = await this.getWorkspaceByNamePublic({wsName: this.wsName, orgName: this.orgRefName} );
       }
       this.viewPortVersionId = this.file.currentVersionId.toString();
       let currentOrgId = this.currentOrganization?._id ? this.currentOrganization._id.toString() : '';
