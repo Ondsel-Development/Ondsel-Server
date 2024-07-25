@@ -318,6 +318,10 @@ export default {
         this.forbidNameChange = false;
         this.changableVisibility = true;
         break;
+      case 'Ondsel':
+        this.forbidNameChange = false;
+        this.changableVisibility = true;
+        break;
     }
     if (!this.organization) {
       // require for manage user and group of workspace
