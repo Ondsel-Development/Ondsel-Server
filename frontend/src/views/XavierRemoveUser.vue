@@ -72,6 +72,7 @@
 import {mapState} from "vuex";
 import {crc32} from "@/refNameFunctions";
 import {models} from "@feathersjs/vuex";
+import _ from "lodash";
 
 const { User } = models.api;
 
@@ -122,7 +123,8 @@ export default {
         log.push(`making DEL call to user API with "${target}" via admin "${this.user.username}"`);
         try {
           const delResult = await User.remove(target);
-          log.push(`API CALL RETURN: ${JSON.stringify(delResult, null, 2)}`);
+          const cleanDelResult = _.pick(delResult, ['_id', 'success', 'message', 'logs'])
+          log.push(`API CALL RETURN: ${JSON.stringify(cleanDelResult, null, 2)}`);
         } catch (e) {
           log.push('API GENERATED ERROR: ' + e.toString())
         }
