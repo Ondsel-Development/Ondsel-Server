@@ -35,6 +35,7 @@ import {
 import { commitMessage } from './message.hooks.js';
 import {
   canUserAccessSharedModelGetMethod,
+  handleAdditionalDataQuery,
   handleDirectSharedToUsers,
   validateSharedModelCreatePayload
 } from './helpers.js';
@@ -113,6 +114,7 @@ export const sharedModels = (app) => {
     around: {
       all: [
         schemaHooks.resolveExternal(sharedModelsExternalResolver),
+        handleAdditionalDataQuery(),
         schemaHooks.resolveResult(sharedModelsResolver)
       ],
       create: [
