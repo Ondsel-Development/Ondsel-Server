@@ -161,3 +161,14 @@ export function generateDefaultTitle(sharedModel, file) {
   }
   return `${file.custFileName}`;
 }
+
+
+export const handleAdditionalDataQuery = () => {
+  return async (context, next) => {
+    // this is an "around" hook
+    context.$additionalData = context.params?.query?.additionalData === "true";
+    delete context.params.query.additionalData;
+    await next();
+    return context;
+  }
+}

@@ -11,7 +11,9 @@ import { userSummarySchema } from '../users/users.subdocs.schema.js';
 import { messageSchema } from './message.schema.js';
 import {ProtectionType, VersionFollowTypeMap as versionFollowTypeMap} from './shared-models.subdocs.schema.js';
 import {fileDetailSchema, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
-import {buildFakeModelAndFileForActiveVersion, buildFakeModelUrl, generateDefaultTitle} from "./helpers.js";
+import { buildFakeModelAndFileForActiveVersion, buildFakeModelUrl } from "./helpers.js";
+import { buildUserSummary } from "../users/users.distrib.js";
+import { buildOrganizationSummary } from "../organizations/organizations.distrib.js";
 
 
 // Main data model schema
@@ -130,6 +132,30 @@ export const sharedModelsResolver = resolve({
       }
       throw error;
     }
+  }),
+
+  additionalData: virtual(async (message, context) => {
+    if (context.$additionalData) {
+      const data = {};
+      try {
+        data.datePublished = new Date(message.createdAt).toISOString();
+        data.dateModified = new Date(message.updatedAt).toISOString();
+        const fileResp = await context.app.service('file').find({ query: { modelId: message.cloneModelId } });
+        if (fileResp.data.length) {
+          const file = fileResp.data[0];
+          const user = await context.app.service('users').get(file.userId);
+          data.author = buildUserSummary(user);
+          const workspace = await context.app.service('workspaces').get(file.workspace._id);
+          const org = await context.app.service('organizations').get(workspace.organizationId);
+          data.organization = {
+            ...buildOrganizationSummary(org),
+            owner: org.users[0],
+          };
+        }
+      } catch(e) {}
+      return data;
+    }
+    return undefined;
   }),
 })
 
@@ -326,6 +352,7 @@ export const sharedModelsQuerySchema = Type.Intersect(
     // Add additional query properties here
     Type.Object({
       isThumbnailGenerated: Type.Union([Type.Boolean(), Type.Object({ $exists: Type.Boolean()}, { additionalProperties: false })]),
+      additionalData: Type.Optional(Type.Boolean()),
     }, { additionalProperties: false })
   ],
   { additionalProperties: false }
