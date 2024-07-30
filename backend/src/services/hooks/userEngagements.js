@@ -92,6 +92,7 @@ const generateUserEngagementPayload = context => {
     ...(context.id && {contextId: context.id}),
     ...(!_.isEmpty(context.$userQuery) && {query: context.$userQuery}),
     ...(version && {version: version}),
+    ...(!context.id && {contextId: context?.result?._id})  // 'create' hook don't have context.id, so assigning from result
   };
   return payload;
 }
