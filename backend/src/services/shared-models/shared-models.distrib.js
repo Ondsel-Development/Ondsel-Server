@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {addSharedModelToFile, deleteSharedModelFromFile, updateSharedModelToFile} from "../file/file.distrib.js";
 import {ProtectionType, VersionFollowType, VersionFollowTypeMap} from "./shared-models.subdocs.schema.js";
 import {narrowlyUpdateSharedModelCurationRepresentativeFileUrl} from "./shared-models.curation.js";
+import {ObjectId} from "mongodb";
 
 export const sharedModelsSummarySchema = Type.Object(
   {
@@ -24,8 +25,9 @@ export const sharedModelsSummarySchema = Type.Object(
 export const copySharedModelBeforePatch = async (context) => {
     // store a copy of the Org in `context.beforePatchCopy` to help detect true changes
     const smService = context.app.service('shared-models');
-    const smId = context.id;
-    context.beforePatchCopy = await smService.get(smId);
+    const smDb = await smService.options.Model;
+    const smId = new ObjectId(context.id);
+    context.beforePatchCopy = await smDb.findOne({_id: smId}); // use direct DB so that it is found even if already deleted
     return context;
 }
 

@@ -83,12 +83,12 @@ export const handleDirectSharedToUsers = async context => {
 export async function buildFakeModelAndFileForActiveVersion(message, context) {
   // this function pulls from the DB to generate a psuedo Model and subtending File
   let finalModel = null;
-
   let {refFile, refModel} = await getReferenceFileAndModel(message, context);
 
   const currentVersionId = refFile.currentVersionId;
   removePrivateFileFields(refFile);
-  refFile.versions = refFile.versions.find(version => version._id.equals(currentVersionId));
+  const versionsAvailable = refFile.versions || [];
+  refFile.versions = versionsAvailable.find(version => version._id.equals(currentVersionId));
   finalModel = _.omit(refModel, 'attributes');
   finalModel.file = refFile;
 
@@ -105,18 +105,26 @@ export async function buildFakeModelUrl(message, context) {
 }
 
 async function getReferenceFileAndModel(message, context) {
+  // DO NOT use the .find functions as those endpoint throw errors on deleted items which wreaks havoc
+  // during distributed deletion
   const modelService = context.app.service('models');
+  const modelDb = await modelService.options.Model;
   const fileService = context.app.service('file');
+  const fileDb = await fileService.options.Model;
   let model = null;
   let file = null;
 
-  // get file data
+  // get file data if it exists
   const fileId = message.fileDetail.fileId;
-  file = await fileService.get(fileId);
+  file = await fileDb.findOne(
+    {_id: fileId}
+  );
 
-  // get model data
+  // get model data if it exists
   if (file) {
-    model = await modelService.get(file.modelId);
+    model = await modelDb.findOne(
+      {_id: file.modelId}
+    );
   }
   return {
     refFile: file,
@@ -166,8 +174,10 @@ export function generateDefaultTitle(sharedModel, file) {
 export const handleAdditionalDataQuery = () => {
   return async (context, next) => {
     // this is an "around" hook
-    context.$additionalData = context.params?.query?.additionalData === "true";
-    delete context.params.query.additionalData;
+    if (context.params?.query?.additionalData) {
+      context.$additionalData = context.params?.query?.additionalData === "true";
+      delete context.params.query.additionalData;
+    }
     await next();
     return context;
   }
