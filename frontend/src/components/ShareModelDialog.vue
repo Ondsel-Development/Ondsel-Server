@@ -40,7 +40,7 @@
           <v-text-field
             v-model.trim="description"
             label="Description"
-            hint="Enter description of share link, it can be tag or short note"
+            hint="Enter a short private description of this share link"
             :disabled="isGeneratingLink"
             :counter="20"
             :rules="descriptionRules"

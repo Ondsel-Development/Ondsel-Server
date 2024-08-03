@@ -325,7 +325,7 @@ export default {
           key: 'link',
         },
         { title: 'Title', key: 'title', sortable: false, width: '20em'},
-        { title: 'Private Note', key: 'description', sortable: false, width: '20em'},
+        { title: 'Description', key: 'description', sortable: false, width: '20em'},
         { title: 'Created At', key: 'createdAt', sortable: true},
         { title: 'Protection/Version', key: 'protection', sortable: true, width: '10em'},
         { title: 'Active', key: 'isActive', sortable: true},
