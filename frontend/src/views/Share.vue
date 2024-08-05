@@ -216,7 +216,7 @@
     width="1100"
     temporary
   >
-    <ModelInfo v-if="drawerActiveWindow === 'modelInfo'" ref="modelInfoDrawer" :shared-model="sharedModel"/>
+    <SharedModelInfo v-if="drawerActiveWindow === 'modelInfo'" ref="modelInfoDrawer" :shared-model="sharedModel"/>
     <Messages v-else-if="drawerActiveWindow === 'openMessages'" ref="messagesDrawer" :shared-model="sharedModel" />
   </v-navigation-drawer>
   <edit-promotion-dialog v-if="currentOrganization" ref="editPromotionDialog" collection="shared-models" :item-id="sharedModel?._id" :item-name="name"></edit-promotion-dialog>
@@ -234,12 +234,12 @@ import ModelViewer from "@/components/ModelViewer";
 import AttributeViewer from '@/components/AttributeViewer';
 import ExportModelDialog from '@/components/ExportModelDialog';
 import ShareLinkDialog from '@/components/ShareLinkDialog';
-import ModelInfo from '@/components/ModelInfo.vue';
 import EditPromotionDialog from "@/components/EditPromotionDialog.vue";
 import ObjectsListView from '@/components/ObjectsListView.vue';
 import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import Messages from "@/components/Messages.vue";
 import ShareWithUserDialog from "@/components/ShareWithUserDialog.vue";
+import SharedModelInfo from "@/components/SharedModelInfo.vue";
 
 const { SharedModel, Model, OrgSecondaryReference } = models.api;
 
@@ -254,7 +254,7 @@ export default {
     AttributeViewer,
     ModelViewer,
     ExportModelDialog,
-    ModelInfo,
+    SharedModelInfo,
     ObjectsListView
   },
   data: () => ({
