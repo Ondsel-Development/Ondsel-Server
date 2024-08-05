@@ -38,9 +38,16 @@
       <v-form ref="form" @submit.prevent="generateSharedModelUrl">
         <v-card-text class="mt-0">
           <v-text-field
+            v-model.trim="title"
+            label="Title"
+            hint="Enter title for share link. This will be visible to recipient(s)"
+            :disabled="isGeneratingLink"
+            :rules="titleRules"
+          ></v-text-field>
+          <v-text-field
             v-model.trim="description"
-            label="Description"
-            hint="Enter description of share link, it can be tag or short note"
+            label="Private Note"
+            hint="Enter a private short note"
             :disabled="isGeneratingLink"
             :counter="20"
             :rules="descriptionRules"
@@ -168,6 +175,7 @@ import { models } from '@feathersjs/vuex';
 
 const { Model, SharedModel } = models.api;
 
+// this class is used strictly for Creating a new ShareLink from the Model's page (via MangeSharedModels.vue)
 export default {
   name: 'ShareModelDialog',
   emits: ['shareModel'],
@@ -178,6 +186,7 @@ export default {
   data: () => ({
     dialog: false,
     valid: false,
+    title: '',
     description: '',
     protection: 'Unlisted',
     versionFollowing: 'Locked',
@@ -206,13 +215,16 @@ export default {
     sharedModel: null,
     isGeneratingLink: false,
     toolTipMsg: 'Copy to clipboard',
+    titleRules: [
+      v => !!v || 'Title is required',
+    ],
     descriptionRules: [
-      v => !!v || 'Description is required',
-      v => (v && v.length <= 20) || 'Description must be less than 20 characters'
+      v => !!v || 'Private note is required',
+      v => (v && v.length <= 20) || 'Private note must be less than 20 characters'
     ],
     pinRules: [
       v => !!v || 'PIN is required',
-      v => (v && v.length === 6) || 'PIN must be 6 characters'
+      v => (v && v.length === 6) || 'PIN must be 6 digits'
     ],
     error: '',
     versionFollowingItems: [
@@ -245,6 +257,7 @@ export default {
       sharedModel.versionFollowing = this.versionFollowing;
       sharedModel.protection = this.protection;
       sharedModel.pin = this.pin;
+      sharedModel.title = this.title;
       sharedModel.description = this.description;
       sharedModel.canViewModel = this.permissions.canViewModel;
       sharedModel.canViewModelAttributes = this.permissions.canViewModelAttributes;

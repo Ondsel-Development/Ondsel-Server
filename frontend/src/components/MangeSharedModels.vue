@@ -134,7 +134,7 @@
       </v-btn>
       <br>
       <span v-if="item.versionFollowing === 'Locked'">Locked to {{ (item.fileDetail?.versionId || '??').substr(-6) }}</span>
-      <span v-if="item.versionFollowing === 'Active'">Show Active Version</span>
+      <span v-if="item.versionFollowing === 'Active'">Shows Active Version</span>
     </template>
     <template v-slot:expanded-row="{ columns, item }">
       <td :colspan="columns.length">
