@@ -1,12 +1,36 @@
 <template>
   <v-card flat>
-    <v-card-title style="text-align: center;">CAD Model Display Information</v-card-title>
+    <v-card-title style="text-align: center;">ShareLink Information</v-card-title>
     <v-card-item style="justify-content: center;">
       <v-table density="comfortable" style="width: 600px; text-align: left;">
         <tbody>
+          <tr v-if="sharedModel && sharedModel.title">
+            <td class="font-weight-medium">Title</td>
+            <td><b>{{ sharedModel.title }}</b></td>
+          </tr>
           <tr v-if="fileObject">
             <td class="font-weight-medium">Date</td>
             <td>{{ dateFormat(fileObject.createdAt) }}</td>
+          </tr>
+          <tr v-if="sharedModel && sharedModel.curation?.tags">
+            <td class="font-weight-medium">Tags</td>
+            <td>
+              <v-chip-group>
+                <v-chip v-for="(tag) in sharedModel.curation.tags" :key="tag">{{tag}}</v-chip>
+              </v-chip-group>
+              <v-sheet v-if="sharedModel.curation.tags.length===0"><i>no tags</i></v-sheet>
+            </td>
+          </tr>
+          <tr>
+            <td class="font-weight-medium">Version</td>
+            <td>
+              <v-sheet v-if="sharedModel.versionFollowing === 'Locked'">
+                Showing a <i>specific</i> version of the original file
+              </v-sheet>
+              <v-sheet v-else>
+                Showing <i>the active</i> version of the original file
+              </v-sheet>
+            </td>
           </tr>
           <tr v-if="user">
             <td class="font-weight-medium">Created By</td>
@@ -45,7 +69,7 @@
               </v-btn>
             </td>
           </tr>
-          <tr v-if="organization && fileObject">
+          <tr v-if="organization && fileObject && open">
             <td class="font-weight-medium">Workspace</td>
             <td>
               <v-btn
@@ -65,7 +89,7 @@
               </v-btn>
             </td>
           </tr>
-          <tr v-if="organization && fileObject">
+          <tr v-if="organization && fileObject && open">
             <td class="font-weight-medium">File</td>
             <td>
               <v-btn
@@ -89,29 +113,30 @@
 import {mapActions} from "vuex";
 
 export default {
-  name: "ModelInfo",
+  name: "SharedModelInfo",
   props: {
-    model: {
+    sharedModel: {
       type: Object,
       required: false,
-    },
+    }
   },
   data: () => ({
     user: null,
     workspace: null,
     organization: null,
+    open: false,
     isDataFetchingInProgress: false,
   }),
   computed: {
     fileObject() {
-      if (this.model) {
-        return this.model.file;
+      if (this.sharedModel) {
+        return this.sharedModel.cloneModel.file;
       }
       return null;
     }
   },
   async mounted() {
-    await this.fetchModelInfoData();
+    await this.fetchSharedModelInfoData();
   },
   methods: {
     ...mapActions('app', ['getUserByIdOrNamePublic', 'getWorkspaceByIdPublic', 'getOrgByIdOrNamePublic']),
@@ -119,13 +144,16 @@ export default {
       const date = new Date(number);
       return date.toDateString();
     },
-    async fetchModelInfoData() {
+    async fetchSharedModelInfoData() {
+      console.log("HERE1");
       this.isDataFetchingInProgress = true;
       this.user = await this.getUserByIdOrNamePublic(this.fileObject.userId);
       if (this.fileObject.workspace) {
         this.workspace = await this.getWorkspaceByIdPublic(this.fileObject.workspace._id);
         this.organization = await this.getOrgByIdOrNamePublic(this.workspace.organizationId);
       }
+      this.open = this.fileObject?.workspace?.open === true;
+      console.log("HERE2");
     },
     async gotoWorkspace() {
       if (this.organization.type === 'Personal') {
