@@ -57,6 +57,8 @@ export const modelSchema = Type.Object(
     latestLogErrorIdForStepExportCommand: logErrorIdType,
     latestLogErrorIdForStlExportCommand: logErrorIdType,
     latestLogErrorIdForObjExportCommand: logErrorIdType,
+    // viewer file key
+    generatedFileForViewer: Type.Optional(Type.String()),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -71,6 +73,11 @@ export const modelResolver = resolve({
   objUrl: virtual(async(message, context) => {
     const { app } = context;
     if (message.isObjGenerated) {
+      if (message.generatedFileForViewer) {
+        let r = await app.service('upload').get(message.generatedFileForViewer);
+        return r.url || '';
+      }
+
       let r = await app.service('upload').get(`${message._id.toString()}_generated.FCSTD`);
       if (!r.url) {
         r = await app.service('upload').get(`${message._id.toString()}_generated.BREP`);

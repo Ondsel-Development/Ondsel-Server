@@ -221,6 +221,20 @@ const startObjGeneration = async (context) => {
   } else {
     throw new BadRequest('Not able to find filename')
   }
+
+  // When input file is STEP, then don't need runner, viewer can render STEP file directly.
+  if (fileName.toUpperCase().split('.').pop() === 'STP' || fileName.toUpperCase().split('.').pop() === 'STEP') {
+    const uploadService = context.app.service('upload');
+    const generatedFileForViewer = `${modelId.toString()}_generated.STEP`;
+    await uploadService.copy(fileName, generatedFileForViewer);
+    context.data.generatedFileForViewer = generatedFileForViewer;
+    context.data.shouldStartObjGeneration = false;
+    context.data.isObjGenerationInProgress = false;
+    context.data.isObjGenerated = true;
+    context.data.latestLogErrorIdForObjGenerationCommand = null;
+    return context
+  }
+
   axios({
     method: 'post',
     url: context.app.get('fcWorkerUrl'),
