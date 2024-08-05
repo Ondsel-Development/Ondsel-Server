@@ -169,7 +169,7 @@ export class Viewer {
 
     const selectedObj = getSelectedObject(this.raycaster, this.camera, this.pointer, this.obj);
     if (selectedObj) {
-      const modelObject3d = this.model.findObjectByUuid(selectedObj.parent?.uuid);
+      const modelObject3d = this.model.findObjectByMeshUuid(selectedObj.parent?.uuid);
       if (modelObject3d) {
         this.selectGivenObject(modelObject3d, true);
       }

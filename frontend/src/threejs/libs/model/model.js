@@ -28,7 +28,7 @@ export class Model extends ModelObject3D
         return object;
     }
 
-    findObjectByUuid(uuid) {
+    findObjectByMeshUuid(uuid) {
         for (let obj of this.objects) {
             if (obj.object3d.uuid === uuid) {
                 return obj;
@@ -36,4 +36,26 @@ export class Model extends ModelObject3D
         }
         return null;
     }
+
+    GetRootObjects() {
+      return this.objects.filter(o => o.parent === null);
+    }
+
+    GetObjectByName(name) {
+      for (let obj of this.objects) {
+        if (obj.name === name) {
+          return obj;
+        }
+      }
+      return null;
+    }
+
+  findObjectByUuid(uuid) {
+    for (let obj of this.objects) {
+      if (obj.uuid === uuid) {
+        return obj;
+      }
+    }
+    return null;
+  }
 }

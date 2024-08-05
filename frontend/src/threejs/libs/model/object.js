@@ -1,15 +1,25 @@
 import * as THREE from 'three';
+import {v4 as uuidv4} from 'uuid';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
+
+export const ModelObjectType = Object.freeze({
+  Shape: 'Shape',
+  Link: 'Link',
+})
 
 export class ModelObject3D
 {
     constructor() {
+        this.uuid = uuidv4();
         this.realName = '';
         this.name = '';
         this.propertyGroups = [];
         this.meshes = [];
         this.object3d = null;
         this.color = null;
+        this.parent = null;
+        this.children = [];
+        this.visibility = null;
     }
     GetName ()
     {
@@ -89,4 +99,68 @@ export class ModelObject3D
         }
         return new THREE.Color(OBJ_COLOR);
     }
+
+    SetParent(modelObject) {
+      this.parent = modelObject;
+      return this.parent;
+    }
+
+    GetParent() {
+      return this.parent;
+    }
+
+    AddChildren(mainObject) {
+      this.children.push(mainObject);
+      return this.children.length - 1;
+    }
+
+    GetChildren() {
+      return this.children;
+    }
+
+    GetType() {
+      return this.object3d ? ModelObjectType.Shape: ModelObjectType.Link;
+    }
+
+    IsShapeType() {
+      return this.GetType() === ModelObjectType.Shape;
+    }
+
+    GetVisibility() {
+      if (this.IsShapeType()) {
+        return this.object3d.visible;
+      }
+      if (this.visibility === null) {
+        this.visibility = true;
+      }
+      return this.visibility;
+    }
+
+    ToggleVisibility(isVisible = null) {
+      if (this.IsShapeType()) {
+        if (isVisible === null) {
+          this.object3d.visible = !this.GetVisibility();
+        } else {
+          this.object3d.visible = isVisible;
+        }
+      } else {
+        this.visibility = !this.GetVisibility();
+        this.GetAllChildren().forEach(object => object.ToggleVisibility(this.visibility));
+      }
+    }
+
+  GetAllChildren() {
+    let allChildren = [];
+
+    function collectChildren(object) {
+      object.children.forEach(child => {
+        allChildren.push(child);
+        collectChildren(child); // Recursively collect children of the current child
+      });
+    }
+
+    collectChildren(this);
+    return allChildren;
+  }
+
 }
