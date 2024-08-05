@@ -23,7 +23,9 @@ export class Model extends ModelObject3D
     GetCompoundObject() {
         const object = new THREE.Group();
         for (let o of this.objects) {
+          if (o.IsShapeType()) {
             object.add(o.GetObject3d());
+          }
         }
         return object;
     }
