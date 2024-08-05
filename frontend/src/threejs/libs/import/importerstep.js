@@ -41,7 +41,6 @@ export class ImporterStep {
     this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
 
     this.worker.addEventListener ('message', (ev) => {
-      console.log(ev)
       for (let resultMesh of ev.data.meshes) {
 
         let object3d = new ModelObject3D ();
@@ -66,7 +65,6 @@ export class ImporterStep {
         geometry.setIndex(new THREE.BufferAttribute(index, 1));
         let material = new THREE.MeshPhongMaterial({color: object3d.GetColor()})
         const mesh = new THREE.Mesh (geometry, material);
-        console.log(mesh);
         mainObject.add(mesh);
         object3d.SetObject3d(mainObject);
         this.model.AddObject(object3d);
@@ -75,7 +73,6 @@ export class ImporterStep {
       // Create Tree Structure
 
       for (let root of ev.data.root.children) {
-        console.log('RR', root)
         let rootObj = this.model.GetObjectByName(root.name);
         if (!rootObj) {
           rootObj = new ModelObject3D();
@@ -84,7 +81,6 @@ export class ImporterStep {
           this.model.AddObject(rootObj);
         }
         for (let child of root.children) {
-          console.log('CC', child)
           let childObj = this.model.GetObjectByName(child.name);
           if (!childObj) {
             childObj = new ModelObject3D();
@@ -101,23 +97,16 @@ export class ImporterStep {
           }
 
           for (let meshIndex of child.meshes) {
-            console.log(meshIndex);
             const meshObj = this.model.GetObjects()[meshIndex]
             if (childObj.GetName() === meshObj.GetName()) {
-              console.log('continute, ', childObj.name, meshIndex, meshObj.name)
               continue;
             }
-            console.log('adding child of ', childObj.name, meshObj.name);
             childObj.AddChildren(meshObj);
             meshObj.SetParent(childObj);
           }
-
         }
-
-
       }
 
-      console.log('ROOT', this.model.GetRootObjects());
       onFinish(this.model);
     });
 
