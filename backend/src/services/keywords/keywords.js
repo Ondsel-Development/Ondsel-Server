@@ -19,6 +19,7 @@ import {upsertScore} from "./commands/upsertScore.js";
 import {removeScore} from "./commands/removeScore.js";
 import {organizationPublicFields} from "../organizations/organizations.schema.js";
 import {useRake} from "../../curation.schema.js";
+import {partialSearch} from "./helpers.js";
 
 export * from './keywords.class.js'
 export * from './keywords.schema.js'
@@ -144,6 +145,31 @@ const expandSearchUsingAlgorithms = async context => {
   if (targetFilter) {
     allFound = allFound.filter((entry) => entry.curation.collection === targetFilter);
   }
+  // if list less than 100, then also add partial searches on the first 5 single-word rake entries of length 3 or more
+  // matching entries are "scored" at only 50% of normal because they are partial matches
+  if (allFound.length < 100) {
+    let partialKeywordList = [];
+    for (const keyphrase of rakeList) {
+      if (partialKeywordList.length < 5) {
+        if (keyphrase.indexOf(' ') < 0) {
+          if (keyphrase.length >= 3) {
+            partialKeywordList.push(keyphrase);
+          }
+        }
+      }
+    }
+    for (const keyword of partialKeywordList) {
+      try {
+        const newEntries = await partialSearch(context, keyword, 0.5);
+        allFound.push(...newEntries);
+      } catch (e) {
+        if (e.name !== 'NotFound') {
+          console.log('partial Search problem: ' + e.message);
+        }
+      }
+    }
+  }
+
   // sort first, so that the best rise to the top; this includes finding the best duplicate
   allFound.sort((a, b) => b.score - a.score);
   // remove the duplicates retaining order, always retaining the top duplicate

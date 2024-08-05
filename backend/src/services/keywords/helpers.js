@@ -23,3 +23,28 @@ export async function safelyGetKeyword(context, keyword){
   }
   return keywordObj;
 }
+
+export async function partialSearch(context, keyword, reduction){
+  // returns a list of matches (not sorted)
+  // the keyword supplied MUST be a single word; not a phrase
+  // reduction is a value between 0.0 and 0.1
+  const keywordsService = context.service;
+  const kwDb = await keywordsService.options.Model;
+
+  const regex = new RegExp(`^${keyword}.+`, ''); // the '.+' is for avoiding exact matches
+  const query = { _id: { $regex: regex } };
+  let results=[];
+  try {
+    const documents = await kwDb.find(query).toArray();
+    for (const doc of documents) {
+      results.push(...doc.sortedMatches);
+    }
+  } catch (e) {
+    console.log("FIND PARTIAL KEYWORD ERR " + e.message);
+  }
+  // reduce em all
+  for (let match of results) {
+    match.score = match.score * reduction;
+  }
+  return results;
+}

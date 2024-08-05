@@ -439,7 +439,12 @@ const createUserInstance = async (context) => {
   );
   if (!result.data.length) {
     const sharedModel = await context.service.get(context.id);
-    const dummyModel = await modelService.get(sharedModel.dummyModelId);
+    let dummyModel = null;
+    if (sharedModel.dummyModelId) {
+      dummyModel = await modelService.get(sharedModel.dummyModelId);
+    } else {
+      dummyModel = await modelService.get(sharedModel.cloneModelId);
+    }
 
     const isFcstdExists = await uploadService.checkFileExists(
       context.app.get('awsClientModelBucket'),
