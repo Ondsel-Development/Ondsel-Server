@@ -476,9 +476,7 @@ export default {
       this.isModelLoaded = true;
       this.viewer = viewer;
       setTimeout(() => this.uploadThumbnail(), 500);
-      this.$refs.objectListView.$data.model3d = this.viewer.model;
-      this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
-      this.$refs.objectListView.$data.linkedObjects = this.viewer.importer.activeImporter?.document?.LinkedFiles() || {};
+      this.$refs.objectListView.$data.viewer = this.viewer;
     },
     objectClicked(object3d) {
       this.$refs.objectListView.selectListItem(object3d);

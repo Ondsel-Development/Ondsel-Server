@@ -1,5 +1,6 @@
 <template>
   <v-treeview
+    v-if="model3d"
     :items="treeViewItems"
     v-model="active"
     item-props
@@ -13,7 +14,7 @@
     style="position: absolute; top: 70px; background: transparent;"
   >
     <template v-slot:prepend="{ item, open }">
-      <v-checkbox density="compact" hide-details />
+      <v-checkbox v-model="selectedObjects[item.uuid]" density="compact" hide-details @click.stop="objectSelected(item)"/>
       <v-btn
         :icon="item.visibility? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
         variant="text"
@@ -30,45 +31,6 @@
       />
     </template>
   </v-treeview>
-
-  <!--<v-list
-    v-model:opened="open"
-    v-model:selected="active"
-    width="250"
-    height="90%"
-    select-strategy="independent"
-    style="position: absolute; top: 70px; background: transparent;"
-  >
-    <v-list-group value="Objects">
-      <template v-slot:activator="{ props }">
-        <v-list-item
-            v-bind="props"
-            title="List of objects"
-        ></v-list-item>
-      </template>
-      <v-list-item
-        v-for="object3d of objects3d"
-        :title="object3d.name || 'Default'"
-        :value="object3d"
-        @click.stop="objectSelected(object3d)"
-      >
-        <template #append>
-          <v-btn
-              v-if="linkedObjects.hasOwnProperty(object3d.realName)"
-              icon="mdi-open-in-new"
-              variant="text"
-              @click.stop="openAssemblyObjectInfoDialog(object3d.realName)"
-          />
-          <v-btn
-            :icon="object3d.object3d.visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
-            variant="text"
-            flat
-            @click.stop="object3d.object3d.visible = !object3d.object3d.visible"
-          />
-        </template>
-      </v-list-item>
-    </v-list-group>
-  </v-list>-->
   <AssemblyObjectInfoDialog ref="assemblyObjectInfoDialog" />
 </template>
 
@@ -86,13 +48,14 @@ export default {
     }
   },
   data: () => ({
-    model3d: null,
-    objects3d: [],
-    linkedObjects: {},
+    viewer: null,
     open: ['Objects'],
     active: [],
   }),
   computed: {
+    model3d: vm => vm.viewer ? vm.viewer.model : null,
+    objects3d: vm => vm.viewer ? vm.viewer.model.objects3d : null,
+    linkedObjects: vm => vm.viewer ? vm.viewer.importer.activeImporter?.document?.LinkedFiles() || {} : {},
     treeViewItems() {
       function convertToTitleObject(modelObject) {
         let result = {
@@ -111,13 +74,37 @@ export default {
       }
       return this.model3d ? this.model3d.GetRootObjects().map(root => convertToTitleObject(root)) : [];
     },
+    selectedObjects() {
+      const data = {};
+      if (this.model3d) {
+        this.model3d.GetObjects().forEach(o => {
+          data[o.uuid] = this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid);
+        })
+      }
+      return data;
+    },
     activated() {
       return this.model3d ? this.model3d.GetRootObjects().map(m => m.uuid) : [];
     }
   },
   methods: {
-    objectSelected(object3d) {
+    objectSelected(item) {
+      // TODO: Use previous implementation but we can refactor the whole selection workflow.
+      const object3d = this.model3d.findObjectByUuid(item.uuid);
       this.$emit('selectGivenObject', object3d);
+      object3d.GetAllChildren().forEach(o => {
+        if (this.selectedObjects[item.uuid]) {
+          // If child object is already selected, then don't need to send signal.
+          if (!this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid)) {
+            this.$emit('selectGivenObject', o)
+          }
+        } else {
+          // If child object is already un-selected, then don't need to send signal.
+          if (this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid)) {
+            this.$emit('selectGivenObject', o)
+          }
+        }
+      });
     },
     selectListItem(object3d) {
       const index = this.active.indexOf(object3d);

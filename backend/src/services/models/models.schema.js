@@ -58,7 +58,7 @@ export const modelSchema = Type.Object(
     latestLogErrorIdForStlExportCommand: logErrorIdType,
     latestLogErrorIdForObjExportCommand: logErrorIdType,
     // viewer file key
-    generatedFileForViewer: Type.Optional(Type.String()),
+    generatedFileExtensionForViewer: Type.Optional(Type.String()),
   },
   { $id: 'Model', additionalProperties: false }
 )
@@ -73,8 +73,8 @@ export const modelResolver = resolve({
   objUrl: virtual(async(message, context) => {
     const { app } = context;
     if (message.isObjGenerated) {
-      if (message.generatedFileForViewer) {
-        let r = await app.service('upload').get(message.generatedFileForViewer);
+      if (message.generatedFileExtensionForViewer) {
+        let r = await app.service('upload').get(`${message._id.toString()}_generated.${message.generatedFileExtensionForViewer}`);
         return r.url || '';
       }
 
@@ -149,6 +149,7 @@ export const modelDataSchema = Type.Pick(modelSchema, [
   'isSharedModelAnonymousType',
   'fileUpdatedAt',
   'fileId',
+  'generatedFileExtensionForViewer',
 ], {
   $id: 'ModelData'
 })

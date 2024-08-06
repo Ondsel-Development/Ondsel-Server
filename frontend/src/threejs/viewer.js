@@ -157,7 +157,7 @@ export class Viewer {
 
   fitCameraToObjects() {
     if (this.selectedObjs.length > 0) {
-      fitCameraToSelection(this.camera, this.controls, this.selectedObjs.map(o => o.object3d));
+      fitCameraToSelection(this.camera, this.controls, this.selectedObjs.filter(o => o.IsShapeType()).map(o => o.object3d));
     } else {
       fitCameraToSelection(this.camera, this.controls, this.obj);
     }
@@ -177,13 +177,18 @@ export class Viewer {
   }
 
   selectGivenObject(modelObject3d, triggerObjectClickEvent=false) {
-    const meshObj = getObject3dFromScene(this.scene, modelObject3d);
     if (!this.selectedObjs.includes(modelObject3d)) {
-      meshObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
+      if (modelObject3d.IsShapeType()) {
+        const meshObj = getObject3dFromScene(this.scene, modelObject3d);
+        meshObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
+      }
       this.selectedObjs.push(modelObject3d);
     } else {
       const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
-      meshObj.material.color.set(color);
+      if (modelObject3d.IsShapeType()) {
+        const meshObj = getObject3dFromScene(this.scene, modelObject3d);
+        meshObj.material.color.set(color);
+      }
       const index = this.selectedObjs.indexOf(modelObject3d);
       if (index > -1) {
         this.selectedObjs.splice(index, 1);

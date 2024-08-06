@@ -415,7 +415,7 @@ export default {
       this.isModelLoaded = true;
       this.viewer = viewer;
       if (this.$refs.objectListView) {
-        this.$refs.objectListView.$data.objects3d = this.viewer.model.objects;
+        this.$refs.objectListView.$data.viewer= this.viewer;
       }
       setTimeout(() => this.uploadThumbnail(), 500);
     },

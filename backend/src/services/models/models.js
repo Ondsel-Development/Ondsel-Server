@@ -227,7 +227,7 @@ const startObjGeneration = async (context) => {
     const uploadService = context.app.service('upload');
     const generatedFileForViewer = `${modelId.toString()}_generated.STEP`;
     await uploadService.copy(fileName, generatedFileForViewer);
-    context.data.generatedFileForViewer = generatedFileForViewer;
+    context.data.generatedFileExtensionForViewer = 'STEP';
     context.data.shouldStartObjGeneration = false;
     context.data.isObjGenerationInProgress = false;
     context.data.isObjGenerated = true;
@@ -427,6 +427,7 @@ const createSharedModelObject = async (context) => {
     attributes: context.result.attributes || {},
     isSharedModel: true,
     isSharedModelAnonymousType: true,
+    ...(context.result.generatedFileExtensionForViewer && { generatedFileExtensionForViewer: context.result.generatedFileExtensionForViewer})
   }, {
     authentication: context.params.authentication,
   });
@@ -475,20 +476,25 @@ const feedSystemGeneratedSharedModel = async (context) => {
     const systemGeneratedSharedModel = result.data[0];
     const patchData = {};
     if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
-      const isFcstdExists = await uploadService.checkFileExists(
-        context.app.get('awsClientModelBucket'),
-        `${context.id.toString()}_generated.FCSTD`
-      )
       let extension = 'OBJ';
-      if (isFcstdExists) {
-        extension = 'FCSTD';
+      if (context.result.generatedFileExtensionForViewer) {
+        extension = context.result.generatedFileExtensionForViewer;
+        patchData['generatedFileExtensionForViewer'] = context.result.generatedFileExtensionForViewer;
       } else {
-        const isBrepExists = await uploadService.checkFileExists(
+        const isFcstdExists = await uploadService.checkFileExists(
           context.app.get('awsClientModelBucket'),
-          `${context.id.toString()}_generated.BREP`
+          `${context.id.toString()}_generated.FCSTD`
         )
-        if (isBrepExists) {
-          extension = 'BREP';
+        if (isFcstdExists) {
+          extension = 'FCSTD';
+        } else {
+          const isBrepExists = await uploadService.checkFileExists(
+            context.app.get('awsClientModelBucket'),
+            `${context.id.toString()}_generated.BREP`
+          )
+          if (isBrepExists) {
+            extension = 'BREP';
+          }
         }
       }
       uploadService.copy(`${context.id.toString()}_generated.${extension}`, `${systemGeneratedSharedModel.model._id.toString()}_generated.${extension}`);
