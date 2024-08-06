@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import occtimportjs from 'occt-import-js';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
 import { Model } from '@/threejs/libs/model/model';
 import { ModelObject3D } from '@/threejs/libs/model/object';
@@ -38,10 +39,9 @@ export class ImporterStep {
 
   ImportContent (fileContent, onFinish) {
 
-    this.worker = new Worker('/occt-import-js/dist/occt-import-js-worker.js');
-
-    this.worker.addEventListener ('message', (ev) => {
-      for (let resultMesh of ev.data.meshes) {
+    occtimportjs().then (occt => {
+      const data = occt.ReadStepFile(fileContent, null);
+      for (let resultMesh of data.meshes) {
 
         let object3d = new ModelObject3D ();
         if (resultMesh.name) {
@@ -72,7 +72,7 @@ export class ImporterStep {
 
       // Create Tree Structure
 
-      for (let root of ev.data.root.children) {
+      for (let root of data.root.children) {
         let rootObj = this.model.GetObjectByName(root.name);
         if (!rootObj) {
           rootObj = new ModelObject3D();
@@ -106,17 +106,8 @@ export class ImporterStep {
           }
         }
       }
-
       onFinish(this.model);
     });
 
-    this.worker.addEventListener ('error', (ev) => {
-      console.log(ev);
-    });
-
-    this.worker.postMessage ({
-      format : 'step',
-      buffer : fileContent
-    });
   }
 }
