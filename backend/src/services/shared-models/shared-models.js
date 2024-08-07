@@ -197,7 +197,7 @@ export const sharedModels = (app) => {
             'pin',
           )
         ),
-        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants', 'protection'),
+        preventChanges(false, 'thumbnailUrl', 'messages', 'messagesParticipants'),
         handleDirectSharedToUsers,
         iff(
           isProvider('external'),
