@@ -120,7 +120,7 @@ export default {
   },
   computed: {
     ...mapState('auth', ['accessToken', 'user']),
-    valid3dModelExtensions: () => ['fcstd', 'obj'],
+    valid3dModelExtensions: () => ['fcstd', 'obj', 'step', 'stp'],
     dropzoneOptions() {
       const h = import.meta.env.VITE_APP_API_URL;
       const vm = this;
