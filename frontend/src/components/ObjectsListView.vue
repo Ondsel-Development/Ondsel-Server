@@ -2,7 +2,6 @@
   <v-treeview
     v-if="model3d"
     :items="treeViewItems"
-    v-model="active"
     item-props
     slim
     selectable
@@ -51,6 +50,7 @@ export default {
     viewer: null,
     open: ['Objects'],
     active: [],
+    selectedObjsUuid: [],
   }),
   computed: {
     model3d: vm => vm.viewer ? vm.viewer.model : null,
@@ -60,7 +60,7 @@ export default {
       function convertToTitleObject(modelObject) {
         let result = {
           id: modelObject.uuid,
-          title: modelObject.name,
+          title: modelObject.GetLabel(),
           uuid: modelObject.uuid,
           visibility: modelObject.GetVisibility(),
           realName: modelObject.GetRealName(),
@@ -78,7 +78,7 @@ export default {
       const data = {};
       if (this.model3d) {
         this.model3d.GetObjects().forEach(o => {
-          data[o.uuid] = this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid);
+          data[o.uuid] = this.selectedObjsUuid.some(uuid => uuid === o.uuid);
         })
       }
       return data;
@@ -89,29 +89,29 @@ export default {
   },
   methods: {
     objectSelected(item) {
-      // TODO: Use previous implementation but we can refactor the whole selection workflow.
       const object3d = this.model3d.findObjectByUuid(item.uuid);
-      this.$emit('selectGivenObject', object3d);
-      object3d.GetAllChildren().forEach(o => {
-        if (this.selectedObjects[item.uuid]) {
-          // If child object is already selected, then don't need to send signal.
-          if (!this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid)) {
-            this.$emit('selectGivenObject', o)
-          }
-        } else {
-          // If child object is already un-selected, then don't need to send signal.
-          if (this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === o.uuid)) {
-            this.$emit('selectGivenObject', o)
+      const isObjSelected = this.selectedObjects[item.uuid];
+
+      for (let obj of [object3d, ...object3d.GetAllChildren()]) {
+        if (isObjSelected === this.selectedObjects[obj.uuid]) {
+          this.viewer.selectGivenObject(obj);
+          if (this.viewer.selectedObjs.some(selectedObj => selectedObj.uuid === obj.uuid)) {
+            this.selectedObjsUuid.push(obj.uuid);
+          } else {
+            const index = this.selectedObjsUuid.indexOf(obj.uuid);
+            if (index > -1) {
+              this.selectedObjsUuid.splice(index, 1);
+            }
           }
         }
-      });
+      }
     },
     selectListItem(object3d) {
-      const index = this.active.indexOf(object3d);
+      const index = this.selectedObjsUuid.indexOf(object3d.uuid);
       if (index > -1) {
-        this.active.splice(index, 1);
+        this.selectedObjsUuid.splice(index, 1);
       } else {
-        this.active.push(object3d);
+        this.selectedObjsUuid.push(object3d.uuid);
       }
     },
     openAssemblyObjectInfoDialog(objectName) {

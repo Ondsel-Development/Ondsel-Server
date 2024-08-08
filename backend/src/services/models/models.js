@@ -226,12 +226,34 @@ const startObjGeneration = async (context) => {
   if (fileName.toUpperCase().split('.').pop() === 'STP' || fileName.toUpperCase().split('.').pop() === 'STEP') {
     const uploadService = context.app.service('upload');
     const generatedFileForViewer = `${modelId.toString()}_generated.STEP`;
-    await uploadService.copy(fileName, generatedFileForViewer);
+    const isExists = await uploadService.checkFileExists(
+      context.app.get('awsClientModelBucket'),
+      generatedFileForViewer
+    )
+    if (!isExists) {
+      await uploadService.copy(fileName, generatedFileForViewer);
+    }
     context.data.generatedFileExtensionForViewer = 'STEP';
     context.data.shouldStartObjGeneration = false;
     context.data.isObjGenerationInProgress = false;
     context.data.isObjGenerated = true;
     context.data.latestLogErrorIdForObjGenerationCommand = null;
+    if (context.result) {
+      // Update status in DB too, when shouldStartObjGeneration is true in POST endpoint
+      await context.service.patch(
+        context.result._id.toString(),
+        _.pick(
+          context.data,
+          [
+            'generatedFileExtensionForViewer',
+            'shouldStartObjGeneration',
+            'isObjGenerationInProgress',
+            'isObjGenerated',
+            'latestLogErrorIdForObjGenerationCommand',
+          ]
+        )
+      );
+    }
     return context
   }
 
