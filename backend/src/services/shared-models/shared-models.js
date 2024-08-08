@@ -291,25 +291,30 @@ const createClone = async (context) => {
       'isSharedModel': true,
       'isSharedModelAnonymousType': true,
       'isThumbnailGenerated': isThumbnailGenerated,
+      ...(model.generatedFileExtensionForViewer && {generatedFileExtensionForViewer: model.generatedFileExtensionForViewer}),
     }, {
       authentication: context.params.authentication,
     });
 
     if (isObjGenerated) {
-      const isFcstdExists = await uploadService.checkFileExists(
-        context.app.get('awsClientModelBucket'),
-        `${model._id.toString()}_generated.FCSTD`
-      )
       let extension = 'OBJ';
-      if (isFcstdExists) {
-        extension = 'FCSTD';
+      if (model.generatedFileExtensionForViewer) {
+        extension = model.generatedFileExtensionForViewer;
       } else {
-        const isBrepExists = await uploadService.checkFileExists(
+        const isFcstdExists = await uploadService.checkFileExists(
           context.app.get('awsClientModelBucket'),
-          `${model._id.toString()}_generated.BREP`
+          `${model._id.toString()}_generated.FCSTD`
         )
-        if (isBrepExists) {
-          extension = 'BREP';
+        if (isFcstdExists) {
+          extension = 'FCSTD';
+        } else {
+          const isBrepExists = await uploadService.checkFileExists(
+            context.app.get('awsClientModelBucket'),
+            `${model._id.toString()}_generated.BREP`
+          )
+          if (isBrepExists) {
+            extension = 'BREP';
+          }
         }
       }
       await uploadService.copy(
@@ -335,7 +340,7 @@ const patchModel = async (context) => {
   const sharedModel = await context.service.get(context.id, { authentication: context.params.authentication });
   const modelService = app.service('models');
 
-  const lookUpKeys = ['isObjGenerated', 'isThumbnailGenerated', 'attributes', '_id'];
+  const lookUpKeys = ['isObjGenerated', 'isThumbnailGenerated', 'attributes', '_id', 'generatedFileExtensionForViewer'];
   if (
     (
       sharedModel.dummyModelId.equals(data.model._id) ||
@@ -446,27 +451,29 @@ const createUserInstance = async (context) => {
       dummyModel = await modelService.get(sharedModel.cloneModelId);
     }
 
-    const isFcstdExists = await uploadService.checkFileExists(
+    let extension = dummyModel.generatedFileExtensionForViewer || 'FCSTD';
+    const isGeneratedFileExists = await uploadService.checkFileExists(
       context.app.get('awsClientModelBucket'),
-      `${dummyModel._id.toString()}_generated.FCSTD`
+      `${dummyModel._id.toString()}_generated.${extension}`
     );
     const newModel = await modelService.create({
       'uniqueFileName': dummyModel.uniqueFileName,
       'custFileName': dummyModel.custFileName || dummyModel.file.custFileName,
-      'shouldStartObjGeneration': !isFcstdExists,
+      'shouldStartObjGeneration': !isGeneratedFileExists,
       'isObjGenerationInProgress': false,
-      'isObjGenerated': isFcstdExists,
+      'isObjGenerated': isGeneratedFileExists,
       'errorMsg': dummyModel.errorMsg,
       'attributes': dummyModel.attributes,
       'isSharedModel': true,
       'sharedModelId': context.id.toString(),
       'isSharedModelAnonymousType': false,
+      ...(dummyModel.generatedFileExtensionForViewer && {generatedFileExtensionForViewer: dummyModel.generatedFileExtensionForViewer}),
     }, {
       authentication: context.params.authentication,
     });
 
-    if (isFcstdExists) {
-      await uploadService.copy(`${dummyModel._id.toString()}_generated.FCSTD`, `${newModel._id.toString()}_generated.FCSTD`);
+    if (isGeneratedFileExists) {
+      await uploadService.copy(`${dummyModel._id.toString()}_generated.${extension}`, `${newModel._id.toString()}_generated.${extension}`);
     }
 
   } else if (!result.data[0].objUrl && !result.data[0].error) {
