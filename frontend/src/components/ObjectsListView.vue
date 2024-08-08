@@ -60,7 +60,7 @@ export default {
       function convertToTitleObject(modelObject) {
         let result = {
           id: modelObject.uuid,
-          title: modelObject.name,
+          title: modelObject.GetLabel(),
           uuid: modelObject.uuid,
           visibility: modelObject.GetVisibility(),
           realName: modelObject.GetRealName(),

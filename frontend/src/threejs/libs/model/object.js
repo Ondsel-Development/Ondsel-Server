@@ -41,6 +41,13 @@ export class ModelObject3D
         this.realName = name;
     }
 
+    GetLabel() {
+      if (this.name) {
+        return this.name;
+      }
+      return `Compound_${this.uuid.substring(0, 8)}`;
+     }
+
     GetObject3d ()
     {
         return this.object3d;
