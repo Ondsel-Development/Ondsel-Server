@@ -50,7 +50,7 @@
           on {{ dateFormat(item.createdAt) }}
         </v-sheet>
         <v-btn
-          v-if="canUserWrite && isFileModel(file)"
+          v-if="isFileModel(file)"
           class="my-2"
           :append-icon="displayLinks[item._id] ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           :prepend-icon="arrayCountIcon(item.links)"
@@ -68,7 +68,7 @@
 <!--        </v-sheet>-->
       </v-sheet>
       <v-sheet
-        v-if="canUserWrite && displayLinks[item._id]"
+        v-if="displayLinks[item._id]"
         class="d-flex flex-column flex-wrap border-lg ml-16 pl-2"
       >
         <v-sheet><span class="text-h6">ShareLinks</span></v-sheet>
@@ -90,38 +90,39 @@
             <v-sheet
               class="d-flex flex-row flex-wrap"
             >
-              <v-sheet width="4em" class="my-1 mt-3">
-                {{link.isActive ? 'Enabled' : 'Disabled'}}
-              </v-sheet>
               <v-sheet
-                width="3em"
-                class="d-flex flex-column"
+                width="6em"
+                class="d-flex flex-row"
               >
-                <v-btn
-                  variant="plain"
-                >
+                <v-container class="ml-n2 mr-n3">
+                  <v-icon>
+                    {{link.isActive ? 'mdi-checkbox-marked-circle-outline' : 'mdi-checkbox-blank-circle-outline'}}
+                  </v-icon>
+                  <v-tooltip activator="parent">
+                    {{link.isActive ? 'Enabled' : 'Disabled'}}
+                  </v-tooltip>
+                </v-container>
+                <v-container class="mx-n3">
                   <v-icon>
                     {{link.versionFollowing === 'Locked' ? 'mdi-clock-end' : 'mdi-elevation-rise'}}
                   </v-icon>
                   <v-tooltip activator="parent">
                     {{link.versionFollowing === 'Locked' ? 'Locked: restricted to this specific version of the file' : 'Active: follows the file\'s currently Active version'}}
                   </v-tooltip>
-                </v-btn>
-                <v-btn
-                  variant="plain"
-                >
+                </v-container>
+                <v-container class="ml-n3">
                   <v-icon>
                     {{protectionDetail(link.protection).icon}}
                   </v-icon>
                   <v-tooltip activator="parent">
                     {{protectionDetail(link.protection).title}}
                   </v-tooltip>
-                </v-btn>
+                </v-container>
               </v-sheet>
-              <v-sheet :width="$vuetify.display.mobile ? '16em' : '28em'" class="text-wrap my-3" style="word-break: break-word">
+              <v-sheet :width="$vuetify.display.mobile ? '16em' : '28em'" class="text-wrap my-3 ml-4" style="word-break: break-word">
                 <b>{{link.title || 'no public description'}}</b>
                 <br>
-                private: <i>{{link.description || 'no note'}}</i>
+                <span v-if="!publicView">private: <i>{{link.description || 'no note'}}</i></span>
               </v-sheet>
               <v-sheet width="3em" class="mt-3 mr-2">
                 <v-btn
@@ -149,7 +150,7 @@
                   </v-tooltip>
                 </v-btn>
               </v-sheet>
-              <v-sheet width="3em" class="mr-2">
+              <v-sheet v-if="canUserWrite" width="3em" class="mr-2">
                 <v-btn
                   color="secondary"
                   icon="mdi-cog"
@@ -157,7 +158,7 @@
                   @click="startEditLinkDialog(link, item)"
                 ></v-btn>
               </v-sheet>
-              <v-sheet width="3em" class="mr-2">
+              <v-sheet v-if="canUserWrite" width="3em" class="mr-2">
                 <v-btn
                   v-if="link.protection === 'Direct'"
                   class="ma-1"
@@ -169,7 +170,7 @@
             </v-sheet>
           </v-sheet>
           <v-sheet
-            v-if="file.currentVersionId === item._id"
+            v-if="file.currentVersionId === item._id && canUserWrite"
             class="border-sm pa-1"
           >
             <v-btn
