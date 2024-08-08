@@ -168,6 +168,10 @@ const expandSearchUsingAlgorithms = async context => {
         }
       }
     }
+    // once again, use targetFilter (if given) to reduce list to a single collection/target
+    if (targetFilter) {
+      allFound = allFound.filter((entry) => entry.curation.collection === targetFilter);
+    }
   }
 
   // sort first, so that the best rise to the top; this includes finding the best duplicate
