@@ -17,8 +17,9 @@ function handleDownloadSharedModelFile(app) {
           // Stream the file directly to the client
           const response = await axios.get(url, { responseType: 'stream' });
           response.data.pipe(res);
+        } else {
+          res.status(500).json({ error: 'Not allowed to download a file' });
         }
-        res.status(500).json({ error: 'Not allowed to download a file' });
       } catch (e) {
         logger.error(e);
         next(e);
