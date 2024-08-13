@@ -1,3 +1,5 @@
+import { tripe } from './tripe/tripe.js'
+
 import { keywords } from './keywords/keywords.js'
 
 import { orgInvites } from './org-invites/org-invites.js'
@@ -40,8 +42,9 @@ import { notifications } from './notifications/notifications.js'
 
 import { userEngagements } from './user-engagements/user-engagements.js'
 
-
 export const services = (app) => {
+  app.configure(tripe)
+
   app.configure(orgSecondaryReferences)
 
   app.configure(preferences)
