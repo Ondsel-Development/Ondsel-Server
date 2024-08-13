@@ -41,6 +41,7 @@ import { addProtectionFieldToSharedModelCommand } from "./addProtectionFieldToSh
 import { addFollowSupportToSharedModelsCommand } from "./add-follow-support-to-shared-models.command.js";
 import {updateSharedModelsWithTitleCommand} from "./update-sharedmodels-with-title.command.js";
 import {updateDirectoriesWithTitleCommand} from "./update-directories-with-titles.command.js";
+import {handleStepFileAsModelCommand} from "./handle-step-file-as-model.js";
 
 
 async function runMigration() {
@@ -169,6 +170,9 @@ async function runMigration() {
       break;
     case 'updateDirectoriesWithTitles':
       await updateDirectoriesWithTitleCommand(app);
+      break;
+    case 'handleStepFileAsModel':
+      await handleStepFileAsModelCommand(app);
       break;
     default:
       console.error('Please specify the migration command.')
