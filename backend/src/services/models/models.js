@@ -221,6 +221,42 @@ const startObjGeneration = async (context) => {
   } else {
     throw new BadRequest('Not able to find filename')
   }
+
+  // When input file is STEP, then don't need runner, viewer can render STEP file directly.
+  if (fileName.toUpperCase().split('.').pop() === 'STP' || fileName.toUpperCase().split('.').pop() === 'STEP') {
+    const uploadService = context.app.service('upload');
+    const generatedFileForViewer = `${modelId.toString()}_generated.STEP`;
+    const isExists = await uploadService.checkFileExists(
+      context.app.get('awsClientModelBucket'),
+      generatedFileForViewer
+    )
+    if (!isExists) {
+      await uploadService.copy(fileName, generatedFileForViewer);
+    }
+    context.data.generatedFileExtensionForViewer = 'STEP';
+    context.data.shouldStartObjGeneration = false;
+    context.data.isObjGenerationInProgress = false;
+    context.data.isObjGenerated = true;
+    context.data.latestLogErrorIdForObjGenerationCommand = null;
+    if (context.result) {
+      // Update status in DB too, when shouldStartObjGeneration is true in POST endpoint
+      await context.service.patch(
+        context.result._id.toString(),
+        _.pick(
+          context.data,
+          [
+            'generatedFileExtensionForViewer',
+            'shouldStartObjGeneration',
+            'isObjGenerationInProgress',
+            'isObjGenerated',
+            'latestLogErrorIdForObjGenerationCommand',
+          ]
+        )
+      );
+    }
+    return context
+  }
+
   axios({
     method: 'post',
     url: context.app.get('fcWorkerUrl'),
@@ -413,6 +449,7 @@ const createSharedModelObject = async (context) => {
     attributes: context.result.attributes || {},
     isSharedModel: true,
     isSharedModelAnonymousType: true,
+    ...(context.result.generatedFileExtensionForViewer && { generatedFileExtensionForViewer: context.result.generatedFileExtensionForViewer})
   }, {
     authentication: context.params.authentication,
   });
@@ -461,20 +498,25 @@ const feedSystemGeneratedSharedModel = async (context) => {
     const systemGeneratedSharedModel = result.data[0];
     const patchData = {};
     if (context.data.isObjGenerated && !systemGeneratedSharedModel.model.isObjGenerated) {
-      const isFcstdExists = await uploadService.checkFileExists(
-        context.app.get('awsClientModelBucket'),
-        `${context.id.toString()}_generated.FCSTD`
-      )
       let extension = 'OBJ';
-      if (isFcstdExists) {
-        extension = 'FCSTD';
+      if (context.result.generatedFileExtensionForViewer) {
+        extension = context.result.generatedFileExtensionForViewer;
+        patchData['generatedFileExtensionForViewer'] = context.result.generatedFileExtensionForViewer;
       } else {
-        const isBrepExists = await uploadService.checkFileExists(
+        const isFcstdExists = await uploadService.checkFileExists(
           context.app.get('awsClientModelBucket'),
-          `${context.id.toString()}_generated.BREP`
+          `${context.id.toString()}_generated.FCSTD`
         )
-        if (isBrepExists) {
-          extension = 'BREP';
+        if (isFcstdExists) {
+          extension = 'FCSTD';
+        } else {
+          const isBrepExists = await uploadService.checkFileExists(
+            context.app.get('awsClientModelBucket'),
+            `${context.id.toString()}_generated.BREP`
+          )
+          if (isBrepExists) {
+            extension = 'BREP';
+          }
         }
       }
       uploadService.copy(`${context.id.toString()}_generated.${extension}`, `${systemGeneratedSharedModel.model._id.toString()}_generated.${extension}`);

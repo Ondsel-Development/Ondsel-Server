@@ -11,18 +11,26 @@
             <v-sheet class="d-flex flex-column">
               <v-sheet name="buttons">
                 <a
-                  v-if="file.modelId"
+                  v-if="!publicView && file.modelId"
                   :href="fileModelUrl"
                   target="_blank"
-                  class="mr-2 mt-2"
                   style="text-decoration: none; color: inherit;"
                 >
                   <v-btn
+                    class="mr-2 mt-2"
                     color="secondary"
                     variant="elevated"
                     append-icon="mdi-open-in-new"
                   >Explore</v-btn>
                 </a>
+                <v-btn
+                  v-else
+                  class="mr-2 mt-2"
+                  color="secondary"
+                  variant="elevated"
+                  disabled
+                  append-icon="mdi-open-in-new"
+                >Explore</v-btn>
                 <v-btn
                   v-if="!publicView && workspace.curation?.representativeFile?._id !== file._id"
                   class="mr-2 mb-n1"
