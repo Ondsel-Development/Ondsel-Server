@@ -33,6 +33,7 @@ const eventNameMapping = {
   'directories.get': 'FETCH_DIRECTORIES',
   'directories.find': 'FETCH_DIRECTORIES',
   'directories.remove': 'REMOVE_DIRECTORIES',
+  'keywords.find': 'SEARCH',
 }
 
 const eventsToTrack = {
@@ -45,6 +46,7 @@ const eventsToTrack = {
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
+    keywords: ['find'],
   },
   rest: {
     authentication: ['create', 'remove'],
@@ -55,6 +57,7 @@ const eventsToTrack = {
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
+    keywords: ['find'],
   }
 }
 
