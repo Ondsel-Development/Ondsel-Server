@@ -42,6 +42,7 @@ export const modelSchema = Type.Object(
     isSharedModel: Type.Optional(Type.Boolean({default: false})),
     isThumbnailGenerated: Type.Optional(Type.Boolean({default: false})),
     thumbnailUrl: Type.String(),
+    thumbnailUrlUpdatedAt: Type.Number(),
     isExportFCStdGenerated: Type.Optional(Type.Boolean({default: false})),
     isExportSTEPGenerated: Type.Optional(Type.Boolean({default: false})),
     isExportSTLGenerated: Type.Optional(Type.Boolean({default: false})),
@@ -93,6 +94,12 @@ export const modelResolver = resolve({
     const { app } = context;
     if (message.isThumbnailGenerated) {
       const r = await app.service('upload').get(`public/${message._id.toString()}_thumbnail.PNG`);
+      if (message.thumbnailUrlUpdatedAt) {
+        // Adding the `updatedAt` query parameter is crucial because we are overriding the thumbnail without changing
+        // the URL, which causes the browser to cache the thumbnail. By including `updatedAt`, the thumbnail URL
+        // changes, ensuring that the browser loads the updated version.
+        return `${r.url}?updatedAt=${message.thumbnailUrlUpdatedAt}`;
+      }
       return r.url
     }
     return '';

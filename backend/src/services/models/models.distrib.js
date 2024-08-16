@@ -92,7 +92,7 @@ export const distributeModelThumbnails = async (context) => {
     return context;
   }
   if (context.result.isThumbnailGenerated === true) {
-    await applyThumbnailToFile(context.app, context.id, context.result.fileId);
+    await applyThumbnailToFile(context.app, context.result, context.result.fileId);
     await applyThumbnailsToActiveFollowingSharedModels(context.app, context.result);
   }
   return context;

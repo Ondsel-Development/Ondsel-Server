@@ -42,6 +42,13 @@
         location="start"
       >Export model</v-tooltip>
     </v-btn>
+    <v-btn icon flat :disabled="!user" @click="uploadThumbnail(true)">
+      <v-icon>mdi-camera</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Click new thumbnail</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView ref="objectListView" :model="model" @select-given-object="objectSelected" />
@@ -416,9 +423,9 @@ export default {
       this.model.shouldStartObjGeneration = true;
       this.model = await this.model.save();
     },
-    uploadThumbnail() {
+    uploadThumbnail(force=false) {
 
-      if (!this.isAuthenticated || this.model.isThumbnailGenerated) {
+      if (!force && (!this.isAuthenticated || this.model.isThumbnailGenerated)) {
         return
       }
 
