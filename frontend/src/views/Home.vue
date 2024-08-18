@@ -204,7 +204,7 @@
     <v-navigation-drawer
       v-model="isDrawerOpen"
       location="right"
-      width="48em"
+      width="1100"
       temporary
     >
       <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>
@@ -218,7 +218,6 @@ import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
 import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
-import { nextTick } from 'vue';
 
 import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
