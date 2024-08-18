@@ -176,7 +176,7 @@
   <AttributeViewer
     v-if="model"
     :is-active="isAttributeViewerActive"
-    :attributes="model.attributes"
+    :attributes="model.attributes || {}"
     :is-obj-generated="model.isObjGenerated"
     :is-model-loaded="isModelLoaded"
     :can-view-model-attributes="sharedModel.canViewModelAttributes"

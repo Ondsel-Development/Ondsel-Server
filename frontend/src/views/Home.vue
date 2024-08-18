@@ -185,7 +185,7 @@
     <AttributeViewer
       v-if="model && organization"
       :is-active="isAttributeViewerActive"
-      :attributes="model.attributes"
+      :attributes="model.attributes || {}"
       :is-obj-generated="model.isObjGenerated"
       :is-model-loaded="isModelLoaded"
       :can-have-write-access-to-workspace="canHaveWriteAccess"
