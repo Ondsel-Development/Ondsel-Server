@@ -91,7 +91,7 @@ export async function applyModelSummaryToFile(app, fileId, modelSummary) {
   );
 }
 
-export async function applyThumbnailToFile(app, modelId, fileId) {
+export async function applyThumbnailToFile(app, model, fileId) {
   const fileService = app.service('file');
   const fDb = await fileService.options.Model;
 
@@ -101,13 +101,14 @@ export async function applyThumbnailToFile(app, modelId, fileId) {
       const currentVersionId = currentFile.currentVersionId;
       // first attempt to duplicate the file
       const uploadService = app.service('upload');
-      const fromUrl = `public/${modelId.toString()}_thumbnail.PNG`;
-      const toUrl = `public/${modelId.toString()}_${currentVersionId.toString()}_versionthumbnail.PNG`;
+      const fromUrl = `public/${model._id.toString()}_thumbnail.PNG`;
+      const toUrl = `public/${model._id.toString()}_${currentVersionId.toString()}_versionthumbnail.PNG`;
       await uploadService.upsert(fromUrl, toUrl);
       const finalUrlObj = await uploadService.get(toUrl);
-      const finalUrl = finalUrlObj?.url;
+      let finalUrl = finalUrlObj?.url;
       // now save in the File document
       if (finalUrl) {
+        finalUrl += `?updatedAt=${model.thumbnailUrlUpdatedAt}`
         const result = await fDb.updateOne(
           { _id: fileId },
           {
