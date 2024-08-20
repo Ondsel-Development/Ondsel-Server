@@ -42,6 +42,13 @@
         location="start"
       >Export model</v-tooltip>
     </v-btn>
+    <v-btn icon flat :disabled="!user" @click="uploadThumbnail(true)">
+      <v-icon>mdi-camera</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Click new thumbnail</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView ref="objectListView" :model="model" @select-given-object="objectSelected" />
@@ -185,7 +192,7 @@
     <AttributeViewer
       v-if="model && organization"
       :is-active="isAttributeViewerActive"
-      :attributes="model.attributes"
+      :attributes="model.attributes || {}"
       :is-obj-generated="model.isObjGenerated"
       :is-model-loaded="isModelLoaded"
       :can-have-write-access-to-workspace="canHaveWriteAccess"
@@ -204,7 +211,7 @@
     <v-navigation-drawer
       v-model="isDrawerOpen"
       location="right"
-      width="48em"
+      width="1100"
       temporary
     >
       <MangeSharedModels v-if="drawerActiveWindow === 'sharedModel'" :model="model"/>
@@ -218,7 +225,6 @@ import Dropzone from "dropzone";
 import { v4 as uuidv4 } from 'uuid';
 import {mapGetters, mapState} from 'vuex';
 import { models } from '@feathersjs/vuex';
-import { nextTick } from 'vue';
 
 import ModelViewer from '@/components/ModelViewer';
 import AttributeViewer from '@/components/AttributeViewer';
@@ -416,9 +422,9 @@ export default {
       this.model.shouldStartObjGeneration = true;
       this.model = await this.model.save();
     },
-    uploadThumbnail() {
+    uploadThumbnail(force=false) {
 
-      if (!this.isAuthenticated || this.model.isThumbnailGenerated) {
+      if (!force && (!this.isAuthenticated || this.model.isThumbnailGenerated)) {
         return
       }
 

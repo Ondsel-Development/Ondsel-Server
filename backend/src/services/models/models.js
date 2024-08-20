@@ -147,6 +147,10 @@ export const model = (app) => {
           startObjGeneration,
         ),
         iff(
+          context => context.data.isThumbnailGenerated,
+          addThumbnailUrlUpdateAt,
+        ),
+        iff(
           context => (
             context.data.shouldStartFCStdExport ||
             context.data.shouldStartSTEPExport ||
@@ -558,4 +562,9 @@ const verifyToCreateSystemGeneratedShareLink = context => {
   context.params.skipSystemGeneratedSharedModel = !createShareLink
   context.data = _.omit(data, 'createSystemGeneratedShareLink');
   return context;
+}
+
+
+const addThumbnailUrlUpdateAt = context => {
+  context.data.thumbnailUrlUpdatedAt = Date.now();
 }
