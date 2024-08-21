@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "description": "Backend for Ondsel-Server",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "homepage": "",
   "private": true,
   "keywords": [

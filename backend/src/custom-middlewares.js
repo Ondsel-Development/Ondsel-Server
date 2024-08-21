@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { logger } from './logger.js';
 import _ from 'lodash';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 
 function handleDownloadSharedModelFile(app) {
@@ -58,7 +60,27 @@ function handleDownloadFile(app) {
 }
 
 
+function handleStatusEndpoint(app) {
+  app.use(
+    '/status',
+    async (req, res, next) => {
+      const packageJsonPath = path.resolve('package.json');
+      const data = await readFile(packageJsonPath, 'utf8');
+      const packageJson = JSON.parse(data);
+      const [majorVersion, minorVersion, patchVersion] = packageJson.version.split('.');
+      res.json({
+        version: {
+          majorVersion: majorVersion,
+          minorVersion: minorVersion,
+          patchVersion: patchVersion,
+        }
+      })
+    }
+  )
+}
+
 export function registerCustomMiddlewares(app) {
   handleDownloadSharedModelFile(app);
   handleDownloadFile(app);
+  handleStatusEndpoint(app);
 }
