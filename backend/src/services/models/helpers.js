@@ -87,3 +87,16 @@ export const canUserAccessModelPatchMethod = async context => {
   }
   throw new BadRequest({ type: 'PermissionError', msg: 'You dont have write access to this model'});
 }
+
+
+export const generateStlDownloadLink = async context => {
+  // Generate STL file download link for Slant3D
+  const downloadService = context.app.service('download');
+  const fileKey = `${context.id}_export.STL`
+  const resp = await downloadService.find({ query: { fileKey } });
+  // Generate link only if not exists
+  if (resp.total === 0) {
+    await downloadService.create({ fileKey, shouldGeneratePin: true });
+  }
+  return context;
+}
