@@ -29,6 +29,8 @@ export const removeWorkspace = async context => {
     let desc = `(DELETED, former refName=${ws.refName}) ${ws.description}`;
     let deletedAt = Date.now();
     let deletedBy = context.params.user?._id || undefined; // if not set, then a migration script probably did the deletion
+    // delete the directory first as it does as workspace GET that would fail after marking workspace deleted
+    await directoryService.remove(ws.rootDirectory._id, {$removeRoot: true, ...context.params});
     newWsDoc = context.data = await workspaceService.patch(
       wsId,
       {
@@ -41,7 +43,6 @@ export const removeWorkspace = async context => {
         deletedBy: deletedBy,
       }
     )
-    await directoryService.remove(ws.rootDirectory._id, {$removeRoot: true, ...context.params});
   } else {
     throw new BadRequest('Invalid: workspace not ready for deletion', {
       errors: { reason: checkResult }
@@ -61,10 +62,10 @@ function verifyEmptyWorkspace(workspace, directory) {
     return `unable to get root directory ${dirId} of workspace`
   }
   if (directory.files.length > 0) {
-    return `${directory.files.length} files found; workspace must be empty`;
+    return `${directory.files.length} files found and workspace must be empty`;
   }
   if (directory.directories.length > 0) {
-    return `${directory.directories.length} directories found; workspace must be empty`;
+    return `${directory.directories.length} directories found and workspace must be empty`;
   }
   return true;
 }

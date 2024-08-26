@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import { iff, preventChanges, isProvider } from 'feathers-hooks-common';
+import {iff, preventChanges, isProvider, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -153,13 +153,15 @@ export const workspace = (app) => {
     before: {
       all: [
         iff(isProvider('external'), schemaHooks.validateQuery(workspaceQueryValidator)),
-        schemaHooks.resolveQuery(workspaceQueryResolver)
+        schemaHooks.resolveQuery(workspaceQueryResolver),
       ],
       find: [
+        softDelete(),
         isUserBelongsToWorkspace,
         limitPublicOnlyRequestsToOpenWorkspaces,
       ],
       get: [
+        softDelete(),
         isUserBelongsToWorkspace,
       ],
       create: [
@@ -168,6 +170,7 @@ export const workspace = (app) => {
         uniqueWorkspaceValidator,
       ],
       patch: [
+        softDelete(),
         copyWorkspaceBeforePatch,
         preventChanges(false, 'groupsOrUsers'),
         // preventChanges(isProvider('external'), 'deleted', 'deletedAt', 'deletedBy'),
