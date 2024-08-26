@@ -11,6 +11,7 @@ export const downloadSchema = Type.Object(
     _id: ObjectIdSchema(),
     fileKey: Type.String(),  // File name store in S3
     pin: Type.Optional(Type.String()),
+    createdAt: Type.Number(),
     // Below fields user later to download Ondsel ES
     expireAt: Type.Optional(Type.Number()),
     user: Type.Optional(userSummarySchema),
@@ -27,7 +28,9 @@ export const downloadDataSchema = Type.Pick(downloadSchema, ['fileKey', 'pin', '
   $id: 'DownloadData'
 })
 export const downloadDataValidator = getValidator(downloadDataSchema, dataValidator)
-export const downloadDataResolver = resolve({})
+export const downloadDataResolver = resolve({
+  createdAt: async () => Date.now(),
+})
 
 // Schema for updating existing entries
 export const downloadPatchSchema = Type.Partial(downloadSchema, {
@@ -37,7 +40,7 @@ export const downloadPatchValidator = getValidator(downloadPatchSchema, dataVali
 export const downloadPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const downloadQueryProperties = Type.Pick(downloadSchema, ['_id', 'fileKey', 'pin'])
+export const downloadQueryProperties = Type.Pick(downloadSchema, ['_id', 'fileKey', 'pin', 'createdAt'])
 export const downloadQuerySchema = Type.Intersect(
   [
     querySyntax(downloadQueryProperties),
