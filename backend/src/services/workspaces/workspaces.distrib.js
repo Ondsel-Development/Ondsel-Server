@@ -14,7 +14,10 @@ import {upsertOrganizationSummaryToUser} from "../users/users.distrib.js";
 import {buildOrganizationSummary} from "../organizations/organizations.distrib.js";
 import {updateWorkspaceSummaryToMatchingDirectories} from "../directories/directories.distrib.js";
 import {updateWorkspaceSummaryToMatchingFiles} from "../file/file.distrib.js";
-import {updateWorkspaceSummaryToMatchingGroups} from "../groups/groups.distrib.js";
+import {
+  removeWorkspaceSummaryToMatchingGroups,
+  updateWorkspaceSummaryToMatchingGroups
+} from "../groups/groups.distrib.js";
 
 export function buildWorkspaceSummary(workspace) {
   return {
@@ -66,6 +69,20 @@ export const distributeWorkspaceSummaries = async (context) => {
         await updateWorkspaceSummaryToMatchingGroups(context, wsSummary);
       }
     }
+  } catch (error) {
+    console.log(error);
+  }
+  return context;
+}
+
+export const removeRelatedWorkspaceSummaries = async (context) => {
+  // this function is for distributing a REMOVE
+  try {
+    const wsId = context.id;
+    //
+    // update Groups
+    //
+    await removeWorkspaceSummaryToMatchingGroups(context, wsId);
   } catch (error) {
     console.log(error);
   }

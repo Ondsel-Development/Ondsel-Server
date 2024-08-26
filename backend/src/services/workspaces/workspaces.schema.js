@@ -41,6 +41,10 @@ export const workspaceSchema = Type.Object(
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
     curation: Type.Optional(Type.Any()), // a curationSchema but I'm getting a circular ref error if I use that directly
+
+    deleted: Type.Optional(Type.Boolean()),
+    deletedAt: Type.Optional(Type.Number()),
+    deletedBy: Type.Optional(ObjectIdSchema()), // userid of deleter
   },
   { $id: 'Workspace', additionalProperties: false }
 )

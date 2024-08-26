@@ -34,13 +34,18 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from '../../hooks/handle-public-info-query.js';
-import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
+import {
+  copyWorkspaceBeforePatch,
+  distributeWorkspaceSummaries,
+  removeRelatedWorkspaceSummaries
+} from "./workspaces.distrib.js";
 import {representWorkspaceWithFile} from "./commands/representWorkspaceWithFile.js";
 import {
   afterCreateHandleWorkspaceCuration,
   buildNewCurationForWorkspace
 } from "./workspaces.curation.js";
 import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {removeWorkspace} from "./commands/removeWorkspace.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -165,6 +170,7 @@ export const workspace = (app) => {
       patch: [
         copyWorkspaceBeforePatch,
         preventChanges(false, 'groupsOrUsers'),
+        // preventChanges(isProvider('external'), 'deleted', 'deletedAt', 'deletedBy'),
         iff(
           isProvider('external'),
           isUserOwnerOrAdminOfOrganization,
@@ -189,7 +195,7 @@ export const workspace = (app) => {
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
       ],
-      remove: []
+      remove: [removeWorkspace],
     },
     after: {
       all: [],
@@ -201,6 +207,7 @@ export const workspace = (app) => {
         addEveryoneGroupIfNeeded,
         afterCreateHandleWorkspaceCuration,
       ],
+      remove: [removeRelatedWorkspaceSummaries]
     },
     error: {
       all: []
