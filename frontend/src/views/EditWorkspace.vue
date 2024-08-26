@@ -213,6 +213,33 @@
                   </v-list-item-action>
                 </v-list-item>
 
+                <v-divider />
+                <v-list-item>
+                  <v-list-item-title>Deletion</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <i>The workspace must be free of all files and directories first.</i>
+                  </v-list-item-subtitle>
+                  <template #append>
+                    <v-list-item-action>
+                      <v-btn
+                        variant="elevated"
+                        color="error"
+                        size="small"
+                        @click.stop="openDeleteWorkspaceDialog()"
+                      >
+                        delete workspace
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <delete-generic-dialog
+                        ref="deleteWorkspaceDialog"
+                        :title="'Workspace '+ workspace.name"
+                        warning-message="Deleting this workspace is not reversible. If part of any groups, those groups will no longer know of the workspace."
+                        :error-message="deleteWorkspaceErrorMsg"
+                      ></delete-generic-dialog>
+                    </v-list-item-action>
+                  </template>
+                </v-list-item>
+
               </v-list>
             </v-card>
 
@@ -246,6 +273,7 @@ import EditTagsDialog from "@/components/EditTagsDialog.vue";
 import Main from '@/layouts/default/Main.vue';
 import _ from 'lodash';
 import {marked} from "marked";
+import DeleteGenericDialog from "@/components/DeleteGenericDialog.vue";
 
 const { Workspace } = models.api;
 
@@ -254,6 +282,7 @@ const { Organization } = models.api;
 export default {
   name: "EditWorkspace",
   components: {
+    DeleteGenericDialog,
     Main,
     EditTagsDialog,
     ReprViewer,
@@ -273,6 +302,7 @@ export default {
     isWorkspaceChangeLicenseDialogActive: false,
     isEditTagsDialogActive: false,
     tab: null,
+    deleteWorkspaceErrorMsg: '',
   }),
   async created() {
     this.slug = this.$route.params.slug;
@@ -371,6 +401,10 @@ export default {
       this.isEditTagsDialogActive = true;
       this.$refs.editTagsDialog.$data.newTags = this.workspace.curation?.tags || [];
       this.$refs.editTagsDialog.$data.dialog = true;
+    },
+    async openDeleteWorkspaceDialog() {
+      this.deleteWorkspaceErrorMsg = '';
+      this.$refs.deleteWorkspaceDialog.$data.showDialog = true;
     },
     async saveTags() {
       this.$refs.editTagsDialog.$data.isPatchPending = true;
