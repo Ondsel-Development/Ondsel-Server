@@ -44,7 +44,7 @@ import {
   afterCreateHandleWorkspaceCuration,
   buildNewCurationForWorkspace
 } from "./workspaces.curation.js";
-import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {beforePatchHandleGenericCuration, removeCurationFromSearch} from "../../curation.schema.js";
 import {removeWorkspace} from "./commands/removeWorkspace.js";
 
 export * from './workspaces.class.js'
@@ -210,7 +210,10 @@ export const workspace = (app) => {
         addEveryoneGroupIfNeeded,
         afterCreateHandleWorkspaceCuration,
       ],
-      remove: [removeRelatedWorkspaceSummaries]
+      remove: [
+        removeRelatedWorkspaceSummaries,
+        removeCurationFromSearch,
+      ]
     },
     error: {
       all: []
