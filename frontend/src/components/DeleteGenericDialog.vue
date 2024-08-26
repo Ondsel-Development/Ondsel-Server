@@ -10,9 +10,9 @@
       </template>
     <v-card-text class="pa-12">
       <p>{{warningMessage}}</p>
-      <div v-if="errorMessage">
-        <span class="red-text">{{ errorMessage }}</span>
-      </div>
+      <v-sheet v-if="errorMessage" class="mt-2" color="error">
+        <p>{{ errorMessage }}</p>
+      </v-sheet>
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn
@@ -49,7 +49,6 @@ export default {
   methods: {
     deleteObject() {
       this.$emit('delete');
-      this.showDialog = false;
     },
     cancelDelete() {
       this.showDialog = false;

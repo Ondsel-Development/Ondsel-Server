@@ -9,10 +9,13 @@ export const removeWorkspace = async context => {
   const workspaceService = context.app.service('workspaces');
   const directoryService = context.app.service('directories');
   const wsId = context.id;
-  const ws = await workspaceService.get(wsId);
+  const ws = await workspaceService.get(wsId, { authentication: context.params.authentication });
   //
   // verify
   //
+  if (context.params.user && !ws.haveWriteAccess) {
+    throw new BadRequest({type: 'PermissionError', msg: 'You do not have write access to delete the workspace'})
+  }
   let checkResult = true;
   if (ws.deleted === true) {
     checkResult = "cannot remove a deleted workspace"
@@ -44,9 +47,7 @@ export const removeWorkspace = async context => {
       }
     )
   } else {
-    throw new BadRequest('Invalid: workspace not ready for deletion', {
-      errors: { reason: checkResult }
-    })
+    throw new BadRequest(`Cannot delete: ${checkResult}`)
   }
   //
   // done; return results

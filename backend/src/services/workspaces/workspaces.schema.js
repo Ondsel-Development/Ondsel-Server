@@ -14,6 +14,7 @@ import {buildOrganizationSummary} from "../organizations/organizations.distrib.j
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
 import {curationSchema} from "../../curation.schema.js";
+import {ObjectId} from "mongodb";
 
 const groupsOrUsers = Type.Object(
   {
@@ -68,7 +69,13 @@ export const workspaceResolver = resolve({
       }
     }
     return false;
-  })
+  }),
+  isUserDefaultWorkspace: virtual(async (workspace, context) => {
+    if (workspace.organization.type !== OrganizationTypeMap.personal) {
+      return false;
+    }
+    return workspace.refName === 'default'
+  }),
 })
 
 export const workspaceExternalResolver = resolve({})

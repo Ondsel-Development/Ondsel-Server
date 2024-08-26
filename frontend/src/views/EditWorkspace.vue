@@ -217,7 +217,8 @@
                 <v-list-item>
                   <v-list-item-title>Deletion</v-list-item-title>
                   <v-list-item-subtitle>
-                    <i>The workspace must be free of all files and directories first.</i>
+                    <span v-if="workspace.isUserDefaultWorkspace"><i>A user's default workspace cannot be deleted.</i></span>
+                    <span v-else><i>The workspace must be free of all files and directories first.</i></span>
                   </v-list-item-subtitle>
                   <template #append>
                     <v-list-item-action>
@@ -226,6 +227,7 @@
                         color="error"
                         size="small"
                         @click.stop="openDeleteWorkspaceDialog()"
+                        :disabled="workspace.isUserDefaultWorkspace"
                       >
                         delete workspace
                       </v-btn>
@@ -235,6 +237,7 @@
                         :title="'Workspace '+ workspace.name"
                         warning-message="Deleting this workspace is not reversible. If part of any groups, those groups will no longer know of the workspace."
                         :error-message="deleteWorkspaceErrorMsg"
+                        @delete="deleteWorkspace"
                       ></delete-generic-dialog>
                     </v-list-item-action>
                   </template>
@@ -303,8 +306,12 @@ export default {
     isEditTagsDialogActive: false,
     tab: null,
     deleteWorkspaceErrorMsg: '',
+    goHomeNext: false, // this is used to prevent 404 after deleting workspace
   }),
   async created() {
+    if (this.goHomeNext) {
+     await this.goHome();
+    }
     this.slug = this.$route.params.slug;
     if (this.userRouteFlag) {
       const userDetail = await this.getUserByIdOrNamePublic(this.slug);
@@ -320,7 +327,7 @@ export default {
       this.$router.push({ name: 'PageNotFound' });
     }
     if (this.workspace.organizationId !== this.currentOrganization._id) {
-      if (this.workspace.organization.type !== 'Open') {
+      if (this.workspace.organization?.type !== 'Open') {
         this.$router.push({ name: 'PermissionError', params: {slug: this.organization?.refName, urlCode: `/org/${this.organization?.refName}/workspace/${this.workspaceRefName}/edit`}})
       }
     }
@@ -402,10 +409,6 @@ export default {
       this.$refs.editTagsDialog.$data.newTags = this.workspace.curation?.tags || [];
       this.$refs.editTagsDialog.$data.dialog = true;
     },
-    async openDeleteWorkspaceDialog() {
-      this.deleteWorkspaceErrorMsg = '';
-      this.$refs.deleteWorkspaceDialog.$data.showDialog = true;
-    },
     async saveTags() {
       this.$refs.editTagsDialog.$data.isPatchPending = true;
       const tagList = this.$refs.editTagsDialog.$data.newTags;
@@ -427,6 +430,26 @@ export default {
         console.log(msg);
       });
       this.$refs.editTagsDialog.$data.isPatchPending = false;
+    },
+    async openDeleteWorkspaceDialog() {
+      this.deleteWorkspaceErrorMsg = '';
+      this.$refs.deleteWorkspaceDialog.$data.showDialog = true;
+    },
+    async deleteWorkspace() {
+      this.deleteWorkspaceErrorMsg = 'pending...';
+      this.goHomeNext = true;
+      await Workspace.remove(
+        this.workspace._id
+      ).then(() => {
+        this.goHome();
+      }).catch((e) => {
+        this.goHomeNext = false;
+        this.deleteWorkspaceErrorMsg = 'ERROR: ' + e.toString()
+      }).finally(() => {
+        if (this.goHomeNext) {
+          this.goHome();
+        }
+      });
     }
   }
 }
