@@ -40,6 +40,7 @@ import { notifications } from './notifications/notifications.js'
 
 import { userEngagements } from './user-engagements/user-engagements.js'
 
+import { download } from './download/download.js'
 
 export const services = (app) => {
   app.configure(orgSecondaryReferences)
@@ -83,6 +84,8 @@ export const services = (app) => {
   app.configure(notifications)
 
   app.configure(userEngagements)
+
+  app.configure(download)
 
   // All services will be registered here
 }

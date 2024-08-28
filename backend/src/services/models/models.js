@@ -30,7 +30,12 @@ import { ModelService, getOptions } from './models.class.js'
 import { modelPath, modelMethods } from './models.shared.js'
 import {getConstraint} from "../users/users.subdocs.schema.js";
 import {copyModelBeforePatch, distributeModelSummaries, distributeModelThumbnails} from "./models.distrib.js";
-import { canUserAccessModelGetMethod, userBelongingModels, canUserAccessModelPatchMethod } from './helpers.js';
+import {
+  canUserAccessModelGetMethod,
+  userBelongingModels,
+  canUserAccessModelPatchMethod,
+  generateStlDownloadLink
+} from './helpers.js';
 import {
   ProtectionTypeMap,
   VersionFollowTypeMap as versionFollowTypeMap
@@ -193,6 +198,10 @@ export const model = (app) => {
         )
       ],
       patch: [
+        iff(
+          context => context.data.isExportSTLGenerated && context.result.isSharedModel,
+          generateStlDownloadLink
+        ),
         iff(
           context => context.data.isObjGenerated || context.data.isThumbnailGenerated,
           feedSystemGeneratedSharedModel,

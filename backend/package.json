@@ -86,7 +86,7 @@
   "devDependencies": {
     "@feathersjs/cli": "^5.0.0",
     "@feathersjs/rest-client": "^5.0.0",
-    "axios": "^1.6.8",
+    "axios": "^1.7.5",
     "cross-env": "^7.0.3",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.21",

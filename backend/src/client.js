@@ -1,6 +1,8 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
+import { downloadClient } from './services/download/download.shared.js'
+
 import { userEngagementsClient } from './services/user-engagements/user-engagements.shared.js'
 
 import { notificationsClient } from './services/notifications/notifications.shared.js'
@@ -99,6 +101,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(notificationsClient)
 
   client.configure(userEngagementsClient)
+
+  client.configure(downloadClient)
 
   return client
 }
