@@ -150,11 +150,14 @@ export async function forDirectoryUpdateFileSummary(context, dirId, fileSummary)
 
 export const isDirectoryReadyToDelete = async context => {
   const directory = await context.service.get(context.id);
+  const rootOverride = context.params.$removeRoot === true;
   //
   // Ensure this organization is not a root directory
   //
   if (directory.name === "/") {
-    throw new BadRequest('You cannot delete the root directory.');
+    if (!rootOverride) {
+      throw new BadRequest('You cannot delete the root directory.');
+    }
   }
   //
   // Ensure there are no files or subdirectories.
@@ -167,7 +170,9 @@ export const isDirectoryReadyToDelete = async context => {
   //
   // Ensure that the parent directory is really accessible. (it will throw if not)
   //
-  await context.service.get(directory.parentDirectory._id);
+  if (!rootOverride) { // if root, then there is no parent
+    await context.service.get(directory.parentDirectory._id);
+  }
   //
   return context;
 }
@@ -233,6 +238,10 @@ export const ifNeededAddRelatedUserDetails = async context => {
 export const removeFromParent = async context => {
   // remove the just-deleted directory from the parent directory via direct administrative patch
   // this should only be called 'after' the 'remove' method
+  if (context.params.$removeRoot === true) {
+    // if I'm the root already, then don't worry about removing from the parent (there is no parent)
+    return context;
+  };
   const refDir = context.result;
   if (refDir.parentDirectory) {
     const directoryService = context.app.service('directories');

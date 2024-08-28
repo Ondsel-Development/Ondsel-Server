@@ -14,6 +14,7 @@ import {buildOrganizationSummary} from "../organizations/organizations.distrib.j
 import {buildUserSummary} from "../users/users.distrib.js";
 import {LicenseType} from "./workspaces.subdocs.schema.js";
 import {curationSchema} from "../../curation.schema.js";
+import {ObjectId} from "mongodb";
 
 const groupsOrUsers = Type.Object(
   {
@@ -41,6 +42,10 @@ export const workspaceSchema = Type.Object(
     rootDirectory: directorySummary,
     groupsOrUsers: Type.Array(groupsOrUsers),
     curation: Type.Optional(Type.Any()), // a curationSchema but I'm getting a circular ref error if I use that directly
+
+    deleted: Type.Optional(Type.Boolean()),
+    deletedAt: Type.Optional(Type.Number()),
+    deletedBy: Type.Optional(ObjectIdSchema()), // userid of deleter
   },
   { $id: 'Workspace', additionalProperties: false }
 )
@@ -64,7 +69,13 @@ export const workspaceResolver = resolve({
       }
     }
     return false;
-  })
+  }),
+  isUserDefaultWorkspace: virtual(async (workspace, context) => {
+    if (workspace.organization.type !== OrganizationTypeMap.personal) {
+      return false;
+    }
+    return workspace.refName === 'default'
+  }),
 })
 
 export const workspaceExternalResolver = resolve({})

@@ -98,3 +98,22 @@ export async function updateWorkspaceSummaryToMatchingGroups(context, wsSummary)
     );
   }
 }
+
+export async function removeWorkspaceSummaryToMatchingGroups(context, wsId){
+  const groupService = context.app.service('groups');
+  const matchingGroups = await groupService.find({
+    query: {
+      "workspaces._id": wsId,
+    }
+  });
+  const groupList = matchingGroups.data || [];
+  for (const group of groupList) {
+    let newList = group.workspaces.filter((ws) => !ws._id.equals(wsId));
+    await groupService.patch(
+      group._id,
+      {
+        workspaces: newList,
+      }
+    );
+  }
+}

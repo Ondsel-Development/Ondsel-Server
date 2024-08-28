@@ -1,7 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
 import swagger from 'feathers-swagger';
-import { iff, preventChanges, isProvider } from 'feathers-hooks-common';
+import {iff, preventChanges, isProvider, softDelete} from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -34,13 +34,18 @@ import {
   handlePublicOnlyQuery,
   resolvePrivateResults
 } from '../../hooks/handle-public-info-query.js';
-import {copyWorkspaceBeforePatch, distributeWorkspaceSummaries} from "./workspaces.distrib.js";
+import {
+  copyWorkspaceBeforePatch,
+  distributeWorkspaceSummaries,
+  removeRelatedWorkspaceSummaries
+} from "./workspaces.distrib.js";
 import {representWorkspaceWithFile} from "./commands/representWorkspaceWithFile.js";
 import {
   afterCreateHandleWorkspaceCuration,
   buildNewCurationForWorkspace
 } from "./workspaces.curation.js";
-import {beforePatchHandleGenericCuration} from "../../curation.schema.js";
+import {beforePatchHandleGenericCuration, removeCurationFromSearch} from "../../curation.schema.js";
+import {removeWorkspace} from "./commands/removeWorkspace.js";
 
 export * from './workspaces.class.js'
 export * from './workspaces.schema.js'
@@ -148,13 +153,15 @@ export const workspace = (app) => {
     before: {
       all: [
         iff(isProvider('external'), schemaHooks.validateQuery(workspaceQueryValidator)),
-        schemaHooks.resolveQuery(workspaceQueryResolver)
+        schemaHooks.resolveQuery(workspaceQueryResolver),
       ],
       find: [
+        softDelete(),
         isUserBelongsToWorkspace,
         limitPublicOnlyRequestsToOpenWorkspaces,
       ],
       get: [
+        softDelete(),
         isUserBelongsToWorkspace,
       ],
       create: [
@@ -163,8 +170,10 @@ export const workspace = (app) => {
         uniqueWorkspaceValidator,
       ],
       patch: [
+        softDelete(),
         copyWorkspaceBeforePatch,
         preventChanges(false, 'groupsOrUsers'),
+        // preventChanges(isProvider('external'), 'deleted', 'deletedAt', 'deletedBy'),
         iff(
           isProvider('external'),
           isUserOwnerOrAdminOfOrganization,
@@ -189,7 +198,7 @@ export const workspace = (app) => {
         schemaHooks.validateData(workspacePatchValidator),
         schemaHooks.resolveData(workspacePatchResolver)
       ],
-      remove: []
+      remove: [removeWorkspace],
     },
     after: {
       all: [],
@@ -201,6 +210,10 @@ export const workspace = (app) => {
         addEveryoneGroupIfNeeded,
         afterCreateHandleWorkspaceCuration,
       ],
+      remove: [
+        removeRelatedWorkspaceSummaries,
+        removeCurationFromSearch,
+      ]
     },
     error: {
       all: []
