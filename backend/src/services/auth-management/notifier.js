@@ -24,6 +24,7 @@ export const notifier = (app) => {
   // "verifySignupShort" - (NOT ACTIVE YET) used to confirm verification and set user.isVerified=true; which sends a txt message also
   // "sendResetPwd" - used to send a password-change email
   // "resetPwdLong" - used to change the password using the resetToken
+  // "identityChange" - used to change the user's email address
   //
   // see https://feathers-a-m.netlify.app/service-calls.html for more detail
 
@@ -89,6 +90,16 @@ export const notifier = (app) => {
           subject: `[Ondsel] You have been accepted to "${invite.organization.name}"`,
           text: `You are now a member of the "${invite.organization.name}" organization.\n\n`
             + `Yours sincerely,\n`
+            + `Team Ondsel`,
+        });
+      case authManagementActionTypeMap.identityChange:
+        return sendEmail({
+          from: 'contact@ondsel.com',
+          to: user.email,
+          subject: `[Ondsel] Please confirm your email change`,
+          text: `To verify your newly registered email address with Ondsel, please click here: `
+            + getLink('verify-email', user.verifyToken, user._id, baseUrl)
+            + `\n\nYours sincerely,\n`
             + `Team Ondsel`,
         });
       default:
