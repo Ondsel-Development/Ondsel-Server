@@ -19,6 +19,7 @@
           <v-text-field
             v-model.trim="confirmationPassword"
             label="Password"
+            type="password"
             hint="please confirm your password"
             :disabled="pendingChangeEmail"
             :rules="[rules.isRequired, rules.minCharacter]"
@@ -32,7 +33,7 @@
           ></v-text-field>
         </v-form>
         <p>
-          Once you press "Change Email", an email will be sent to the new address containing a confirmation link. Nothing
+          Once you press "Change Email", an email will be sent to your current verified address containing a confirmation link. Nothing
           will change until that email is confirmed.
         </p>
       </v-card-text>
