@@ -188,6 +188,21 @@
                       ref="verifyEmailDialog"
                     />
                   </v-list-item-action>
+                  <v-list-item-action v-if="user.isVerified" class="justify-end">
+                    <v-btn
+                      variant="elevated"
+                      color="secondary"
+                      size="small"
+                      @click.stop="openChangeEmailDialog()"
+                    >
+                      Change Email Address
+                    </v-btn>
+                    <change-email-dialog
+                      :is-active="isChangeEmailDialogActive"
+                      :user="user"
+                      ref="changeEmailDialog"
+                    />
+                  </v-list-item-action>
                 </v-list-item>
 
                 <v-divider />
@@ -295,12 +310,14 @@ import OrganizationPromotionsTable from "@/components/OrganizationPromotionsTabl
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import Main from '@/layouts/default/Main.vue';
 import OrganizationMembershipTable from "@/components/OrganizationMembershipTable.vue";
+import ChangeEmailDialog from "@/components/ChangeEmailDialog.vue";
 
 const { Model, Organization } = models.api;
 
 export default {
   name: 'AccountSettings',
   components: {
+    ChangeEmailDialog,
     OrganizationMembershipTable,
     Main,
     MarkdownViewer,
@@ -311,6 +328,7 @@ export default {
     return {
       isResetPasswordDialogActive: false,
       isVerifyEmailDialogActive: false,
+      isChangeEmailDialogActive: false,
       isUserChangeNameDialogActive: false,
       isChangeDescriptionDialogActive: false,
       isEditTagsDialogActive: false,
@@ -358,6 +376,10 @@ export default {
     openVerifyEmailDialog() {
       this.isVerifyEmailDialogActive = true;
       this.$refs.verifyEmailDialog.$data.dialog = true;
+    },
+    openChangeEmailDialog() {
+      this.isChangeEmailDialogActive = true;
+      this.$refs.changeEmailDialog.$data.dialog = true;
     },
     openUserChangeNameDialog() {
       this.isUserChangeNameDialogActive = true;

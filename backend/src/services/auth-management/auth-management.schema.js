@@ -8,6 +8,7 @@ export const authManagementActionTypeMap = {
   verifySignupLong: 'verifySignupLong',
   sendResetPwd: 'sendResetPwd',
   resetPwdLong: 'resetPwdLong',
+  identityChange: 'identityChange',
 }
 export const resetPwdGENERIC = 'resetPwd';
 export const verifySignupGENERIC = 'verifySignup';
