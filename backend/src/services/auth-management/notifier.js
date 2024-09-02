@@ -48,7 +48,7 @@ export const notifier = (app) => {
           to: user.email,
           subject: `Welcome to Ondsel Lens!`,
           text: `Verification of ${user.email} is complete. Welcome to Ondsel Lens!\n\n`
-            + `We show new features and post tutorials on our YouTube channel:\n\n`
+            + `We show new features and post tutorials on our YouTube channel:\n`
             + `https://www.youtube.com/@ondsel\n\n`
             + `For user support, please join our Discord server:\n`
             + `https://discord.gg/7jmzezyyfP\n\n`
