@@ -100,7 +100,7 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: `[Ondsel] Please confirm your email change`,
+          subject: `Please confirm your email change`,
           text: `To verify your newly registered email address with Ondsel, please click here: `
             + getLink('verify-email', user.verifyToken, user._id, baseUrl)
             + `\n\nYours sincerely,\n`
