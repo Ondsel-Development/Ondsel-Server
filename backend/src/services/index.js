@@ -1,3 +1,5 @@
+import { publisher } from './publisher/publisher.js'
+
 import { keywords } from './keywords/keywords.js'
 
 import { orgInvites } from './org-invites/org-invites.js'
@@ -86,6 +88,8 @@ export const services = (app) => {
   app.configure(userEngagements)
 
   app.configure(download)
+
+  app.configure(publisher)
 
   // All services will be registered here
 }

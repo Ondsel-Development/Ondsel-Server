@@ -45,6 +45,8 @@ import { uploadClient } from './services/upload/upload.shared.js'
 
 import { userClient } from './services/users/users.shared.js'
 
+import { publisherClient } from './services/publisher/publisher.shared.js'
+
 /**
  * Returns a  client for the backend app.
  *
@@ -103,6 +105,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(userEngagementsClient)
 
   client.configure(downloadClient)
+
+  client.configure(publisherClient)
 
   return client
 }
