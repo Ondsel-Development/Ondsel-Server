@@ -1,5 +1,3 @@
-import { publisher } from './publisher/publisher.js'
-
 import { keywords } from './keywords/keywords.js'
 
 import { orgInvites } from './org-invites/org-invites.js'
@@ -43,6 +41,8 @@ import { notifications } from './notifications/notifications.js'
 import { userEngagements } from './user-engagements/user-engagements.js'
 
 import { download } from './download/download.js'
+
+import { publisher } from './publisher/publisher.js'
 
 export const services = (app) => {
   app.configure(orgSecondaryReferences)

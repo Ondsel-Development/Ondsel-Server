@@ -1,8 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
-import { downloadClient } from './services/download/download.shared.js'
-
 import { userEngagementsClient } from './services/user-engagements/user-engagements.shared.js'
 
 import { notificationsClient } from './services/notifications/notifications.shared.js'
@@ -44,6 +42,8 @@ import { modelClient } from './services/models/models.shared.js'
 import { uploadClient } from './services/upload/upload.shared.js'
 
 import { userClient } from './services/users/users.shared.js'
+
+import { downloadClient } from './services/download/download.shared.js'
 
 import { publisherClient } from './services/publisher/publisher.shared.js'
 
