@@ -1,27 +1,32 @@
 import {StringEnum} from "@feathersjs/typebox";
 
-export const PublishedFileIdentityMap = {
-  linuxAarch64AppImage: 'Linux-aarch64.AppImage',
-  linuxAarch64AppImageSha256: 'Linux-aarch64.AppImage-SHA256.txt',
-  linuxX8664AppImage: 'Linux-x86_64.AppImage',
-  linuxX8664AppImageSha256: 'Linux-x86_64.AppImage-SHA256.txt',
-  macOsAppleSiliconDmg: 'macOS-apple-silicon-arm64.dmg',
-  macOsAppleSiliconDmgSha256: 'macOS-apple-silicon-arm64.dmg-SHA256.txt',
-  macOsIntelX8664Dmg: 'macOS-intel-x86_64.dmg',
-  macOsIntelX8664DmgSha256: 'macOS-intel-x86_64.dmg-SHA256.txt',
-  windowsX8664InstallerExe: 'Windows-x86_64-installer.exe',
-  windowsX8664InstallerExeSha256: 'Windows-x86_64-installer.exe-SHA256.txt',
+// https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe
+// https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-38472-Windows-x86_64.7z
+
+export const PublishedFileNatureMap = {
+  linuxX8664App: "linux_x86_64_app",
+  linuxAarch64App: "linux_aarch64_app",
+  macMApp: "mac_m_app",
+  macIntelApp: "mac_intel_app",
+  winX8664Installer: "win_x86_64_installer",
+  winX8664ArchivedApp: "win_x86_64_archived_app",
 }
 
-export const PublishedFileIdentityType = StringEnum([
-  PublishedFileIdentityMap.linuxAarch64AppImage,
-  PublishedFileIdentityMap.linuxAarch64AppImageSha256,
-  PublishedFileIdentityMap.linuxX8664AppImage,
-  PublishedFileIdentityMap.linuxX8664AppImageSha256,
-  PublishedFileIdentityMap.macOsAppleSiliconDmg,
-  PublishedFileIdentityMap.macOsAppleSiliconDmgSha256,
-  PublishedFileIdentityMap.macOsIntelX8664Dmg,
-  PublishedFileIdentityMap.macOsIntelX8664DmgSha256,
-  PublishedFileIdentityMap.windowsX8664InstallerExe,
-  PublishedFileIdentityMap.windowsX8664InstallerExeSha256,
+export const PublishedFileNatureType = StringEnum([
+  PublishedFileNatureMap.linuxX8664App,
+  PublishedFileNatureMap.linuxAarch64App,
+  PublishedFileNatureMap.macMApp,
+  PublishedFileNatureMap.macIntelApp,
+  PublishedFileNatureMap.winX8664Installer,
+  PublishedFileNatureMap.winX8664ArchivedApp,
+])
+
+export const PublishedReleaseCadenceMap = {
+  weekly: 'weekly-builds',
+  stable: 'stable',
+}
+
+export const PublishedReleaseCadenceType = StringEnum([
+  PublishedReleaseCadenceMap.weekly,
+  PublishedReleaseCadenceMap.stable,
 ])

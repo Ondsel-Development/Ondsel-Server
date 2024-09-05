@@ -3,17 +3,30 @@ import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
-import {PublishedFileIdentityType} from "./publisher.subdocs.schema.js";
+import {
+  PublishedFileNatureType,
+  PublishedReleaseCadenceType
+} from "./publisher.subdocs.schema.js";
+
+// https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe
+// https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-38472-Windows-x86_64.7z
 
 // Main data model schema
 export const publisherSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    identity: PublishedFileIdentityType,
+    active: Type.Boolean(),
+    nature: PublishedFileNatureType,
+    isSha256: Type.Boolean(),
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     releaseDate: Type.Number(),
+    releaseCadence: PublishedReleaseCadenceType,
     release: Type.Optional(Type.String()),
+    matchingUrlQuery: Type.String(), // ex: "2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe"
+    mappedUrl: Type.String(),        // ex: " s3 something"
+
+    deleted: Type.Optional(Type.Boolean),
   },
   { $id: 'Publisher', additionalProperties: false }
 )
@@ -37,7 +50,7 @@ export const publisherPatchValidator = getValidator(publisherPatchSchema, dataVa
 export const publisherPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const publisherQueryProperties = Type.Pick(publisherSchema, ['_id', 'text'])
+export const publisherQueryProperties = Type.Pick(publisherSchema, ['_id', 'releaseCadence', 'isSha256'])
 export const publisherQuerySchema = Type.Intersect(
   [
     querySyntax(publisherQueryProperties),

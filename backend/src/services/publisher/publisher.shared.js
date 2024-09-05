@@ -1,6 +1,6 @@
 export const publisherPath = 'publisher'
 
-export const publisherMethods = ['find', 'get', 'create', 'patch', 'remove']
+export const publisherMethods = ['find', 'create', 'remove']
 
 export const publisherClient = (client) => {
   const connection = client.get('connection')
