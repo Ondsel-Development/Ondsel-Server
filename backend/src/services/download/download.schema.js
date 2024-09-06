@@ -3,6 +3,7 @@ import { resolve } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
+import { userSummarySchema } from '../users/users.subdocs.schema.js';
 
 // Main data model schema
 export const downloadSchema = Type.Object(
@@ -12,10 +13,8 @@ export const downloadSchema = Type.Object(
     pin: Type.Optional(Type.String()),
     createdAt: Type.Number(),
     // Below fields user later to download Ondsel ES
-    ondselPublished: Type.Optional(Type.Boolean()),
-    ondselPublisherFileId: Type.Optional(ObjectIdSchema()), // a reference to the 'publisher' collection, leave empty on 'create'
-    // TODO: expireAt: Type.Optional(Type.Number()),
-    // TODO: user: Type.Optional(userSummarySchema),
+    expireAt: Type.Optional(Type.Number()),
+    user: Type.Optional(userSummarySchema),
   },
   { $id: 'Download', additionalProperties: false }
 )

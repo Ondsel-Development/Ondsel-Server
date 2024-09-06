@@ -52,10 +52,10 @@ export const download = (app) => {
         const { fileKey, pin } = req.params;
         const downloadService = app.service('download');
         const resp = await downloadService.find({ query: {
-            fileKey: fileKey,
-            ...(pin && { pin: pin}),
-            ...(!pin && { pin: { $exists: false } })
-          } });
+          fileKey: fileKey,
+          ...(pin && { pin: pin}),
+          ...(!pin && { pin: { $exists: false } })
+        } });
         let downloadObj;
         if (resp.total) {
           downloadObj = resp.data[0];
