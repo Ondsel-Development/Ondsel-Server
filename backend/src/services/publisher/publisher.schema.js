@@ -7,7 +7,6 @@ import {
   PublishedFileNatureType,
   PublishedReleaseCadenceType
 } from "./publisher.subdocs.schema.js";
-import {downloadSummarySchema} from "../download/download.subdocs.js";
 
 // https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe
 // https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-38472-Windows-x86_64.7z
@@ -15,7 +14,7 @@ import {downloadSummarySchema} from "../download/download.subdocs.js";
 // Main data model schema
 export const publisherSchema = Type.Object(
   {
-    _id: ObjectIdSchema(),
+    _id: Type.String(), // ex: "Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe"
     active: Type.Boolean(),
     nature: PublishedFileNatureType,
     isSha256: Type.Boolean(),
@@ -24,9 +23,7 @@ export const publisherSchema = Type.Object(
     releaseDate: Type.Number(),
     releaseCadence: PublishedReleaseCadenceType,
     release: Type.Optional(Type.String()),
-    matchingUrlQuery: Type.String(), // ex: "2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe"
     mappedUrl: Type.String(),        // ex: " s3 something"
-    download: downloadSummarySchema,
 
     deleted: Type.Optional(Type.Boolean),
   },

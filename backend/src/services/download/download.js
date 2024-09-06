@@ -19,7 +19,7 @@ import { DownloadService, getOptions } from './download.class.js'
 import { downloadPath, downloadMethods } from './download.shared.js'
 import swagger from "feathers-swagger";
 import {authenticate} from "@feathersjs/authentication";
-import {generatePin, handleOndselPublishedFile} from "./helpers.js";
+import {generatePin} from "./helpers.js";
 
 export * from './download.class.js'
 export * from './download.schema.js'
@@ -52,10 +52,10 @@ export const download = (app) => {
         const { fileKey, pin } = req.params;
         const downloadService = app.service('download');
         const resp = await downloadService.find({ query: {
-          fileKey: fileKey,
-          ...(pin && { pin: pin}),
+            fileKey: fileKey,
+            ...(pin && { pin: pin}),
             ...(!pin && { pin: { $exists: false } })
-        } });
+          } });
         let downloadObj;
         if (resp.total) {
           downloadObj = resp.data[0];
@@ -93,7 +93,6 @@ export const download = (app) => {
       get: [],
       create: [
         generatePin,
-        handleOndselPublishedFile,
         schemaHooks.validateData(downloadDataValidator),
         schemaHooks.resolveData(downloadDataResolver),
       ],

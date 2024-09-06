@@ -59,6 +59,32 @@ function handleDownloadFile(app) {
   )
 }
 
+// function handlePublishedFileDownload(app) {
+//   app.use(
+//     '/publisher/download/:id', // :id = the _id contains the filename. All filenames must be unique.
+//     async (req, res, next) => {
+//       try {
+//         const { id } = req.params;
+//         const publisherDetails = await app.service('publisher').get(id);
+//         const isOpen = _.get(file, 'workspace.open', false);
+//         if (isOpen) {
+//           const { url } = await app.service('upload').get(id);
+//           // Set appropriate headers for file download
+//           res.setHeader('Content-Disposition', `attachment; filename="${file.custFileName}"`);
+//           res.setHeader('Content-Type', 'application/octet-stream');
+//           // Stream the file directly to the client
+//           const response = await axios.get(url, { responseType: 'stream' });
+//           response.data.pipe(res);
+//         } else {
+//           res.status(404).json({ error: 'File Not Found' });
+//         }
+//       } catch (e) {
+//         logger.error(e);
+//         next(e);
+//       }
+//     }
+//   )
+// }
 
 function handleStatusEndpoint(app) {
   app.use(
