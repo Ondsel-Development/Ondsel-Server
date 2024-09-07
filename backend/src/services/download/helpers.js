@@ -8,8 +8,3 @@ export const generatePin = async context => {
   }
   return context;
 }
-
-export const handleOndselPublishedFile = async context => {
-  // TODO
-  return context;
-}

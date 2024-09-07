@@ -14,7 +14,7 @@ import {
 // Main data model schema
 export const publisherSchema = Type.Object(
   {
-    _id: Type.String(), // ex: "Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe"
+    _id: ObjectIdSchema(),
     active: Type.Boolean(),
     nature: PublishedFileNatureType,
     isSha256: Type.Boolean(),
@@ -23,7 +23,8 @@ export const publisherSchema = Type.Object(
     releaseDate: Type.Number(),
     releaseCadence: PublishedReleaseCadenceType,
     release: Type.Optional(Type.String()),
-    mappedUrl: Type.String(),        // ex: " s3 something"
+    filename: Type.String(), // ex: "Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe"
+    uploadedUniqueFilename: Type.String(), // ex: "66a8e0f9-0e0b-4712-84d7-455e457a7812"; see 'upload' endpoint
 
     deleted: Type.Optional(Type.Boolean),
   },

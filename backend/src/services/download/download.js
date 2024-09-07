@@ -54,7 +54,7 @@ export const download = (app) => {
         const resp = await downloadService.find({ query: {
           fileKey: fileKey,
           ...(pin && { pin: pin}),
-          ...(!pin && { pin: { $exists: false } })
+            ...(!pin && { pin: { $exists: false } })
         } });
         let downloadObj;
         if (resp.total) {

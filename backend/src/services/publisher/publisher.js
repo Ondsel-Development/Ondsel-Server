@@ -85,8 +85,8 @@ export const publisher = (app) => {
       ],
       patch: [
         disallow(),
-        // schemaHooks.validateData(publisherPatchValidator),
-        // schemaHooks.resolveData(publisherPatchResolver)
+        schemaHooks.validateData(publisherPatchValidator),
+        schemaHooks.resolveData(publisherPatchResolver)
       ],
       remove: [
         disallow('external'),
@@ -94,7 +94,10 @@ export const publisher = (app) => {
       ]
     },
     after: {
-      all: []
+      all: [],
+      remove: [
+        // TODO: removePreviousVersions,
+      ],
     },
     error: {
       all: []
