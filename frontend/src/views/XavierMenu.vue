@@ -3,6 +3,13 @@
     <v-card-title><v-sheet color="success">Professor Xavier's School For The Hidden</v-sheet></v-card-title>
     <v-card-text>
       <v-list>
+        <v-list-item
+          color="link"
+          class="text-decoration-underline"
+          @click="$router.push({ name: 'XavierUpdateSoftwareReleases', params: {} })"
+        >
+          Update Software Releases
+        </v-list-item>
         <v-list-item>
           View/Modify Key Documents:
           <v-list class="ms-4">

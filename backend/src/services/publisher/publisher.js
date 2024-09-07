@@ -61,10 +61,12 @@ export const publisher = (app) => {
   app.service(publisherPath).hooks({
     around: {
       all: [
-        authenticate('jwt'),
         schemaHooks.resolveExternal(publisherExternalResolver),
         schemaHooks.resolveResult(publisherResolver)
-      ]
+      ],
+      find: [],
+      create: [authenticate('jwt')],
+      remove: [authenticate('jwt')],
     },
     before: {
       all: [
