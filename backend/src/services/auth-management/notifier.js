@@ -97,9 +97,13 @@ export const notifier = (app) => {
             + `Team Ondsel`,
         });
       case authManagementActionTypeMap.identityChange:
+        // added by auth-library:
+        // "verifyChanges": {
+        //   "email": "johnd+111@ondsel.com"
+        // },
         return sendEmail({
           from: 'contact@ondsel.com',
-          to: user.email,
+          to: user.verifyChanges.email,
           subject: `Please confirm your email change`,
           text: `To verify your newly registered email address with Ondsel, please click here: `
             + getLink('verify-email', user.verifyToken, user._id, baseUrl)
