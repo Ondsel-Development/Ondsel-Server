@@ -4,9 +4,10 @@ import { Type, getValidator, querySyntax } from '@feathersjs/typebox'
 import { ObjectIdSchema } from '@feathersjs/typebox'
 import { dataValidator, queryValidator } from '../../validators.js'
 import {
-  PublishedFileNatureType,
+  PublishedFileTargetType,
   PublishedReleaseCadenceType
 } from "./publisher.subdocs.schema.js";
+import {refNameHasher} from "../../refNameFunctions.js";
 
 // https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe
 // https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-38472-Windows-x86_64.7z
@@ -15,9 +16,7 @@ import {
 export const publisherSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    active: Type.Boolean(),
-    nature: PublishedFileNatureType,
-    isSha256: Type.Boolean(),
+    target: PublishedFileTargetType,
     createdBy: ObjectIdSchema(),
     createdAt: Type.Number(),
     releaseDate: Type.Number(),
@@ -36,11 +35,23 @@ export const publisherResolver = resolve({})
 export const publisherExternalResolver = resolve({})
 
 // Schema for creating new entries
-export const publisherDataSchema = Type.Pick(publisherSchema, ['text'], {
+export const publisherDataSchema = Type.Pick(publisherSchema, [
+  'target',
+  'releaseCadence',
+  'release',
+  'filename',
+  'uploadedUniqueFilename',
+], {
   $id: 'PublisherData'
 })
 export const publisherDataValidator = getValidator(publisherDataSchema, dataValidator)
-export const publisherDataResolver = resolve({})
+export const publisherDataResolver = resolve({
+  createdBy: async (_value, _message, context) => {
+    return context.params.user._id
+  },
+  createdAt: async () => Date.now(),
+  releaseDate: async () => Date.now(),
+})
 
 // Schema for updating existing entries
 export const publisherPatchSchema = Type.Partial(publisherSchema, {
@@ -50,7 +61,7 @@ export const publisherPatchValidator = getValidator(publisherPatchSchema, dataVa
 export const publisherPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const publisherQueryProperties = Type.Pick(publisherSchema, ['_id', 'releaseCadence', 'isSha256'])
+export const publisherQueryProperties = Type.Pick(publisherSchema, ['target', 'releaseCadence'])
 export const publisherQuerySchema = Type.Intersect(
   [
     querySyntax(publisherQueryProperties),
