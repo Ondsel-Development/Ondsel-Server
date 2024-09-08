@@ -40,6 +40,7 @@
             </div>
           </div>
           <v-divider class="my-4"></v-divider>
+          <span class="text-red">{{this.errorMsg}}</span>
           <v-text-field
             v-model="originalFilename"
             label="uploaded filename"
@@ -77,7 +78,7 @@
           <v-btn
             color="cancel"
             variant="elevated"
-            @click="dialog = false"
+            @click="clearFieldsCloseDialog()"
           >Cancel</v-btn>
           <v-btn
             type="submit"
@@ -176,7 +177,7 @@ export default {
             console.log(message);
             if (!file.accepted) {
               vm.error = 'InvalidFileType';
-              vm.errorMsg = "Invalid File Type"
+              vm.errorMsg = `Invalid File (${message})`
             }
             vm.isFileUploadInProgress = false;
           })
@@ -185,6 +186,16 @@ export default {
     },
   },
   methods: {
+    clearFieldsCloseDialog() {
+      this.cadence = null;
+      this.releaseTarget = null;
+      this.weeklyTarget = null;
+      this.version = null;
+      this.warningMsg = '';
+      this.errorMsg = '';
+      this.originalFilename = '';
+      this.dialog = false;
+    },
     checkReleaseTarget(rawText) {
       if (this.cadence === 'stable') {
         if (!rawText) {
@@ -260,9 +271,9 @@ export default {
           uploadedUniqueFilename: this.newFile.upload.filename,
         });
         this.$emit('uploadedFile');
-        this.dialog = false;
         this.newFile = null;
         this.error = null;
+        this.clearFieldsCloseDialog();
       }
     },
   },

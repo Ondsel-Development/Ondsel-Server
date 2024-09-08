@@ -8,6 +8,9 @@
       <v-data-table :items="releases"></v-data-table>
       <h2>Weekly Builds</h2>
       <v-data-table :items="weeklies"></v-data-table>
+      <pre>
+        <a href="https://github.com/Ondsel-Development/assets/releases">https://github.com/Ondsel-Development/assets/releases</a>
+      </pre>
       <v-btn
         class="mr-2 mt-2"
         color="secondary"
@@ -15,6 +18,14 @@
         @click="$refs.uploadSoftwareDialog.openFileUploadDialog();"
       >
         Upload File
+      </v-btn>
+      <v-btn
+        class="mr-2 mt-2"
+        color="secondary"
+        variant="elevated"
+        @click="scanPublisherCollection()"
+      >
+        Refresh Lens Column From Database
       </v-btn>
       <v-card>
         <v-card-title>
@@ -55,6 +66,9 @@
 import Main from '@/layouts/default/Main.vue';
 import {mapState} from "vuex";
 import XavierUploadSoftwareDialog from "@/components/XavierUploadSoftwareDialog.vue";
+import {models} from "@feathersjs/vuex";
+
+const { Publisher } = models.api;
 
 export default {
   name: 'XavierUpdateSoftwareReleases',
@@ -113,8 +127,22 @@ export default {
         "Lens": "TBD",
       })
     }
+    await this.scanPublisherCollection();
   },
   methods: {
+    async scanPublisherCollection() {
+      const results = await Publisher.find({});
+      const publishedList = results.data;
+      for (const item of publishedList) {
+        const name = item.target;
+        const cadence = item.releaseCadence;
+        if (cadence === 'stable') {
+          this.setWebRelease(name, item);
+        } else {
+          this.setWebWeekly(name, item);
+        }
+      }
+    },
     async scanReleaseJson() {
       let json = JSON.parse(this.rawJson);
       let wd = {};
@@ -138,7 +166,7 @@ export default {
       assets = testingBuild.assets || []
       for (let key of this.weeklyFileTypes) {
         temp = assets.find(asset => asset.name.endsWith(key));
-        this.setWkRelease(key, temp);
+        this.setGHWeekly(key, temp);
       }
       for (const [k, v] of Object.entries(wd)) {
         if (v.created_at) {
@@ -153,20 +181,30 @@ export default {
     },
     setGHRelease(name, obj) {
       let index = this.releases.findIndex(entry => entry.name === name);
-      console.log(name, index);
-      console.log(this.releases)
       if (index >= 0) {
         this.releases[index]["GH url"] = obj.browser_download_url;
       }
     },
-    setWkRelease(name, obj) {
+    setGHWeekly(name, obj) {
       let index = this.weeklies.findIndex(entry => entry.name === name);
       if (index >= 0) {
         this.weeklies[index]["GH url"] = obj.browser_download_url;
       }
     },
+    setWebRelease(name, obj) {
+      let index = this.releases.findIndex(entry => entry.name === name);
+      if (index >= 0) {
+        this.releases[index]["Lens"] = obj.filename;
+      }
+    },
+    setWebWeekly(name, obj) {
+      let index = this.weeklies.findIndex(entry => entry.name === name);
+      if (index >= 0) {
+        this.weeklies[index]["Lens"] = obj.filename;
+      }
+    },
     async updateEntry() {
-      // TODO
+      await this.scanPublisherCollection();
     },
   },
 }
