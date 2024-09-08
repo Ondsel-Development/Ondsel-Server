@@ -86,7 +86,8 @@ export const publisher = (app) => {
         schemaHooks.resolveData(publisherDataResolver)
       ],
       patch: [
-        disallow(),
+        // a "softDelete" calls `patch` behind-the-scenes on `remove`, so this cannot "disallow()" all
+        disallow('external'),
         schemaHooks.validateData(publisherPatchValidator),
         schemaHooks.resolveData(publisherPatchResolver)
       ],
@@ -97,12 +98,29 @@ export const publisher = (app) => {
     },
     after: {
       all: [],
-      remove: [
-        // TODO: removePreviousVersions,
-      ],
+      create: [
+        removePreviousVersions,
+      ]
     },
     error: {
       all: []
     }
   })
+}
+
+
+const removePreviousVersions = async (context) => {
+  const service = context.service;
+  const thisEntry = context.result
+  const thisId = thisEntry._id;
+  const target = thisEntry.target;
+  const allMatches = await service.find({
+    query: {
+      "target": target
+    }
+  });
+  const theOthers = allMatches.data.filter(item => !item._id.equals(thisId));
+  for (const other of theOthers) {
+    await service.remove(other._id);
+  }
 }

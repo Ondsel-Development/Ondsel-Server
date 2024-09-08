@@ -61,7 +61,7 @@ export const publisherPatchValidator = getValidator(publisherPatchSchema, dataVa
 export const publisherPatchResolver = resolve({})
 
 // Schema for allowed query properties
-export const publisherQueryProperties = Type.Pick(publisherSchema, ['target', 'releaseCadence'])
+export const publisherQueryProperties = Type.Pick(publisherSchema, ['target', 'releaseCadence', 'deleted'])
 export const publisherQuerySchema = Type.Intersect(
   [
     querySyntax(publisherQueryProperties),
