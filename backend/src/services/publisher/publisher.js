@@ -35,7 +35,7 @@ export * from './publisher.schema.js'
 // hex index). Since that ID isn't really private, I'm not too concerned about it.
 //
 // The download links will look like this:
-//   `https://lens.ondsel.com/published/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe`
+//   `https://lens.ondsel.com/published/a438f938493849348384/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe`
 //
 // When the user downloads that URL, NGINX will catch the "/published" link and do two things:
 //
@@ -44,9 +44,11 @@ export * from './publisher.schema.js'
 //
 // From the user's perspective, they are directly downloading from Lens.
 //
-// If the user does not have a live session cookie, then NGINX will send a 404. So copying the download URL and trying it elsewhere will not work.
+// If the user does not have a live session cookie, then NGINX will send a 404. So copying the download URL and trying
+// it elsewhere will not work.
 //
-// A seasoned hacker could bypass this by inspecting header data and artificially scripting a mock header session, but that is way beyond the skill set of 99.9% of our users.
+// A seasoned hacker could bypass this by inspecting header data and artificially scripting a mock header session, but
+// that is way beyond the skill set of 99.9% of our users.
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const publisher = (app) => {

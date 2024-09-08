@@ -9,9 +9,6 @@ import {
 } from "./publisher.subdocs.schema.js";
 import {refNameHasher} from "../../refNameFunctions.js";
 
-// https://github.com/Ondsel-Development/FreeCAD/releases/download/2024.2.2/Ondsel_ES-2024.2.2.37240-Windows-x86_64-installer.exe
-// https://github.com/Ondsel-Development/FreeCAD/releases/download/weekly-builds/Ondsel_ES_weekly-builds-38472-Windows-x86_64.7z
-
 // Main data model schema
 export const publisherSchema = Type.Object(
   {
