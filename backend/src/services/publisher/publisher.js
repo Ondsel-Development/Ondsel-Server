@@ -66,6 +66,7 @@ export const publisher = (app) => {
         schemaHooks.resolveExternal(publisherExternalResolver),
         schemaHooks.resolveResult(publisherResolver)
       ],
+      get: [authenticate('jwt')],
       find: [],
       create: [authenticate('jwt')],
       remove: [authenticate('jwt')],
@@ -79,7 +80,7 @@ export const publisher = (app) => {
         softDelete(),
       ],
       get: [
-        disallow(),
+        // get called by proxy
       ],
       create: [
         verifyOndselAdministrativePower,
