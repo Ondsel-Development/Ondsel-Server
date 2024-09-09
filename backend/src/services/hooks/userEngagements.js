@@ -47,6 +47,7 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
     keywords: ['find'],
+    publisher: ['get'],
   },
   rest: {
     authentication: ['create', 'remove'],
@@ -58,6 +59,7 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
     keywords: ['find'],
+    publisher: ['get'],
   }
 }
 
@@ -121,6 +123,25 @@ export const createUserEngagementEntry = async context => {
   }
 }
 
+export const createUserEngagementEntryForMiddlewareGet = (mwPath, mwMethod) => {
+  return async (context, next) => {
+    const userEngagementService = context.app.service('user-engagements');
+    const { path, method, params } = context;
+    const user = context.params.user;
+    if (canTrackEvent(params.provider, mwPath, mwMethod, eventsToTrack)) {
+      const payload = generateUserEngagementPayload(context);
+      if (user) {
+        const ue = await userEngagementService.create(payload, { user: user });
+      } else {
+        console.log("anon");
+      }
+    }
+    console.log("HERE1");
+    next();
+    console.log("HERE2");
+    return context;
+  }
+}
 
 export const saveContextQueryState = context => {
   context.$userQuery = context.params.query;

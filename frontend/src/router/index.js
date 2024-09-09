@@ -43,6 +43,7 @@ import SharedWithMe from "@/views/SharedWithMe.vue";
 import MyNotifications from "@/views/MyNotifications.vue";
 import WorkspaceFile from "@/views/WorkspaceFile.vue";
 import WorkerErrorCodes from "@/views/WorkerErrorCodes.vue";
+import XavierUpdateSoftwareReleases from "@/views/XavierUpdateSoftwareReleases.vue";
 
 
 const isWindowLoadedInIframe = () => {
@@ -220,6 +221,12 @@ const routes = [
     path: '/xavier-68373833',
     component: XavierMenu,
     name: 'XavierMenu',
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/xavier-9384242',
+    component: XavierUpdateSoftwareReleases,
+    name: 'XavierUpdateSoftwareReleases',
     meta: { requiresAuth: true },
   },
   {

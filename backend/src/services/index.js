@@ -42,6 +42,8 @@ import { userEngagements } from './user-engagements/user-engagements.js'
 
 import { download } from './download/download.js'
 
+import { publisher } from './publisher/publisher.js'
+
 export const services = (app) => {
   app.configure(orgSecondaryReferences)
 
@@ -86,6 +88,8 @@ export const services = (app) => {
   app.configure(userEngagements)
 
   app.configure(download)
+
+  app.configure(publisher)
 
   // All services will be registered here
 }

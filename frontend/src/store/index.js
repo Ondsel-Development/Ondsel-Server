@@ -17,6 +17,7 @@ import workspace from '@/store/services/workspaces';
 import keywords from "@/store/services/keywords";
 import orgSecondaryReference from '@/store/services/orgSecondaryReferences';
 import notifications from "@/store/services/notifications";
+import publisher from "@/store/services/publisher";
 
 const store =  new Vuex.Store({
   state: {},
@@ -43,6 +44,7 @@ const store =  new Vuex.Store({
     keywords,
     orgSecondaryReference,
     notifications,
+    publisher,
   ]
 })
 
