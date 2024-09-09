@@ -131,7 +131,7 @@ export default {
   },
   methods: {
     async scanPublisherCollection() {
-      const results = await Publisher.find({});
+      const results = await Publisher.find({query: {$limit: 100}});
       const publishedList = results.data;
       for (const item of publishedList) {
         const name = item.target;

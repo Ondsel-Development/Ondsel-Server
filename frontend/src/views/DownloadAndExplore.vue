@@ -153,8 +153,7 @@
                             x86_64 AppImage
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Linux-x86_64.AppImage']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -169,8 +168,7 @@
                             aarch64 AppImage
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Linux-aarch64.AppImage']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -202,8 +200,7 @@
                             Apple Silicon dmg
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['macOS-apple-silicon-arm64.dmg']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -218,8 +215,7 @@
                             Intel dmg
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['macOS-intel-x86_64.dmg']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -250,8 +246,7 @@
                             x86_64.7z
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Windows-x86_64.7z']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -339,7 +334,7 @@ export default {
     let buildDate = 'unknown';
     let osd = {};
     let wd = {};
-    const results = await Publisher.find({});
+    const results = await Publisher.find({query: {$limit: 100}});
     const publishedList = results.data;
     for (const item of publishedList) {
       const target = item.target;
@@ -357,19 +352,28 @@ export default {
       } else {
         wd[target] = item;
         wd[target].browser_download_url = url;
-        buildDate = item.releaseDate;
+        buildDate = this.dateFormat(item.releaseDate);
+        console.log(item)
       }
     }
+    console.log(buildDate)
     this.ondselSeDownload = osd;
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
-    this.weeklyBuildDate = buildDate.slice(0,10);
+    this.weeklyBuildDate = buildDate;
   },
   methods: {
     async scanPublisherCollection() {
     },
     async goPublicModels() {
       this.$router.push({name: 'PublicModels'})
+    },
+    dateFormat(number) {
+      if (number) {
+        const date = new Date(number);
+        return date.toDateString();
+      }
+      return "unknown"
     },
   },
 }

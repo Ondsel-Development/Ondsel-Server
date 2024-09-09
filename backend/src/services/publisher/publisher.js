@@ -117,9 +117,11 @@ const removePreviousVersions = async (context) => {
   const thisEntry = context.result
   const thisId = thisEntry._id;
   const target = thisEntry.target;
+  const cadence = thisEntry.releaseCadence;
   const allMatches = await service.find({
     query: {
-      "target": target
+      "target": target,
+      "releaseCadence": cadence,
     }
   });
   const theOthers = allMatches.data.filter(item => !item._id.equals(thisId));
