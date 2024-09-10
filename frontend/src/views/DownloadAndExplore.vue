@@ -153,8 +153,7 @@
                             x86_64 AppImage
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Linux-x86_64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Linux-x86_64.AppImage']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -169,8 +168,7 @@
                             aarch64 AppImage
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Linux-aarch64.AppImage']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Linux-aarch64.AppImage']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -202,8 +200,7 @@
                             Apple Silicon dmg
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['macOS-apple-silicon-arm64.dmg']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['macOS-apple-silicon-arm64.dmg']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                         <p/>
@@ -218,8 +215,7 @@
                             Intel dmg
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['macOS-intel-x86_64.dmg']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['macOS-intel-x86_64.dmg']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -250,8 +246,7 @@
                             x86_64.7z
                             <span
                               class="text-sm-caption"
-                              v-if="weeklyBuildDate !== weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)"
-                            ><br>{{weeklyDownload['Windows-x86_64.7z']?.created_at.slice(0, 10)}}</span>
+                            ><br>{{dateFormat(weeklyDownload['Windows-x86_64.7z']?.releaseDate)}}</span>
                           </span>
                         </v-btn>
                       </v-expansion-panel-text>
@@ -295,7 +290,9 @@
 import {mapState} from "vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
-import axios from "axios";
+import {models} from "@feathersjs/vuex";
+
+const { Publisher } = models.api;
 
 export default {
   name: 'DownloadAndExplore',
@@ -305,6 +302,25 @@ export default {
     ondselSeVersionTxt: 'tbd',
     weeklyDownload: {},
     weeklyBuildDate: 'tbd',
+    releaseFileTypes: [
+      'Linux-x86_64.AppImage',
+      'Linux-x86_64.AppImage-SHA256.txt',
+      'Linux-aarch64.AppImage',
+      'Linux-aarch64.AppImage-SHA256.txt',
+      'macOS-apple-silicon-arm64.dmg',
+      'macOS-apple-silicon-arm64.dmg-SHA256.txt',
+      'macOS-intel-x86_64.dmg',
+      'macOS-intel-x86_64.dmg-SHA256.txt',
+      'Windows-x86_64-installer.exe',
+      'Windows-x86_64-installer.exe-SHA256.txt',
+    ],
+    weeklyFileTypes: [
+      'Linux-aarch64.AppImage',
+      'Linux-x86_64.AppImage',
+      'macOS-apple-silicon-arm64.dmg',
+      'macOS-intel-x86_64.dmg',
+      'Windows-x86_64.7z',
+    ],
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
@@ -314,59 +330,50 @@ export default {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
       this.$router.push({name: 'PendingVerification'})
     }
-    let wd = {};
     let osVer = 'unknown';
     let buildDate = 'unknown';
     let osd = {};
-    await axios.get('https://api.github.com/repos/Ondsel-Development/FreeCAD/releases')
-      .then(function (response) {
-        const justCurrent = response.data.filter(build => build.prerelease !== true);
-        const tagsFound = justCurrent.map(build => build.tag_name);
-        const semverExp = new RegExp('^\\d{4}.'); // must start with four digits and a dot
-        let semverTags = tagsFound.filter(tag => semverExp.test(tag));
-        semverTags.sort();
-        osVer = semverTags.pop();
-        const ondselSeBuild = response.data.find(build => build.tag_name === osVer);
-        let assets = ondselSeBuild.assets || []
-        osd['Linux-aarch64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage'));
-        osd['Linux-aarch64.AppImage-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage-SHA256.txt'));
-        osd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
-        osd['Linux-x86_64.AppImage-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage-SHA256.txt'));
-        osd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
-        osd['macOS-apple-silicon-arm64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg-SHA256.txt'));
-        osd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
-        osd['macOS-intel-x86_64.dmg-SHA256.txt'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg-SHA256.txt'));
-        osd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
-        osd['Windows-x86_64-installer.exe-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe-SHA256.txt'));
-        const testingBuild = response.data.find(build => build.tag_name === 'weekly-builds');
-        buildDate = testingBuild.created_at;
-        assets = testingBuild.assets || []
-        wd['Linux-aarch64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-aarch64.AppImage'));
-        wd['Linux-x86_64.AppImage'] = assets.find(asset => asset.name.endsWith('Linux-x86_64.AppImage'));
-        wd['macOS-apple-silicon-arm64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-apple-silicon-arm64.dmg'));
-        wd['macOS-intel-x86_64.dmg'] = assets.find(asset => asset.name.endsWith('macOS-intel-x86_64.dmg'));
-        // wd['Windows-x86_64-installer.exe'] = assets.find(asset => asset.name.endsWith('Windows-x86_64-installer.exe'));
-        wd['Windows-x86_64.7z'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z'));
-        wd['Windows-x86_64.7z-SHA256.txt'] = assets.find(asset => asset.name.endsWith('Windows-x86_64.7z-SHA256.txt'));
-        for (const [k, v] of Object.entries(wd)) {
-          if (v.created_at) {
-            if (v.created_at > buildDate) {
-              buildDate = v.created_at;
-            }
-          }
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    let wd = {};
+    const results = await Publisher.find({query: {$limit: 100}});
+    const publishedList = results.data;
+    for (const item of publishedList) {
+      const target = item.target;
+      const cadence = item.releaseCadence;
+      let url;
+      if (import.meta.env.VITE_DEV_PROXY_TO_API_HACK) {
+        url = `${import.meta.env.VITE_DEV_PROXY_TO_API_HACK}/publisher/${item._id}/download/${item.filename}`;
+      } else {
+        url = `/publisher/${item._id}/download/${item.filename}`;
+      }
+      if (cadence === 'stable') {
+        osd[target] = item;
+        osd[target].browser_download_url = url;
+        osVer = item.release;
+      } else {
+        wd[target] = item;
+        wd[target].browser_download_url = url;
+        buildDate = this.dateFormat(item.releaseDate);
+        console.log(item)
+      }
+    }
+    console.log(buildDate)
     this.ondselSeDownload = osd;
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
-    this.weeklyBuildDate = buildDate.slice(0,10);
+    this.weeklyBuildDate = buildDate;
   },
   methods: {
+    async scanPublisherCollection() {
+    },
     async goPublicModels() {
       this.$router.push({name: 'PublicModels'})
+    },
+    dateFormat(number) {
+      if (number) {
+        const date = new Date(number);
+        return date.toDateString();
+      }
+      return "unknown"
     },
   },
 }
