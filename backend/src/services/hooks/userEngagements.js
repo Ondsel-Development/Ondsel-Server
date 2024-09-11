@@ -125,7 +125,7 @@ export async function createUserEngagementEntryForPublisherDownload(publishedDet
   // because this is called from expressJS-style middleware, we have no 'context'.
   const userEngagementService = app.service('user-engagements');
   const userService = app.service('users');
-  const user = userService.get(userId);
+  const user = await userService.get(userId);
   const falseContext = {
     id: publishedDetails._id,
     path: 'publisher',

@@ -18,37 +18,27 @@
                   />
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
-                  <v-btn
-                    size="large"
-                    variant="outlined"
-                    class="text-none justify-start mt-6"
-                    min-width="14em"
-                    :href="ondselSeDownload['Linux-x86_64.AppImage']?.browser_download_url"
-                  >
-                    x86_64 AppImage
-                  </v-btn>
-                  <v-btn
-                    :href="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']?.browser_download_url"
-                    flat
-                    size="x-small"
-                    class="text-caption text-red"
-                  >SHA256</v-btn>
+                  <download-published-link
+                    :details="ondselSeDownload['Linux-x86_64.AppImage']"
+                    :user-id="userId"
+                    :small="false"
+                  ></download-published-link>
+                  <download-published-link
+                    :details="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']"
+                    :user-id="userId"
+                    :small="true"
+                  ></download-published-link>
                   <p/>
-                  <v-btn
-                    size="large"
-                    variant="outlined"
-                    class="text-none justify-start"
-                    min-width="14em"
-                    :href="ondselSeDownload['Linux-aarch64.AppImage']?.browser_download_url"
-                  >
-                    aarch64 AppImage
-                  </v-btn>
-                  <v-btn
-                    :href="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']?.browser_download_url"
-                    flat
-                    size="x-small"
-                    class="text-caption text-red"
-                  >SHA256</v-btn>
+                  <download-published-link
+                    :details="ondselSeDownload['Linux-aarch64.AppImage']"
+                    :user-id="userId"
+                    :small="false"
+                  ></download-published-link>
+                  <download-published-link
+                    :details="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']"
+                    :user-id="userId"
+                    :small="true"
+                  ></download-published-link>
                 </v-container>
               </v-container>
               <p/>
@@ -61,37 +51,27 @@
                   />
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
-                  <v-btn
-                    size="large"
-                    variant="outlined"
-                    class="text-none justify-start"
-                    min-width="14em"
-                    :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
-                  >
-                    Apple Silicon dmg
-                  </v-btn>
-                  <v-btn
-                    :href="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']?.browser_download_url"
-                    flat
-                    size="x-small"
-                    class="text-caption text-red"
-                  >SHA256</v-btn>
+                  <download-published-link
+                    :details="ondselSeDownload['macOS-apple-silicon-arm64.dmg']"
+                    :user-id="userId"
+                    :small="false"
+                  ></download-published-link>
+                  <download-published-link
+                    :details="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']"
+                    :user-id="userId"
+                    :small="true"
+                  ></download-published-link>
                   <p/>
-                  <v-btn
-                    size="large"
-                    variant="outlined"
-                    class="text-none justify-start mt-6"
-                    min-width="14em"
-                    :href="ondselSeDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
-                  >
-                    Intel dmg
-                  </v-btn>
-                  <v-btn
-                    :href="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']?.browser_download_url"
-                    flat
-                    size="x-small"
-                    class="text-caption text-red"
-                  >SHA256</v-btn>
+                  <download-published-link
+                    :details="ondselSeDownload['macOS-intel-x86_64.dmg']"
+                    :user-id="userId"
+                    :small="false"
+                  ></download-published-link>
+                  <download-published-link
+                    :details="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']"
+                    :user-id="userId"
+                    :small="true"
+                  ></download-published-link>
                 </v-container>
               </v-container>
               <v-container class="d-flex flex-row mt-4 justify-start">
@@ -103,24 +83,16 @@
                   />
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
-                  <v-btn
-                    size="large"
-                    variant="outlined"
-                    class="text-none justify-start mt-4"
-                    min-width="14em"
-                    :href="ondselSeDownload['Windows-x86_64-installer.exe']?.browser_download_url"
-                  >
-                    x86_64 installer
-                  </v-btn>
-                  <form method="POST" :action="`${ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url}`">
-                    <input type="hidden" name="downloadCounter" :value="`${getObscuredForCustomMiddleware()}`">
-                    <v-btn
-                      flat
-                      size="x-small"
-                      class="text-caption text-red"
-                      type="submit"
-                    >SHA256</v-btn>
-                  </form>
+                  <download-published-link
+                    :details="ondselSeDownload['Windows-x86_64-installer.exe']"
+                    :user-id="userId"
+                    :small="false"
+                  ></download-published-link>
+                  <download-published-link
+                    :details="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']"
+                    :user-id="userId"
+                    :small="true"
+                  ></download-published-link>
                 </v-container>
               </v-container>
             </v-card-text>
@@ -145,35 +117,17 @@
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
-                        <v-btn
-                          size="large"
-                          variant="outlined"
-                          class="text-none justify-start mt-6"
-                          min-width="14em"
-                          :href="weeklyDownload['Linux-x86_64.AppImage']?.browser_download_url"
-                        >
-                          <span>
-                            x86_64 AppImage
-                            <span
-                              class="text-sm-caption"
-                            ><br>{{dateFormat(weeklyDownload['Linux-x86_64.AppImage']?.releaseDate)}}</span>
-                          </span>
-                        </v-btn>
+                        <download-published-link
+                          :details="weeklyDownload['Linux-x86_64.AppImage']"
+                          :user-id="userId"
+                          :small="false"
+                        ></download-published-link>
                         <p/>
-                        <v-btn
-                          size="large"
-                          variant="outlined"
-                          class="text-none justify-start mt-6"
-                          min-width="14em"
-                          :href="weeklyDownload['Linux-aarch64.AppImage']?.browser_download_url"
-                        >
-                          <span>
-                            aarch64 AppImage
-                            <span
-                              class="text-sm-caption"
-                            ><br>{{dateFormat(weeklyDownload['Linux-aarch64.AppImage']?.releaseDate)}}</span>
-                          </span>
-                        </v-btn>
+                        <download-published-link
+                          :details="weeklyDownload['Linux-aarch64.AppImage']"
+                          :user-id="userId"
+                          :small="false"
+                        ></download-published-link>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -192,35 +146,17 @@
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
-                        <v-btn
-                          size="large"
-                          variant="outlined"
-                          class="text-none justify-start"
-                          min-width="14em"
-                          :href="weeklyDownload['macOS-apple-silicon-arm64.dmg']?.browser_download_url"
-                        >
-                          <span>
-                            Apple Silicon dmg
-                            <span
-                              class="text-sm-caption"
-                            ><br>{{dateFormat(weeklyDownload['macOS-apple-silicon-arm64.dmg']?.releaseDate)}}</span>
-                          </span>
-                        </v-btn>
+                        <download-published-link
+                          :details="weeklyDownload['macOS-apple-silicon-arm64.dmg']"
+                          :user-id="userId"
+                          :small="false"
+                        ></download-published-link>
                         <p/>
-                        <v-btn
-                          size="large"
-                          variant="outlined"
-                          class="text-none justify-start mt-6"
-                          min-width="14em"
-                          :href="weeklyDownload['macOS-intel-x86_64.dmg']?.browser_download_url"
-                        >
-                          <span>
-                            Intel dmg
-                            <span
-                              class="text-sm-caption"
-                            ><br>{{dateFormat(weeklyDownload['macOS-intel-x86_64.dmg']?.releaseDate)}}</span>
-                          </span>
-                        </v-btn>
+                        <download-published-link
+                          :details="weeklyDownload['macOS-intel-x86_64.dmg']"
+                          :user-id="userId"
+                          :small="false"
+                        ></download-published-link>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -238,20 +174,11 @@
                   <v-expansion-panels>
                     <v-expansion-panel title="for testing">
                       <v-expansion-panel-text>
-                        <v-btn
-                          size="large"
-                          variant="outlined"
-                          class="text-none justify-start mt-4"
-                          min-width="14em"
-                          :href="weeklyDownload['Windows-x86_64.7z']?.browser_download_url"
-                        >
-                          <span>
-                            x86_64.7z
-                            <span
-                              class="text-sm-caption"
-                            ><br>{{dateFormat(weeklyDownload['Windows-x86_64.7z']?.releaseDate)}}</span>
-                          </span>
-                        </v-btn>
+                        <download-published-link
+                          :details="weeklyDownload['Windows-x86_64.7z']"
+                          :user-id="userId"
+                          :small="false"
+                        ></download-published-link>
                       </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -294,36 +221,38 @@ import {mapState} from "vuex";
 import {SubscriptionTypeMap} from "@/store/services/users";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
 import {models} from "@feathersjs/vuex";
+import DownloadPublishedLink from "@/components/DownloadPublishedLink.vue";
 
 const { Publisher } = models.api;
 
 export default {
   name: 'DownloadAndExplore',
-  components: {SignupProgressBar},
+  components: {DownloadPublishedLink, SignupProgressBar},
   data: () => ({
     ondselSeDownload: {},
     ondselSeVersionTxt: 'tbd',
     weeklyDownload: {},
     weeklyBuildDate: 'tbd',
-    releaseFileTypes: [
-      'Linux-x86_64.AppImage',
-      'Linux-x86_64.AppImage-SHA256.txt',
-      'Linux-aarch64.AppImage',
-      'Linux-aarch64.AppImage-SHA256.txt',
-      'macOS-apple-silicon-arm64.dmg',
-      'macOS-apple-silicon-arm64.dmg-SHA256.txt',
-      'macOS-intel-x86_64.dmg',
-      'macOS-intel-x86_64.dmg-SHA256.txt',
-      'Windows-x86_64-installer.exe',
-      'Windows-x86_64-installer.exe-SHA256.txt',
-    ],
-    weeklyFileTypes: [
-      'Linux-aarch64.AppImage',
-      'Linux-x86_64.AppImage',
-      'macOS-apple-silicon-arm64.dmg',
-      'macOS-intel-x86_64.dmg',
-      'Windows-x86_64.7z',
-    ],
+    releaseFileTypes: {
+      'Linux-x86_64.AppImage': 'x86_64 AppImage',
+      'Linux-x86_64.AppImage-SHA256.txt': 'SHA256',
+      'Linux-aarch64.AppImage': 'aarch64 AppImage',
+      'Linux-aarch64.AppImage-SHA256.txt': 'SHA256',
+      'macOS-apple-silicon-arm64.dmg': 'Apple Silicon dmg',
+      'macOS-apple-silicon-arm64.dmg-SHA256.txt': 'SHA256',
+      'macOS-intel-x86_64.dmg': "Intel dmg",
+      'macOS-intel-x86_64.dmg-SHA256.txt': 'SHA256',
+      'Windows-x86_64-installer.exe': 'x86_64 installer',
+      'Windows-x86_64-installer.exe-SHA256.txt': 'SHA256',
+    },
+    weeklyFileTypes: {
+      'Linux-aarch64.AppImage': 'x86_64 AppImage',
+      'Linux-x86_64.AppImage': 'aarch64 AppImage',
+      'macOS-apple-silicon-arm64.dmg': 'Apple Silicon dmg',
+      'macOS-intel-x86_64.dmg': "Intel dmg",
+      'Windows-x86_64.7z': 'x86_64.7z',
+    },
+    userId: '',
   }),
   computed: {
     ...mapState('auth', { loggedInUser: 'payload' }),
@@ -349,12 +278,17 @@ export default {
         url = `/publisher/${item._id}/download/${item.filename}`;
       }
       if (cadence === 'stable') {
+        const shortName = this.releaseFileTypes[target];
         osd[target] = item;
         osd[target].browser_download_url = url;
+        osd[target].shortName = shortName;
+        osd[target].releaseDate = false; // prevents display
         osVer = item.release;
       } else {
+        const shortName = this.weeklyFileTypes[target];
         wd[target] = item;
         wd[target].browser_download_url = url;
+        wd[target].shortName = shortName;
         buildDate = this.dateFormat(item.releaseDate);
       }
     }
@@ -362,10 +296,9 @@ export default {
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
     this.weeklyBuildDate = buildDate;
+    this.userId = this.user._id.toString();
   },
   methods: {
-    async scanPublisherCollection() {
-    },
     async goPublicModels() {
       this.$router.push({name: 'PublicModels'})
     },
@@ -376,19 +309,6 @@ export default {
       }
       return "unknown"
     },
-    getObscuredForCustomMiddleware() {
-      return this.rot13rot5(this.user._id.toString());
-    },
-    rot13rot5(str) {
-      // ========== from chatGPT:
-      return str.replace(/[A-Za-z0-9]/g, function(c) {
-        if (/[A-Za-z]/.test(c)) {
-          return String.fromCharCode(c.charCodeAt(0) + (c.toUpperCase() <= 'M' ? 13 : -13));
-        } else if (/[0-9]/.test(c)) {
-          return String.fromCharCode((c.charCodeAt(0) - 48 + 5) % 10 + 48);
-        }
-      });
-    }
   },
 }
 </script>

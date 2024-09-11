@@ -78,14 +78,19 @@ function handlePublishedFileDownload(app) {
     thisPath,
     // authenticate('jwt'),
     async (req, res, next) => {
+      const { id } = req.params;
+      let publishedDetails;
       try {
-        const { id } = req.params;
+        publishedDetails = await app.service('publisher').get(id);
+      } catch (e) {
+        res.sendStatus(404);
+      }
+      try {
         if (!req.body.hasOwnProperty('downloadCounter')) {
           return res.status(401).json({ msg: 'authorization denied' });
         }
         const enc = req.body['downloadCounter'];
         const uid = rot13rot5(enc);
-        const publishedDetails = await app.service('publisher').get(id);
         await createUserEngagementEntryForPublisherDownload(publishedDetails, uid, app);
         const { url } = await app.service('upload').get(publishedDetails.uploadedUniqueFilename);
 
