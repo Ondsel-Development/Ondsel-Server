@@ -8,6 +8,6 @@ export const logger = createLogger({
   format: format.combine(format.splat(), format.simple()),
   transports: [
     new transports.Console(),
-    new transports.File({ filename: 'combined.log' }),
+    // new transports.File({ filename: 'combined.log' }),
   ]
 })
