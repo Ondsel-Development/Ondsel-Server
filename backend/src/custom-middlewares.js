@@ -3,16 +3,20 @@ import { logger } from './logger.js';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
 import path from 'path';
-import {authenticate} from "@feathersjs/authentication";
 import {
-  createUserEngagementEntry,
-  createUserEngagementEntryForMiddlewareGet
+  createUserEngagementEntryForPublisherDownload
 } from "./services/hooks/userEngagements.js";
 
-const setSessionAuthentication = (req, res, next) => {
-  req.authentication = req.session.authentication;
-  next();
-};
+function rot13rot5(str) {
+  // ========== from chatGPT:
+  return str.replace(/[A-Za-z0-9]/g, function(c) {
+    if (/[A-Za-z]/.test(c)) {
+      return String.fromCharCode(c.charCodeAt(0) + (c.toUpperCase() <= 'M' ? 13 : -13));
+    } else if (/[0-9]/.test(c)) {
+      return String.fromCharCode((c.charCodeAt(0) - 48 + 5) % 10 + 48);
+    }
+  });
+}
 
 function handleDownloadSharedModelFile(app) {
   app.use(
@@ -70,32 +74,32 @@ function handleDownloadFile(app) {
 
 function handlePublishedFileDownload(app) {
   const thisPath = '/publisher/:id/download/:filename';
-  app.use(
+  app.post(
     thisPath,
-    [
-      // this is disabled for testing; once in a full docker environment running both front/back,
-      // test with JWT turned back on:
-      //
-      // setSessionAuthentication,
-      // authenticate('jwt'),
-      // createUserEngagementEntryForMiddlewareGet('publisher', 'get'), // use 'get' for feathers; not 'GET'
-      async (req, res, next) => {
-        try {
-          const { id } = req.params;
-          const publishedDetails = await app.service('publisher').get(id);
-          const { url } = await app.service('upload').get(publishedDetails.uploadedUniqueFilename);
-          // Set appropriate headers for file download
-          res.setHeader('Content-Disposition', `attachment; filename="${publishedDetails.filename}"`);
-          res.setHeader('Content-Type', 'application/octet-stream');
-          // Stream the file directly to the client
-          const response = await axios.get(url, { responseType: 'stream' });
-          response.data.pipe(res);
-        } catch (e) {
-          logger.error(e);
-          next(e);
+    // authenticate('jwt'),
+    async (req, res, next) => {
+      try {
+        const { id } = req.params;
+        if (!req.body.hasOwnProperty('downloadCounter')) {
+          return res.status(401).json({ msg: 'authorization denied' });
         }
-      },
-    ]
+        const enc = req.body['downloadCounter'];
+        const uid = rot13rot5(enc);
+        const publishedDetails = await app.service('publisher').get(id);
+        await createUserEngagementEntryForPublisherDownload(publishedDetails, uid, app);
+        const { url } = await app.service('upload').get(publishedDetails.uploadedUniqueFilename);
+
+        // Set appropriate headers for file download
+        res.setHeader('Content-Disposition', `attachment; filename="${publishedDetails.filename}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        // Stream the file directly to the client
+        const response = await axios.get(url, { responseType: 'stream' });
+        response.data.pipe(res);
+      } catch (e) {
+        logger.error(e);
+        next(e);
+      }
+    },
   )
 }
 
@@ -124,3 +128,4 @@ export function registerCustomMiddlewares(app) {
   handlePublishedFileDownload(app);
   handleStatusEndpoint(app);
 }
+

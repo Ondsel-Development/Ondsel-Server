@@ -112,12 +112,15 @@
                   >
                     x86_64 installer
                   </v-btn>
-                  <v-btn
-                    :href="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url"
-                    flat
-                    size="x-small"
-                    class="text-caption text-red"
-                  >SHA256</v-btn>
+                  <form method="POST" :action="`${ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']?.browser_download_url}`">
+                    <input type="hidden" name="downloadCounter" :value="`${getObscuredForCustomMiddleware()}`">
+                    <v-btn
+                      flat
+                      size="x-small"
+                      class="text-caption text-red"
+                      type="submit"
+                    >SHA256</v-btn>
+                  </form>
                 </v-container>
               </v-container>
             </v-card-text>
@@ -353,10 +356,8 @@ export default {
         wd[target] = item;
         wd[target].browser_download_url = url;
         buildDate = this.dateFormat(item.releaseDate);
-        console.log(item)
       }
     }
-    console.log(buildDate)
     this.ondselSeDownload = osd;
     this.ondselSeVersionTxt = osVer;
     this.weeklyDownload = wd;
@@ -375,6 +376,19 @@ export default {
       }
       return "unknown"
     },
+    getObscuredForCustomMiddleware() {
+      return this.rot13rot5(this.user._id.toString());
+    },
+    rot13rot5(str) {
+      // ========== from chatGPT:
+      return str.replace(/[A-Za-z0-9]/g, function(c) {
+        if (/[A-Za-z]/.test(c)) {
+          return String.fromCharCode(c.charCodeAt(0) + (c.toUpperCase() <= 'M' ? 13 : -13));
+        } else if (/[0-9]/.test(c)) {
+          return String.fromCharCode((c.charCodeAt(0) - 48 + 5) % 10 + 48);
+        }
+      });
+    }
   },
 }
 </script>

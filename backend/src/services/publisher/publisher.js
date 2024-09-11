@@ -68,7 +68,7 @@ export const publisher = (app) => {
       ],
       get: [authenticate('jwt')],
       find: [],
-      create: [authenticate('jwt')],
+      create: [authenticateJwtWhenNotADownload()],
       remove: [authenticate('jwt')],
     },
     before: {
@@ -109,6 +109,18 @@ export const publisher = (app) => {
       all: []
     }
   })
+}
+
+export const authenticateJwtWhenNotADownload = () => {
+  // this is an "around" hook
+  return async (context, next) => {
+    if (context.path.includes(`/download/`) === true) {
+      await next()
+    } else {
+      await authenticate("jwt")(context, next);
+    }
+    return context;
+  }
 }
 
 
