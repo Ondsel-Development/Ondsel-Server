@@ -83,9 +83,12 @@ function handlePublishedFileDownload(app) {
       try {
         publishedDetails = await app.service('publisher').get(id);
       } catch (e) {
-        res.sendStatus(404);
+        return res.status(404).json({msg: 'not found'});
       }
       try {
+        if (!publishedDetails) {
+          return res.status(404).json({msg: 'not found'})
+        }
         if (!req.body.hasOwnProperty('downloadCounter')) {
           return res.status(401).json({ msg: 'authorization denied' });
         }
