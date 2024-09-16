@@ -27,7 +27,6 @@
           <v-text-field
             v-model.trim="newEmailAddress"
             label="New email address"
-            hint="enter a plain email address (user@domain.tld)"
             :disabled="pendingChangeEmail"
             :rules="[rules.isRequired, rules.isEmail]"
           ></v-text-field>
