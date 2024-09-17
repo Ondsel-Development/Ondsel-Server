@@ -47,7 +47,6 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
     keywords: ['find'],
-    publisher: ['get'],
   },
   rest: {
     authentication: ['create', 'remove'],
@@ -59,7 +58,6 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
     keywords: ['find'],
-    publisher: ['get'],
   }
 }
 
@@ -123,24 +121,21 @@ export const createUserEngagementEntry = async context => {
   }
 }
 
-export const createUserEngagementEntryForMiddlewareGet = (mwPath, mwMethod) => {
-  return async (context, next) => {
-    const userEngagementService = context.app.service('user-engagements');
-    const { path, method, params } = context;
-    const user = context.params.user;
-    if (canTrackEvent(params.provider, mwPath, mwMethod, eventsToTrack)) {
-      const payload = generateUserEngagementPayload(context);
-      if (user) {
-        const ue = await userEngagementService.create(payload, { user: user });
-      } else {
-        console.log("anon");
-      }
-    }
-    console.log("HERE1");
-    next();
-    console.log("HERE2");
-    return context;
+export async function createUserEngagementEntryForPublisherDownload(publishedDetails, userId, app) {
+  // because this is called from expressJS-style middleware, we have no 'context'.
+  const userEngagementService = app.service('user-engagements');
+  const userService = app.service('users');
+  const user = await userService.get(userId);
+  const falseContext = {
+    id: publishedDetails._id,
+    path: 'publisher',
+    method: 'get', // it's really a POST, but this makes more sense in context
+    params: {
+      provider: ConnectionTypeMap.socketio,
+    },
   }
+  const payload = generateUserEngagementPayload(falseContext);
+  const ue = await userEngagementService.create(payload, { user: user });
 }
 
 export const saveContextQueryState = context => {

@@ -24,6 +24,7 @@ export const notifier = (app) => {
   // "verifySignupShort" - (NOT ACTIVE YET) used to confirm verification and set user.isVerified=true; which sends a txt message also
   // "sendResetPwd" - used to send a password-change email
   // "resetPwdLong" - used to change the password using the resetToken
+  // "identityChange" - used to change the user's email address
   //
   // see https://feathers-a-m.netlify.app/service-calls.html for more detail
 
@@ -35,7 +36,7 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: `[Ondsel] Please confirm your Ondsel account`,
+          subject: `Let's confirm your Ondsel account`,
           text: `To verify your newly registered account with Ondsel, please click here: `
             + getLink('verify-email', user.verifyToken, user._id, baseUrl)
             + `\n\nYours sincerely,\n`
@@ -46,8 +47,12 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: `[Ondsel] Thanks for confirming your account`,
+          subject: `Welcome to Ondsel Lens!`,
           text: `Verification of ${user.email} is complete. Welcome to Ondsel Lens!\n\n`
+            + `We show new features and post tutorials on our YouTube channel:\n`
+            + `https://www.youtube.com/@ondsel\n\n`
+            + `For user support, please join our Discord server:\n`
+            + `https://discord.gg/7jmzezyyfP\n\n`
             + `Yours sincerely,\n`
             + `Team Ondsel`,
         });
@@ -66,7 +71,7 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: user.email,
-          subject: `[Ondsel] Your password has been changed`,
+          subject: `Your Ondsel password has been changed`,
           text: `Your password for ${user.username} at Ondsel has been successfully changed.\n\n`
             + `Yours sincerely,\n`
             + `Team Ondsel`,
@@ -75,7 +80,7 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email,
-          subject: `[Ondsel] You have been invited to "${invite.organization.name}"`,
+          subject: `You have been invited to "${invite.organization.name}"`,
           text: `You have been invited to join an organization titled "${invite.organization.name}".\n`
             + `Please click the following link to accept: `
             + getLink('join-org', invite.inviteToken, invite.inviteId, baseUrl)
@@ -86,9 +91,23 @@ export const notifier = (app) => {
         return sendEmail({
           from: 'contact@ondsel.com',
           to: invite.email, // NOTE: this email is the User's email; NOT the invite's original email (if different)
-          subject: `[Ondsel] You have been accepted to "${invite.organization.name}"`,
+          subject: `You have been accepted to "${invite.organization.name}"`,
           text: `You are now a member of the "${invite.organization.name}" organization.\n\n`
             + `Yours sincerely,\n`
+            + `Team Ondsel`,
+        });
+      case authManagementActionTypeMap.identityChange:
+        // added by auth-library:
+        // "verifyChanges": {
+        //   "email": "johnd+111@ondsel.com"
+        // },
+        return sendEmail({
+          from: 'contact@ondsel.com',
+          to: user.verifyChanges.email,
+          subject: `Please confirm your email change`,
+          text: `To verify your newly registered email address with Ondsel, please click here: `
+            + getLink('verify-email', user.verifyToken, user._id, baseUrl)
+            + `\n\nYours sincerely,\n`
             + `Team Ondsel`,
         });
       default:
