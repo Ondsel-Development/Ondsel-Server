@@ -246,8 +246,8 @@ export default {
       'Windows-x86_64-installer.exe-SHA256.txt': 'SHA256',
     },
     weeklyFileTypes: {
-      'Linux-aarch64.AppImage': 'x86_64 AppImage',
-      'Linux-x86_64.AppImage': 'aarch64 AppImage',
+      'Linux-aarch64.AppImage': 'aarch64 AppImage',
+      'Linux-x86_64.AppImage': 'x86_64 AppImage',
       'macOS-apple-silicon-arm64.dmg': 'Apple Silicon dmg',
       'macOS-intel-x86_64.dmg': "Intel dmg",
       'Windows-x86_64.7z': 'x86_64.7z',
