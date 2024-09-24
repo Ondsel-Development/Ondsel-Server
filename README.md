@@ -87,6 +87,7 @@ $ docker run -p 9000:8080 --name fc_worker fc-worker:latest
     1. `cd backend`
     1. `zip -r ./od-backend.zip .`
     1. `cd ../frontend`
+    1. add the `.env` file that you have
     1. `zip -r ./od-frontend.zip .`
 1. Login to AWS dashboard (https://console.aws.amazon.com/console/home).
 1. Open `Elastic Beanstalk` app (https://us-east-1.console.aws.amazon.com/elasticbeanstalk/home?region=us-east-1#/environments)
