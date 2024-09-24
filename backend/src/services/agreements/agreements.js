@@ -18,6 +18,8 @@ import swagger from "feathers-swagger";
 import {disallow, iff, isProvider, preventChanges} from "feathers-hooks-common";
 import {canUserAccessDirectoryOrFilePatchMethod} from "../directories/helpers.js";
 import {BadRequest} from "@feathersjs/errors";
+import {isAdminUser} from "../../hooks/is-user.js";
+import {verifyOndselAdministrativePower} from "../hooks/administration.js";
 
 export * from './agreements.class.js'
 export * from './agreements.schema.js'
@@ -55,7 +57,7 @@ export const agreements = (app) => {
       find: [],
       get: [],
       create: [
-        disallow('external'),
+        verifyOndselAdministrativePower,
         schemaHooks.validateData(agreementsDataValidator),
         schemaHooks.resolveData(agreementsDataResolver)
       ],
