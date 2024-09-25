@@ -8,7 +8,7 @@
           Check your email for a confirmation message.
         </p>
         <p>
-          Once confirmed, your account will be active and you will be sent to the Choose Tier step.
+          Once confirmed, your account will be active and you will be sent to the Download & Explore page.
         </p>
       </v-card-text>
     </v-card>

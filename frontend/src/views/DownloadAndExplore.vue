@@ -1,13 +1,18 @@
 <template>
   <v-container class="d-flex flex-column justify-center">
-    <signup-progress-bar step="3" msg="recommend downloading Ondsel SE next"></signup-progress-bar>
+    <signup-progress-bar step="2" msg="recommend downloading Ondsel ES next"></signup-progress-bar>
+    <v-card v-if="promptForSurvey">
+      <v-card-text>
+        <markdown-viewer :markdown-html="promptForSurveyHtml"></markdown-viewer>
+      </v-card-text>
+    </v-card>
     <v-container class="d-flex flex-wrap justify-center">
       <v-card flat>
         <v-card-title>Download</v-card-title>
         <v-card-text>
           <v-card width="30em">
             <v-card-title>Ondsel ES</v-card-title>
-            <v-card-subtitle>v {{ondselSeVersionTxt}}</v-card-subtitle>
+            <v-card-subtitle>v {{ondselEsVersionTxt}}</v-card-subtitle>
             <v-card-text class="overflow-y-auto" >
               <v-container class="d-flex flex-row justify-start">
                 <v-avatar width="7em" rounded="0" class="mr-2">
@@ -19,23 +24,23 @@
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <download-published-link
-                    :details="ondselSeDownload['Linux-x86_64.AppImage']"
+                    :details="ondselEsDownload['Linux-x86_64.AppImage']"
                     :user-id="userId"
                     :small="false"
                   ></download-published-link>
                   <download-published-link
-                    :details="ondselSeDownload['Linux-x86_64.AppImage-SHA256.txt']"
+                    :details="ondselEsDownload['Linux-x86_64.AppImage-SHA256.txt']"
                     :user-id="userId"
                     :small="true"
                   ></download-published-link>
                   <p/>
                   <download-published-link
-                    :details="ondselSeDownload['Linux-aarch64.AppImage']"
+                    :details="ondselEsDownload['Linux-aarch64.AppImage']"
                     :user-id="userId"
                     :small="false"
                   ></download-published-link>
                   <download-published-link
-                    :details="ondselSeDownload['Linux-aarch64.AppImage-SHA256.txt']"
+                    :details="ondselEsDownload['Linux-aarch64.AppImage-SHA256.txt']"
                     :user-id="userId"
                     :small="true"
                   ></download-published-link>
@@ -52,23 +57,23 @@
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <download-published-link
-                    :details="ondselSeDownload['macOS-apple-silicon-arm64.dmg']"
+                    :details="ondselEsDownload['macOS-apple-silicon-arm64.dmg']"
                     :user-id="userId"
                     :small="false"
                   ></download-published-link>
                   <download-published-link
-                    :details="ondselSeDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']"
+                    :details="ondselEsDownload['macOS-apple-silicon-arm64.dmg-SHA256.txt']"
                     :user-id="userId"
                     :small="true"
                   ></download-published-link>
                   <p/>
                   <download-published-link
-                    :details="ondselSeDownload['macOS-intel-x86_64.dmg']"
+                    :details="ondselEsDownload['macOS-intel-x86_64.dmg']"
                     :user-id="userId"
                     :small="false"
                   ></download-published-link>
                   <download-published-link
-                    :details="ondselSeDownload['macOS-intel-x86_64.dmg-SHA256.txt']"
+                    :details="ondselEsDownload['macOS-intel-x86_64.dmg-SHA256.txt']"
                     :user-id="userId"
                     :small="true"
                   ></download-published-link>
@@ -84,12 +89,12 @@
                 </v-avatar>
                 <v-container style="border-left: 4px solid black;">
                   <download-published-link
-                    :details="ondselSeDownload['Windows-x86_64-installer.exe']"
+                    :details="ondselEsDownload['Windows-x86_64-installer.exe']"
                     :user-id="userId"
                     :small="false"
                   ></download-published-link>
                   <download-published-link
-                    :details="ondselSeDownload['Windows-x86_64-installer.exe-SHA256.txt']"
+                    :details="ondselEsDownload['Windows-x86_64-installer.exe-SHA256.txt']"
                     :user-id="userId"
                     :small="true"
                   ></download-published-link>
@@ -222,15 +227,19 @@ import {SubscriptionTypeMap} from "@/store/services/users";
 import SignupProgressBar from "@/components/SignupProgressBar.vue";
 import {models} from "@feathersjs/vuex";
 import DownloadPublishedLink from "@/components/DownloadPublishedLink.vue";
+import {marked} from "marked";
+import MarkdownViewer from "@/components/MarkdownViewer.vue";
 
-const { Publisher } = models.api;
+const { Publisher, Agreements } = models.api;
 
 export default {
   name: 'DownloadAndExplore',
-  components: {DownloadPublishedLink, SignupProgressBar},
+  components: {MarkdownViewer, DownloadPublishedLink, SignupProgressBar},
   data: () => ({
-    ondselSeDownload: {},
-    ondselSeVersionTxt: 'tbd',
+    promptForSurvey: false,
+    promptForSurveyHtml: '',
+    ondselEsDownload: {},
+    ondselEsVersionTxt: 'tbd',
     weeklyDownload: {},
     weeklyBuildDate: 'tbd',
     releaseFileTypes: {
@@ -262,6 +271,7 @@ export default {
     if (this.loggedInUser.user.tier === SubscriptionTypeMap.unverified) {
       this.$router.push({name: 'PendingVerification'})
     }
+    await this.getSurveyPrompt();
     let osVer = 'unknown';
     let buildDate = 'unknown';
     let osd = {};
@@ -292,13 +302,26 @@ export default {
         buildDate = this.dateFormat(item.releaseDate);
       }
     }
-    this.ondselSeDownload = osd;
-    this.ondselSeVersionTxt = osVer;
+    this.ondselEsDownload = osd;
+    this.ondselEsVersionTxt = osVer;
     this.weeklyDownload = wd;
     this.weeklyBuildDate = buildDate;
     this.userId = this.user._id.toString();
   },
   methods: {
+    async getSurveyPrompt() {
+      Agreements.find({
+        query: {category: 'signup-survey-prompt'}
+      }).then(response => {
+        if (response.data.length > 0) {
+          const promptDoc = response.data[0];
+          this.promptForSurvey = true;
+          this.promptForSurveyHtml = marked.parse(promptDoc.current.markdownContent);
+        }
+      }).catch((e) => {
+        console.error(e);
+      })
+    },
     async goPublicModels() {
       this.$router.push({name: 'PublicModels'})
     },
