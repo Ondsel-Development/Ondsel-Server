@@ -13,7 +13,7 @@ import configuration from '@feathersjs/configuration'
 import socketio from '@feathersjs/socketio'
 import swagger from 'feathers-swagger';
 import { iff, isProvider } from 'feathers-hooks-common';
-import {createUserEngagementEntry, saveContextQueryState} from './services/hooks/userEngagements.js';
+import {createUserEngagementEntry, saveContextQueryState, saveContextPayloadState} from './services/hooks/userEngagements.js';
 
 import { configurationValidator } from './configuration.js'
 import { logger } from './logger.js'
@@ -87,7 +87,10 @@ app.hooks({
     all: [logError]
   },
   before: {
-    all: [saveContextQueryState],
+    all: [
+      saveContextQueryState,
+      saveContextPayloadState,
+    ],
   },
   after: {
     all: [

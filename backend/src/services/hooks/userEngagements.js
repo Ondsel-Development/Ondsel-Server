@@ -16,11 +16,13 @@ const eventNameMapping = {
   'shared-models.create': 'CREATE_SHARED-MODEL',
   'shared-models.get': 'FETCH_SHARED-MODEL',
   'shared-models.find': 'FETCH_SHARED-MODEL',
+  'shared-models.patch': 'UPDATE_SHARED-MODEL',
   'shared-models.remove': 'REMOVE_SHARED-MODEL',
   'models.create': 'CREATE_MODEL',
   'models.get': 'FETCH_MODEL',
   'models.find': 'FETCH_MODEL',
   'models.remove': 'REMOVE_MODEL',
+  'models.patch': 'UPDATE_MODEL',
   'preferences.create': 'CREATE_PREFERENCE',
   'preferences.get': 'FETCH_PREFERENCE',
   'preferences.find': 'FETCH_PREFERENCE',
@@ -41,8 +43,8 @@ const eventsToTrack = {
     authentication: ['create', 'remove'],
     workspaces: ['create', 'get', 'find', 'remove'],
     organizations: ['create', 'get', 'find', 'remove'],
-    'shared-models': ['create', 'get', 'find', 'remove'],
-    models: ['create', 'get', 'find', 'remove'],
+    'shared-models': ['create', 'get', 'find', 'remove', 'patch'],
+    models: ['create', 'get', 'find', 'remove', 'patch'],
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
@@ -50,10 +52,10 @@ const eventsToTrack = {
   },
   rest: {
     authentication: ['create', 'remove'],
-    workspaces: ['create', 'get', 'find', 'remove'],
+    workspaces: ['create', 'remove'],
     organizations: ['create', 'get', 'find', 'remove'],
-    'shared-models': ['create', 'get', 'find', 'remove'],
-    models: ['create', 'get', 'find', 'remove'],
+    'shared-models': ['create', 'get', 'find', 'remove', 'patch'],
+    models: ['create', 'get', 'find', 'remove', 'patch'],
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'get', 'find', 'remove'],
@@ -95,7 +97,8 @@ const generateUserEngagementPayload = context => {
     ...(context.id && {contextId: context.id}),
     ...(!_.isEmpty(context.$userQuery) && {query: context.$userQuery}),
     ...(version && {version: version}),
-    ...(!context.id && {contextId: context?.result?._id})  // 'create' hook don't have context.id, so assigning from result
+    ...(!context.id && {contextId: context?.result?._id}),  // 'create' hook don't have context.id, so assigning from result
+    ...(!_.isEmpty(context.$userPayload) && {payload: context.$userPayload}),
   };
   return payload;
 }
@@ -140,5 +143,10 @@ export async function createUserEngagementEntryForPublisherDownload(publishedDet
 
 export const saveContextQueryState = context => {
   context.$userQuery = context.params.query;
+  return context;
+}
+
+export const saveContextPayloadState = context => {
+  context.$userPayload = context.data;
   return context;
 }
