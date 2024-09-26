@@ -36,6 +36,7 @@ const eventNameMapping = {
   'directories.find': 'FETCH_DIRECTORIES',
   'directories.remove': 'REMOVE_DIRECTORIES',
   'keywords.find': 'SEARCH',
+  'org-secondary-references.patch': 'UPDATE_ORG_SECONDARY_REFERENCES',
 }
 
 const eventsToTrack = {
@@ -49,6 +50,7 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'remove'],
     keywords: ['find'],
+    'org-secondary-references': ['patch'],
   },
   rest: {
     authentication: ['create', 'remove'],
@@ -60,6 +62,7 @@ const eventsToTrack = {
     file: ['create', 'get', 'find', 'remove'],
     directories: ['create', 'remove'],
     keywords: ['find'],
+    'org-secondary-references': ['patch'],
   }
 }
 
