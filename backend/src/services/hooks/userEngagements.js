@@ -66,28 +66,29 @@ function canTrackEvent(provider, path, method, config = eventsToTrack) {
 }
 
 
-const generateUserEngagementPayload = context => {
-  const { path, method, params } = context;
-
-  const getSource = () => {
-    const source = _.get(params.headers, 'x-lens-source');
-    if (source) {
-      if (_.some(SourceTypeMap, v => v === source)) {
-        return source;
-      }
-      return SourceTypeMap.unknown;
-    }
-    if (params.provider === ConnectionTypeMap.socketio) {
-      // TODO: When whether socket connection with lens website or not. Skipping for now.
-      return SourceTypeMap.lens;
+export const getSource = params => {
+  const source = _.get(params.headers, 'x-lens-source');
+  if (source) {
+    if (_.some(SourceTypeMap, v => v === source)) {
+      return source;
     }
     return SourceTypeMap.unknown;
   }
+  if (params.provider === ConnectionTypeMap.socketio) {
+    // TODO: When whether socket connection with lens website or not. Skipping for now.
+    return SourceTypeMap.lens;
+  }
+  return SourceTypeMap.unknown;
+}
+
+
+const generateUserEngagementPayload = context => {
+  const { path, method, params } = context;
 
   const version = _.get(params.headers, 'x-lens-version');
 
   const payload = {
-    source: getSource(),
+    source: getSource(params),
     path: path,
     method: method,
     connection: params.provider,

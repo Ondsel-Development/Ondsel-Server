@@ -1,6 +1,6 @@
 export const userEngagementsPath = 'user-engagements'
 
-export const userEngagementsMethods = ['find', 'get', 'create', 'patch', 'remove']
+export const userEngagementsMethods = ['get', 'create']
 
 export const userEngagementsClient = (client) => {
   const connection = client.get('connection')
