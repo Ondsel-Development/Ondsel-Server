@@ -20,6 +20,7 @@ export const userEngagementsSchema = Type.Object(
     method: Type.String(),
     contextId: Type.Optional(ObjectIdSchema()),
     query: Type.Optional(Type.Object({})),
+    payload: Type.Optional(Type.Object({})),
     connection: ConnectionType,
   },
   { $id: 'UserEngagements', additionalProperties: false }
@@ -39,6 +40,7 @@ export const userEngagementsDataSchema = Type.Pick(userEngagementsSchema, [
   'query',
   'connection',
   'version',
+  'payload',
 ], {
   $id: 'UserEngagementsData'
 })
