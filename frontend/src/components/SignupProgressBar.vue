@@ -13,13 +13,8 @@
       </v-timeline-item>
 
       <v-timeline-item :dot-color="itemDotColor[2]">
-        <v-card-title :class="itemTitleClass[2]">Choose Tier</v-card-title>
+        <v-card-title :class="itemTitleClass[2]">Download / Explore</v-card-title>
         <v-card-subtitle>{{itemSubtitle[2]}}</v-card-subtitle>
-      </v-timeline-item>
-
-      <v-timeline-item :dot-color="itemDotColor[3]">
-        <v-card-title :class="itemTitleClass[3]">Download / Explore</v-card-title>
-        <v-card-subtitle>{{itemSubtitle[3]}}</v-card-subtitle>
       </v-timeline-item>
     </v-timeline>
   </v-card>
@@ -41,9 +36,9 @@ export default {
   data() {
     return {
       showProgressBar: false,
-      itemDotColor: ['white', 'white', 'white', 'white'],
-      itemSubtitle: ['', '', '', ''],
-      itemTitleClass: ['', '', '', ''],
+      itemDotColor: ['white', 'white', 'white'],
+      itemSubtitle: ['', '', ''],
+      itemTitleClass: ['', '', ''],
       messageToDisplay: '',
     }
   },
@@ -60,11 +55,8 @@ export default {
         this.showProgressBar = true;
       } else {
         this.showProgressBar = this.$route.query.psu;
-        if (step === 2 && this.$route.name === 'InitialPurchaseForPeer') {
-          this.showProgressBar = true;
-        }
       }
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         if (i < step) {
           this.itemDotColor[i] = 'green';
           this.itemSubtitle[i] = '';

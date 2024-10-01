@@ -27,6 +27,13 @@
             >
               Terms of Service/Use
             </v-list-item>
+            <v-list-item
+              color="link"
+              class="text-decoration-underline"
+              @click="$router.push({ name: 'XavierUpdateKeyDocuments', params: {name: 'signup-survey-prompt'} })"
+            >
+              Signup Survey Prompt
+            </v-list-item>
           </v-list>
         </v-list-item>
         <v-list-item

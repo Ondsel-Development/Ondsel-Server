@@ -260,6 +260,7 @@ export const agreementsAcceptedSchema = Type.Object(
   {
     currentPrivacyPolicyVersion: Type.Union([Type.String(), Type.Null()]),
     currentTermsOfServiceVersion: Type.Union([Type.String(), Type.Null()]),
+    sawSignupSurvey: Type.Optional(Type.Boolean()),
     history: Type.Array(specificAgreementCompletionType),
   }
 )

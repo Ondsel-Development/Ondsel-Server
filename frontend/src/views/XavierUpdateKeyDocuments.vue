@@ -24,7 +24,7 @@
             </v-card>
             <v-card max-width="60em" class="ma-2">
               <v-card-text border="primary md">
-                <pre style="overflow-x: auto;">{{lensSiteDocument?.current?.markdownContent}}</pre>
+                <pre style="overflow-x: auto;">{{markdownContent}}</pre>
               </v-card-text>
             </v-card>
           </v-list-item-media>
@@ -57,7 +57,7 @@
     </v-card-text>
   </v-card>
 
-  <edit-key-document-dialog ref="editKeyDocument" :markdown="lensSiteDocument?.current?.markdownContent" @save-key-document="saveKeyDocument"></edit-key-document-dialog>
+  <edit-key-document-dialog ref="editKeyDocument" :markdown="markdownContent" @save-key-document="saveKeyDocument"></edit-key-document-dialog>
 </template>
 
 <script>
@@ -73,8 +73,10 @@ export default {
   name: 'XavierUpdateKeyDocuments',
   components: {EditKeyDocumentDialog, MarkdownViewer},
   data: () => ({
+    docExists: false,
     lensSiteDocument: {},
-    markdownHtml: 'missing data',
+    markdownContent: 'content missing',
+    markdownHtml: 'content missing',
     history: [],
     versionHeaders: [
       {
@@ -111,8 +113,10 @@ export default {
         query: {category: this.docName}
       }).then(response => {
         if (response.data.length > 0) {
+          this.docExists = true;
           this.lensSiteDocument = response.data[0];
-          this.markdownHtml =  marked.parse(this.lensSiteDocument.current.markdownContent);
+          this.markdownContent = this.lensSiteDocument.current.markdownContent
+          this.markdownHtml =  marked.parse(this.markdownContent);
           let newHistory = [];
           for (const h of this.lensSiteDocument.history) {
             newHistory.push({
@@ -127,11 +131,6 @@ export default {
     },
     async saveKeyDocument(newDoc, version) {
       this.$refs.editKeyDocument.$data.isPatchPending = true;
-      let newCurrent = {...this.lensSiteDocument.current};
-      newCurrent.markdownContent = newDoc;
-      let newHistory = [];
-      newHistory.push(...this.lensSiteDocument.history);
-      let now = Date.now();
       // interpret version text
       let effectiveDate;
       let deprecatedDate;
@@ -152,23 +151,46 @@ export default {
         this.$refs.editKeyDocument.$data.isPatchPending = false;
         return;
       }
-      newCurrent.version = version;
-      // deprecate the old
-      const lastIndex = newHistory.length - 1;
-      newHistory[lastIndex].deprecated = deprecatedDate;
-      // add the new
-      newCurrent.agreementDocId = this.newObjectId();
-      newCurrent.effective = effectiveDate;
-      newCurrent.docPostedAt = now;
-      newHistory.push(newCurrent);
-      // save it all and return
-      await models.api.Agreements.patch(
-        this.lensSiteDocument._id.toString(),
-        {
-          current: newCurrent,
-          history: newHistory,
+      let now = Date.now();
+      if (this.docExists) {
+        let newCurrent = {...this.lensSiteDocument.current};
+        newCurrent.markdownContent = newDoc;
+        let newHistory = [];
+        newHistory.push(...this.lensSiteDocument.history);
+        newCurrent.version = version;
+        // deprecate the old
+        const lastIndex = newHistory.length - 1;
+        newHistory[lastIndex].deprecated = deprecatedDate;
+        // add the new
+        newCurrent.agreementDocId = this.newObjectId();
+        newCurrent.effective = effectiveDate;
+        newCurrent.docPostedAt = now;
+        newHistory.push(newCurrent);
+        // save it all and return
+        await models.api.Agreements.patch(
+          this.lensSiteDocument._id.toString(),
+          {
+            current: newCurrent,
+            history: newHistory,
+          }
+        );
+      } else { // else doc does not exist so create a new one
+        let specificAgreement = {
+          agreementDocId: this.newObjectId(),
+          title: '', // todo: consider deprecating this field in later PR; field never used
+          effective: effectiveDate,
+          deprecated: null,
+          version: version,
+          markdownContent: newDoc,
+          docPostedAt: now,
         }
-      );
+        const agreement = {
+          category: this.docName,
+          current: specificAgreement,
+          history: [specificAgreement],
+        }
+        await models.api.Agreements.create(agreement)
+      }
       this.update();
       this.$refs.editKeyDocument.$data.isPatchPending = false;
       this.$refs.editKeyDocument.$data.dialog = false;
