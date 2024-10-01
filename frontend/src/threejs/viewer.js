@@ -63,9 +63,12 @@ export class Viewer {
       NEAR, // Near plane
       FAR, // Far plane
     );
-    this.camera.position.set(
-      1, -1, 1
-    );
+
+    // Position the camera along the negative Y-axis
+    this.camera.position.set(1, -1, 1);
+    // Set the camera's "up" vector to the Z-axis
+    this.camera.up.set(0, 0, 1);
+
     this.scene.add(this.camera);
 
     this.createLights();
