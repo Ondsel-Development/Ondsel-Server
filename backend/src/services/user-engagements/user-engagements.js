@@ -1,5 +1,7 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/service.html
 import { authenticate } from '@feathersjs/authentication'
+import swagger from 'feathers-swagger';
+import { disallow, iff } from 'feathers-hooks-common';
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import {
@@ -10,11 +12,15 @@ import {
   userEngagementsExternalResolver,
   userEngagementsDataResolver,
   userEngagementsPatchResolver,
-  userEngagementsQueryResolver
+  userEngagementsQueryResolver,
+  userEngagementsSchema,
+  userEngagementsDataSchema,
+  userEngagementsPatchSchema,
+  userEngagementsQuerySchema,
 } from './user-engagements.schema.js'
 import { UserEngagementsService, getOptions } from './user-engagements.class.js'
 import { userEngagementsPath, userEngagementsMethods } from './user-engagements.shared.js'
-import {disallow} from "feathers-hooks-common";
+import { createLaunchShareLinkInOndselEsEntry } from './commands/launchOndselEsCommand.js';
 
 export * from './user-engagements.class.js'
 export * from './user-engagements.schema.js'
@@ -26,7 +32,15 @@ export const userEngagements = (app) => {
     // A list of all methods this service exposes externally
     methods: userEngagementsMethods,
     // You can add additional custom events to be sent to clients here
-    events: []
+    events: [],
+    docs: swagger.createSwaggerServiceOptions({
+      schemas: { userEngagementsSchema, userEngagementsDataSchema, userEngagementsPatchSchema, userEngagementsQuerySchema },
+      docs: {
+        description: 'A User Engagements service',
+        idType: 'string',
+        securities: ['all'],
+      }
+    })
   })
   // Initialize hooks
   app.service(userEngagementsPath).hooks({
@@ -39,13 +53,16 @@ export const userEngagements = (app) => {
     },
     before: {
       all: [
-        disallow('external'),
         schemaHooks.validateQuery(userEngagementsQueryValidator),
         schemaHooks.resolveQuery(userEngagementsQueryResolver)
       ],
       find: [],
       get: [],
       create: [
+        iff(
+          context => context.data.shouldLaunchShareLinkInOndselEsEntry,
+          createLaunchShareLinkInOndselEsEntry,
+        ),
         schemaHooks.validateData(userEngagementsDataValidator),
         schemaHooks.resolveData(userEngagementsDataResolver)
       ],

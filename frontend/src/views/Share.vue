@@ -85,6 +85,13 @@
         location="start"
       >Open messages</v-tooltip>
     </v-btn>
+    <v-btn icon flat @click="openModelInOndselEsDialog">
+      <v-icon>mdi-open-in-app</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Open model in Ondsel ES desktop app</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" :full-screen="isWindowLoadedInIframe" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView v-if="!isWindowLoadedInIframe" ref="objectListView" @select-given-object="objectSelected" />
@@ -224,6 +231,11 @@
     ref="manageBookmarkDialog"
     :shared-model="sharedModel"
   />
+  <launch-ondsel-es-dialog
+    ref="launchOndselEsDialog"
+    :launching-in-progress="checkingOndselEsIsInstalled"
+    @launch-ondsel-es="openModelInOndselEs"
+  />
 </template>
 
 <script>
@@ -240,6 +252,8 @@ import ManageBookmarkDialog from '@/components/ManageBookmarkDialog.vue';
 import Messages from "@/components/Messages.vue";
 import ShareWithUserDialog from "@/components/ShareWithUserDialog.vue";
 import SharedModelInfo from "@/components/SharedModelInfo.vue";
+import openOndselEsMixin from '@/mixins/openOndselEsMixin';
+import LaunchOndselEsDialog from '@/components/LaunchOndselEsDialog.vue';
 
 const { SharedModel, Model, OrgSecondaryReference } = models.api;
 
@@ -255,8 +269,10 @@ export default {
     ModelViewer,
     ExportModelDialog,
     SharedModelInfo,
-    ObjectsListView
+    ObjectsListView,
+    LaunchOndselEsDialog,
   },
+  mixins: [openOndselEsMixin],
   data: () => ({
     dialog: true,
     sharedModel: null,
@@ -462,6 +478,9 @@ export default {
       this.$refs.shareWithUserDialog.$data.isPatchPending = false;
       this.$refs.shareWithUserDialog.$data.dialog = false;
     },
+    openModelInOndselEsDialog() {
+      this.$refs.launchOndselEsDialog.openDialog();
+    }
   },
   watch: {
     async 'model.isObjGenerated'(v) {
