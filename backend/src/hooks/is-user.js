@@ -12,6 +12,7 @@ export const isEndUser = async (context) => {
 }
 
 export const isAdminUser = (user) => {
+  // to be deprecated as .isTripe is to be deprecated; use verifyOndselAdministrativePower instead
   let email = user?.email;
   let flag = user?.isTripe;
   if (flag === true && email.includes("@ondsel.com")) {

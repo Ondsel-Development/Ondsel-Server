@@ -1,6 +1,5 @@
 <template>
   <v-container class="d-flex flex-column justify-center">
-    <signup-progress-bar step="2" msg="choose below"></signup-progress-bar>
     <v-card class="mx-auto" :subtitle="`current tier: ${user.fullTierName}`" flat>
       <v-card-title>Select Subscription Tier</v-card-title>
       <v-container class="d-flex flex-wrap">

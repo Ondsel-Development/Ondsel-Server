@@ -16,11 +16,13 @@ const eventNameMapping = {
   'shared-models.create': 'CREATE_SHARED-MODEL',
   'shared-models.get': 'FETCH_SHARED-MODEL',
   'shared-models.find': 'FETCH_SHARED-MODEL',
+  'shared-models.patch': 'UPDATE_SHARED-MODEL',
   'shared-models.remove': 'REMOVE_SHARED-MODEL',
   'models.create': 'CREATE_MODEL',
   'models.get': 'FETCH_MODEL',
   'models.find': 'FETCH_MODEL',
   'models.remove': 'REMOVE_MODEL',
+  'models.patch': 'UPDATE_MODEL',
   'preferences.create': 'CREATE_PREFERENCE',
   'preferences.get': 'FETCH_PREFERENCE',
   'preferences.find': 'FETCH_PREFERENCE',
@@ -34,30 +36,34 @@ const eventNameMapping = {
   'directories.find': 'FETCH_DIRECTORIES',
   'directories.remove': 'REMOVE_DIRECTORIES',
   'keywords.find': 'SEARCH',
+  'org-secondary-references.patch': 'UPDATE_ORG_SECONDARY_REFERENCES',
+  'publisher.get': 'DOWNLOAD_ONDSEL_ES',
 }
 
 const eventsToTrack = {
   socketio: {
     authentication: ['create', 'remove'],
-    workspaces: ['create', 'get', 'find', 'remove'],
+    workspaces: ['create', 'remove'],
     organizations: ['create', 'get', 'find', 'remove'],
-    'shared-models': ['create', 'get', 'find', 'remove'],
-    models: ['create', 'get', 'find', 'remove'],
+    'shared-models': ['create', 'get', 'find', 'remove', 'patch'],
+    models: ['create', 'get', 'find', 'remove', 'patch'],
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
-    directories: ['create', 'get', 'find', 'remove'],
+    directories: ['create', 'remove'],
     keywords: ['find'],
+    'org-secondary-references': ['patch'],
   },
   rest: {
     authentication: ['create', 'remove'],
-    workspaces: ['create', 'get', 'find', 'remove'],
+    workspaces: ['create', 'remove'],
     organizations: ['create', 'get', 'find', 'remove'],
-    'shared-models': ['create', 'get', 'find', 'remove'],
-    models: ['create', 'get', 'find', 'remove'],
+    'shared-models': ['create', 'get', 'find', 'remove', 'patch'],
+    models: ['create', 'get', 'find', 'remove', 'patch'],
     preferences: ['create', 'get', 'find', 'remove'],
     file: ['create', 'get', 'find', 'remove'],
-    directories: ['create', 'get', 'find', 'remove'],
+    directories: ['create', 'remove'],
     keywords: ['find'],
+    'org-secondary-references': ['patch'],
   }
 }
 
@@ -66,28 +72,29 @@ function canTrackEvent(provider, path, method, config = eventsToTrack) {
 }
 
 
-const generateUserEngagementPayload = context => {
-  const { path, method, params } = context;
-
-  const getSource = () => {
-    const source = _.get(params.headers, 'x-lens-source');
-    if (source) {
-      if (_.some(SourceTypeMap, v => v === source)) {
-        return source;
-      }
-      return SourceTypeMap.unknown;
-    }
-    if (params.provider === ConnectionTypeMap.socketio) {
-      // TODO: When whether socket connection with lens website or not. Skipping for now.
-      return SourceTypeMap.lens;
+export const getSource = params => {
+  const source = _.get(params.headers, 'x-lens-source');
+  if (source) {
+    if (_.some(SourceTypeMap, v => v === source)) {
+      return source;
     }
     return SourceTypeMap.unknown;
   }
+  if (params.provider === ConnectionTypeMap.socketio) {
+    // TODO: When whether socket connection with lens website or not. Skipping for now.
+    return SourceTypeMap.lens;
+  }
+  return SourceTypeMap.unknown;
+}
+
+
+const generateUserEngagementPayload = context => {
+  const { path, method, params } = context;
 
   const version = _.get(params.headers, 'x-lens-version');
 
   const payload = {
-    source: getSource(),
+    source: getSource(params),
     path: path,
     method: method,
     connection: params.provider,
@@ -95,7 +102,8 @@ const generateUserEngagementPayload = context => {
     ...(context.id && {contextId: context.id}),
     ...(!_.isEmpty(context.$userQuery) && {query: context.$userQuery}),
     ...(version && {version: version}),
-    ...(!context.id && {contextId: context?.result?._id})  // 'create' hook don't have context.id, so assigning from result
+    ...(!context.id && {contextId: context?.result?._id}),  // 'create' hook don't have context.id, so assigning from result
+    ...(!_.isEmpty(context.$userPayload) && {payload: context.$userPayload}),
   };
   return payload;
 }
@@ -140,5 +148,10 @@ export async function createUserEngagementEntryForPublisherDownload(publishedDet
 
 export const saveContextQueryState = context => {
   context.$userQuery = context.params.query;
+  return context;
+}
+
+export const saveContextPayloadState = context => {
+  context.$userPayload = context.data;
   return context;
 }

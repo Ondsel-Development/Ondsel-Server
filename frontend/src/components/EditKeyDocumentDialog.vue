@@ -5,16 +5,16 @@
     width="auto"
   >
     <v-card min-width="60em">
-      <template v-slot:title>
+      <v-card-title>
         <div class="text-center">Edit Content (Markdown)</div>
-      </template>
+      </v-card-title>
       <v-progress-linear
         :active="isPatchPending"
         indeterminate
         absolute
         bottom
       ></v-progress-linear>
-      <v-form ref="editLongDescriptionMdDialogForm" @submit.prevent="isPatchPending">
+      <v-form>
         <v-card-text>
           <p>Enter a longer description. Use Markdown formatting.</p>
           <v-textarea

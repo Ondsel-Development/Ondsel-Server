@@ -135,7 +135,7 @@ export default {
               consistentNameForSubscriptionChange(matomoEventActionMap.upgrade, SubscriptionTypeMap.solo),
             ]);
             this.$router
-              .push({name: 'ChooseTier', query: { psu: true }}) // when here, a new user is verifying the first email
+              .push({name: 'DownloadAndExplore', query: { psu: true }}) // when here, a new user is verifying the first email
               .then(() => {
                 this.$router.go()
               }) // this forces a refresh on destination
