@@ -4,13 +4,7 @@ export default {
     checkingOndselEsIsInstalled: false,
   }),
   methods: {
-    getOndselEsUrl() {
-      if (this.$route.name === 'Share') {
-        return `ondsel:share/${this.$route.params.id}`;
-      }
-      return null;
-    },
-    openModelInOndselEs() {
+    openModelInOndselEs(url) {
       this.checkingOndselEsIsInstalled = true;
       const timeoutDuration = 1500; // Time to wait to check if app opened
       let isAppOpened = false;
@@ -18,7 +12,7 @@ export default {
       // Create an iframe to attempt opening the app
       const iframe = document.createElement("iframe");
       iframe.style.display = "none";
-      iframe.src = this.getOndselEsUrl();
+      iframe.src = url;
       document.body.appendChild(iframe);
 
       this.blurListener = () => {

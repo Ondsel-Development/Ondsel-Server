@@ -49,6 +49,13 @@
         location="start"
       >Click new thumbnail</v-tooltip>
     </v-btn>
+    <v-btn v-if="model" icon flat @click="openModelInOndselEsDialog">
+      <v-icon>mdi-open-in-app</v-icon>
+      <v-tooltip
+        activator="parent"
+        location="start"
+      >Open model in Ondsel ES desktop app</v-tooltip>
+    </v-btn>
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView ref="objectListView" :model="model" @select-given-object="objectSelected" />
@@ -218,6 +225,11 @@
       <ModelInfo ref="modelInfoDrawer" v-else-if="drawerActiveWindow === 'modelInfo'" :model="model"/>
     </v-navigation-drawer>
   </div>
+  <launch-ondsel-es-dialog
+    ref="launchOndselEsDialog"
+    :launching-in-progress="checkingOndselEsIsInstalled"
+    @launch-ondsel-es="openModelInOndselEs(getOndselEsUrl(model))"
+  />
 </template>
 
 <script>
@@ -232,12 +244,23 @@ import ExportModelDialog from '@/components/ExportModelDialog';
 import MangeSharedModels from '@/components/MangeSharedModels';
 import ModelInfo from '@/components/ModelInfo.vue';
 import ObjectsListView from '@/components/ObjectsListView.vue';
+import openOndselEsMixin from '@/mixins/openOndselEsMixin';
+import LaunchOndselEsDialog from '@/components/LaunchOndselEsDialog.vue';
 
 const { Model, SharedModel, Workspace, Organization } = models.api;
 
 export default {
   name: 'HomeView',
-  components: { AttributeViewer, MangeSharedModels, ModelViewer, ExportModelDialog, ModelInfo, ObjectsListView },
+  components: {
+    AttributeViewer,
+    MangeSharedModels,
+    ModelViewer,
+    ExportModelDialog,
+    ModelInfo,
+    ObjectsListView,
+    LaunchOndselEsDialog,
+  },
+  mixins: [openOndselEsMixin],
   data: () => ({
     dialog: true,
     model: null,
@@ -501,6 +524,12 @@ export default {
           }
         })
       }
+    },
+    getOndselEsUrl(model) {
+      return `ondsel:file/${model.file._id}/version/${model.file.currentVersionId}`;
+    },
+    openModelInOndselEsDialog() {
+      this.$refs.launchOndselEsDialog.openDialog();
     }
   },
   watch: {
