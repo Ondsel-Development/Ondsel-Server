@@ -85,7 +85,7 @@
         location="start"
       >Open messages</v-tooltip>
     </v-btn>
-    <v-btn icon flat @click="openModelInOndselEsDialog">
+    <v-btn v-if="sharedModel" icon flat @click="openModelInOndselEsDialog">
       <v-icon>mdi-open-in-app</v-icon>
       <v-tooltip
         activator="parent"
@@ -234,7 +234,7 @@
   <launch-ondsel-es-dialog
     ref="launchOndselEsDialog"
     :launching-in-progress="checkingOndselEsIsInstalled"
-    @launch-ondsel-es="openModelInOndselEs"
+    @launch-ondsel-es="openModelInOndselEs(getOndselEsUrl(sharedModel._id))"
   />
 </template>
 
@@ -480,7 +480,10 @@ export default {
     },
     openModelInOndselEsDialog() {
       this.$refs.launchOndselEsDialog.openDialog();
-    }
+    },
+    getOndselEsUrl(shareId) {
+      return `ondsel:share/${shareId}`;
+    },
   },
   watch: {
     async 'model.isObjGenerated'(v) {

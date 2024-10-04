@@ -51,13 +51,20 @@
         </v-sheet>
         <v-btn
           v-if="isFileModel(file)"
-          class="my-2"
+          class="mr-2 my-2"
           :append-icon="displayLinks[item._id] ? 'mdi-arrow-collapse-up' : 'mdi-arrow-expand-down'"
           :prepend-icon="arrayCountIcon(item.links)"
           @click="toggleLinkDisplay(index)"
           width="12em"
         >
           ShareLinks
+        </v-btn>
+        <v-btn
+          class="my-2"
+          append-icon="mdi-open-in-app"
+          @click="$emit('launchOndselEs', item._id)"
+        >
+          Open In Ondsel ES
         </v-btn>
 <!--        <v-sheet width="3em">-->
 <!--          <v-btn-->
@@ -219,7 +226,7 @@ const { SharedModel } = models.api;
 export default {
   name: "FileVersionsTable",
   components: {DirectShareToUsersDialog, ShareLinkCrudDialog, FileInfoDialog },
-  emits: ['changeVisibleVersion', 'changedFile'],
+  emits: ['changeVisibleVersion', 'changedFile', 'launchOndselEs'],
   props: {
     file: Object,
     canUserWrite: {
