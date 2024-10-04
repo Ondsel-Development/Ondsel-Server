@@ -114,6 +114,7 @@
     <template v-slot:item.isActive="{ item }">
       <v-switch
         v-model="item.isActive"
+        color="primary"
         hide-details
         :disabled="item.isSystemGenerated && !user.constraint.canDisableAutomaticGenerationOfPublicLink"
         @update:modelValue="updateSharedModel(item._id, {isActive: item.isActive})"
