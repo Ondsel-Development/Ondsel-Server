@@ -315,7 +315,7 @@ class FreeCadDocument
                      */
                     let colorString = this.GetFirstChildValue (propertyElement, 'PropertyMaterial', 'diffuseColor');
                     const colorInt = parseInt (colorString, 10);
-                    object.color = new THREE.Color(colorInt);
+                    object.color = new THREE.Color(...intToRgba(colorInt));
                 }
             }
         }
