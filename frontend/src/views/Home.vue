@@ -49,13 +49,13 @@
         location="start"
       >Click new thumbnail</v-tooltip>
     </v-btn>
-    <v-btn v-if="model" icon flat @click="openModelInOndselEsDialog">
+    <!-- <v-btn v-if="model" icon flat @click="openModelInOndselEsDialog">
       <v-icon>mdi-open-in-app</v-icon>
       <v-tooltip
         activator="parent"
         location="start"
       >Open model in Ondsel ES desktop app</v-tooltip>
-    </v-btn>
+    </v-btn> -->
   </v-navigation-drawer>
   <ModelViewer ref="modelViewer" @model:loaded="modelLoaded" @object:clicked="objectClicked"/>
   <ObjectsListView ref="objectListView" :model="model" @select-given-object="objectSelected" />

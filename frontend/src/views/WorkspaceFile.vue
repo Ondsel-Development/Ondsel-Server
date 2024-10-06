@@ -77,14 +77,14 @@
                   :disabled="!canUserWrite"
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
-                <v-btn
+                <!-- <v-btn
                   v-if="file?._id"
                   class="mr-2 mt-2"
                   color="secondary"
                   variant="elevated"
                   append-icon="mdi-open-in-app"
                   @click="ondselEsUrl = getOndselEsUrl(file._id, file.currentVersionId); $refs.launchOndselEsDialog.openDialog();"
-                >Open In Ondsel ES</v-btn>
+                >Open In Ondsel ES</v-btn>-->
               </v-sheet>
               <file-view-port
                 :file="file"
