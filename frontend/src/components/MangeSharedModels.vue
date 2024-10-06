@@ -92,13 +92,13 @@
           <v-text-field
             width="12em"
             density="compact"
-            counter="20"
+            counter="100"
             variant="outlined"
             v-model="item.description"
             :disabled="item.isSystemGenerated"
             :rules="[
               v => !!v || 'Description is required',
-              v => (v && v.length <= 20) || 'Description must be less than 20 characters'
+              v => (v && v.length <= 100) || 'Description must be less than 100 characters'
             ]"
             @click="item.descriptionFieldClicked=true"
           ></v-text-field>

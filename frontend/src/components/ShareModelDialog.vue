@@ -49,12 +49,13 @@
             label="Private Note"
             hint="Enter a private short note"
             :disabled="isGeneratingLink"
-            :counter="20"
+            :counter="100"
             :rules="descriptionRules"
           ></v-text-field>
           <v-combobox
             v-model="protection"
             label="Protection"
+            :disabled="isGeneratingLink"
             :items="['Listed', 'Unlisted', 'Pin', 'Direct']"
             hide-details
           ></v-combobox>
@@ -220,7 +221,7 @@ export default {
     ],
     descriptionRules: [
       v => !!v || 'Private note is required',
-      v => (v && v.length <= 20) || 'Private note must be less than 20 characters'
+      v => (v && v.length <= 100) || 'Private note must be less than 100 characters'
     ],
     pinRules: [
       v => !!v || 'PIN is required',
