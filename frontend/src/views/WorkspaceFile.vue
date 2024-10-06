@@ -77,6 +77,14 @@
                   :disabled="!canUserWrite"
                   @click="$refs.uploadNewVersionFile.openFileUploadDialog();"
                 >Upload New Version</v-btn>
+                <!-- <v-btn
+                  v-if="file?._id"
+                  class="mr-2 mt-2"
+                  color="secondary"
+                  variant="elevated"
+                  append-icon="mdi-open-in-app"
+                  @click="ondselEsUrl = getOndselEsUrl(file._id, file.currentVersionId); $refs.launchOndselEsDialog.openDialog();"
+                >Open In Ondsel ES</v-btn>-->
               </v-sheet>
               <file-view-port
                 :file="file"
@@ -93,6 +101,7 @@
                   :active-version-thumbnail-available="activeVersionThumbnailAvailable"
                   @change-visible-version="changeViewPort"
                   @changed-file="reloadFileAndWorkspace"
+                  @launch-ondsel-es="versionId => { ondselEsUrl = getOndselEsUrl(file._id, versionId); $refs.launchOndselEsDialog.openDialog();}"
                 >
                 </file-versions-table>
               </v-sheet>
@@ -141,6 +150,10 @@
           </v-card-text>
         </v-card>
       </v-sheet>
+      <launch-ondsel-es-dialog
+        ref="launchOndselEsDialog"
+        @launch-ondsel-es="openModelInOndselEs(ondselEsUrl)"
+      />
     </template>
   </Main>
 </template>
@@ -157,6 +170,8 @@ import RepresentWorkspaceDialog from "@/components/RepresentWorkspaceDialog.vue"
 import FileVersionsTable from "@/components/FileVersionsTable.vue";
 import fileDownloadMixin from "@/mixins/fileDownloadMixin";
 import FileViewPort from "@/components/FileViewPort.vue";
+import LaunchOndselEsDialog from '@/components/LaunchOndselEsDialog.vue';
+import openOndselEsMixin from '@/mixins/openOndselEsMixin';
 import {deriveOwnerDescAndRoute} from "@/genericHelpers";
 
 const { File } = models.api;
@@ -165,10 +180,14 @@ export default {
   name: 'WorkspaceFile',
   components: {
     FileViewPort,
-    FileVersionsTable, RepresentWorkspaceDialog, UploadNewVersionFileDialog, DeleteFileDialog,
-    Main
+    FileVersionsTable,
+    RepresentWorkspaceDialog,
+    UploadNewVersionFileDialog,
+    DeleteFileDialog,
+    Main,
+    LaunchOndselEsDialog,
   },
-  mixins: [fileDownloadMixin],
+  mixins: [fileDownloadMixin, openOndselEsMixin],
   data() {
     return {
       activeVersionThumbnailAvailable: false,
@@ -186,6 +205,7 @@ export default {
       orgRefName: '',
       slug: '',
       representingWorkspaceOrg: false,
+      ondselEsUrl: '',
     };
   },
   async created() {
@@ -247,6 +267,9 @@ export default {
       'getWorkspaceByNamePrivate',
       'getWorkspaceByNamePublic',
     ]),
+    getOndselEsUrl(fileId, versionId) {
+      return `ondsel:file/${fileId}/version/${versionId}`;
+    },
     refLabel(refId) {
       return ".." + refId.substr(-6);
     },
