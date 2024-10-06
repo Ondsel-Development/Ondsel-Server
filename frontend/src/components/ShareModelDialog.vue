@@ -221,7 +221,7 @@ export default {
     ],
     descriptionRules: [
       v => !!v || 'Private note is required',
-      v => (v && v.length <= 100) || 'Private note must be less than 20 characters'
+      v => (v && v.length <= 100) || 'Private note must be less than 100 characters'
     ],
     pinRules: [
       v => !!v || 'PIN is required',
