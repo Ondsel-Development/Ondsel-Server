@@ -55,7 +55,7 @@ const eventsToTrack = {
   },
   rest: {
     authentication: ['create', 'remove'],
-    workspaces: ['create', 'remove'],
+    workspaces: ['create', 'get', 'find', 'remove'],
     organizations: ['create', 'get', 'find', 'remove'],
     'shared-models': ['create', 'get', 'find', 'remove', 'patch'],
     models: ['create', 'get', 'find', 'remove', 'patch'],
