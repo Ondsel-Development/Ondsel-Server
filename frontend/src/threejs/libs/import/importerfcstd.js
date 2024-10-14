@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import occtimportjs from 'occt-import-js';
 import { Model } from '../model/model.js';
-import { ModelObject3D } from '../model/object.js';
+import {ModelObject3D, ModelObjectType} from '../model/object.js';
 import { GetFileExtension } from '../utils/fileutils.js';
 import { ArrayBufferToUtf8String } from '../utils/bufferutils.js';
 import { Property, PropertyGroup, PropertyType } from '../model/property.js';
@@ -30,18 +30,24 @@ class FreeCadObject
         this.fileContent = null;
         this.inLinkCount = 0;
         this.properties = null;
+        this.childs = [];
+        this.parent = null;
     }
 
     IsConvertible ()
     {
+        if (this.type === 'Assembly::AssemblyObject') {
+          return false;
+        }
         if (this.fileName === null || this.fileContent === null) {
             return false;
         }
         if (!this.isVisible) {
             return false;
         }
+
         if (this.inLinkCount > 0) {
-            return false;
+          return !!(this.parent && this.parent.IsAssemblyObject());
         }
         return true;
     }
@@ -53,6 +59,10 @@ class FreeCadObject
 
       return new THREE.Color(OBJ_COLOR);
 
+    }
+
+    IsAssemblyObject() {
+      return this.type === 'Assembly::AssemblyObject';
     }
 }
 
@@ -97,6 +107,9 @@ class FreeCadDocument
     {
         if (name === 'PropertyBag') {
             return true;
+        }
+        if (type === 'Assembly::AssemblyObject') {
+          return true;
         }
         if (!type.startsWith ('Part::') && !type.startsWith ('PartDesign::')) {
             return false;
@@ -151,12 +164,21 @@ class FreeCadDocument
           }
         }
       }
+
+      // Remove keys where external files not linked. It can be a link inside a file. Mainly added below check for
+      // Assembly file.
+      for (const key in linkedFiles) {
+        if (linkedFiles[key] === '') {
+          delete linkedFiles[key];
+        }
+      }
+
       return linkedFiles;
     }
 
     LoadDocumentXml ()
     {
-        const excludedObjects = ['App::Plane', 'App::Origin'];
+        const excludedObjects = ['App::Plane', 'App::Origin', 'App::Line'];
         let documentXml = this.GetXMLContent ('Document.xml');
         if (documentXml === null) {
             return false;
@@ -215,14 +237,25 @@ class FreeCadDocument
                 let hasShapePrp = false;
                 for (let propertyElement of propertyElements) {
                     let propertyName = propertyElement.getAttribute ('name');
+                    let propertyType = propertyElement.getAttribute ('type');
                     if (propertyName === 'Label') {
                         object.shapeName = this.GetFirstChildValue (propertyElement, 'String', 'value');
                     } else if (propertyName === 'Visibility') {
                         let isVisibleString = this.GetFirstChildValue (propertyElement, 'Bool', 'value');
                         object.isVisible = (isVisibleString === 'true');
                     } else if (propertyName === 'Visible') {
-                        let isVisibleString = this.GetFirstChildValue (propertyElement, 'Bool', 'value');
-                        object.isVisible = (isVisibleString === 'true');
+                      let isVisibleString = this.GetFirstChildValue(propertyElement, 'Bool', 'value');
+                      object.isVisible = (isVisibleString === 'true');
+                    } else if (propertyName === 'Group' && propertyType === 'App::PropertyLinkList' && object.type === 'Assembly::AssemblyObject') {
+                      for (let linkElement of propertyElement.getElementsByTagName ('Link')) {
+                        let linkElementName = linkElement.getAttribute('value');
+                        if (this.objectNames.includes(linkElementName)) {
+                          const childObject = this.objectData.get(linkElementName);
+                          object.childs.push(childObject);
+                          childObject.parent = object;
+                        }
+                      }
+
                     } else if (propertyName === 'Shape') {
                         let fileName = this.GetFirstChildValue (propertyElement, 'Part', 'file');
                         if (!this.HasFile (fileName)) {
@@ -361,6 +394,12 @@ class FreeCadDocument
                 if (propertyValue !== null && propertyValue.length > 0) {
                     property = new Property (PropertyType.Number, propertyName, parseFloat (propertyValue));
                 }
+            } else if (propertyType === 'App::PropertyPlacement') {
+              const propertyValueAngle = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'A');
+              const propertyValueXAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Ox');
+              const propertyValueYAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Oy');
+              const propertyValueZAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Oz');
+              property = new Property (PropertyType.Rotation, propertyName, [propertyValueXAxis, propertyValueYAxis, propertyValueZAxis, propertyValueAngle]);
             }
             if (property !== null) {
                 propertyGroup.AddProperty (property);
@@ -480,6 +519,48 @@ export class ImporterFcstd
                     this.OnFileConverted(obj, result, null);
                 }
             }
+
+            for (let [objectName, object] of this.document.objectData) {
+              if (object.IsAssemblyObject()) {
+                const object3d = new ModelObject3D();
+                if (object.shapeName !== null) {
+                  object3d.SetName (object.shapeName);
+                }
+                if (object.name !== null) {
+                  object3d.SetRealName (object.name);
+                }
+                if (object.properties !== null && object.properties.PropertyCount () > 0) {
+                  object3d.AddPropertyGroup (object.properties);
+                }
+                if (object.color !== null) {
+                  object3d.SetColor(object.color);
+                }
+
+                object3d.SetType(ModelObjectType.Assembly);
+                const group = new THREE.Group();
+
+                for (let o of object.childs) {
+                  const modelObject = this.model.GetObjectByName(o.shapeName);
+                  if (modelObject) {
+                    group.add(modelObject.object3d);
+                    modelObject.SetParent(object3d);
+                    object3d.AddChildren(modelObject);
+                  }
+                }
+
+                if (object.properties !== null) {
+                  const placementPrp = object.properties.GetPropertyByName('Placement');
+                  if (placementPrp) {
+                    const axis = new THREE.Vector3(placementPrp.value[0], placementPrp.value[1], placementPrp.value[2]);
+                    group.rotateOnAxis(axis, placementPrp.value[3])
+                  }
+                }
+                object3d.SetObject3d(group);
+                this.model.AddObject(object3d);
+              }
+
+            }
+
             onFinish(this.model);
         })
 
@@ -544,7 +625,11 @@ export class ImporterFcstd
             object3d.SetColor(object.color);
         }
 
-        // object3d.AddMeshes(resultContent.meshes);
+        if (object.IsAssemblyObject()) {
+          object3d.SetType(ModelObjectType.Assembly);
+        } else {
+          object3d.SetType(ModelObjectType.Shape);
+        }
 
         let mainObject = new THREE.Object3D();
         for (let resultMesh of resultContent.meshes) {

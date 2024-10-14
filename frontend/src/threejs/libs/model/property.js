@@ -6,7 +6,8 @@ export const PropertyType =
     Boolean : 4,
     Percent : 5,
     Color : 6,
-    Angle: 7
+    Angle: 7,
+    Rotation: 8,
 };
 
 export class Property
@@ -50,6 +51,16 @@ export class PropertyGroup
     GetProperty (index)
     {
         return this.properties[index];
+    }
+
+    GetPropertyByName (name)
+    {
+        for (let prp of this.properties) {
+            if (prp.name === name) {
+                return prp;
+            }
+        }
+        return null;
     }
 
     Clone ()
