@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OBJ_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
-import { ModelObject3D } from '@/threejs/libs/model/object';
+import {ModelObject3D, ModelObjectType} from '@/threejs/libs/model/object';
 import { Model } from '@/threejs/libs/model/model';
 
 export class ImporterObj {
@@ -32,6 +32,7 @@ export class ImporterObj {
       // called when resource is loaded
       (object) => {
         let object3d = new ModelObject3D ();
+        object3d.SetType(ModelObjectType.Shape);
         object.traverse((child) => {
           if ( child instanceof THREE.Mesh ) {
             child.material = new THREE.MeshPhongMaterial({color: OBJ_COLOR})

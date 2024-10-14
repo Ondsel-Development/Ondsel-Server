@@ -5,7 +5,8 @@ import { OBJ_COLOR } from '@/threejs/libs/constants';
 export const ModelObjectType = Object.freeze({
   Shape: 'Shape',
   Link: 'Link',
-  Assembly: 'Assembly'
+  Assembly: 'Assembly',
+  Group: 'Group',
 })
 
 export class ModelObject3D
@@ -128,10 +129,7 @@ export class ModelObject3D
     }
 
     GetType() {
-      if (this.type === ModelObjectType.Assembly) {
-        return false;
-      }
-      return this.object3d ? ModelObjectType.Shape: ModelObjectType.Link;
+      return this.type;
     }
 
     SetType (type)

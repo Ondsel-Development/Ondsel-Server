@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
 import { Model } from '@/threejs/libs/model/model';
-import { ModelObject3D } from '@/threejs/libs/model/object';
+import {ModelObject3D, ModelObjectType} from '@/threejs/libs/model/object';
 
 export class ImporterBrep {
 
@@ -42,6 +42,7 @@ export class ImporterBrep {
 
     this.worker.addEventListener ('message', (ev) => {
       let object3d = new ModelObject3D ();
+      object3d.SetType(ModelObjectType.Shape);
       let mainObject = new THREE.Object3D();
       for (let resultMesh of ev.data.meshes) {
         let geometry = new THREE.BufferGeometry();

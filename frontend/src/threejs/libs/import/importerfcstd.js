@@ -625,11 +625,7 @@ export class ImporterFcstd
             object3d.SetColor(object.color);
         }
 
-        if (object.IsAssemblyObject()) {
-          object3d.SetType(ModelObjectType.Assembly);
-        } else {
-          object3d.SetType(ModelObjectType.Shape);
-        }
+        object3d.SetType(ModelObjectType.Shape);
 
         let mainObject = new THREE.Object3D();
         for (let resultMesh of resultContent.meshes) {
