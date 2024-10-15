@@ -16,6 +16,10 @@ export class Model extends ModelObject3D
         return this.objects.length - 1;
     }
 
+    RemoveObject(object) {
+      this.objects = this.objects.filter(o => o.uuid !== object.uuid);
+    }
+
     GetObjects() {
         return this.objects;
     }
@@ -23,7 +27,7 @@ export class Model extends ModelObject3D
     GetCompoundObject() {
         const object = new THREE.Group();
         for (let o of this.objects) {
-          if (o.IsShapeType()) {
+          if (o.parent === null && (o.IsShapeType() || o.GetObject3d() instanceof THREE.Group)) {
             object.add(o.GetObject3d());
           }
         }
