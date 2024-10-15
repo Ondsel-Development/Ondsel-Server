@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import occtimportjs from 'occt-import-js';
 import { OBJ_COLOR } from '@/threejs/libs/constants';
 import { Model } from '@/threejs/libs/model/model';
-import { ModelObject3D } from '@/threejs/libs/model/object';
+import {ModelObject3D, ModelObjectType} from '@/threejs/libs/model/object';
 
 export class ImporterStep {
 
@@ -67,6 +67,7 @@ export class ImporterStep {
         const mesh = new THREE.Mesh (geometry, material);
         mainObject.add(mesh);
         object3d.SetObject3d(mainObject);
+        object3d.SetType(ModelObjectType.Shape);
         this.model.AddObject(object3d);
       }
 
@@ -76,22 +77,30 @@ export class ImporterStep {
         let rootObj = this.model.GetObjectByName(root.name);
         if (!rootObj) {
           rootObj = new ModelObject3D();
+          rootObj.SetType(ModelObjectType.Group);
           rootObj.SetName(root.name);
           rootObj.SetRealName(root.name);
+          const rootObjGroup = new THREE.Group();
+          rootObj.SetObject3d(rootObjGroup);
           this.model.AddObject(rootObj);
         }
         for (let child of root.children) {
           let childObj = this.model.GetObjectByName(child.name);
           if (!childObj) {
             childObj = new ModelObject3D();
+            childObj.SetType(ModelObjectType.Group);
+            const childObjGroup = new THREE.Group();
             childObj.SetName(child.name);
             childObj.SetRealName(child.name);
+            childObj.SetObject3d(childObjGroup);
             this.model.AddObject(childObj);
           }
           rootObj.AddChildren(childObj);
+          rootObj.GetObject3d().add(childObj.GetObject3d());
           childObj.SetParent(rootObj);
           for (let index in child.children) {
             const indexObj = this.model.GetObjects()[index];
+            childObj.GetObject3d().add(indexObj.GetObject3d());
             childObj.AddChildren(indexObj);
             indexObj.SetParent(childObj);
           }
@@ -101,6 +110,8 @@ export class ImporterStep {
             if (childObj.GetName() === meshObj.GetName()) {
               continue;
             }
+
+            childObj.GetObject3d().add(meshObj.GetObject3d());
             childObj.AddChildren(meshObj);
             meshObj.SetParent(childObj);
           }
