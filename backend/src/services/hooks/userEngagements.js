@@ -92,6 +92,15 @@ const generateUserEngagementPayload = context => {
   const { path, method, params } = context;
 
   const version = _.get(params.headers, 'x-lens-version');
+  const additionalDataStringify = _.get(params.headers, 'x-lens-additional-data');
+  let additionalData = null;
+  if (additionalDataStringify) {
+    try {
+      additionalData = JSON.parse(additionalDataStringify);
+    } catch (e) {
+      additionalData = null;
+    }
+  }
 
   const payload = {
     source: getSource(params),
@@ -104,6 +113,7 @@ const generateUserEngagementPayload = context => {
     ...(version && {version: version}),
     ...(!context.id && {contextId: context?.result?._id}),  // 'create' hook don't have context.id, so assigning from result
     ...(!_.isEmpty(context.$userPayload) && {payload: context.$userPayload}),
+    ...(additionalData && { additionalData }),
   };
   return payload;
 }
