@@ -3,8 +3,10 @@ import { logger } from './logger.js';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { authenticate } from '@feathersjs/express'
 import {
-  createUserEngagementEntryForPublisherDownload
+  createUserEngagementEntryForPublisherDownload,
+  createUserEngagementEntryForStatusEndpoint,
 } from "./services/hooks/userEngagements.js";
 
 function rot13rot5(str) {
@@ -111,10 +113,27 @@ function handlePublishedFileDownload(app) {
   )
 }
 
+const tryToAuthentication = async (req, res, next) => {
+
+  await authenticate('jwt')(req, res, async (authError) => {
+    if (authError) {
+      // If authentication fails, we proceed without the user object
+    }
+  });
+
+  next();
+}
+
 function handleStatusEndpoint(app) {
   app.use(
     '/status',
+    tryToAuthentication,
     async (req, res, next) => {
+      const user = _.get(req, 'feathers.user', null);
+      const provider = _.get(req, 'feathers.provider', 'rest');
+      if (user) {
+        await createUserEngagementEntryForStatusEndpoint(user, provider, req.headers, app);
+      }
       const packageJsonPath = path.resolve('package.json');
       const data = await readFile(packageJsonPath, 'utf8');
       const packageJson = JSON.parse(data);
