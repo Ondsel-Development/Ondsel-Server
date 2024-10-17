@@ -131,7 +131,7 @@ function handleStatusEndpoint(app) {
     async (req, res, next) => {
       const user = _.get(req, 'feathers.user', null);
       const provider = _.get(req, 'feathers.provider', 'rest');
-      if (user) {
+      if (_.get(req, 'headers.x-lens-additional-data', null) !== null) {
         await createUserEngagementEntryForStatusEndpoint(user, provider, req.headers, app);
       }
       const packageJsonPath = path.resolve('package.json');
