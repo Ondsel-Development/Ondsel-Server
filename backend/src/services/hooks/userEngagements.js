@@ -38,6 +38,7 @@ const eventNameMapping = {
   'keywords.find': 'SEARCH',
   'org-secondary-references.patch': 'UPDATE_ORG_SECONDARY_REFERENCES',
   'publisher.get': 'DOWNLOAD_ONDSEL_ES',
+  'status.find': 'FETCH_STATUS',
 }
 
 const eventsToTrack = {
@@ -64,6 +65,7 @@ const eventsToTrack = {
     directories: ['create', 'remove'],
     keywords: ['find'],
     'org-secondary-references': ['patch'],
+    status: ['find'],
   }
 }
 
@@ -154,6 +156,21 @@ export async function createUserEngagementEntryForPublisherDownload(publishedDet
   }
   const payload = generateUserEngagementPayload(falseContext);
   const ue = await userEngagementService.create(payload, { user: user });
+}
+
+export async function createUserEngagementEntryForStatusEndpoint(user, provider, headers, app) {
+  const userEngagementService = app.service('user-engagements');
+  const falseContext = {
+    path: 'status',
+    method: 'find',
+    params: {
+      provider: provider,
+      headers: headers,
+    }
+  }
+  const payload = generateUserEngagementPayload(falseContext);
+  const ue = await userEngagementService.create(payload, { user: user });
+  return ue;
 }
 
 export const saveContextQueryState = context => {

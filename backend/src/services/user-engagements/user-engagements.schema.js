@@ -15,7 +15,7 @@ export const userEngagementsSchema = Type.Object(
     source: SourceType,
     version: Type.Optional(Type.String()),
     createdAt: Type.Number(),
-    createdBy: userSummarySchema,
+    createdBy: Type.Optional(userSummarySchema),
     path: Type.String(),
     method: Type.String(),
     contextId: Type.Optional(ObjectIdSchema()),
@@ -50,7 +50,10 @@ export const userEngagementsDataValidator = getValidator(userEngagementsDataSche
 export const userEngagementsDataResolver = resolve({
   createdBy: async (_value, _message, context) => {
     // Associate the record with the id of the authenticated user
-    return buildUserSummary(context.params.user);
+    if (context.params.user) {
+      return buildUserSummary(context.params.user);
+    }
+    return undefined;
   },
   createdAt: async () => Date.now(),
 })
