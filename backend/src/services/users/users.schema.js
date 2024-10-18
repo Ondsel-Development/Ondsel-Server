@@ -7,7 +7,7 @@ import { dataValidator, queryValidator } from '../../validators.js'
 
 import {organizationSummarySchema} from '../organizations/organizations.subdocs.schema.js';
 import {
-  agreementsAcceptedSchema, getConstraint, NotificationCadenceType, NotificationCadenceTypeMap,
+  agreementsAcceptedSchema, getConstraint, NotificationCadenceType, NotificationCadenceTypeMap, OndselUsageType,
   SubscriptionConstraintsType,
   subscriptionDetailSchema,
   SubscriptionStateMap,
@@ -51,6 +51,7 @@ export const userSchema = Type.Object(
     resetShortToken: Type.Optional(Type.String()), // for SMS
     resetExpires: Type.Number(),
     resetAttempts: Type.Number(),
+    usageType: OndselUsageType,
 
     // public fields
     username: Type.String(),
@@ -92,7 +93,7 @@ export const userExternalResolver = resolve({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'name'], {
+export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'username', 'name', 'usageType'], {
   $id: 'UserData'
 })
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
