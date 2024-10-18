@@ -38,6 +38,7 @@ const eventNameMapping = {
   'keywords.find': 'SEARCH',
   'org-secondary-references.patch': 'UPDATE_ORG_SECONDARY_REFERENCES',
   'publisher.get': 'DOWNLOAD_ONDSEL_ES',
+  'status.find': 'FETCH_STATUS',
 }
 
 const eventsToTrack = {
@@ -64,6 +65,7 @@ const eventsToTrack = {
     directories: ['create', 'remove'],
     keywords: ['find'],
     'org-secondary-references': ['patch'],
+    status: ['find'],
   }
 }
 
@@ -92,6 +94,15 @@ const generateUserEngagementPayload = context => {
   const { path, method, params } = context;
 
   const version = _.get(params.headers, 'x-lens-version');
+  const additionalDataStringify = _.get(params.headers, 'x-lens-additional-data');
+  let additionalData = null;
+  if (additionalDataStringify) {
+    try {
+      additionalData = JSON.parse(additionalDataStringify);
+    } catch (e) {
+      additionalData = null;
+    }
+  }
 
   const payload = {
     source: getSource(params),
@@ -104,6 +115,7 @@ const generateUserEngagementPayload = context => {
     ...(version && {version: version}),
     ...(!context.id && {contextId: context?.result?._id}),  // 'create' hook don't have context.id, so assigning from result
     ...(!_.isEmpty(context.$userPayload) && {payload: context.$userPayload}),
+    ...(additionalData && { additionalData }),
   };
   return payload;
 }
@@ -144,6 +156,21 @@ export async function createUserEngagementEntryForPublisherDownload(publishedDet
   }
   const payload = generateUserEngagementPayload(falseContext);
   const ue = await userEngagementService.create(payload, { user: user });
+}
+
+export async function createUserEngagementEntryForStatusEndpoint(user, provider, headers, app) {
+  const userEngagementService = app.service('user-engagements');
+  const falseContext = {
+    path: 'status',
+    method: 'find',
+    params: {
+      provider: provider,
+      headers: headers,
+    }
+  }
+  const payload = generateUserEngagementPayload(falseContext);
+  const ue = await userEngagementService.create(payload, { user: user });
+  return ue;
 }
 
 export const saveContextQueryState = context => {
