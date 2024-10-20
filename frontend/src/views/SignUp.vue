@@ -41,6 +41,15 @@
           :disabled="isCreatePending"
         ></v-text-field>
 
+        <v-select
+          v-model="user.usageType"
+          label="How do you plan to use Ondsel?"
+          :items="usageTypes"
+          :rules="[rules.isRequired]"
+          :disabled="isCreatePending"
+        />
+
+
         <v-text-field
           v-model="usernameTemp"
           label="username builder (type here)"
@@ -207,6 +216,11 @@ export default {
   computed: {
     User: () => models.api.User,
     ...mapState('users', ['isCreatePending']),
+    usageTypes: () => [
+      { value: 'work', title: 'I want to use Ondsel for work' },
+      { value: 'personal', title: 'I want to use Ondsel for personal projects' },
+      { value: 'both', title: 'I want to use Ondsel for both work and personal projects' }
+    ]
   },
   methods: {
     ...mapActions('auth', ['authenticate']),

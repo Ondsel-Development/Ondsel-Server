@@ -41,6 +41,7 @@ class User extends BaseModel {
       password: '',
       username: '',
       name: '',
+      usageType: ''
     }
   }
 
