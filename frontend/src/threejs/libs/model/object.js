@@ -7,6 +7,7 @@ export const ModelObjectType = Object.freeze({
   Link: 'Link',
   Assembly: 'Assembly',
   Group: 'Group',
+  Image: 'Image'
 })
 
 export class ModelObject3D
@@ -146,7 +147,7 @@ export class ModelObject3D
     }
 
     GetVisibility() {
-      if (this.IsShapeType()) {
+      if (this.IsShapeType() || this.type === ModelObjectType.Image) {
         return this.object3d.visible;
       }
       if (this.visibility === null) {
@@ -156,7 +157,7 @@ export class ModelObject3D
     }
 
     ToggleVisibility(isVisible = null) {
-      if (this.IsShapeType()) {
+      if (this.IsShapeType() || this.type === ModelObjectType.Image) {
         if (isVisible === null) {
           this.object3d.visible = !this.GetVisibility();
         } else {

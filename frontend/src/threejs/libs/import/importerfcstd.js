@@ -111,6 +111,9 @@ class FreeCadDocument
         if (type === 'Assembly::AssemblyObject') {
           return true;
         }
+        if (type === 'Image::ImagePlane') {
+          return true;
+        }
         if (!type.startsWith ('Part::') && !type.startsWith ('PartDesign::')) {
             return false;
         }
@@ -268,6 +271,13 @@ class FreeCadDocument
                         object.fileName = fileName;
                         object.fileContent = this.files[fileName];
                         hasShapePrp = true;
+                    } else if (propertyName === 'ImageFile') {
+                      let fileName = this.GetFirstChildValue (propertyElement, 'FileIncluded', 'file');
+                      if (!this.HasFile (fileName)) {
+                        continue;
+                      }
+                      object.fileName = fileName;
+                      object.fileContent = this.files[fileName];
                     }
                 }
 
@@ -399,7 +409,11 @@ class FreeCadDocument
               const propertyValueXAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Ox');
               const propertyValueYAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Oy');
               const propertyValueZAxis = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Oz');
-              property = new Property (PropertyType.Rotation, propertyName, [propertyValueXAxis, propertyValueYAxis, propertyValueZAxis, propertyValueAngle]);
+              const propertyValuePx = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Px');
+              const propertyValuePy = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Py');
+              const propertyValuePz = this.GetFirstChildValue (propertyElement, 'PropertyPlacement', 'Pz');
+              property = new Property (PropertyType.Placement, propertyName, [
+                propertyValueXAxis, propertyValueYAxis, propertyValueZAxis, propertyValueAngle, [propertyValuePx, propertyValuePy, propertyValuePz]]);
             }
             if (property !== null) {
                 propertyGroup.AddProperty (property);
@@ -499,19 +513,60 @@ export class ImporterFcstd
             this.model.AddPropertyGroup (this.document.properties);
         }
 
-        let objectsToConvert = this.document.GetObjectListToConvert ();
-        if (objectsToConvert.length === 0) {
-            this.SetError ('No importable object found.');
-            onFinish (this.model);
-            return;
-        }
-
         this.model.propertyBagObject = this.document.GetPropertyBagObject();
-        this.ConvertObjects (objectsToConvert, onFinish);
+        this.ConvertObjects (this.document, onFinish);
     }
 
-    ConvertObjects (objects, onFinish)
+    ConvertObjects (document, onFinish)
     {
+        let objects = document.GetObjectListToConvert ();
+        if (objects.length === 0) {
+          this.SetError ('No importable object found.');
+          onFinish (this.model);
+          return;
+        }
+
+        // Load and add PNG image as a plane in the scene
+        const textureLoader = new THREE.TextureLoader();
+        for (const [objectName, object] of document.objectData) {
+          if (object.type !== 'Image::ImagePlane') {
+            continue;
+          }
+          // Convert the Uint8Array to a Blob and create an object URL
+          const blob = new Blob([object.fileContent], { type: 'image/png' });
+          const imageUrl = URL.createObjectURL(blob);
+          textureLoader.load(imageUrl, (texture) => {
+            const object3d = new ModelObject3D();
+            this.AssignDataToModelObject(object, object3d);
+
+            object3d.SetType(ModelObjectType.Image);
+
+            if (object.properties !== null) {
+              const xSize = object.properties.GetPropertyByName('XSize')?.value || 0;
+              const ySize = object.properties.GetPropertyByName('YSize')?.value || 0;
+              const planeGeometry = new THREE.PlaneGeometry(xSize, ySize);
+              const planeMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide,
+                color: object.GetColor()
+              });
+              const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+              const placementPrp = object.properties.GetPropertyByName('Placement');
+              if (placementPrp) {
+                const axis = new THREE.Vector3(placementPrp.value[0], placementPrp.value[1], placementPrp.value[2]);
+                axis.normalize();
+                planeMesh.rotateOnAxis(axis, placementPrp.value[3])
+                planeMesh.position.set(...placementPrp.value[4]);
+              }
+              let mainObject = new THREE.Object3D();
+              mainObject.add(planeMesh);
+              object3d.SetObject3d(mainObject);
+              this.model.AddObject(object3d);
+            }
+          })
+        }
+
         occtimportjs().then(occt => {
             for (let obj of objects) {
                 const result = occt.ReadBrepFile(obj.fileContent, null);
@@ -520,21 +575,11 @@ export class ImporterFcstd
                 }
             }
 
-            for (let [objectName, object] of this.document.objectData) {
+            // Assembly object creation
+            for (let [objectName, object] of document.objectData) {
               if (object.IsAssemblyObject()) {
                 const object3d = new ModelObject3D();
-                if (object.shapeName !== null) {
-                  object3d.SetName (object.shapeName);
-                }
-                if (object.name !== null) {
-                  object3d.SetRealName (object.name);
-                }
-                if (object.properties !== null && object.properties.PropertyCount () > 0) {
-                  object3d.AddPropertyGroup (object.properties);
-                }
-                if (object.color !== null) {
-                  object3d.SetColor(object.color);
-                }
+                this.AssignDataToModelObject(object, object3d);
 
                 object3d.SetType(ModelObjectType.Assembly);
                 const group = new THREE.Group();
@@ -552,6 +597,7 @@ export class ImporterFcstd
                   const placementPrp = object.properties.GetPropertyByName('Placement');
                   if (placementPrp) {
                     const axis = new THREE.Vector3(placementPrp.value[0], placementPrp.value[1], placementPrp.value[2]);
+                    axis.normalize();
                     group.rotateOnAxis(axis, placementPrp.value[3])
                   }
                 }
@@ -609,21 +655,8 @@ export class ImporterFcstd
         }
 
         let object3d = new ModelObject3D ();
-        if (object.shapeName !== null) {
-            object3d.SetName (object.shapeName);
-        }
 
-        if (object.name !== null) {
-            object3d.SetRealName (object.name);
-        }
-
-        if (object.properties !== null && object.properties.PropertyCount () > 0) {
-            object3d.AddPropertyGroup (object.properties);
-        }
-
-        if (object.color !== null) {
-            object3d.SetColor(object.color);
-        }
+        this.AssignDataToModelObject(object, object3d);
 
         object3d.SetType(ModelObjectType.Shape);
 
@@ -646,5 +679,20 @@ export class ImporterFcstd
 
         this.model.AddObject(object3d);
 
+    }
+
+    AssignDataToModelObject(freecadObj, object3d) {
+      if (freecadObj.shapeName !== null) {
+        object3d.SetName (freecadObj.shapeName);
+      }
+      if (freecadObj.name !== null) {
+        object3d.SetRealName (freecadObj.name);
+      }
+      if (freecadObj.properties !== null && freecadObj.properties.PropertyCount () > 0) {
+        object3d.AddPropertyGroup (freecadObj.properties);
+      }
+      if (freecadObj.color !== null) {
+        object3d.SetColor(freecadObj.color);
+      }
     }
 }

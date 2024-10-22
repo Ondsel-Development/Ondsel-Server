@@ -7,7 +7,7 @@ export const PropertyType =
     Percent : 5,
     Color : 6,
     Angle: 7,
-    Rotation: 8,
+    Placement: 8,
 };
 
 export class Property
