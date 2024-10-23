@@ -6,6 +6,7 @@ import { fitCameraToSelection, getSelectedObject } from '@/threejs/cameraUtils'
 import { Importer } from '@/threejs/libs/import/importer';
 import { OBJ_COLOR, OBJ_HIGHLIGHTED_COLOR, EDGE_COLOR } from '@/threejs/libs/constants';
 import { getObject3dFromScene } from '@/threejs/libs/utils/sceneutils';
+import {ModelObjectType} from "@/threejs/libs/model/object";
 
 
 const ViewerConfig = {
@@ -138,6 +139,7 @@ export class Viewer {
       this.addAxesHelper();
       fitCameraToSelection(this.camera, this.controls, this.obj);
     }
+
     this.onLoadCallback();
   }
 
@@ -181,14 +183,14 @@ export class Viewer {
 
   selectGivenObject(modelObject3d, triggerObjectClickEvent=false) {
     if (!this.selectedObjs.includes(modelObject3d)) {
-      if (modelObject3d.IsShapeType()) {
+      if (modelObject3d.IsShapeType() || modelObject3d.type === ModelObjectType.Image) {
         const meshObj = getObject3dFromScene(this.scene, modelObject3d);
         meshObj.material.color.set(OBJ_HIGHLIGHTED_COLOR);
       }
       this.selectedObjs.push(modelObject3d);
     } else {
       const color = modelObject3d ? modelObject3d.GetColor() : OBJ_COLOR;
-      if (modelObject3d.IsShapeType()) {
+      if (modelObject3d.IsShapeType() || modelObject3d.type === ModelObjectType.Image) {
         const meshObj = getObject3dFromScene(this.scene, modelObject3d);
         meshObj.material.color.set(color);
       }

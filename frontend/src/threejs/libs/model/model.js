@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { ModelObject3D } from './object.js';
+import {ModelObject3D, ModelObjectType} from './object.js';
 
 export class Model extends ModelObject3D
 {
@@ -27,7 +27,7 @@ export class Model extends ModelObject3D
     GetCompoundObject() {
         const object = new THREE.Group();
         for (let o of this.objects) {
-          if (o.parent === null && (o.IsShapeType() || o.GetObject3d() instanceof THREE.Group)) {
+          if (o.parent === null && (o.IsShapeType() || o.GetObject3d() instanceof THREE.Group) || o.type === ModelObjectType.Image) {
             object.add(o.GetObject3d());
           }
         }
