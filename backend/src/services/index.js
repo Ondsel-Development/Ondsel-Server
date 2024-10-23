@@ -1,3 +1,5 @@
+import { stripeEvents } from './stripe-events/stripe-events.js'
+
 import { keywords } from './keywords/keywords.js'
 
 import { orgInvites } from './org-invites/org-invites.js'
@@ -45,6 +47,8 @@ import { download } from './download/download.js'
 import { publisher } from './publisher/publisher.js'
 
 export const services = (app) => {
+  app.configure(stripeEvents)
+
   app.configure(orgSecondaryReferences)
 
   app.configure(preferences)
