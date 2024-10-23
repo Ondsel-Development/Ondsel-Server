@@ -183,7 +183,6 @@
             <v-btn
               color="secondary"
               prepend-icon="mdi-plus"
-              :disabled = "!activeVersionThumbnailAvailable"
               @click="startCreateLinkDialog(item)"
             >
               Create Link
