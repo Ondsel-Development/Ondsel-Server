@@ -1,7 +1,9 @@
 <template>
   <v-container fluid>
     <signup-progress-bar step="0" msg="start with the form"></signup-progress-bar>
-    <v-card title="Sign Up to Ondsel" class="mx-auto mt-8" width="22em" flat>
+    <h2>as of November 1, 2024, sign-up is disabled</h2>
+    You can still sign-in with an existing account. The downloads page is now anonymous.
+    <v-card title="Sign Up to Ondsel" class="mx-auto mt-8" width="22em" flat disabled>
       <template v-slot:loader="{  }">
         <v-progress-linear
           :active="isCreatePending"
@@ -122,7 +124,7 @@
         <v-card-actions>
           <v-btn
             type="submit"
-            :disabled="isCreatePending"
+            disabled
             class="mt-2"
             color="primary"
             block
@@ -229,33 +231,7 @@ export default {
     },
     async signUp() {
       if (this.isValid) {
-        await this.user.create()
-          .then(async () => {
-            // post agreement to TOS
-            this.acceptAgreement.userId = this.user._id;
-            this.acceptAgreement.category = 'terms-of-service';
-            this.acceptAgreement.version = this.tosDoc.current.version;
-            this.acceptAgreement.newAccount = true;
-            await this.acceptAgreement.create();
-            await this.sleep(200);  // wait for mongodb to distribute
-            await this.login(); // now use the new db data
-            this.$router.push({name: 'RedirectToPendingVerification'}); //.then(() => { this.$router.go() })
-          })
-          .catch((e) => {
-            if (e.message === 'Invalid: Username already taken') {
-              this.extraHintContent = 'username already taken';
-              this.lastBadUsername = this.usernameTemp;
-              this.$refs.form.validate();
-            }
-            if (e.message === 'Invalid: Email already taken') {
-              this.extraHintContent = 'email already taken';
-              this.lastBadEmail = this.user.email;
-              this.$refs.form.validate();
-            }
-            console.log(e.message);
-            this.snackerMsg = e.message;
-            this.showSnacker = true;
-          });
+        console.log("disabled")
       }
     },
     async login() {

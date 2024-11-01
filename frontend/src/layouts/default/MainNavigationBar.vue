@@ -127,7 +127,7 @@
               Login
             </v-btn>
           </template>
-          <template v-if="currentRouteName !== 'SignUp'">
+          <!--<template v-if="currentRouteName !== 'SignUp'">
             <v-btn
               variant="tonal"
               color="primary"
@@ -137,7 +137,7 @@
             >
               SignUp
             </v-btn>
-          </template>
+          </template>-->
         </template>
       </v-list-item>
       <v-list-item

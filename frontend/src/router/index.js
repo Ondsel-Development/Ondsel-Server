@@ -68,11 +68,11 @@ const routes = [
     name: 'CreateOrganization',
     meta: { requiresAuth: true },
   },
-  {
-    path: '/signup',
-    component: SignUp,
-    name: 'SignUp',
-  },
+  // {
+  //   path: '/signup',
+  //   component: SignUp,
+  //   name: 'SignUp',
+  // },
   {
     path: '/getting-started',
     component: GettingStarted,
@@ -180,8 +180,7 @@ const routes = [
   {
     path: '/download-and-explore',
     component: DownloadAndExplore,
-    name: 'DownloadAndExplore',
-    meta: { requiresAuth: true },
+    name: 'DownloadAndExplore'
   },
   {
     path: '/bookmarks',
