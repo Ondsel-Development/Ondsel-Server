@@ -1,6 +1,5 @@
 <template>
-  <form method="POST" :action="`${details?.browser_download_url}`">
-    <input type="hidden" name="downloadCounter" :value="`${getObscuredForCustomMiddleware()}`">
+  <a :href="`${details?.browser_download_url}`">
     <v-btn
       v-if="small"
       flat
@@ -27,8 +26,7 @@
         </span>
       </span>
     </v-btn>
-
-  </form>
+  </a>
 </template>
 
 <script>
