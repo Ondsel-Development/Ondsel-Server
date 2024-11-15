@@ -4,6 +4,13 @@
       LENS Home Page
     </template>
     <template #content>
+      <v-card color="indigo-darken-3">
+        <v-card-title>Shutdown Notice</v-card-title>
+        <v-card-text>
+          <h1>Service is Shutting Down as of November 22nd, 2024</h1>
+          <h2>Please download any of your files that you want to keep!</h2>
+        </v-card-text>
+      </v-card>
       <v-sheet class="d-flex flex-wrap flex-row">
         <v-sheet
           name="left_side"
