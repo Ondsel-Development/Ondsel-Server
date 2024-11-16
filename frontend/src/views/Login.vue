@@ -4,8 +4,16 @@
     </template>
     <template #content>
       <v-sheet
-        class="d-flex flex-row flex-wrap justify-center align-center"
+        class="d-flex flex-column flex-wrap justify-center align-center"
       >
+        <v-card color="indigo-darken-3">
+          <v-card-title>Shutdown Notice</v-card-title>
+          <v-card-text>
+            <h1>Service is Shutting Down as of November 22nd, 2024</h1>
+            <h2>Please download any of your files that you want to keep!</h2>
+          </v-card-text>
+        </v-card>
+        <p></p>
         <v-card title="Login to Ondsel" width="26em" class="pa-2 mt-16">
           <v-card-text>
             <template v-slot:loader="{ isActive }">
