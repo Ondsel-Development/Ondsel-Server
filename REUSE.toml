@@ -20,7 +20,9 @@ SPDX-License-Identifier = "BSD-2-Clause"
 [[annotations]]
 path = [
      "frontend/public/occt-import-js/dist/*",
-     "frontend/public/share/*"
+     "frontend/public/share/occt-import-js.wasm",
+     "frontend/public/model/occt-import-js.wasm",
+     "frontend/*.json"
 ]
 SPDX-FileCopyrightText = "2024 Victor Kovacs <viktorkovacs@gmail.com>"
 SPDX-License-Identifier = "LGPL-2.1-only"

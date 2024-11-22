@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import * as THREE from 'three';
 import {v4 as uuidv4} from 'uuid';
 import { OBJ_COLOR } from '@/threejs/libs/constants';

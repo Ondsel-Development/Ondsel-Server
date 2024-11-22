@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <v-sheet class="border-md flex-grow-1">
     <v-sheet class="d-flex flex-row flex-wrap justify-space-between" name="flv-top-row">
