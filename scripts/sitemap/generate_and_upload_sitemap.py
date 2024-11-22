@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import os
 from datetime import datetime
 from xml.etree.ElementTree import Element, SubElement, tostring, ElementTree
