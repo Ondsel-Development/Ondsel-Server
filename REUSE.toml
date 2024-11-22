@@ -40,3 +40,13 @@ path = [
 ]
 SPDX-FileCopyrightText = "2024 Ondsel <development@ondsel.com>"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+# Logos
+[[annotations]]
+path = [
+     "frontend/public/favicon.ico",
+     "frontend/public/ondsel_logo.svg",
+     "frontend/src/assets/logo.svg"
+]
+SPDX-FileCopyrightText = "2024 Ondsel <development@ondsel.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
