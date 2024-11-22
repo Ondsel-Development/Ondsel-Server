@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // merge first and last name to new 'name' field.
 
 export async function mergeFirstLastNameCommand(app) {

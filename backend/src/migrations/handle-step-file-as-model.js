@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Recognised old STEP files as 3d model.
 
 export async function handleStepFileAsModelCommand(app) {

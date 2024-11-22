@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Migrate old files objects which were created before https://github.com/Ondsel-Development/Ondsel-Server/pull/60.
 import _ from 'lodash';
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 FROM node:lts-alpine3.17
 
 # copy both 'package.json' and 'package-lock.json' (if available)

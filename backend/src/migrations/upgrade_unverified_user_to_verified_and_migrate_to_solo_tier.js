@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Script to manually verify user and migrate it to Solo user.
 
 import { SubscriptionTypeMap, SubscriptionTermTypeMap } from '../services/users/users.subdocs.schema.js';

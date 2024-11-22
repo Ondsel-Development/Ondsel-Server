@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { Type, getValidator, defaultAppConfiguration } from '@feathersjs/typebox'
 
 import { dataValidator } from './validators.js'

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import mongodb from 'mongodb';
 import _ from 'lodash';
 import { OrganizationTypeMap } from '../services/organizations/organizations.subdocs.schema.js';

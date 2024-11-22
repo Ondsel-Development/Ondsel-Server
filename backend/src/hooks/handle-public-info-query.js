@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {resolveResult} from "@feathersjs/schema";
 import {authenticate} from "@feathersjs/authentication";
 import axios from "axios";

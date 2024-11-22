@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {StringEnum, Type} from "@feathersjs/typebox";
 
 // This schema is strictly a courtesy for the Swagger page; this is never stored anywhere or used anywhere else.

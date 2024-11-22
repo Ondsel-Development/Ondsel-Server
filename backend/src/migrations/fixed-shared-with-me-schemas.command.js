@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /*
 For some org-secondary-references, shared-model summary not up-to date (have missing fields) and because of corrupted data
 user not able to share any share link to user (api throwing ValidationError).

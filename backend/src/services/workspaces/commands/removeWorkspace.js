@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {BadRequest} from "@feathersjs/errors";
 
 // remove the workspace via soft delete if ready

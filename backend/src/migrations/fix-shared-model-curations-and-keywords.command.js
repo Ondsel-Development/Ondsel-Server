@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {buildNewCurationForSharedModel} from "../services/shared-models/shared-models.curation.js";
 import {buildFileSummary} from "../services/file/file.distrib.js";
 

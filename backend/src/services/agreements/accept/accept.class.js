@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { MongoDBService } from '@feathersjs/mongodb'
 
 // By default calls the standard MongoDB adapter service methods but can be customized with your own functionality.

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import _ from 'lodash';
 import {matchingCuration} from "../../../curation.schema.js";
 import {MAX_MATCHES_KEPT} from "../keywords.subdocs.js";

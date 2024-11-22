@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {buildWorkspaceSummary} from "../services/workspaces/workspaces.distrib.js";
 import {buildUserSummary} from "../services/users/users.distrib.js";
 import {OrganizationTypeMap} from "../services/organizations/organizations.subdocs.schema.js";

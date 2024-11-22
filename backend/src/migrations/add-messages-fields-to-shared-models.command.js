@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 export async function addMessagesFieldsToSharedModelsCommand(app) {
   const sharedModelsService = app.service('shared-models');
   const db = await sharedModelsService.options.Model;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 export const emailPath = 'email'
 
 export const emailMethods = ['find', 'get', 'create', 'patch', 'remove']

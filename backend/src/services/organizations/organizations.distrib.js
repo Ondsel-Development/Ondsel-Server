@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // A "distrib" file is for taking/sending "second-class" information between collections.
 //
 // Each collection is the "source of truth" for it's key fields. However, many collections have

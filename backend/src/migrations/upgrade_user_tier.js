@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Script to manually upgrade user tier from Solo to Peer.
 // It creates an entry in account event collection with amount USD $120 with yearly subscription term.
 
