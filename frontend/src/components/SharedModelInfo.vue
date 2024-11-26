@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <v-card flat>
     <v-card-title style="text-align: center;">ShareLink Information</v-card-title>

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {generateAndApplyKeywords, navTargetMap} from "../../curation.schema.js";
 import {buildNewCurationForOrganization} from "../organizations/organizations.curation.js";
 import {buildFileSummary} from "../file/file.distrib.js";

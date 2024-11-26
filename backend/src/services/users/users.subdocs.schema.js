@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // subdocuments used by users.schema.js and users of that schema
 
 import { Type } from '@feathersjs/typebox'

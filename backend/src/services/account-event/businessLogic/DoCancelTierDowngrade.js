@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {addTransactionToUserAndSummarize, makeEmptyJournalTransaction, verifyBalanced} from "../../../accounting.js";
 import {SubscriptionTypeMap} from "../../users/users.subdocs.schema.js";
 import { sendNotificationToSlack } from '../../../slack-notifications.js';

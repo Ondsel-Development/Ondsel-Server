@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 export async function addOrgSecondaryReferencesToAllOrganizationsCommand(app) {
   const orgService = app.service('organizations');
   const orgSecondaryReferencesService = app.service('org-secondary-references');

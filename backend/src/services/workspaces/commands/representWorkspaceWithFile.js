@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {buildNewCurationForWorkspace} from "../workspaces.curation.js";
 import _ from "lodash";
 import {buildFileSummary} from "../../file/file.distrib.js";

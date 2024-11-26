@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <v-container>
     <h1 class="text-h5 font-weight-bold mb-2">Account History</h1>

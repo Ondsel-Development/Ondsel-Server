@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import AWS from 'aws-sdk'
 import Store from 's3-blob-store'
 import BlobService from 'feathers-blob'

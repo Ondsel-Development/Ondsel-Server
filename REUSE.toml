@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version = 1
+
+# Third party files
+[[annotations]]
+path = [
+     "frontend/nginx_binaries/http_connect.lua",
+     "frontend/nginx_binaries/http_headers.lua",
+     "frontend/nginx_binaries/http.lua"
+]
+SPDX-FileCopyrightText = "2023 James Hurst <james@pintsized.co.uk>"
+SPDX-License-Identifier = "BSD-2-Clause"
+
+[[annotations]]
+path = [
+     "frontend/nginx_binaries/resolver.lua"
+]
+SPDX-FileCopyrightText = "2012-2019 Yichun \"agentzh\" Zhang (章亦春), OpenResty"
+SPDX-License-Identifier = "BSD-2-Clause"
+
+[[annotations]]
+path = [
+     "frontend/public/occt-import-js/dist/*",
+     "frontend/public/share/occt-import-js.wasm",
+     "frontend/public/model/occt-import-js.wasm",
+     "frontend/*.json"
+]
+SPDX-FileCopyrightText = "2024 Victor Kovacs <viktorkovacs@gmail.com>"
+SPDX-License-Identifier = "LGPL-2.1-only"
+
+# Ondsel-Server files
+[[annotations]]
+path = [
+     "backend/config/*.json",
+     "backend/*.json",
+     "backend/.prettierrc"
+]
+SPDX-FileCopyrightText = "2024 Ondsel <development@ondsel.com>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+# Logos
+[[annotations]]
+path = [
+     "frontend/public/favicon.ico",
+     "frontend/public/ondsel_logo.svg",
+     "frontend/src/assets/logo.svg"
+]
+SPDX-FileCopyrightText = "2024 Ondsel <development@ondsel.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"

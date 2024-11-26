@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /*
 
 Due to some coding bug, user subdocs not properly distributed to workspace.groupsOrUsers for newly signed-up user.

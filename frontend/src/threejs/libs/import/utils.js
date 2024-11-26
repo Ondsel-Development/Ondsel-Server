@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 export function readShapeAppearance(buffer) {
   const appearances = [];
   const entrySize = 24; // Each entry is 24 bytes long

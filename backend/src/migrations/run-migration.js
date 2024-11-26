@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { app } from '../app.js';
 import { migrateOldModelsCommand } from './migrate-models.command.js';
 import { migrateOldFilesCommand } from './migrate-old-files.command.js';

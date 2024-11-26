@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 export function getInitials(name) {
   const nameArray = name.split(' ');
   const firstName = nameArray[0].charAt(0).toUpperCase();

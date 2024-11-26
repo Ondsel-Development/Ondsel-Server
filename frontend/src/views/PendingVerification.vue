@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <v-container fluid>
     <signup-progress-bar step="1" msg="a link was sent to your email"></signup-progress-bar>

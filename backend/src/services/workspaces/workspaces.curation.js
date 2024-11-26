@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // A "curation" file is for visibly decorating an object and handling pre-emptive keyword indexing (for later searches.)
 //
 

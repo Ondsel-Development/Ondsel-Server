@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <v-card class="mx-auto" max-width="896" flat>
     <v-card-title>Xavier Search Results</v-card-title>

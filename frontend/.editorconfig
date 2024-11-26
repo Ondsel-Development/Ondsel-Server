@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 [*.{js,jsx,ts,tsx,vue}]
 indent_style = space
 indent_size = 2

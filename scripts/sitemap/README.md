@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Sitemap Generator and Uploader
 
 This script generates `sitemap.xml` files for user profiles and shared links from a MongoDB database and uploads them to an AWS S3 bucket. It is designed to be run from the `scripts` folder at the root of your project.

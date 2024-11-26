@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {ObjectIdSchema, StringEnum, Type} from "@feathersjs/typebox";
 import {curationSchema} from "../../curation.schema.js";
 

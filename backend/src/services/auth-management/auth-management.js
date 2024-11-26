@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ondsel <development@ondsel.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { authManagementPath } from './auth-management.shared.js'
 import {AuthenticationManagementService} from "feathers-authentication-management";
 import {notifier} from "./notifier.js";
