@@ -48,6 +48,9 @@ import { download } from './download/download.js'
 
 import { publisher } from './publisher/publisher.js'
 
+import { shareLinkAnalytics } from './share-link-analytics/share-link-analytics.js'
+
+
 export const services = (app) => {
   app.configure(orgSecondaryReferences)
 
@@ -94,6 +97,8 @@ export const services = (app) => {
   app.configure(download)
 
   app.configure(publisher)
+
+  app.configure(shareLinkAnalytics)
 
   // All services will be registered here
 }
